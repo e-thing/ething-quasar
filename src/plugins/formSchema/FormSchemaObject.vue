@@ -1,19 +1,36 @@
 
 <script>
 
-import { makeForm } from './core'
+import { makeForm, FormComponent } from './core'
 
 export default {
   name: 'FormSchemaObject',
+
+  mixins: [FormComponent],
 
   render: function (createElement) {
     let children = []
     var self = this
 
-    for (let key in this.schema.properties) {
+    for (let key in (this.schema.properties || {})) {
       let schema = this.schema.properties[key]
 
       children.push(
+        createElement('q-field', {
+          props: {
+            label: key,
+            orientation: 'vertical'
+          }
+        }, [
+          makeForm(createElement, schema, this.model[key], this.level, function (newValue) {
+            var o = Object.assign({}, self.value)
+            o[key] = newValue
+            self.value = o
+          })
+        ])
+      )
+
+      /*children.push(
         createElement('div', [
           createElement('h2', key),
           makeForm(createElement, schema, this.model[key], function (newValue) {
@@ -22,32 +39,18 @@ export default {
             self.value = o
           })
         ])
-      )
+      )*/
     }
 
     return createElement('div', children)
   },
 
   props: {
-    schema: Object,
     model: {
       type: Object,
       default: function () { return {} }
     }
   },
-
-  data: function () {
-    return {
-      value: this.model
-    }
-  },
-
-  watch: {
-    value: function (val, oldVal) {
-      console.log('FormSchemaObject value changed to ' + val)
-      this.$emit('update:model', val)
-    }
-  }
 
 }
 

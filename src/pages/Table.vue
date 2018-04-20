@@ -105,7 +105,6 @@ export default {
 
   watch: {
     resource: function (r, old) {
-      console.log
       if (r) {
         this.serverPagination.rowsNumber = r.length()
         this.reloadData()

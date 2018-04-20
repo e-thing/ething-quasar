@@ -1,34 +1,25 @@
 <template>
   <div class="form-schema-string">
-    <input v-bind:value="model" v-on:input="value = $event.target.value"/>
+    <!--<input type="text" v-bind:value="model" v-on:input="value = $event.target.value"/>-->
+    <q-input :type="schema.format === 'text' ? 'textarea' : 'text'" v-bind:value="model" v-on:input="value = $event"/>
   </div>
 </template>
 
 <script>
 
+import { FormComponent } from './core'
+
 export default {
   name: 'FormSchemaString',
 
+  mixins: [FormComponent],
+
   props: {
-    schema: Object,
     model: {
       type: String,
       default: ''
     }
   },
-
-  data: function () {
-    return {
-      value: this.model
-    }
-  },
-
-  watch: {
-    value: function (val, oldVal) {
-      console.log('FormSchemaString value changed to ' + val)
-      this.$emit('update:model', val)
-    }
-  }
 }
 
 </script>

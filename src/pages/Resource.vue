@@ -1,12 +1,41 @@
 <template>
   <q-page padding>
-    <!-- content -->
+
+    <resource-editor :resource="resource" @done="onDone"/>
+
   </q-page>
 </template>
 
 <script>
+
+import ResourceEditor from '../components/ResourceEditor'
+
 export default {
-  // name: 'PageName',
+  name: 'PageResource',
+
+  components: {
+    ResourceEditor
+  },
+
+  computed: {
+    resource () {
+      var id = this.$route.params.id
+      var r = this.$store.getters['ething/findOneById'](id)
+      if (id && id.length) {
+        if (!r) {
+          this.$router.replace('/404')
+        }
+      }
+      return r
+    }
+  },
+
+  methods: {
+    onDone (resource) {
+      this.$router.push({ path: '/data', params: { path: resource.dirname() }})
+    }
+  }
+
 }
 </script>
 

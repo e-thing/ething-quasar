@@ -23,6 +23,10 @@ export default [
       {
         path: 'resource/:id',
         component: () => import('pages/Resource')
+      },
+      {
+        path: 'test',
+        component: () => import('pages/Test')
       }
     ]
   },

@@ -7,7 +7,7 @@ export default {
 
   render: function (createElement) {
     var self = this
-    return makeForm(createElement, this.schema, this.model, function (newValue) {
+    return makeForm(createElement, this.schema, this.model, 0, function (newValue) {
       self.value = newValue
     })
   },

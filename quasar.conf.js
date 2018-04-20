@@ -46,7 +46,8 @@ module.exports = function (ctx) {
       open: true // opens browser window automatically
     },
     // framework: 'all' --- includes everything; for dev only!
-    framework: {
+    framework: 'all',
+    /*framework: {
       components: [
         'QLayout',
         'QLayoutHeader',
@@ -68,7 +69,10 @@ module.exports = function (ctx) {
         'QBreadcrumbsEl',
         'QTable',
         'QInnerLoading',
-        'QSpinnerGears'
+        'QSpinnerGears',
+        'QField',
+        'QInput',
+        'QSelect',
         //
       ],
       directives: [
@@ -78,7 +82,7 @@ module.exports = function (ctx) {
       plugins: [
         'Notify'
       ]
-    },
+    },*/
     // animations: 'all' --- includes all animations
     animations: [
     ],
