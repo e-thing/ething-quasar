@@ -1,6 +1,7 @@
 import EThing from 'ething-js'
 import resourcesMetaData from '../resources'
 
+
 export default ({ app, router, Vue, store }) => {
   Vue.prototype.$ething = EThing
 
