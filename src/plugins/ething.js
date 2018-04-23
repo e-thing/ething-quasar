@@ -5,37 +5,44 @@ import resourcesMetaData from '../resources'
 export default ({ app, router, Vue, store }) => {
   Vue.prototype.$ething = EThing
 
-  console.log('ething configuring ...')
-  //EThing.config.serverUrl = 'http://lebios.no-ip.org'
-  //EThing.auth.setBasicAuth('ething', 'admin');
+  app.data = app.data || {}
+  app.data.loading = true
+  app.data.error = false
 
-  router.beforeEach((to, from, next) => {
+  console.log('ething configuring ...')
+  EThing.config.serverUrl = 'http://lebios.no-ip.org'
+  EThing.auth.setBasicAuth('ething', 'admin');
+
+  /*router.beforeEach((to, from, next) => {
     // console.log('beforeEach', to, from)
-    next()
-    return
     EThing.arbo.load(function(){
+      app.data.loading = false
       next()
     })
 
-  })
+  })*/
 
-  /*EThing.arbo.load(function(){
+  EThing.arbo.load().done( () => {
     console.log('ething arbo loaded !')
     store.commit('ething/update')
-  })*/
+    app.data.loading = false
+  }).fail( err => {
+    app.data.error = err
+  })
 }
 
 // meta api
 
 const defaultsMeta = {
     color: 'grey',
-    icon: 'file',
+    icon: 'mdi-help',
     description: '',
     bases: [],
     interfaces: [],
     required: [],
     properties: {},
     virtual: false,
+    widgets: []
 }
 
 const defaultsMetaProperty = {
@@ -61,26 +68,37 @@ function deepCopy(o) {
   return copy;
 }
 
-function compile (type, resource) {
+function compile (type, resource, partial) {
 
   if (type instanceof EThing.Resource) {
     resource = type
-    type = resource.type()
+    type = ''
+    var types = resource.types()
+    for(var i in types){
+      if (_metadata.hasOwnProperty(types[i])) {
+        type = types[i]
+        break
+      }
+    }
   }
 
   // check the cache
-  if (!resource) {
-    // static
-    if (_metadata_cache.hasOwnProperty(type)) {
-      return _metadata_cache[type]
-    }
-  } else {
-    if (_metadata_cache_dyn.hasOwnProperty(resource.id()) && type === resource.type()) {
-      var cache = _metadata_cache_dyn[resource.id()]
-      if (cache.ts >= resource.modifiedDate().getTime()) {
-        return cache.meta
-      } else {
-        delete _metadata_cache_dyn[resource.id()]
+  if(!partial){
+    if (!resource) {
+      // static
+      if (_metadata_cache.hasOwnProperty(type)) {
+        return _metadata_cache[type]
+      }
+    } else {
+      if (_metadata_cache_dyn.hasOwnProperty(resource.id())) {
+        var cache = _metadata_cache_dyn[resource.id()]
+        if (cache.type === type) {
+          if (cache.ts >= resource.modifiedDate().getTime()) {
+            return cache.meta
+          } else {
+            delete _metadata_cache_dyn[resource.id()]
+          }
+        }
       }
     }
   }
@@ -114,29 +132,31 @@ function compile (type, resource) {
     var inherited = {}
 
     for(let b in bases) {
-      merge(inherited, compile(bases[b], resource))
+      merge(inherited, compile(bases[b], resource, true))
     }
 
     for(let i in interfaces) {
-      merge(inherited, compile(interfaces[i], resource))
+      merge(inherited, compile(interfaces[i], resource, true))
     }
 
     m = merge(inherited, m)
   }
 
-  m = merge(deepCopy(defaultsMeta), m)
-
-  for(let k in m.properties)
-    m.properties[k] = merge(deepCopy(defaultsMetaProperty), m.properties[k])
-
   // add it to the static cache !
-  if (!resource) {
-    _metadata_cache[type] = m
-  } else {
-    if (type === resource.type()) {
+  if(!partial){
+
+    m = merge(deepCopy(defaultsMeta), m)
+
+    for(let k in m.properties)
+      m.properties[k] = merge(deepCopy(defaultsMetaProperty), m.properties[k])
+
+    if (!resource) {
+      _metadata_cache[type] = m
+    } else {
       _metadata_cache_dyn[resource.id()] = {
         ts: Date.now(),
-        meta: m
+        meta: m,
+        type
       }
     }
   }
@@ -165,7 +185,17 @@ function merge(a, b){
 }
 
 EThing.meta = {
-  get: compile,
-  _metadata,
-  _metadata_cache
+  get: compile
+}
+
+// widgets api
+
+import widgets from '../components/widgets'
+
+EThing.widgets = {
+  find (name) {
+    if (widgets.hasOwnProperty(name)) {
+      return widgets[name]
+    }
+  }
 }

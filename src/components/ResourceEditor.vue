@@ -79,15 +79,7 @@ export default {
           var type = this.resource instanceof EThing.Resource ? this.resource.type() : this.resource
           var resource = this.resource instanceof EThing.Resource ? this.resource : null
 
-          console.log(EThing.meta._metadata)
-          console.log(EThing.meta._metadata_cache)
-
-          var meta = EThing.meta.get(type, resource)
-
-          console.log(meta)
-
-          console.log(EThing.meta._metadata)
-          console.log(EThing.meta._metadata_cache)
+          var meta = resource ? EThing.meta.get(resource) : EThing.meta.get(type)
 
           var required = meta.required || []
           var properties = {}

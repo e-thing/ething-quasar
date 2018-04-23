@@ -5,10 +5,6 @@
       <q-breadcrumbs-el v-for="(item, index) in pathItems" :key="index" :label="item.label" :icon="item.icon" :to="item.link" />
     </q-breadcrumbs>
 
-    <q-inner-loading :visible="!$store.state.ething.loaded">
-      <q-spinner-gears size="50px" color="primary"></q-spinner-gears>
-    </q-inner-loading>
-
     <div v-if="resources.length">
       <q-list link no-border>
 
@@ -55,7 +51,7 @@
       </q-list>
     </div>
 
-    <div v-if="$store.state.ething.loaded && resources.length==0" class="q-pa-md">
+    <div v-else class="q-pa-md">
       No items found.
     </div>
 
@@ -71,9 +67,7 @@ export default {
   name: 'PageData',
 
   data () {
-    return {
-      loading: true
-    }
+    return {}
   },
 
   computed: {

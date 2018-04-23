@@ -13,6 +13,10 @@ export default [
         component: () => import('pages/Data')
       },
       {
+        path: 'devices',
+        component: () => import('pages/Devices')
+      },
+      {
         path: 'table/:id',
         component: () => import('pages/Table')
       },
@@ -23,6 +27,10 @@ export default [
       {
         path: 'resource/:id',
         component: () => import('pages/Resource')
+      },
+      {
+        path: 'device/:id',
+        component: () => import('pages/Device')
       },
       {
         path: 'dashboard',

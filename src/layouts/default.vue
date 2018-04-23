@@ -32,9 +32,17 @@
         link
         inset-delimiter
       >
+        <q-item @click.native="$router.push('/dashboard')">
+          <q-item-side icon="school" />
+          <q-item-main label="Dashboard" />
+        </q-item>
         <q-item @click.native="$router.push('/data')">
           <q-item-side icon="school" />
           <q-item-main label="Data" />
+        </q-item>
+        <q-item @click.native="$router.push('/devices')">
+          <q-item-side icon="school" />
+          <q-item-main label="Devices" />
         </q-item>
 
         <q-list-header>Essential Links</q-list-header>
@@ -50,7 +58,19 @@
     </q-layout-drawer>
 
     <q-page-container>
-      <router-view />
+      <q-inner-loading v-if="$root.loading" visible class="text-center">
+        <div v-if="$root.error">
+          <div class="q-pa-lg text-negative">
+            {{ String($root.error) }}
+          </div>
+          <q-btn color="negative" icon="refresh" label="Reload" @click="$router.go($router.currentRoute)"/>
+        </div>
+        <div v-else>
+          <div class="q-pa-lg text-primary">loading...</div>
+          <q-spinner-pie color="primary" size="50px" />
+        </div>
+      </q-inner-loading>
+      <router-view v-else/>
     </q-page-container>
   </q-layout>
 </template>

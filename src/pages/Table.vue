@@ -33,7 +33,6 @@
 
 import { date as qdate } from 'quasar'
 
-const PAGINATION = 50
 
 export default {
   name: 'PageTable',
