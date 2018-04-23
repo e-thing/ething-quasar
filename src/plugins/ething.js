@@ -6,21 +6,23 @@ export default ({ app, router, Vue, store }) => {
   Vue.prototype.$ething = EThing
 
   console.log('ething configuring ...')
-  EThing.config.serverUrl = 'http://lebios.no-ip.org'
-  EThing.auth.setBasicAuth('ething', 'admin');
+  //EThing.config.serverUrl = 'http://lebios.no-ip.org'
+  //EThing.auth.setBasicAuth('ething', 'admin');
 
   router.beforeEach((to, from, next) => {
     // console.log('beforeEach', to, from)
+    next()
+    return
     EThing.arbo.load(function(){
       next()
     })
 
   })
 
-  EThing.arbo.load(function(){
+  /*EThing.arbo.load(function(){
     console.log('ething arbo loaded !')
     store.commit('ething/update')
-  })
+  })*/
 }
 
 // meta api

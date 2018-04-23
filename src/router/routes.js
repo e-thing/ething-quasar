@@ -25,6 +25,10 @@ export default [
         component: () => import('pages/Resource')
       },
       {
+        path: 'dashboard',
+        component: () => import('pages/Dashboard')
+      },
+      {
         path: 'test',
         component: () => import('pages/Test')
       }
