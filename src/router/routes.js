@@ -21,6 +21,10 @@ export default [
         component: () => import('pages/Table')
       },
       {
+        path: 'chart/:id',
+        component: () => import('pages/Chart')
+      },
+      {
         path: 'text/:id',
         component: () => import('pages/Text')
       },
