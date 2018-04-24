@@ -62,7 +62,7 @@ import Vue from 'vue'
 import EThing from 'ething-js'
 import VueGridLayout from 'vue-grid-layout'
 import Widget from '../components/Widget'
-import { throttle } from 'quasar'
+import { debounce } from 'quasar'
 import ResourceSelect from '../components/ResourceSelect'
 
 var GridLayout = VueGridLayout.GridLayout
@@ -165,14 +165,14 @@ export default {
           layout.forEach( w => {
             w.i = this.idCnt++
           })
-          
+
           this.layout = layout
         })
       }
 
     },
 
-    save: throttle( function(){
+    save: debounce( function(){
       this.file( file => {
         var config = {}
         config.widgets = this.layout.map( item => {

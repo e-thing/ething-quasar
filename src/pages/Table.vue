@@ -61,6 +61,10 @@ export default {
           this.$router.replace('/404')
         }
       }
+
+      this.serverPagination.rowsNumber = r.length()
+      this.visibleColumns = ['date'].concat(r.keys())
+
       return r
     },
 
@@ -105,12 +109,12 @@ export default {
   watch: {
     resource: function (r, old) {
       if (r) {
-        this.serverPagination.rowsNumber = r.length()
         this.reloadData()
       }
     },
 
-    columns: function (col, oldCol) {
+    /*columns: function (col, oldCol) {
+      console.log('columns',col, oldCol)
       // calculate the new keys
       var newKeys = []
       col.forEach(c => {
@@ -122,7 +126,7 @@ export default {
       if (newKeys.length) {
         this.visibleColumns = this.visibleColumns.concat(newKeys)
       }
-    }
+    }*/
   },
 
   methods: {

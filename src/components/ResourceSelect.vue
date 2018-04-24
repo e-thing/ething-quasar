@@ -12,7 +12,16 @@ import EThing from 'ething-js'
 export default {
     name: 'ResourceSelect',
 
-    props: ['type', 'not-type', 'filter', 'value'],
+    props: {
+      type: String,
+      notType: String,
+      filter: {},
+      value: {},
+      useId: {
+        type: Boolean,
+        default: false
+      }
+    },
 
     data () {
         return {}
@@ -29,7 +38,7 @@ export default {
           }
 
           if (this.type) {
-            if (!r.isTypeof(type)){
+            if (!r.isTypeof(this.type)){
               return false
             }
           }
@@ -46,7 +55,7 @@ export default {
         return this.resources.map( r => {
           return {
             label: r.name(),
-            value: r,
+            value: this.useId ? r.id() : r,
             icon: this.$ething.meta.get(r).icon,
             leftColor: this.$ething.meta.get(r).color,
             inset: true,

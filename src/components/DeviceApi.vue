@@ -154,8 +154,6 @@ export default {
 
             var contentType = blobData.type;
 
-            console.log(blobData, contentType)
-
             if (!blobData || blobData.size == 0) {
     					operation.result = null
               operation.resultType = 'empty'

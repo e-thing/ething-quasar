@@ -3,24 +3,25 @@
     <q-layout-header>
       <q-toolbar
         color="primary"
-        :glossy="$q.theme === 'mat'"
-        :inverted="$q.theme === 'ios'"
       >
-        <q-btn
-          flat
-          dense
-          round
-          @click="leftDrawerOpen = !leftDrawerOpen"
-          aria-label="Menu"
-        >
-          <q-icon name="menu" />
-        </q-btn>
 
-        <q-toolbar-title>
-          Quasar App
-          <div slot="subtitle">Running on Quasar v{{ $q.version }}</div>
+        <q-btn class="xs" flat round dense icon="menu" @click="leftDrawerOpen = !leftDrawerOpen" aria-label="Toggle menu on left side" />
+
+        <q-toolbar-title shrink >
+          EThing
         </q-toolbar-title>
+
+        <q-btn class="gt-xs" flat label="Dashboard" @click="$router.push('/dashboard')" />
+        <q-btn class="gt-xs" flat label="Devices" @click="$router.push('/devices')" />
+        <q-btn class="gt-xs" flat label="Data" @click="$router.push('/data')" />
+
+        <q-toolbar-title class="gt-xs"/>
+
+        <q-btn class="gt-xs" flat dense icon="settings" aria-label="settings" />
+        <q-btn class="gt-xs" flat dense icon="exit to app" aria-label="logout" />
+
       </q-toolbar>
+
     </q-layout-header>
 
     <q-layout-drawer
@@ -32,28 +33,31 @@
         link
         inset-delimiter
       >
+        <q-list-header>Menu</q-list-header>
         <q-item @click.native="$router.push('/dashboard')">
-          <q-item-side icon="school" />
+          <q-item-side icon="dashboard" />
           <q-item-main label="Dashboard" />
         </q-item>
-        <q-item @click.native="$router.push('/data')">
-          <q-item-side icon="school" />
-          <q-item-main label="Data" />
-        </q-item>
         <q-item @click.native="$router.push('/devices')">
-          <q-item-side icon="school" />
+          <q-item-side icon="devices" />
           <q-item-main label="Devices" />
         </q-item>
+        <q-item @click.native="$router.push('/data')">
+          <q-item-side icon="mdi-database" />
+          <q-item-main label="Data" />
+        </q-item>
 
-        <q-list-header>Essential Links</q-list-header>
-        <q-item @click.native="openURL('http://quasar-framework.org')">
-          <q-item-side icon="school" />
-          <q-item-main label="Docs" sublabel="quasar-framework.org" />
+        <q-item-separator />
+
+        <q-item @click.native="$router.push('/settings')">
+          <q-item-side icon="settings" />
+          <q-item-main label="Settings" />
         </q-item>
-        <q-item @click.native="openURL('https://github.com/quasarframework/')">
-          <q-item-side icon="code" />
-          <q-item-main label="GitHub" sublabel="github.com/quasarframework" />
+        <q-item @click.native="$router.push('/logout')">
+          <q-item-side icon="exit to app" />
+          <q-item-main label="Logout" />
         </q-item>
+
       </q-list>
     </q-layout-drawer>
 
@@ -82,7 +86,7 @@ export default {
   name: 'LayoutDefault',
   data () {
     return {
-      leftDrawerOpen: this.$q.platform.is.desktop
+      leftDrawerOpen: false // this.$q.platform.is.desktop
     }
   },
   methods: {

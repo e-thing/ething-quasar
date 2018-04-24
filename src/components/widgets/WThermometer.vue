@@ -1,15 +1,3 @@
-<template>
-  <div class="absolute-center">
-    <q-knob
-      :value="value"
-      :min="min"
-      :max="max"
-      readonly
-    >
-      {{value}} <span class="unit">{{unit}}</span>
-    </q-knob>
-  </div>
-</template>
 
 <script>
 

@@ -24,5 +24,7 @@ export default {
       default: 0,
       description: "This resource will be automatically removed after a specific duration of inactivity.",
     }
-  }
+  },
+
+  widgets: ['WChart']
 }

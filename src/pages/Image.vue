@@ -1,24 +1,17 @@
 <template>
   <q-page>
-
-    <chart :preferences="resource" />
-
+    <image-viewer :source="resource" thumbnails controls/>
   </q-page>
 </template>
 
 <script>
-import Chart from '../components/Chart'
+import ImageViewer from '../components/ImageViewer'
 
 export default {
-  name: 'PageChart',
+  name: 'PageImage',
 
   components: {
-      Chart
-  },
-
-  data () {
-    return {
-    }
+    ImageViewer
   },
 
   computed: {
@@ -32,9 +25,7 @@ export default {
       }
       return r
     },
-
-  },
-
+  }
 }
 </script>
 

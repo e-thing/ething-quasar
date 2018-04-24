@@ -103,7 +103,7 @@ function compile (type, resource, partial) {
     }
   }
 
-  console.log('compile ' + type + (resource ? ' for resource ' + resource.id() : ''))
+  // console.log('compile ' + type + (resource ? ' for resource ' + resource.id() : ''))
 
   var m = null
 
