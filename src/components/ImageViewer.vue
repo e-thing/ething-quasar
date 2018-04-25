@@ -1,9 +1,11 @@
 <template>
-    <div class="card-carousel" :class="{ hasThumbnails: thumbnails }" >
+    <div class="card-carousel" :class="{ hasThumbnails: thumbnails, noTitle: !noTitle }" >
         <div class="card-img">
-            <div class="absolute-center">
-              <img :src="currentImageSrc" alt="">
-              <div v-if="!noTitle" class="title text-center">{{ currentImage.name() }}</div>
+            <div class="img-wrapper">
+                <div class="">
+                  <img :src="currentImageSrc" alt="">
+                  <div v-if="!noTitle" class="title text-center">{{ currentImage.name() }}</div>
+                </div>
             </div>
             <div class="actions" v-if="controls">
                 <q-btn round flat size="lg" icon="chevron left" @click="prevImage" class="prev"/>
@@ -166,20 +168,58 @@ export default {
 }
 
 .card-img {
-    margin-bottom: 15px;
     position: absolute;
     top: 0;
-    width: 100%;
     bottom: 0px;
+    width: 100%;
+    overflow-x: hidden;
 }
 
 .card-carousel.hasThumbnails .card-img {
-  bottom: 150px;
+  bottom: 132px;
 }
 
-.card-img > img {
-    display: block;
-    margin: 0 auto;
+.card-img > div.img-wrapper {
+    position: absolute;
+    width: 200%;
+    text-align: center;
+    height: 100%;
+}
+
+.card-img > div.img-wrapper > div {
+    height: 100%;
+    float: left;
+    position: relative;
+    overflow: hidden;
+    width: 50%;
+}
+
+.card-img > div.img-wrapper > div:before {
+    content: ' ';
+    display: inline-block;
+    vertical-align: middle;
+    height: 100%;
+}
+
+.card-img > div.img-wrapper > div > img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.card-img.hasTitle > div.img-wrapper > div > img {
+    padding: 30px;
+}
+
+
+.title {
+    position: absolute;
+    bottom: 0px;
+    width: 100%;
+    padding: 5px 0;
 }
 
 .actions {
