@@ -18,7 +18,7 @@
         <q-toolbar-title class="gt-xs"/>
 
         <q-btn class="gt-xs" flat dense icon="settings" aria-label="settings" />
-        <q-btn class="gt-xs" flat dense icon="exit to app" aria-label="logout" />
+        <q-btn class="gt-xs" flat dense icon="exit to app" aria-label="logout" @click="logout" />
 
       </q-toolbar>
 
@@ -53,7 +53,7 @@
           <q-item-side icon="settings" />
           <q-item-main label="Settings" />
         </q-item>
-        <q-item @click.native="$router.push('/logout')">
+        <q-item @click.native="logout">
           <q-item-side icon="exit to app" />
           <q-item-main label="Logout" />
         </q-item>
@@ -90,7 +90,20 @@ export default {
     }
   },
   methods: {
-    openURL
+    openURL,
+    logout () {
+      var xhr = new XMLHttpRequest()
+      var self = this
+      xhr.open("GET", this.$ething.config.serverUrl + '/auth/logout', true);
+      xhr.withCredentials = true
+      xhr.onreadystatechange = function() {
+				if (this.readyState == 4){
+          self.$router.push({name: 'login'})
+        }
+      }
+      xhr.send()
+
+    }
   }
 }
 </script>

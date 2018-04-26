@@ -1,6 +1,6 @@
 import EThing from 'ething-js'
 import resourcesMetaData from '../resources'
-
+import { Cookies } from 'quasar'
 
 export default ({ app, router, Vue, store }) => {
   Vue.prototype.$ething = EThing
@@ -11,24 +11,76 @@ export default ({ app, router, Vue, store }) => {
 
   console.log('ething configuring ...')
   EThing.config.serverUrl = 'http://lebios.no-ip.org'
-  EThing.auth.setBasicAuth('ething', 'admin');
+  // EThing.auth.setBasicAuth('ething', 'admin');
 
-  /*router.beforeEach((to, from, next) => {
-    // console.log('beforeEach', to, from)
-    EThing.arbo.load(function(){
-      app.data.loading = false
-      next()
-    })
+  var init = false
 
-  })*/
+  router.beforeEach((to, from, next) => {
 
-  EThing.arbo.load().done( () => {
-    console.log('ething arbo loaded !')
-    store.commit('ething/update')
-    app.data.loading = false
-  }).fail( err => {
-    app.data.error = err
+    if (!init && to.name !== 'login') {
+
+      /*var csrf_token = Cookies.get('Csrf-token')
+
+      if (csrf_token) {*/
+
+        init = true
+
+        // on unauthenticated request, start the auth process
+      	EThing.ajaxError(function (err,xhr,opt) {
+      		//console.log(err,xhr,opt);
+      		if(opt.url && /\/devices\/[^\/]+\/call/.test(opt.url))
+            return
+
+      		if(xhr.status == 401 || xhr.status == 403){
+            router.app.$router.push({
+              name: 'login',
+              query: {
+                redirect_uri: router.app.$router.currentRoute.path
+              }
+            })
+      		}
+      	})
+
+        EThing.apiRequestPrefilter(function(xhrOrUrl){
+      		if(typeof xhrOrUrl == 'string'){
+      			// insert query param
+      			/*xhrOrUrl += xhrOrUrl.indexOf('?') !== -1 ? '&' : '?';
+      			xhrOrUrl += 'csrf_token='+encodeURIComponent(csrf_token)*/
+      		} else {
+            xhrOrUrl.withCredentials = true
+      			//xhrOrUrl.setRequestHeader('X-Csrf-Token',csrf_token)
+          }
+      		return xhrOrUrl
+      	})
+
+        EThing.arbo.load().done( () => {
+          console.log('ething arbo loaded !')
+          store.commit('ething/update')
+          app.data.loading = false
+        }).fail( err => {
+          app.data.error = err
+        })
+
+      /*} else {
+        console.warn('no Csrf-token cookie found ! need to be authiticated');
+
+        next({
+          name: 'login',
+          replace: true,
+          query: {
+            redirect_uri: to.path
+          }
+        })
+
+        return
+      }*/
+    }
+
+    next()
+
   })
+
+
 }
 
 // meta api

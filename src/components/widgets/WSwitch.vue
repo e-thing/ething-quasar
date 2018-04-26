@@ -1,20 +1,22 @@
+<template>
+  <div class="absolute-center">
+    <q-toggle v-model="state" />
+  </div>
+</template>
 
 <script>
 
-import WKnob from './WKnob'
 import WResource from './WResource'
 
 export default {
-    name: 'WThermometer',
+    name: 'WSwitch',
 
-    mixins: [WKnob, WResource],
+    mixins: [WResource],
 
     data () {
-      return {
-        unit: '°C',
-        min: -20,
-        max: 40
-      }
+        return {
+            state: false
+        }
     },
 
     watch: {
@@ -25,9 +27,9 @@ export default {
 
     methods: {
       update () {
-        console.log('WThermometer update...')
-        this.r.getTemperature().done(v => {
-          this.value = v
+        console.log('WSwitch update...')
+        this.r.getState().done(v => {
+          this.state = v
         })
       }
     },
@@ -37,7 +39,7 @@ export default {
     },
 
     minWidth: 1,
-    minHeight: 3
+    minHeight: 1
 
 
 

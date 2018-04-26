@@ -4,7 +4,7 @@
             <div class="img-wrapper">
                 <div class="">
                   <img :src="currentImageSrc" alt="">
-                  <div v-if="!noTitle" class="title text-center">{{ currentImage.name() }}</div>
+                  <div v-if="!noTitle" class="title text-center text-faded">{{ currentImage.name() }}</div>
                 </div>
             </div>
             <div class="actions" v-if="controls">
@@ -48,13 +48,10 @@ export default {
       // and is the reason why we don't have to worry about the
       // big image getting updated
       currentImage () {
-
-          console.log('currentImage', this.images[this.activeImage].id(), this.images)
           return this.images[this.activeImage]
       },
 
       currentImageSrc () {
-          console.log('currentImageSrc')
           return this.currentImage.getContentUrl(false)
       },
 
@@ -103,26 +100,23 @@ export default {
       // Go forward on the images array
       // or go at the first image if you can't go forward :/
       nextImage() {
-        console.log('nextImage')
-          var active = this.activeImage + 1;
-          if(active >= this.images.length) {
-              active = 0;
-          }
-          this.activateImage(active);
+        var active = this.activeImage + 1;
+        if(active >= this.images.length) {
+            active = 0;
+        }
+        this.activateImage(active);
       },
       // Go backwards on the images array
       // or go at the last image
       prevImage() {
-        console.log('prevImage')
-          var active = this.activeImage - 1;
-          if(active < 0) {
-              active = this.images.length - 1;
-          }
-          this.activateImage(active);
+        var active = this.activeImage - 1;
+        if(active < 0) {
+            active = this.images.length - 1;
+        }
+        this.activateImage(active);
       },
       activateImage(imageIndex) {
-          console.log('activateImage', imageIndex)
-          this.activeImage = imageIndex;
+        this.activeImage = imageIndex;
       }
   }
 

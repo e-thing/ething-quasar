@@ -7,7 +7,8 @@ module.exports = function (ctx) {
       'i18n',
       'axios',
       'ething',
-      'formSchema'
+      'formSchema',
+      'vuelidate'
     ],
     css: [
       'app.styl'
