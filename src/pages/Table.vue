@@ -2,7 +2,7 @@
   <q-page>
 
     <q-table
-      :title="resource ? resource.name() : '...'"
+      :title="title"
       :data="serverData"
       :columns="columns"
       row-key="id"
@@ -11,6 +11,11 @@
       :pagination.sync="serverPagination"
       @request="request"
     >
+
+      <template slot="top-left" slot-scope="props">
+        <div class="q-title q-title-opacity">{{ resource.basename() }} <small v-if="createdBy"> - {{ createdBy.basename() }}</small></div>
+      </template>
+
       <template slot="top-right" slot-scope="props">
         <q-table-columns
           color="secondary"
@@ -103,6 +108,20 @@ export default {
 
       return columns
     },
+
+    /*title () {
+      var createdBy = this.$ething.arbo.findOneById(this.resource.createdBy())
+      var title = this.resource.name()
+      if (createdBy) {
+        title += ' - ' + createdBy.basename()
+      }
+      return title
+    },*/
+
+    createdBy () {
+      return this.$ething.arbo.findOneById(this.resource.createdBy())
+    },
+
 
   },
 

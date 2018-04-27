@@ -1,6 +1,6 @@
 import EThing from 'ething-js'
 import resourcesMetaData from '../resources'
-import { Cookies } from 'quasar'
+// import { Cookies } from 'quasar'
 
 export default ({ app, router, Vue, store }) => {
   Vue.prototype.$ething = EThing
@@ -53,12 +53,28 @@ export default ({ app, router, Vue, store }) => {
       		return xhrOrUrl
       	})
 
-        EThing.arbo.load().done( () => {
+
+        var metaDfr = EThing.request({
+          url: 'utils/definitions',
+          dataType: 'json',
+        }).done( (def) => {
+          console.log('ething meta loaded !')
+          importDefinitions(def)
+        })
+
+        var arboDfr = EThing.arbo.load().done( () => {
           console.log('ething arbo loaded !')
           store.commit('ething/update')
+        })
+
+        EThing.utils.Deferred.when(arboDfr, metaDfr).done( () => {
+          console.log('ething loaded !')
           app.data.loading = false
-        }).fail( err => {
-          app.data.error = err
+
+          SSE.start()
+
+        }).fail( args => {
+          app.data.error = args[0]
         })
 
       /*} else {
@@ -120,48 +136,17 @@ function deepCopy(o) {
   return copy;
 }
 
-function compile (type, resource, partial) {
-
-  if (type instanceof EThing.Resource) {
-    resource = type
-    type = ''
-    var types = resource.types()
-    for(var i in types){
-      if (_metadata.hasOwnProperty(types[i])) {
-        type = types[i]
-        break
-      }
-    }
-  }
-
-  // check the cache
-  if(!partial){
-    if (!resource) {
-      // static
-      if (_metadata_cache.hasOwnProperty(type)) {
-        return _metadata_cache[type]
-      }
-    } else {
-      if (_metadata_cache_dyn.hasOwnProperty(resource.id())) {
-        var cache = _metadata_cache_dyn[resource.id()]
-        if (cache.type === type) {
-          if (cache.ts >= resource.modifiedDate().getTime()) {
-            return cache.meta
-          } else {
-            delete _metadata_cache_dyn[resource.id()]
-          }
-        }
-      }
-    }
-  }
+function _compile (type, resource, dynamic_interface) {
 
   // console.log('compile ' + type + (resource ? ' for resource ' + resource.id() : ''))
 
-  var m = null
+  var m = {
+    inheritances: [] // this array will hold all the dependencies name (interfaces + bases)
+  }
 
   if (_metadata.hasOwnProperty(type)) {
 
-    var m = deepCopy(_metadata[type])
+    m = merge(m, deepCopy(_metadata[type]))
     var dynamic = null
 
     if (resource && typeof m.dynamic == 'function') {
@@ -181,49 +166,112 @@ function compile (type, resource, partial) {
     var interfaces = (m.interfaces || []).reverse()
     delete m.interfaces
 
-    var inherited = {}
+    var inherited = {
+      inheritances: []
+    }
 
     for(let b in bases) {
-      merge(inherited, compile(bases[b], resource, true))
+      inherited.inheritances.push(bases[b])
+      merge(inherited, _compile(bases[b], resource))
     }
 
     for(let i in interfaces) {
-      merge(inherited, compile(interfaces[i], resource, true))
+      inherited.inheritances.push(interfaces[i])
+      merge(inherited, _compile(interfaces[i], resource))
+    }
+
+    inherited.inheritances = [...new Set(inherited.inheritances)]
+
+    if (dynamic_interface && resource) {
+      // dynamic interfaces
+      resource.interfaces().reverse().forEach(i => {
+        if (inherited.inheritances.indexOf(i)===-1) {
+          // it is a dynamic interface
+          // console.log('dynamic interface ' + i + ' for ' + resource.name() + ' ' + resource.type())
+          inherited.inheritances.push(i)
+          merge(inherited, _compile(i, resource))
+        }
+      })
     }
 
     m = merge(inherited, m)
   }
 
-  // add it to the static cache !
-  if(!partial){
+  // console.log(type, 'inheritances:', deepCopy(m.inheritances))
 
-    m = merge(deepCopy(defaultsMeta), m)
+  // console.log('end compile ' + type + (resource ? ' for resource ' + resource.id() : ''))
 
-    for(let k in m.properties)
-      m.properties[k] = merge(deepCopy(defaultsMetaProperty), m.properties[k])
+  return m
+}
 
-    if (!resource) {
-      _metadata_cache[type] = m
-    } else {
-      _metadata_cache_dyn[resource.id()] = {
-        ts: Date.now(),
-        meta: m,
-        type
+function compile (type, resource) {
+
+  if (type instanceof EThing.Resource) {
+    resource = type
+    type = ''
+    var types = resource.types()
+    for(var i in types){
+      if (_metadata.hasOwnProperty(types[i])) {
+        type = types[i]
+        break
       }
+    }
+  }
+
+  // check the cache
+  if (!resource) {
+    // static
+    if (_metadata_cache.hasOwnProperty(type)) {
+      return _metadata_cache[type]
+    }
+  } else {
+    if (_metadata_cache_dyn.hasOwnProperty(resource.id())) {
+      var cache = _metadata_cache_dyn[resource.id()]
+      if (cache.type === type) {
+        if (cache.ts >= resource.modifiedDate().getTime()) {
+          return cache.meta
+        } else {
+          delete _metadata_cache_dyn[resource.id()]
+        }
+      }
+    }
+  }
+
+  var m = _compile(type, resource, resource && resource.isTypeof('Device'))
+
+  // add defaults
+  m = merge(deepCopy(defaultsMeta), m)
+
+  for(let k in m.properties)
+    m.properties[k] = merge(deepCopy(defaultsMetaProperty), m.properties[k])
+
+  // add it to the static cache !
+  if (!resource) {
+    _metadata_cache[type] = m
+  } else {
+    _metadata_cache_dyn[resource.id()] = {
+      ts: Date.now(),
+      meta: m,
+      type
     }
   }
 
   return m
 }
 
-function merge(a, b){
+function merge (a, b) {
   if (b) {
     for(let i in b){
       if(typeof b[i] != typeof a[i] || a[i] === null) {
         a[i] = b[i]
       } else if (typeof b[i] === 'object' && b[i] !== null) {
-        if (Array.isArray(b)) {
-          a[i] = b[i].concat(a[i])
+        if (Array.isArray(b[i])) {
+          var cpy = b[i]
+          a[i].forEach(item => {
+            if(cpy.indexOf(item)===-1)
+              cpy.push(item)
+          })
+          a[i] = cpy
         } else {
           merge(a[i], b[i])
         }
@@ -234,6 +282,100 @@ function merge(a, b){
   }
 
   return a
+}
+
+function parseDefinition (schema, meta) {
+  if (typeof schema['allOf'] != 'undefined') {
+    schema['allOf'].forEach( (subSchema) => {
+      parseDefinition(subSchema, meta)
+    })
+  } else {
+
+    if(typeof schema['$ref'] === 'string') {
+
+      var ref = schema['$ref']
+
+      if (/^#\/resources\//.test(ref)) {
+        var base = ref.replace("#/resources/", "")
+
+        if(!meta.bases)
+          meta.bases = []
+
+        meta.bases.push(base)
+      }
+      else if (/^#\/interfaces\//.test(ref)) {
+        var iface = ref.replace("#/interfaces/", "")
+
+        if(!meta.interfaces)
+          meta.interfaces = []
+
+        meta.interfaces.push(iface)
+      }
+      else {
+        console.warn('meta parsing error [unknown ref] ', ref)
+      }
+
+    } else {
+      if(schema['type']==='object') {
+
+        var properties = schema['properties'] || {}
+
+        if(!meta.properties)
+          meta.properties = {}
+
+        for(let propertyName in properties) {
+          meta.properties[propertyName] = properties[propertyName]
+        }
+
+      } else {
+        console.warn('meta parsing error [type must be an object] ', schema)
+      }
+    }
+
+  }
+}
+
+function importDefinitions (def) {
+  var meta = {}
+
+  for(let type in def.resources) {
+    let resource = def.resources[type]
+    let m = {}
+
+    parseDefinition(resource, m)
+
+    meta[type] = m
+  }
+
+  for(let type in def.interfaces) {
+    let iface = def.interfaces[type]
+    let m = {}
+
+    parseDefinition(iface, m)
+
+    meta[type] = m
+  }
+
+  // merge with user defined definitions
+  for(let type in meta) {
+    if (_metadata[type]) {
+      // console.log('merging ' + type)
+      meta[type] = merge(meta[type], _metadata[type])
+    }
+  }
+
+  for(let type in _metadata) {
+    if (!meta[type]) {
+      // console.log('adding ' + type)
+      meta[type] = _metadata[type]
+    }
+  }
+
+  _metadata = meta
+
+  // console.log('after merging')
+  // console.log(meta)
+
 }
 
 EThing.meta = {
@@ -251,3 +393,87 @@ EThing.widgets = {
     }
   }
 }
+
+
+// SSE
+
+// server sent event
+var SSE = {
+	source: null,
+
+	start () {
+
+		var source = this.source = new EventSource(EThing.config.serverUrl + "/api/events", { withCredentials: true })
+
+		/*source.onopen = function() {
+			console.log("opened")
+		}*/
+
+		source.onmessage = (event) => {
+			var data = JSON.parse(event.data)
+			this.dispatch(data)
+		}
+
+
+	},
+
+	stop () {
+		if(this.source)
+      this.source.close()
+	},
+
+  dispatch (event) {
+    console.log(event)
+
+    var name = event.name,
+			isResourceEvent = !!event.data.resource,
+			resource,
+			evt = EThing.Event(name, {
+				data: event.data,
+				originalEvent: event
+			});
+
+		if(isResourceEvent){
+			resource = EThing.arbo.findOneById(event.data.resource);
+
+			var resourceId = event.data.resource;
+
+			switch(name){
+				case 'ResourceMetaUpdated':
+					var mtime = new Date(event.data.rModifiedDate);
+					if(!resource || mtime > resource.modifiedDate()){
+						this.fetch(resourceId);
+					}
+					break;
+				case 'ResourceCreated':
+					if(!resource){
+						this.fetch(resourceId);
+					}
+					break;
+				case 'ResourceDeleted':
+					EThing.arbo.remove(resourceId);
+					break;
+			}
+
+			if(resource){
+				resource.trigger(evt);
+			}
+
+		} else {
+			EThing.trigger(evt);
+		}
+  },
+
+  cacheDelay: 500,
+  cache: {},
+
+  fetch (resourceId) {
+    if(this.cache[resourceId]) clearTimeout(this.cache[resourceId]);
+		this.cache[resourceId] = setTimeout(() => {
+			delete this.cache[resourceId];
+			console.log("updating resource " + resourceId);
+			EThing.get(resourceId);
+		}, this.cacheDelay);
+  }
+
+};

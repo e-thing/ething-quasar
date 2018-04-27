@@ -1,7 +1,7 @@
 <template>
   <q-page padding>
 
-    <resource-editor :resource="resource" @done="onDone"/>
+    <resource-editor :resource="resource" @done="onDone" @canceled="onCancel"/>
 
   </q-page>
 </template>
@@ -33,6 +33,10 @@ export default {
   methods: {
     onDone (resource) {
       this.$router.push({ path: '/data', params: { path: resource.dirname() }})
+    },
+
+    onCancel () {
+      this.$router.go(-1)
     }
   }
 

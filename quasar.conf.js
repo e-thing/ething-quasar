@@ -7,6 +7,7 @@ module.exports = function (ctx) {
       'i18n',
       'axios',
       'ething',
+      'ething-ui',
       'formSchema',
       'vuelidate'
     ],

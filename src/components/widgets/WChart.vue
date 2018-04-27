@@ -1,5 +1,5 @@
 <template>
-  <chart :preferences="r" expended/>
+  <chart :preferences="r" expended dense/>
 </template>
 
 <script>

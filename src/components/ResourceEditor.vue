@@ -18,7 +18,7 @@
 
     <div>
         <q-btn :loading="loading" color="primary" icon="done" :label="create ? 'create' : 'edit'" @click="handler"/>
-        <q-btn color="negative" icon="clear" label="cancel" flat />
+        <q-btn color="negative" icon="clear" label="cancel" flat @click="$emit('canceled')"/>
     </div>
   </div>
 </template>

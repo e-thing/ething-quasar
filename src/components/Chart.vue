@@ -225,7 +225,8 @@ export default {
 
   props: {
     preferences: {},
-    expended: Boolean
+    expended: Boolean,
+    dense: Boolean
   },
 
   components: {
@@ -290,6 +291,15 @@ export default {
 
         this.dataSource.clear()
 
+        var title = preferences.title
+        if (this.dense && preferences.subtitle) {
+          if (title) {
+            title += ' - ' + preferences.subtitle
+          } else {
+            title = preferences.subtitle
+          }
+        }
+
         this.options = {
             chart: {
               plotBorderWidth: 1,
@@ -345,10 +355,14 @@ export default {
                     type: 'all',
                     text: 'All'
                 }],
-                selected: 1
+                selected: 1,
+                enabled: !this.dense
             },
             tooltip: {
                 xDateFormat: '%Y-%m-%d %H:%M'
+            },
+            navigator: {
+              enabled: !this.dense
             },
             /*responsive: {
                 rules: [{
@@ -380,10 +394,10 @@ export default {
             series: [],
             yAxis: [],
             title: {
-                text: preferences.title
+                text: title
             },
             subtitle: {
-                text: preferences.subtitle
+                text: this.dense ? null : preferences.subtitle
             },
         }
 

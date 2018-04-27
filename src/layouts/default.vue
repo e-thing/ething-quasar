@@ -17,7 +17,7 @@
 
         <q-toolbar-title class="gt-xs"/>
 
-        <q-btn class="gt-xs" flat dense icon="settings" aria-label="settings" />
+        <q-btn class="gt-xs" flat dense icon="settings" aria-label="settings" @click="$router.push('/settings')"/>
         <q-btn class="gt-xs" flat dense icon="exit to app" aria-label="logout" @click="logout" />
 
       </q-toolbar>
