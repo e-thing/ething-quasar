@@ -5,9 +5,9 @@
       <q-btn :loading="saveLoading" label="save" @click="save"/>
       <q-btn-dropdown label="langage">
         <q-list link>
-          <q-item v-for="(item, index) in langages()" :key="index" v-close-overlay @click.native="setLangage(item)">
+          <q-item v-for="(value, key, index) in langages()" :key="key" v-close-overlay @click.native="setLangage(key, value)">
             <q-item-main>
-              <q-item-tile label>{{ item }}</q-item-tile>
+              <q-item-tile label>{{ key }}</q-item-tile>
             </q-item-main>
           </q-item>
         </q-list>
@@ -37,6 +37,7 @@ export default {
     return {
       content: '',
       cmOption: {
+        mode: 'text',
         tabSize: 4,
         styleActiveLine: true,
         lineNumbers: true,
@@ -84,14 +85,17 @@ export default {
     },
 
     langages () {
-      return [
-        'javascript',
-        'yaml'
-      ]
+      return {
+        'javascript': 'text/javascript',
+        'yaml': 'text/x-yaml',
+        'json': 'application/json'
+      }
     },
 
-    setLangage (langage) {
+    setLangage (langage, mime) {
       console.log('setLangage = ' + langage)
+      this.cmOption.mode = mime
+
     },
 
     save () {
@@ -111,4 +115,7 @@ export default {
 </script>
 
 <style>
+.CodeMirror {
+  height: 100%;
+}
 </style>

@@ -32,6 +32,7 @@ export default ({ app, router, Vue, store }) => {
             return
 
       		if(xhr.status == 401 || xhr.status == 403){
+            init = false
             router.app.$router.push({
               name: 'login',
               query: {
@@ -319,7 +320,13 @@ function parseDefinition (schema, meta) {
       if(schema['type']==='object') {
 
         var properties = schema['properties'] || {}
+        var required = schema['required'] || []
 
+        if(!meta.required)
+          meta.required = []
+
+        meta.required = required.concat(meta.required)
+        
         if(!meta.properties)
           meta.properties = {}
 
@@ -376,10 +383,13 @@ function importDefinitions (def) {
   // console.log('after merging')
   // console.log(meta)
 
+  EThing.meta.types = Object.keys(_metadata)
+
 }
 
 EThing.meta = {
-  get: compile
+  get: compile,
+  types: Object.keys(_metadata)
 }
 
 // widgets api

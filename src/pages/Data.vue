@@ -1,12 +1,11 @@
 <template>
-  <q-page>
+  <q-page class="q-mb-xl">
 
     <q-breadcrumbs class="q-pa-md">
       <q-breadcrumbs-el v-for="(item, index) in pathItems" :key="index" :label="item.label" :icon="item.icon" :to="item.link" />
     </q-breadcrumbs>
-    
 
-    <q-btn-dropdown color="primary" label="Create">
+    <!--<q-btn-dropdown color="primary" label="Create">
       <q-list link>
         <q-item v-close-overlay @click.native="create('File')">
           <q-item-side :icon="$ething.meta.get('File').icon" inverted :color="$ething.meta.get('File').color" />
@@ -21,9 +20,7 @@
           </q-item-main>
         </q-item>
       </q-list>
-    </q-btn-dropdown>
-    
-    
+    </q-btn-dropdown>-->
 
     <div v-if="resources.length">
       <q-list link no-border>
@@ -49,8 +46,12 @@
               <q-item-tile sublabel>{{ $ui.dateToString(file.modifiedDate()) }}</q-item-tile>
               <q-item-tile sublabel>{{ $ui.sizeToString(file.size()) }}</q-item-tile>
             </q-item-main>
-            <q-item-side right icon="delete" color="negative" @click.native.stop="onRemoveClick(file)"/>
-            <q-item-side right icon="settings" @click.native.stop="settingsClick(file)"/>
+            <q-item-side right>
+              <q-btn icon="delete" round flat dense color="negative" @click.stop="onRemoveClick(file)"/>
+            </q-item-side>
+            <q-item-side right>
+              <q-btn icon="settings" round flat dense @click.stop="settingsClick(file)"/>
+            </q-item-side>
           </q-item>
         </div>
 
@@ -64,9 +65,15 @@
               <q-item-tile sublabel>{{ $ui.dateToString(table.modifiedDate()) }}</q-item-tile>
               <q-item-tile sublabel>{{ table.length() }} rows</q-item-tile>
             </q-item-main>
-            <q-item-side right icon="insert chart" color="secondary" @click.native.stop="chartClick(table)"/>
-            <q-item-side right icon="delete" color="negative" @click.native.stop="onRemoveClick(table)"/>
-            <q-item-side right icon="settings" @click.native.stop="settingsClick(table)"/>
+            <q-item-side right>
+              <q-btn icon="insert chart" round flat dense color="secondary" @click.stop="chartClick(table)"/>
+            </q-item-side>
+            <q-item-side right>
+              <q-btn icon="delete" round flat dense color="negative" @click.stop="onRemoveClick(table)"/>
+            </q-item-side>
+            <q-item-side right>
+              <q-btn icon="settings" round flat dense @click.stop="settingsClick(table)"/>
+            </q-item-side>
           </q-item>
         </div>
 
@@ -76,7 +83,7 @@
     <div v-else class="q-pa-md">
       No items found.
     </div>
-    
+
     <q-page-sticky position="bottom-right" :offset="[18, 18]">
         <q-fab
             color="primary"
@@ -178,9 +185,9 @@ export default {
         })
       })
     },
-    
+
     create (type) {
-        
+      this.$router.push('/create/'+type)
     },
   }
 }

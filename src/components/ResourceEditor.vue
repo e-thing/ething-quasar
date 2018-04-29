@@ -49,19 +49,15 @@ export default {
     methods: {
         handler () {
           this.loading = true
-          var ns = null
           var def = {}
           var res = null
 
           if (this.create) {
             if (typeof EThing[this.type] !== 'undefined') {
-              ns = EThing[this.type]
+              res = EThing[this.type].create(Object.assign(def, this.model))
             } else {
-              ns = EThing.Device
-              def.type = this.type
+              res = EThing.Device.create(this.type, Object.assign(def, this.model))
             }
-
-            res = ns.create(Object.assign(def, this.model))
           } else {
             res = this.resource.set(Object.assign(def, this.model))
           }

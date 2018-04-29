@@ -37,6 +37,10 @@ export default [
         component: () => import('pages/Resource')
       },
       {
+        path: 'create/:type',
+        component: () => import('pages/Create')
+      },
+      {
         path: 'device/:id',
         component: () => import('pages/Device')
       },

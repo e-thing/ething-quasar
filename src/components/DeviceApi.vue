@@ -20,8 +20,8 @@
           {{ String(operation.error) }}
         </q-alert>
 
-        <div class="result" v-if="operation.result && !operation.loading">
-          <img v-if="operation.resultType === 'image'" :src="operation.result" />
+        <div class="result q-my-md" v-if="operation.result">
+          <img v-if="operation.resultType === 'image'" :src="operation.result" @load="operation.loading = false" />
           <audio v-else-if="operation.resultType === 'audio'" controls :src="operation.result" :type="operation.resultContentType" />
           <video v-else-if="operation.resultType === 'video'" controls autoplay :src="operation.result" :type="operation.resultContentType" />
           <video v-else-if="operation.resultType === 'video'" controls autoplay :src="operation.result" :type="operation.resultContentType" />
@@ -126,7 +126,7 @@ export default {
         operation.resultContentType = null
 
         // MJPEG
-    		if (/^multipart\/x-mixed-replace/.test(contentType) || contentType=='video/x-motion-jpeg' || contentType=='video/x-jpeg') {
+    		if (/^image\//.test(contentType) || /^multipart\/x-mixed-replace/.test(contentType) || contentType=='video/x-motion-jpeg' || contentType=='video/x-jpeg') {
           operation.result = this.toUrl(operation)
           operation.resultType = 'image'
     		}
@@ -134,6 +134,7 @@ export default {
           operation.resultContentType = contentType
           operation.result = this.toUrl(operation)
           operation.resultType = 'audio'
+          operation.loading = false
     		}
     		else if (/^video\//.test(contentType)) {
     			if(supportsVideoPlayback(contentType)){
@@ -145,6 +146,7 @@ export default {
             operation.result = this.toUrl(operation)
             operation.resultType = 'videoflash'
     			}
+          operation.loading = false
     		}
     		else {
     			// get the content as Blob
@@ -252,6 +254,9 @@ export default {
 }
 </script>
 
-<style scoped>
-
+<style lang="stylus" scoped>
+  .result
+    img
+      width auto
+      max-width 100%
 </style>

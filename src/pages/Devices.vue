@@ -1,8 +1,19 @@
 <template>
   <q-page padding>
-    
-    
-    
+
+    <div class="row justify-end">
+      <q-btn-dropdown color="primary" label="Create" flat >
+        <q-list link>
+          <q-item v-close-overlay v-for="type in types" :key="type" @click.native="create(type)">
+            <q-item-side :icon="$ething.meta.get(type).icon" :color="$ething.meta.get(type).color" />
+            <q-item-main>
+              <q-item-tile label>{{ type }}</q-item-tile>
+            </q-item-main>
+          </q-item>
+        </q-list>
+      </q-btn-dropdown>
+    </div>
+
     <!--<q-tree
       default-expand-all
       :nodes="tree"
@@ -46,8 +57,12 @@
               <q-item-tile sublabel>{{ $ui.dateToString(item.device.modifiedDate()) }}</q-item-tile>
               <q-item-tile sublabel>{{ item.device.type() }}</q-item-tile>
             </q-item-main>
-            <q-item-side right icon="delete" color="negative" @click.native.stop="onRemoveClick(item.device)"/>
-            <q-item-side right icon="settings" @click.native.stop="settingsClick(item.device)"/>
+            <q-item-side right>
+              <q-btn icon="delete" round flat dense color="negative" @click.stop="onRemoveClick(item.device)"/>
+            </q-item-side>
+            <q-item-side right>
+              <q-btn icon="settings" round flat dense @click.stop="settingsClick(item.device)"/>
+            </q-item-side>
           </q-item>
 
       </q-list>
@@ -67,7 +82,14 @@ export default {
   name: 'PageDevices',
 
   data () {
-    return {}
+
+    var types = this.$ething.meta.types.filter(type => {
+      return this.$ething.meta.get(type).inheritances.indexOf('Device') !== -1
+    })
+
+    return {
+      types
+    }
   },
 
   computed: {
@@ -207,6 +229,9 @@ export default {
       })
     },
 
+    create (type) {
+      this.$router.push('/create/'+type)
+    }
 
   }
 }
