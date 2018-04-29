@@ -1,6 +1,8 @@
 <template>
   <q-page padding>
-
+    
+    
+    
     <!--<q-tree
       default-expand-all
       :nodes="tree"
@@ -52,7 +54,7 @@
     </div>
 
     <div v-else class="q-pa-md">
-    No items found.
+    No devices installed.
     </div>
 
   </q-page>

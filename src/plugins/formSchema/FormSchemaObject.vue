@@ -11,15 +11,25 @@ export default {
   render: function (createElement) {
     let children = []
     var self = this
-
-    for (let key in (this.schema.properties || {})) {
+    
+    var requiredProperties = this.schema.required || []
+    var keyOrdered = requiredProperties.concat(Object.keys(this.schema.properties || {}).filter(k => {
+        return requiredProperties.indexOf(k)===-1
+    }))
+    
+    keyOrdered.forEach(key => {
       let schema = this.schema.properties[key]
+      let required = requiredProperties.indexOf(key) !== -1
 
       children.push(
         createElement('q-field', {
           props: {
             label: key,
             orientation: 'vertical'
+          },
+          'class': {
+            formField: true,
+            formFieldRequired: required
           }
         }, [
           makeForm(createElement, schema, this.model[key], this.level, function (newValue) {
@@ -40,7 +50,7 @@ export default {
           })
         ])
       )*/
-    }
+    })
 
     return createElement('div', children)
   },
@@ -56,7 +66,20 @@ export default {
 
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
+
+<style lang="stylus">
+@import '~variables'
+
+verticalMargin = 16px
+
+.formField
+    margin-top verticalMargin
+    margin-bottom verticalMargin
+
+.formFieldRequired
+    & .q-field-label-inner:after
+        content '*'
+        color $negative
+        margin-left 8px
 
 </style>

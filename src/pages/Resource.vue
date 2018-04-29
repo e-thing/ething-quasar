@@ -1,6 +1,8 @@
 <template>
   <q-page padding>
-
+    
+    <div class="q-my-md q-display-1 q-display-1-opacity">{{ resource.basename() }}</div>
+    
     <resource-editor :resource="resource" @done="onDone" @canceled="onCancel"/>
 
   </q-page>

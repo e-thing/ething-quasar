@@ -4,6 +4,26 @@
     <q-breadcrumbs class="q-pa-md">
       <q-breadcrumbs-el v-for="(item, index) in pathItems" :key="index" :label="item.label" :icon="item.icon" :to="item.link" />
     </q-breadcrumbs>
+    
+
+    <q-btn-dropdown color="primary" label="Create">
+      <q-list link>
+        <q-item v-close-overlay @click.native="create('File')">
+          <q-item-side :icon="$ething.meta.get('File').icon" inverted :color="$ething.meta.get('File').color" />
+          <q-item-main>
+            <q-item-tile label>File</q-item-tile>
+          </q-item-main>
+        </q-item>
+        <q-item v-close-overlay @click.native="create('Table')">
+          <q-item-side :icon="$ething.meta.get('Table').icon" inverted :color="$ething.meta.get('Table').color" />
+          <q-item-main>
+            <q-item-tile label>Table</q-item-tile>
+          </q-item-main>
+        </q-item>
+      </q-list>
+    </q-btn-dropdown>
+    
+    
 
     <div v-if="resources.length">
       <q-list link no-border>
@@ -56,7 +76,25 @@
     <div v-else class="q-pa-md">
       No items found.
     </div>
-
+    
+    <q-page-sticky position="bottom-right" :offset="[18, 18]">
+        <q-fab
+            color="primary"
+            icon="add"
+            direction="up"
+        >
+            <q-fab-action
+                :color="$ething.meta.get('File').color"
+                @click="create('File')"
+                :icon="$ething.meta.get('File').icon"
+            />
+            <q-fab-action
+                :color="$ething.meta.get('Table').color"
+                @click="create('Table')"
+                :icon="$ething.meta.get('Table').icon"
+            />
+        </q-fab>
+    </q-page-sticky>
 
   </q-page>
 </template>
@@ -139,6 +177,10 @@ export default {
           this.$q.notify(name + ' removed !')
         })
       })
+    },
+    
+    create (type) {
+        
     },
   }
 }

@@ -37,7 +37,8 @@ export default {
       enum: [false, 'readonly', 'readwrite']
     },
     data: {
-      type: 'object'
+      type: 'object',
+      readOnly: true
     }
   }
 }

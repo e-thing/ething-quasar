@@ -1,6 +1,7 @@
 <template>
   <div class="form-schema-string">
     <!--<input type="text" v-bind:value="model" v-on:input="value = $event.target.value"/>-->
+    <small class="form-schema-description text-faded">{{ schema.description }}</small>
     <q-input :type="schema.format === 'text' ? 'textarea' : 'text'" v-bind:value="model" v-on:input="value = $event"/>
   </div>
 </template>
