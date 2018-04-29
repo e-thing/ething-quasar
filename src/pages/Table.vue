@@ -2,7 +2,6 @@
   <q-page>
 
     <q-table
-      :title="title"
       :data="serverData"
       :columns="columns"
       row-key="id"
@@ -127,7 +126,7 @@ export default {
 
   watch: {
     resource: function (r, old) {
-      if (r) {
+      if (r && r.contentModifiedDate() > this.contentModifiedDate) {
         this.reloadData()
       }
     },
@@ -154,6 +153,8 @@ export default {
 
       // we set QTable to "loading" state
       this.loading = true
+
+      this.contentModifiedDate = this.resource.contentModifiedDate()
 
       // we do the server data fetch, based on pagination and filter received
       this.resource.select({

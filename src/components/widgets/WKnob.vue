@@ -5,6 +5,7 @@
       :min="min"
       :max="max"
       readonly
+      color="primary"
     >
       {{value}} <span class="unit">{{unit}}</span>
     </q-knob>

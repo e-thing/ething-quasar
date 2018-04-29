@@ -15,7 +15,7 @@
         <q-alert
             v-if="operation.error"
             type="negative"
-            class="q-mb-xl"
+            class="q-my-md"
         >
           {{ String(operation.error) }}
         </q-alert>
