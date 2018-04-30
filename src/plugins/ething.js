@@ -2,6 +2,12 @@ import EThing from 'ething-js'
 import resourcesMetaData from '../resources'
 // import { Cookies } from 'quasar'
 
+console.log('EThing node=', EThing.utils.isNode);
+
+if (EThing.utils.isNode) {
+  EThing.utils.XMLHttpRequest = XMLHttpRequest
+}
+
 export default ({ app, router, Vue, store }) => {
   Vue.prototype.$ething = EThing
 
@@ -17,22 +23,32 @@ export default ({ app, router, Vue, store }) => {
 
   router.beforeEach((to, from, next) => {
 
+    app.data.error = false
+
+    // console.log('beforeEach', to, init);
+
     if (!init && to.name !== 'login') {
+
+      init = '...'
 
       /*var csrf_token = Cookies.get('Csrf-token')
 
       if (csrf_token) {*/
 
-        init = true
+        console.log('init...');
 
         // on unauthenticated request, start the auth process
       	EThing.ajaxError(function (err,xhr,opt) {
-      		//console.log(err,xhr,opt);
+      		// console.log('ajaxError', err,xhr,opt);
+
       		if(opt.url && /\/devices\/[^\/]+\/call/.test(opt.url))
             return
 
       		if(xhr.status == 401 || xhr.status == 403){
             init = false
+            app.data.loading = false
+            app.data.error = 'unauthenticated'
+            
             router.app.$router.push({
               name: 'login',
               query: {
@@ -54,7 +70,6 @@ export default ({ app, router, Vue, store }) => {
       		return xhrOrUrl
       	})
 
-
         var metaDfr = EThing.request({
           url: 'utils/definitions',
           dataType: 'json',
@@ -63,7 +78,7 @@ export default ({ app, router, Vue, store }) => {
           importDefinitions(def)
         })
 
-        var arboDfr = EThing.arbo.load().done( () => {
+        var arboDfr = EThing.arbo.load(null, true).done( () => {
           console.log('ething arbo loaded !')
           store.commit('ething/update')
         })
@@ -71,11 +86,13 @@ export default ({ app, router, Vue, store }) => {
         EThing.utils.Deferred.when(arboDfr, metaDfr).done( () => {
           console.log('ething loaded !')
           app.data.loading = false
+          init = true
 
           SSE.start()
 
         }).fail( args => {
           app.data.error = args[0]
+          init = false
         })
 
       /*} else {

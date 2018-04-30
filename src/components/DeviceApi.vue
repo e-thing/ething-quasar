@@ -150,11 +150,11 @@ export default {
     		}
     		else {
     			// get the content as Blob
-          this.device.execute(operation.name, operation.model, true).done( blobData => {
+          this.device.execute(operation.name, operation.model, true).done( (blobData, xhr) => {
 
             operation.loading = false
 
-            var contentType = blobData.type;
+            var contentType = blobData.type || xhr.getResponseHeader("Content-Type")
 
             if (!blobData || blobData.size == 0) {
     					operation.result = null
@@ -167,7 +167,6 @@ export default {
     						try {
     							operation.result = JSON.stringify(JSON.parse(data), null, '  '); // make it beautiful
                   operation.resultType = 'json'
-                  console.log(operation.result)
     						} catch (_error) {
                   operation.error = 'can\'t parse JSON.  Raw result:\n\n' + data
     						}
