@@ -286,6 +286,11 @@ function merge (a, b) {
 }
 
 function parseDefinition (schema, meta) {
+
+  if (schema['virtual'] === true) {
+    meta.virtual = true
+  }
+
   if (typeof schema['allOf'] != 'undefined') {
     schema['allOf'].forEach( (subSchema) => {
       parseDefinition(subSchema, meta)
@@ -326,7 +331,7 @@ function parseDefinition (schema, meta) {
           meta.required = []
 
         meta.required = required.concat(meta.required)
-        
+
         if(!meta.properties)
           meta.properties = {}
 

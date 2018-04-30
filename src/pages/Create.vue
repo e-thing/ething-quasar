@@ -1,7 +1,14 @@
 <template>
   <q-page padding>
 
-    <div class="q-my-md q-display-1 q-display-1-opacity">{{ type }}</div>
+    <div class="q-my-md q-display-1 q-display-1-opacity">{{ $ething.meta.get(type).label || type }}</div>
+
+    <q-breadcrumbs class="q-pb-md" v-if="pathItems.length>1">
+      <q-breadcrumbs-el v-for="(item, index) in pathItems" :key="index" :label="item" />
+    </q-breadcrumbs>
+
+    <div class="q-my-md q-title q-title-opacity" v-if="pathItems.length==1">{{ pathItems[0] }}</div>
+
 
     <resource-editor :resource="type" @done="onDone" @canceled="onCancel"/>
 
@@ -22,6 +29,10 @@ export default {
   computed: {
     type () {
       return this.$route.params.type
+    },
+
+    pathItems () {
+      return (this.$ething.meta.get(this.type).path || [])
     }
   },
 
@@ -32,7 +43,8 @@ export default {
 
     onCancel () {
       this.$router.go(-1)
-    }
+    },
+
   },
 
   mounted () {

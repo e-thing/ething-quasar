@@ -1,6 +1,6 @@
 export default {
 
-  path: ['MiHome'],
+  path: ['Zigate'],
 
   label: 'Temperature sensor',
 

@@ -14,7 +14,7 @@ var makeForm = function (createElement, schema, model, level, onValueUpdate) {
 
   // console.log(type)
   // console.log(model)
-  
+
   if (Array.isArray(schema.enum)) {
     return createElement('form-schema-enum', attributes)
   }
@@ -24,11 +24,14 @@ var makeForm = function (createElement, schema, model, level, onValueUpdate) {
       return createElement('form-schema-object', attributes)
     case 'string':
       var format = schema.format
-      
+
       if (format === 'date-time') {
         return createElement('form-schema-date', attributes)
       }
-      
+      else if (format === 'color') {
+        return createElement('form-schema-color', attributes)
+      }
+
       return createElement('form-schema-string', attributes)
     case 'number':
     case 'integer':

@@ -49,6 +49,10 @@ export default [
         component: () => import('pages/Dashboard')
       },
       {
+        path: 'settings',
+        component: () => import('pages/Settings')
+      },
+      {
         path: 'test',
         component: () => import('pages/Test')
       }

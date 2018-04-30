@@ -9,6 +9,7 @@ import FormSchemaNumber from './FormSchemaNumber.vue'
 import FormSchemaBoolean from './FormSchemaBoolean.vue'
 import FormSchemaEnum from './FormSchemaEnum.vue'
 import FormSchemaDate from './FormSchemaDate.vue'
+import FormSchemaColor from './FormSchemaColor.vue'
 
 // leave the export, even if you don't use it
 export default ({ app, router, Vue }) => {
@@ -22,5 +23,6 @@ export default ({ app, router, Vue }) => {
   Vue.component('FormSchemaBoolean', FormSchemaBoolean)
   Vue.component('FormSchemaEnum', FormSchemaEnum)
   Vue.component('FormSchemaDate', FormSchemaDate)
+  Vue.component('FormSchemaColor', FormSchemaColor)
 
 }

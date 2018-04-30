@@ -1,7 +1,7 @@
 export default {
 
   path: ['MiHome'],
-
-  label: 'Temperature sensor',
+  
+  label: 'MiHome Gateway',
 
 }

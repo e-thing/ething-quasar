@@ -2,14 +2,17 @@
   <q-page padding>
 
     <div class="row justify-end">
-      <q-btn-dropdown color="primary" label="Create" flat >
+      <q-btn-dropdown color="primary" label="Create" icon="add" flat >
         <q-list link>
-          <q-item v-close-overlay v-for="type in types" :key="type" @click.native="create(type)">
-            <q-item-side :icon="$ething.meta.get(type).icon" :color="$ething.meta.get(type).color" />
-            <q-item-main>
-              <q-item-tile label>{{ type }}</q-item-tile>
-            </q-item-main>
-          </q-item>
+          <template v-for="cat in categories">
+            <q-list-header inset>{{ cat.name }}</q-list-header>
+            <q-item v-close-overlay v-for="type in cat.types" :key="type.type" @click.native="create(type.type)">
+              <q-item-side :icon="$ething.meta.get(type.type).icon" :color="$ething.meta.get(type.type).color" />
+              <q-item-main>
+                <q-item-tile label>{{ type.label }}</q-item-tile>
+              </q-item-main>
+            </q-item>
+          </template>
         </q-list>
       </q-btn-dropdown>
     </div>
@@ -83,12 +86,46 @@ export default {
 
   data () {
 
-    var types = this.$ething.meta.types.filter(type => {
-      return this.$ething.meta.get(type).inheritances.indexOf('Device') !== -1
+    var categories = {}
+
+    this.$ething.meta.types.forEach(type => {
+      var meta = this.$ething.meta.get(type)
+      if (meta.inheritances.indexOf('Device') !== -1 && !meta.virtual) {
+
+        var path = meta.path || []
+        var label = meta.label || type
+        var category = path.length>0 ? path[0] : 'other'
+
+        if (!categories[category]) {
+          categories[category] = {
+            types: []
+          }
+        }
+
+        categories[category].types.push({
+          label,
+          type
+        })
+      }
     })
 
+    var other = categories['other']
+    var orderedCategories = []
+
+    delete categories['other']
+
+    for(var category in categories){
+      orderedCategories.push(Object.assign({
+        name: category
+      }, categories[category]))
+    }
+
+    orderedCategories.push(Object.assign({
+      name: 'other'
+    }, other))
+
     return {
-      types
+      categories: orderedCategories
     }
   },
 
