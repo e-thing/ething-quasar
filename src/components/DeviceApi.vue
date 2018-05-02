@@ -24,7 +24,6 @@
           <img v-if="operation.resultType === 'image'" :src="operation.result" @load="operation.loading = false" />
           <audio v-else-if="operation.resultType === 'audio'" controls :src="operation.result" :type="operation.resultContentType" />
           <video v-else-if="operation.resultType === 'video'" controls autoplay :src="operation.result" :type="operation.resultContentType" />
-          <video v-else-if="operation.resultType === 'video'" controls autoplay :src="operation.result" :type="operation.resultContentType" />
           <object v-else-if="operation.resultType === 'videoflash'" width="425" height="300" class="videoplayer" data="http://releases.flowplayer.org/swf/flowplayer-3.2.18.swf" type="application/x-shockwave-flash">
             <param name="movie" value="http://releases.flowplayer.org/swf/flowplayer-3.2.18.swf" />
             <param name="allowfullscreen" value="true" />
@@ -96,7 +95,7 @@ export default {
     methods: {
 
       getApi () {
-        this.device.getApi().done( (api) => {
+        this.device.getApi().then( (api) => {
           this.operations = api.methods.map( m => {
             return Object.assign({
               error: false,
@@ -150,11 +149,11 @@ export default {
     		}
     		else {
     			// get the content as Blob
-          this.device.execute(operation.name, operation.model, true).done( (blobData, xhr) => {
+          this.device.execute(operation.name, operation.model, 'blob').then( (blobData) => {
 
             operation.loading = false
 
-            var contentType = blobData.type || xhr.getResponseHeader("Content-Type")
+            var contentType = blobData.type
 
             if (!blobData || blobData.size == 0) {
     					operation.result = null
@@ -223,9 +222,9 @@ export default {
             operation.error = 'Unable to render the response'
           }
 
-          }).fail( err => {
+          }).catch( err => {
             operation.error = err
-          }).always( () => {
+          }).finally( () => {
             operation.loading = false
           })
 
@@ -256,6 +255,9 @@ export default {
 <style lang="stylus" scoped>
   .result
     img
+      width auto
+      max-width 100%
+    video, object
       width auto
       max-width 100%
 </style>

@@ -45,7 +45,7 @@ export default {
         this.$ething.request({
           url: 'utils/read_log?line='+this.length,
           dataType: 'json',
-        }).done(logs => {
+        }).then(logs => {
 
           this.logs = logs.map((line) => {
             // parsing
@@ -67,7 +67,7 @@ export default {
           }).filter(log => {
             return !!log
           }).reverse()
-        }).always(() => {
+        }).finally(() => {
           this.loading = false
         })
       },
@@ -88,18 +88,18 @@ export default {
   &:hover
     background-color $grey-2
 
-  .debug
+  &.debug
     color $tertiary
 
-  .info
+  &.info
     color $info
 
-  .warning
+  &.warning
     color $warning
 
-  .error
+  &.error
     color $negative
 
-  .fatal
+  &.fatal
     color $negative
 </style>

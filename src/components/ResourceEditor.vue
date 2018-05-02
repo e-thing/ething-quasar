@@ -62,11 +62,11 @@ export default {
             res = this.resource.set(Object.assign(def, this.model))
           }
 
-          res.done((r) => {
+          res.then((r) => {
               this.$emit('done', r)
-          }).fail((err) => {
+          }).catch((err) => {
               this.error = err
-          }).always(() => {
+          }).finally(() => {
               this.loading = false
           })
         },

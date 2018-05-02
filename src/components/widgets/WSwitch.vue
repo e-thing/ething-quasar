@@ -28,7 +28,7 @@ export default {
     methods: {
       update () {
         console.log('WSwitch update...')
-        this.r.getState().done(v => {
+        this.r.getState().then(v => {
           this.state = v
         })
       }

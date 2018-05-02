@@ -161,7 +161,7 @@ export default {
         sort: (pagination.descending ? '-' : '+') + pagination.sortBy,
         start: (pagination.page - 1) * pagination.rowsPerPage,
         length: pagination.rowsPerPage
-      }).done(data => {
+      }).then(data => {
         // updating pagination to reflect in the UI
         this.serverPagination = pagination
 
@@ -170,9 +170,9 @@ export default {
 
         // finally we tell QTable to exit the "loading" state
         this.loading = false
-      }).fail(err => {
+      }).catch(err => {
         // there's an error... do SOMETHING
-      }).always( () => {
+      }).finally( () => {
         this.loading = false
       })
 

@@ -26,7 +26,7 @@ export default {
     methods: {
       update () {
         console.log('WThermometer update...')
-        this.r.getTemperature().done(v => {
+        this.r.getTemperature().then(v => {
           this.value = v
         })
       }

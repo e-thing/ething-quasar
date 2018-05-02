@@ -136,7 +136,7 @@ export default {
           // create the file if not found !
           this.$ething.File.create({
   					name: LAYOUT_FILENAME
-  				}).done( (file) => {
+  				}).then( (file) => {
   					callback(file)
   				})
         } else {
@@ -152,7 +152,7 @@ export default {
       var file = this.file()
 
       if (file) {
-        file.read().done( (config) => {
+        file.read().then( (config) => {
           if(typeof config == 'string')
 						try{
 							config = JSON.parse(config);

@@ -2,11 +2,6 @@ import EThing from 'ething-js'
 import resourcesMetaData from '../resources'
 // import { Cookies } from 'quasar'
 
-console.log('EThing node=', EThing.utils.isNode);
-
-if (EThing.utils.isNode) {
-  EThing.utils.XMLHttpRequest = XMLHttpRequest
-}
 
 export default ({ app, router, Vue, store }) => {
   Vue.prototype.$ething = EThing
@@ -18,6 +13,30 @@ export default ({ app, router, Vue, store }) => {
   console.log('ething configuring ...')
   EThing.config.serverUrl = 'http://lebios.no-ip.org'
   // EThing.auth.setBasicAuth('ething', 'admin');
+
+  EThing.axios.defaults.withCredentials = true
+
+  // on unauthenticated request, start the auth process
+  EThing.axios.interceptors.response.use(function (response) {
+    return response;
+  }, function (error) {
+    var status = error.response.status
+
+    if(status == 401 || status == 403){
+      init = false
+      app.data.loading = false
+      app.data.error = 'unauthenticated'
+
+      router.app.$router.push({
+        name: 'login',
+        query: {
+          redirect_uri: router.app.$router.currentRoute.path
+        }
+      })
+    }
+
+    return Promise.reject(error);
+  });
 
   var init = false
 
@@ -37,61 +56,28 @@ export default ({ app, router, Vue, store }) => {
 
         console.log('init...');
 
-        // on unauthenticated request, start the auth process
-      	EThing.ajaxError(function (err,xhr,opt) {
-      		// console.log('ajaxError', err,xhr,opt);
-
-      		if(opt.url && /\/devices\/[^\/]+\/call/.test(opt.url))
-            return
-
-      		if(xhr.status == 401 || xhr.status == 403){
-            init = false
-            app.data.loading = false
-            app.data.error = 'unauthenticated'
-            
-            router.app.$router.push({
-              name: 'login',
-              query: {
-                redirect_uri: router.app.$router.currentRoute.path
-              }
-            })
-      		}
-      	})
-
-        EThing.apiRequestPrefilter(function(xhrOrUrl){
-      		if(typeof xhrOrUrl == 'string'){
-      			// insert query param
-      			/*xhrOrUrl += xhrOrUrl.indexOf('?') !== -1 ? '&' : '?';
-      			xhrOrUrl += 'csrf_token='+encodeURIComponent(csrf_token)*/
-      		} else {
-            xhrOrUrl.withCredentials = true
-      			//xhrOrUrl.setRequestHeader('X-Csrf-Token',csrf_token)
-          }
-      		return xhrOrUrl
-      	})
-
         var metaDfr = EThing.request({
           url: 'utils/definitions',
           dataType: 'json',
-        }).done( (def) => {
+        }).then( (def) => {
           console.log('ething meta loaded !')
           importDefinitions(def)
         })
 
-        var arboDfr = EThing.arbo.load(null, true).done( () => {
+        var arboDfr = EThing.arbo.load(null, true).then( () => {
           console.log('ething arbo loaded !')
           store.commit('ething/update')
         })
 
-        EThing.utils.Deferred.when(arboDfr, metaDfr).done( () => {
+        Promise.all([arboDfr, metaDfr]).then( () => {
           console.log('ething loaded !')
           app.data.loading = false
           init = true
 
           SSE.start()
 
-        }).fail( args => {
-          app.data.error = args[0]
+        }).catch( err => {
+          app.data.error = err
           init = false
         })
 

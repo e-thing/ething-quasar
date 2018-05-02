@@ -175,11 +175,11 @@ DataSource.prototype.add = function (source, done) {
           r.select({
             datefmt: 'timestamp_ms',
             fields: ['date'].concat(this.keys),
-          }).done( data => {
+          }).then( data => {
             this.done.forEach( cb => {
                 cb(data)
             })
-          }).always( () => {
+          }).finally( () => {
             end()
           })
         }
@@ -498,7 +498,7 @@ export default {
           this.$ething.File.create({
             name: this.filename,
             content: btoa(content)
-          }).done( (f) => {
+          }).then( (f) => {
             this.file = f
           })
         }
@@ -526,7 +526,7 @@ export default {
 
   mounted () {
     if (this.file) {
-      this.file.read().done(data => {
+      this.file.read().then(data => {
         try{
           var preferences = JSON.parse(data);
           this.optionsData = preferences

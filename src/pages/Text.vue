@@ -107,14 +107,14 @@ export default {
 
     reloadContent () {
       this.loading = true
-      this.resource.read().done( (data) => {
+      this.resource.read().then( (data) => {
         this.setLangage(this.resource.mime())
         this.content = data
         this.$nextTick(() => {
           this.markClean()
           this.codemirror().clearHistory()
         })
-      }).always( () => {
+      }).finally( () => {
         this.loading = false
       })
     },
@@ -141,10 +141,10 @@ export default {
 
     save () {
       this.saveLoading = true
-      this.resource.write(this.content).done(() => {
+      this.resource.write(this.content).then(() => {
         this.dirty = false
         this.markClean()
-      }).always( () => {
+      }).finally( () => {
         this.saveLoading = false
       })
     },

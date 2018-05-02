@@ -167,20 +167,29 @@ export default {
 
     onRemoveClick (resource) {
       var name = resource.name()
+
+      var children = this.$ething.arbo.find(r => {
+        return r.createdBy() === resource.id()
+      })
+
+      var items = []
+
+      if (children.length) {
+        items.push({label: 'Remove also the children resources', value: 'removeChildren', color: 'secondary'})
+      }
+
       this.$q.dialog({
         title: 'Remove',
         message: 'Do you really want to remove definitely the ' + resource.type() + ' "' + resource.name() + '" ?',
         options: {
           type: 'checkbox',
           model: [],
-          items: [
-            {label: 'Remove also the children resources', value: 'removeChildren', color: 'secondary'},
-          ]
+          items
         },
         ok: 'Remove',
         cancel: 'Cancel'
       }).then((data) => {
-        resource.remove(data.indexOf('removeChildren') !== -1).done( () => {
+        resource.remove(data.indexOf('removeChildren') !== -1).then( () => {
           this.$q.notify(name + ' removed !')
         })
       })

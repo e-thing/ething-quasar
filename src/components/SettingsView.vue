@@ -162,7 +162,7 @@ export default {
       load () {
         this.loading = true
 
-        this.$ething.settings.get().done((settings) => {
+        this.$ething.settings.get().then((settings) => {
           console.log(settings)
 
           if (!settings.notification.smtp) {
@@ -181,9 +181,9 @@ export default {
 
         this.saving = true
 
-        this.$ething.settings.set(this.settings).fail(err => {
+        this.$ething.settings.set(this.settings).catch(err => {
           this.error = err
-        }).always(() => {
+        }).finally(() => {
           this.saving = false
         })
 
