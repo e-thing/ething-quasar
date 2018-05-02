@@ -1,4 +1,18 @@
 
+var _registeredForms = []
+
+var registerForm = function (generator) {
+  if (typeof generator === 'function') {
+    _registeredForms.push(generator)
+  }
+}
+
+var unregisterForm = function (generator) {
+  const index = _registeredForms.indexOf(generator)
+  if (index !== -1)
+    _registeredForms.splice(index, 1)
+}
+
 var makeForm = function (createElement, schema, model, level, onValueUpdate) {
   var type = schema.type
   var attributes = {
@@ -14,6 +28,13 @@ var makeForm = function (createElement, schema, model, level, onValueUpdate) {
 
   // console.log(type)
   // console.log(model)
+
+  for (let i in _registeredForms) {
+    let element = _registeredForms[i](schema)
+    if (element) {
+      return createElement(element, attributes)
+    }
+  }
 
   if (Array.isArray(schema.enum)) {
     return createElement('form-schema-enum', attributes)
