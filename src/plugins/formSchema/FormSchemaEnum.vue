@@ -16,10 +16,6 @@ export default {
 
   mixins: [FormComponent],
 
-  props: {
-    model: {} // can be anything
-  },
-  
   computed: {
     selectOptions () {
       return (this.schema.enum || []).map( (v) => {
@@ -30,7 +26,7 @@ export default {
       })
     }
   }
-  
+
 }
 
 </script>

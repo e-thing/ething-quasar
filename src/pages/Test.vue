@@ -17,13 +17,17 @@ export default {
         type: 'object',
         properties: {
           host: {
-            type: 'string'
+            description: 'une description',
+            type: 'string',
+            pattern: '^toto'
           },
           isOk: {
             type: 'boolean'
           },
           count: {
-            type: 'number'
+            type: 'number',
+            default: 42,
+            minimum: 40
           },
           color: {
             type: 'string',
@@ -39,6 +43,7 @@ export default {
           },
           object: {
             type: 'object',
+            required: ['host'],
             properties: {
               host: {
                 type: 'string'

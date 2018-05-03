@@ -25,25 +25,19 @@ import 'codemirror/addon/fold/brace-fold.js'
 
 import 'codemirror/addon/lint/lint.js'
 import 'codemirror/addon/lint/lint.css'
-window.jsonlint = require("jsonlint-mod")
-// import 'codemirror/addon/lint/json-lint.js'
+
+import jsonlint from 'jsonlint-mod'
 
 CodeMirror.registerHelper("lint", "json", function(text) {
   var found = [];
-  if (!window.jsonlint) {
-    if (window.console) {
-      window.console.error("Error: window.jsonlint not defined, CodeMirror JSON linting cannot run.");
-    }
-    return found;
-  }
-  var jsonlint = window.jsonlint.parser;
-  jsonlint.parseError = function(str, hash) {
+  var _jsonlint = jsonlint.parser;
+  _jsonlint.parseError = function(str, hash) {
     var loc = hash.loc;
     found.push({from: CodeMirror.Pos(loc.first_line - 1, loc.first_column),
                 to: CodeMirror.Pos(loc.last_line - 1, loc.last_column),
                 message: str});
   };
-  try { jsonlint.parse(text); }
+  try { _jsonlint.parse(text); }
   catch(e) {}
   return found;
 });

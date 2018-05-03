@@ -38,9 +38,14 @@ export default {
 </script>
 
 <style lang="stylus">
+@import '~variables'
 
 .form-schema-description
     margin-bottom 8px
     display inline-block
+    color $faded
+
+.form-schema-error
+  color $negative
 
 </style>

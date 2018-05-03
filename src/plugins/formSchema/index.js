@@ -25,4 +25,6 @@ export default ({ app, router, Vue }) => {
   Vue.component('FormSchemaColor', FormSchemaColor)
   Vue.component('FormSchemaJson', FormSchemaJson)
 
+  Vue.config.optionMergeStrategies.validations = Vue.config.optionMergeStrategies.data
+
 }

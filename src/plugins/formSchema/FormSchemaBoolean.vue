@@ -14,10 +14,7 @@ export default {
   mixins: [FormComponent],
 
   props: {
-    model: {
-      type: Boolean,
-      default: false
-    }
+    model: Boolean
   }
 
 }

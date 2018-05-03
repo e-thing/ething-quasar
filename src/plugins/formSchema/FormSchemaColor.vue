@@ -14,10 +14,7 @@ export default {
   mixins: [FormComponent],
 
   props: {
-    model: {
-      type: String,
-      default: '#FFFFFF'
-    }
+    model: String
   },
 }
 

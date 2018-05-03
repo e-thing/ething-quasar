@@ -13,9 +13,6 @@ export default {
 
   mixins: [FormComponent],
 
-  props: {
-    model: {}
-  },
 }
 
 </script>
