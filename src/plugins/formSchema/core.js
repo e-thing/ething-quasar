@@ -52,6 +52,9 @@ var makeForm = function (createElement, schema, model, level, onValueUpdate) {
       else if (format === 'color') {
         return createElement('form-schema-color', attributes)
       }
+      else if (format === 'json') {
+        return createElement('form-schema-json', attributes)
+      }
 
       return createElement('form-schema-string', attributes)
     case 'number':

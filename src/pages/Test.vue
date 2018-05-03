@@ -1,50 +1,6 @@
 <template>
   <q-page padding>
-    <q-field
-      label="Your Gmail"
-      helper="Helper"
-    >
-      <q-input suffix="@gmail.com" value=""/>
-    </q-field>
 
-    <p>----</p>
-
-    <q-input suffix="@gmail.com" value="" />
-
-    <p>----</p>
-
-    <q-field
-      label="Your Gmail"
-      helper="Helper"
-      orientation="vertical"
-    >
-      <q-input suffix="@gmail.com" value=""/>
-    </q-field>
-
-    <p>----</p>
-
-    <q-field
-      label="Your Gmail"
-      orientation="vertical"
-    >
-      <q-field
-        label="G1"
-        helper="Helper"
-        orientation="vertical"
-      >
-        <q-input suffix="@gmail.com" value="" />
-      </q-field>
-      <q-field
-        label="G2"
-        helper="Helper"
-        orientation="vertical"
-      >
-        <p>description : sddf dfgdfg errtef fg dfg sdf sdffdsf sdf dsf dfdf</p>
-        <q-input suffix="@gmail.com" value="" />
-      </q-field>
-    </q-field>
-
-    <p>----</p>
 
     <form-schema :schema="schema" :model.sync="model" />
 
@@ -69,6 +25,18 @@ export default {
           count: {
             type: 'number'
           },
+          color: {
+            type: 'string',
+            format: 'color'
+          },
+          date: {
+            type: 'string',
+            format: 'date-time'
+          },
+          json: {
+            type: 'string',
+            format: 'json'
+          },
           object: {
             type: 'object',
             properties: {
@@ -90,7 +58,8 @@ export default {
       },
       model: {
         host: 'toto',
-        isOk: false
+        isOk: false,
+        json: '{}'
       }
     }
   }

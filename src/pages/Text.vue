@@ -29,6 +29,7 @@ import 'codemirror/mode/yaml/yaml.js'
 import 'codemirror/mode/python/python.js'
 
 import 'codemirror/addon/edit/matchbrackets.js'
+import 'codemirror/addon/edit/closebrackets.js'
 import 'codemirror/addon/comment/continuecomment.js'
 import 'codemirror/addon/comment/comment.js'
 
@@ -50,8 +51,8 @@ export default {
         lineWrapping: false,
         foldGutter: true,
         styleSelectedText: true,
-        mode: 'text/plain',
         matchBrackets: true,
+        autoCloseBrackets: true,
         showCursorWhenSelecting: true,
         extraKeys: {
           "Ctrl": "autocomplete",
