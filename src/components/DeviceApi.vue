@@ -6,10 +6,10 @@
 
         <vue-markdown v-if="operation.description" class="q-my-md">{{ operation.description }}</vue-markdown>
 
-        <form-schema v-if="hasParameters(operation)" :schema="operation.schema" :model.sync="operation.model" class="q-my-md"/>
+        <form-schema v-if="hasParameters(operation)" :schema="operation.schema" v-model="operation.model" @error="operation.inputError = $event" class="q-my-md"/>
 
         <div>
-            <q-btn :loading="operation.loading" color="primary" icon="done" label="execute" @click="execute(operation)"/>
+            <q-btn :loading="operation.loading" :disable="operation.inputError" color="primary" icon="done" label="execute" @click="execute(operation)"/>
         </div>
 
         <q-alert
@@ -98,6 +98,7 @@ export default {
         this.device.getApi().then( (api) => {
           this.operations = api.methods.map( m => {
             return Object.assign({
+              inputError: false,
               error: false,
               loading: false,
               result: null,

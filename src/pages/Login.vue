@@ -54,10 +54,12 @@ export default {
     }
   },
 
-  validations: {
-    form: {
-      login: { required },
-      password: { required  }
+  validations () {
+    return {
+      form: {
+        login: { required },
+        password: { required  }
+      }
     }
   },
 

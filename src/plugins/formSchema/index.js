@@ -1,5 +1,5 @@
 /*
-<form-schema :schema="schema" v-bind:model.sync="model"/>
+<form-schema :schema="schema" v-model="model" @error="error = $event"/>
 */
 
 import FormSchema from './FormSchema.vue'
@@ -11,6 +11,7 @@ import FormSchemaEnum from './FormSchemaEnum.vue'
 import FormSchemaDate from './FormSchemaDate.vue'
 import FormSchemaColor from './FormSchemaColor.vue'
 import FormSchemaJson from './FormSchemaJson.vue'
+import FormSchemaOptional from './FormSchemaOptional.vue'
 
 // leave the export, even if you don't use it
 export default ({ app, router, Vue }) => {
@@ -24,6 +25,7 @@ export default ({ app, router, Vue }) => {
   Vue.component('FormSchemaDate', FormSchemaDate)
   Vue.component('FormSchemaColor', FormSchemaColor)
   Vue.component('FormSchemaJson', FormSchemaJson)
+  Vue.component('FormSchemaOptional', FormSchemaOptional)
 
   Vue.config.optionMergeStrategies.validations = Vue.config.optionMergeStrategies.data
 

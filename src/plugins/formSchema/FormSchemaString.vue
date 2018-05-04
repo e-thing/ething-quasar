@@ -5,7 +5,7 @@
     <q-input
       :type="schema.format === 'text' ? 'textarea' : 'text'"
       v-bind:value="model"
-      v-on:input="setValue($event)"
+      v-on:input="setValue"
       :error="$v.value.$error"
     />
     <small class="form-schema-error" v-if="$v.value.$error">{{ errorMessage }}</small>

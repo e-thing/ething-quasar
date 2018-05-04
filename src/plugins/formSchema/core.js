@@ -14,7 +14,7 @@ var unregisterForm = function (generator) {
     _registeredForms.splice(index, 1)
 }
 
-var makeForm = function (createElement, schema, model, level, onValueUpdate, props) {
+var makeForm = function (createElement, schema, model, level, onValueUpdate, onErrorUpdate, props) {
   var type = schema.type
   var attributes = {
     props: {
@@ -24,7 +24,8 @@ var makeForm = function (createElement, schema, model, level, onValueUpdate, pro
       ...props
     },
     on: {
-      'update:model': onValueUpdate
+      'input': onValueUpdate,
+      'error': onErrorUpdate,
     }
   }
 
@@ -69,14 +70,36 @@ var makeForm = function (createElement, schema, model, level, onValueUpdate, pro
     case 'boolean':
     case 'bool':
       return createElement('form-schema-boolean', attributes)
+    case 'json':
+      return createElement('form-schema-json', attributes)
+
+    default:
+
+      if (Array.isArray(schema.anyOf)) {
+        if (schema.anyOf.filter(item => item.type === 'null').length < schema.anyOf.length) {
+          return createElement('form-schema-optional', attributes)
+        }
+      }
+
   }
 }
 
 var FormComponent = {
+  model: {
+    prop: 'model',
+    event: 'input'
+  },
+
   props: {
-    schema: Object,
+    schema: {
+      type: Object,
+      required: true
+    },
     model: {},
-    level: Number,
+    level: {
+      type: Number,
+      default: 0
+    },
     required: Boolean
   },
 
@@ -88,7 +111,8 @@ var FormComponent = {
 
   data: function () {
     return {
-      value: this.model
+      value: this.model,
+      error: false
     }
   },
 
@@ -144,7 +168,14 @@ var FormComponent = {
   watch: {
     value: function (val, oldVal) {
       console.log(this.$options.name + ' value ' + oldVal + ' changed to ' + val)
-      this.$emit('update:model', val)
+      this.$emit('input', val)
+    },
+    error: function (val) {
+      console.log(this.$options.name + ' error ' + val)
+      this.$emit('error', val)
+    },
+    '$v.$error' (value) {
+      this.error = value
     }
   },
 
@@ -152,6 +183,9 @@ var FormComponent = {
     setValue (val) {
       this.value = val
       this.$v.value.$touch()
+    },
+    setError (val) {
+      this.error = val
     }
   },
 
@@ -168,5 +202,7 @@ var FormComponent = {
 
 export {
   makeForm,
-  FormComponent
+  FormComponent,
+  registerForm,
+  unregisterForm
 }

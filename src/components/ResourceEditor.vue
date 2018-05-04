@@ -6,7 +6,7 @@
         {{ meta.description }}
     </div>
 
-    <form-schema :schema="schema" :model.sync="model" class="q-mb-xl"/>
+    <form-schema :schema="schema" v-model="model" @error="inputError = $event" class="q-mb-xl"/>
 
     <q-alert
         v-if="error"
@@ -17,9 +17,15 @@
     </q-alert>
 
     <div>
-        <q-btn :loading="loading" color="primary" icon="done" :label="create ? 'create' : 'edit'" @click="handler"/>
+        <q-btn :loading="loading" :disable="inputError" color="primary" icon="done" :label="create ? 'create' : 'edit'" @click="handler"/>
         <q-btn color="negative" icon="clear" label="cancel" flat @click="$emit('canceled')"/>
     </div>
+
+    <q-inner-loading class="text-center" :visible="!ready">
+      <div class="q-pa-lg text-primary">loading...</div>
+      <q-spinner-oval color="primary" size="50px" />
+    </q-inner-loading>
+
   </div>
 </template>
 
@@ -33,16 +39,22 @@ export default {
 
     data () {
 
-        var parse = this.getSchemaModel()
+        var parse = this.getSchemaModel(() => {
+          this.$nextTick(() => {
+            this.ready = true
+          })
+        })
 
         return {
+            inputError: false,
             create: !(this.resource instanceof EThing.Resource),
             type: this.resource instanceof EThing.Resource ? this.resource.type() : this.resource,
             schema: parse.schema,
             model: parse.model,
             meta: parse.meta,
             loading: false,
-            error: null
+            error: null,
+            ready: false
         }
     },
 
@@ -71,7 +83,7 @@ export default {
           })
         },
 
-        getSchemaModel () {
+        getSchemaModel (onReady) {
           var type = this.resource instanceof EThing.Resource ? this.resource.type() : this.resource
           var resource = this.resource instanceof EThing.Resource ? this.resource : null
 
@@ -80,6 +92,14 @@ export default {
           var required = meta.required || []
           var properties = {}
           var model = {}
+          var nPromise = 0
+          var post = () => {
+            nPromise--
+            if (nPromise<=0) {
+              if (typeof onReady === 'function')
+                onReady()
+            }
+          }
           for(let k in meta.properties) {
             if (!meta.properties[k].readOnly) {
                 properties[k] = meta.properties[k]
@@ -88,12 +108,26 @@ export default {
                 }
 
                 if (resource) {
+                    let maybePromise
                     if(typeof meta.properties[k].get === 'function')
-                      model[k] = meta.properties[k].get(resource)
+                      maybePromise = meta.properties[k].get(resource)
                     else
-                      model[k] = resource.attr(k)
+                      maybePromise = resource.attr(k)
+
+                    if (maybePromise instanceof Promise) {
+                      nPromise++
+                      maybePromise.then((val) => {
+                        model[k] = val
+                      }).finally(post)
+                    } else {
+                      model[k] = maybePromise
+                    }
                 }
             }
+          }
+
+          if (!nPromise) {
+            post()
           }
 
           return {

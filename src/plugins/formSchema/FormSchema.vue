@@ -1,37 +1,22 @@
 <script>
 
-import { makeForm } from './core'
+import { makeForm, FormComponent } from './core'
 
 export default {
   name: 'FormSchema',
 
+  mixins: [FormComponent],
+
   render: function (createElement) {
     var self = this
-    return makeForm(createElement, this.schema, this.model, 0, function (newValue) {
+    return makeForm(createElement, this.schema, this.model, this.level, function (newValue) {
       self.value = newValue
+    }, function (newValue) {
+      self.error = newValue
+    }, {
+      required: this.required
     })
   },
-
-  props: {
-    schema: {
-      type: Object,
-      required: true
-    },
-    model: {}
-  },
-
-  data: function () {
-    return {
-      value: this.model
-    }
-  },
-
-  watch: {
-    value: function (val, oldVal) {
-      console.log('FormSchema value changed to ' + val)
-      this.$emit('update:model', val)
-    }
-  }
 
 }
 
@@ -47,5 +32,10 @@ export default {
 
 .form-schema-error
   color $negative
+
+pad-width = 20px
+
+.indent
+  margin-left: pad-width
 
 </style>

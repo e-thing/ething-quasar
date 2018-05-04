@@ -5,6 +5,7 @@ import Table from './Table'
 import Device from './Device'
 
 import Denon from './Denon'
+import Http from './Http'
 import MihomeGateway from './MihomeGateway'
 import MihomeSensorHT from './MihomeSensorHT'
 import MySensorsEthernetGateway from './MySensorsEthernetGateway'
@@ -30,6 +31,7 @@ export default {
   Device,
 
   Denon,
+  Http,
   MihomeGateway,
   MihomeSensorHT,
   MySensorsEthernetGateway,

@@ -2,7 +2,7 @@
   <div class="form-schema-json">
     <!--<input type="text" v-bind:value="model" v-on:input="value = $event.target.value"/>-->
     <small class="form-schema-description text-faded">{{ schema.description }}</small>
-    <codemirror ref='cm' v-bind:value="model" :options="cmOption" v-on:input="value = $event"></codemirror>
+    <codemirror ref='cm' v-bind:value="formattedModel" :options="cmOption" v-on:input="parseJson"></codemirror>
 
   </div>
 </template>
@@ -51,10 +51,10 @@ export default {
     codemirror
   },
 
-  props: {
-    model: {
-      type: String,
-      default: ''
+  computed: {
+
+    formattedModel () {
+      return this.schema.type === 'string' ? this.model : JSON.stringify(this.model, null, 4)
     }
   },
 
@@ -86,7 +86,18 @@ export default {
   },
 
   methods: {
+    parseJson (val) {
 
+      if (this.schema.type !== 'string') {
+        try {
+          val = JSON.parse(val)
+        } catch (e) {
+          val = null
+        }
+      }
+      
+      this.setValue(val)
+    }
   }
 }
 

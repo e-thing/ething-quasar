@@ -1,8 +1,16 @@
 <template>
   <q-page padding>
+    <div class="row">
+      <div class="col-6">
+        <form-schema :schema="schema" v-model="model" @error="error = $event" />
+      </div>
+      <div class="col-6">
+        <pre>{{ model }}</pre>
+        <div v-if="error">error</div>
+        <div v-else>ok</div>
+      </div>
+    </div>
 
-
-    <form-schema :schema="schema" :model.sync="model" />
 
   </q-page>
 </template>
@@ -13,6 +21,7 @@ export default {
 
   data () {
     return {
+      error: false,
       schema: {
         type: 'object',
         properties: {
@@ -37,9 +46,16 @@ export default {
             type: 'string',
             format: 'date-time'
           },
+          optional: {
+            description: 'une description',
+            anyOf: [{
+              type: 'null'
+            },{
+              type: 'string'
+            }]
+          },
           json: {
-            type: 'string',
-            format: 'json'
+            type: 'json',
           },
           object: {
             type: 'object',
@@ -55,7 +71,16 @@ export default {
                 type: 'number'
               },
               object: {
-
+                type: 'object',
+                required: ['host'],
+                properties: {
+                  host: {
+                    type: 'string'
+                  },
+                  isOk: {
+                    type: 'boolean'
+                  },
+                }
               }
             }
           }

@@ -1,3 +1,22 @@
+<template>
+  <div class="form-schema-object" :class="{indent: level}">
+
+    <small class="form-schema-description">{{ schema.description }}</small>
+
+    <q-field
+      v-for="item in items"
+      :key="item.key"
+      :label="item.key"
+      orientation="vertical"
+      class="formField"
+      :class="{formFieldRequired: item.required}"
+    >
+      <form-schema  :required="item.required" :schema="item.schema" :model="item.model" :level="level+1" @input="onChildValueChange(item, $event)" @error="onChildErrorChange(item, $event)"/>
+    </q-field>
+
+
+  </div>
+</template>
 
 <script>
 
@@ -8,6 +27,7 @@ export default {
 
   mixins: [FormComponent],
 
+/*
   render: function (createElement) {
     let children = []
     var self = this
@@ -20,6 +40,7 @@ export default {
     keyOrdered.forEach(key => {
       let schema = this.schema.properties[key]
       let required = requiredProperties.indexOf(key) !== -1
+      let model = (this.model || {})[key]
 
       children.push(
         createElement('q-field', {
@@ -32,42 +53,65 @@ export default {
             formFieldRequired: required
           }
         }, [
-          makeForm(createElement, schema, this.model[key], this.level + 1, function (newValue) {
+          makeForm(createElement, schema, model, this.level + 1, function (newValue) {
             var o = Object.assign({}, self.value)
             o[key] = newValue
             self.value = o
+          }, function (newValue) {
+            self.errors[key] = newValue
+            self.error = Object.values(self.errors).some(err => err)
           }, {
             required
           })
         ])
       )
-
-      /*children.push(
-        createElement('div', [
-          createElement('h2', key),
-          makeForm(createElement, schema, this.model[key], function (newValue) {
-            var o = Object.assign({}, self.value)
-            o[key] = newValue
-            self.value = o
-          })
-        ])
-      )*/
     })
 
     return createElement('div', {
       'class': {
         'form-schema-object': true,
-        ['level-' + this.level]: true
+        'indent': this.level,
       }
     }, children)
-  },
+  },*/
 
-  props: {
-    model: {
-      type: Object,
-      default: function () { return {} }
+  data () {
+    return {
+      errors: {}
     }
   },
+
+  computed: {
+    items () {
+      var requiredProperties = this.schema.required || []
+      var keyOrdered = requiredProperties.concat(Object.keys(this.schema.properties || {}).filter(k => {
+          return requiredProperties.indexOf(k)===-1
+      }))
+
+      return keyOrdered.map(key => {
+        return {
+          key,
+          schema: this.schema.properties[key],
+          required:  requiredProperties.indexOf(key) !== -1,
+          model: (this.model || {})[key]
+        }
+      })
+    }
+  },
+
+  methods: {
+    onChildValueChange (item, val) {
+      var o = Object.assign({}, this.value)
+      o[item.key] = val
+      this.value = o
+    },
+
+    onChildErrorChange (item, val) {
+      this.errors[item.key] = val
+      this.error = Object.values(this.errors).some(err => err)
+    }
+  }
+
 
 }
 
@@ -77,7 +121,6 @@ export default {
 @import '~variables'
 
 verticalMargin = 16px
-pad-width = 20px
 
 .formField
     margin-top verticalMargin
@@ -88,17 +131,5 @@ pad-width = 20px
         content '*'
         color $negative
         margin-left 8px
-
-.form-schema-object
-  &.level-1
-    margin-left: pad-width * 1
-  &.level-2
-    margin-left: pad-width * 2
-  &.level-3
-    margin-left: pad-width * 3
-  &.level-4
-    margin-left: pad-width * 4
-  &.level-5
-    margin-left: pad-width * 5
 
 </style>
