@@ -62,12 +62,12 @@
     </q-layout-drawer>
 
     <q-page-container>
-      <q-inner-loading v-if="$root.loading" visible class="text-center">
-        <div v-if="$root.error">
+      <q-inner-loading v-if="$root.state!=='ok'" visible class="text-center">
+        <div v-if="$root.state==='error'">
           <div class="q-pa-lg text-negative">
             {{ String($root.error) }}
           </div>
-          <q-btn color="negative" icon="refresh" label="Reload" @click="$router.go($router.currentRoute)"/>
+          <q-btn color="negative" icon="refresh" label="Reload" @click="reload"/>
         </div>
         <div v-else>
           <div class="q-pa-lg text-primary">loading...</div>
@@ -80,7 +80,6 @@
 </template>
 
 <script>
-import { openURL } from 'quasar'
 
 export default {
   name: 'LayoutDefault',
@@ -90,19 +89,21 @@ export default {
     }
   },
   methods: {
-    openURL,
     logout () {
-      var xhr = new XMLHttpRequest()
-      var self = this
-      xhr.open("GET", this.$ething.config.serverUrl + '/auth/logout', true);
-      xhr.withCredentials = true
-      xhr.onreadystatechange = function() {
-				if (this.readyState == 4){
-          self.$router.push({name: 'login'})
-        }
-      }
-      xhr.send()
+      this.$root.state = 'begin'
 
+      this.$axios.request({
+        method: 'get',
+        url: this.$ething.config.serverUrl + '/auth/logout',
+        withCredentials: true,
+      }).finally(() => {
+        this.$router.push({name: 'login'})
+      })
+
+    },
+    reload () {
+      this.$root.state = 'begin'
+      this.$router.go(this.$router.currentRoute)
     }
   }
 }

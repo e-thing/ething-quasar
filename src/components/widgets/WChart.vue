@@ -1,5 +1,5 @@
 <template>
-  <chart :preferences="r" expended dense/>
+  <chart :preferences="r" :history="history" expended dense readonly/>
 </template>
 
 <script>
@@ -15,8 +15,28 @@ export default {
 
     mixins: [WResource],
 
-    minWidth: 3,
-    minHeight: 2
+    props: {
+      history: {
+        default: 86400
+      }
+    },
+
+    meta: {
+      minWidth: 250,
+      minHeight: 150,
+      options: {
+        properties: {
+          history: {
+            description: 'the past data to plot',
+            type: 'number',
+            enum: [86400/2, 86400, 86400*2, 86400*7, 'all'],
+            enumLabels: ['12 hours', '1 day', '2 days', '1 week', 'all'],
+            default: 86400
+          }
+        }
+      }
+    }
+
 
 }
 </script>

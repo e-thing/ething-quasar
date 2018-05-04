@@ -15,8 +15,10 @@ export default {
 
     mixins: [WResource],
 
-    minWidth: 3,
-    minHeight: 2
+    meta: {
+      minWidth: 100,
+      minHeight: 60
+    }
 
 }
 </script>

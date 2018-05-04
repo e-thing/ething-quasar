@@ -3,12 +3,11 @@ import resourcesMetaData from '../resources'
 // import { Cookies } from 'quasar'
 import { LocalStorage } from 'quasar'
 
-
 export default ({ app, router, Vue, store }) => {
   Vue.prototype.$ething = EThing
 
   app.data = app.data || {}
-  app.data.loading = true
+  app.data.state = 'begin'
   app.data.error = false
 
   console.log('ething configuring ...')
@@ -24,9 +23,8 @@ export default ({ app, router, Vue, store }) => {
     var status = error.response.status
 
     if(status == 401 || status == 403){
-      init = false
-      app.data.loading = false
-      app.data.error = 'unauthenticated'
+      // reset the session
+      app.data.state = 'begin'
 
       router.app.$router.push({
         name: 'login',
@@ -39,22 +37,20 @@ export default ({ app, router, Vue, store }) => {
     return Promise.reject(error);
   });
 
-  var init = false
-
   router.beforeEach((to, from, next) => {
-
-    app.data.error = false
 
     // console.log('beforeEach', to, init);
 
-    if (!init && to.name !== 'login') {
+    if (app.data.state === 'begin' && to.name !== 'login') {
 
-      init = '...'
+      console.log('begin...')
+
+      // check if there is a stored session !
 
       var serverUrl = LocalStorage.get.item('ething.server.url')
 
       if (!serverUrl) {
-        console.warn('no serverUrl found ! need to be authiticated');
+        console.warn('no serverUrl found ! need to create a new session');
 
         next({
           name: 'login',
@@ -67,52 +63,42 @@ export default ({ app, router, Vue, store }) => {
         return
       }
 
+      // start init process
+
+      app.data.state = 'initializing'
+
       EThing.config.serverUrl = serverUrl
 
-      /*var csrf_token = Cookies.get('Csrf-token')
+      console.log('initializing...');
 
-      if (csrf_token) {*/
+      var metaDfr = EThing.request({
+        url: 'utils/definitions',
+        dataType: 'json',
+      }).then( (def) => {
+        console.log('ething meta loaded !')
+        importDefinitions(def)
+      })
 
-        console.log('init...');
+      var arboDfr = EThing.arbo.load(null, true).then( () => {
+        console.log('ething arbo loaded !')
+        store.commit('ething/update')
+      })
 
-        var metaDfr = EThing.request({
-          url: 'utils/definitions',
-          dataType: 'json',
-        }).then( (def) => {
-          console.log('ething meta loaded !')
-          importDefinitions(def)
-        })
+      Promise.all([arboDfr, metaDfr]).then( () => {
 
-        var arboDfr = EThing.arbo.load(null, true).then( () => {
-          console.log('ething arbo loaded !')
-          store.commit('ething/update')
-        })
+        // everything went ok !
+        app.data.state = 'ok'
 
-        Promise.all([arboDfr, metaDfr]).then( () => {
-          console.log('ething loaded !')
-          app.data.loading = false
-          init = true
+        console.log('ething loaded !')
 
-          SSE.start()
+        SSE.start()
 
-        }).catch( err => {
-          app.data.error = err
-          init = false
-        })
+      }).catch( err => {
+        // something went wrong !
+        app.data.state = 'error'
+        app.data.error = err
+      })
 
-      /*} else {
-        console.warn('no Csrf-token cookie found ! need to be authiticated');
-
-        next({
-          name: 'login',
-          replace: true,
-          query: {
-            redirect_uri: to.path
-          }
-        })
-
-        return
-      }*/
     }
 
     next()

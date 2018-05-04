@@ -17,38 +17,6 @@
       </q-btn-dropdown>
     </div>
 
-    <!--<q-tree
-      default-expand-all
-      :nodes="tree"
-      node-key="id"
-    >
-
-      <div slot="header-generic" slot-scope="prop" class="row col">
-        <q-icon :name="prop.node.icon" :color="prop.node.color" size="24px" class="col-auto q-mr-md" />
-        <div class="col column">
-          <div>{{ prop.node.label }}</div>
-          <small class="text-faded">{{ prop.node.resource.type() }}</small>
-          <small class="text-faded">{{ $ui.dateToString(prop.node.resource.modifiedDate()) }}</small>
-        </div>
-        <div class="col-auto q-ml-md">
-          <q-btn icon="delete" round flat dense color="negative" @click.stop="onRemoveClick(prop.node.resource)"/>
-          <q-btn icon="settings" round flat dense color="faded" @click.stop="settingsClick(prop.node.resource)"/>
-        </div>
-      </div>
-
-      <div slot="body-generic" slot-scope="prop">
-        <div class="row">
-          <q-icon :name="prop.node.icon" :color="prop.node.color" size="24px" class="col-auto q-mr-sm" />
-          <div class="col column">
-            <div>First column</div>
-            <div>Second column</div>
-            <div>Third column</div>
-          </div>
-          <q-icon :name="prop.node.icon" :color="prop.node.color" size="24px" class="col-auto q-mr-sm" />
-        </div>
-      </div>
-    </q-tree>-->
-
     <div v-if="listOrdered.length">
       <q-list link no-border>
 
@@ -60,6 +28,11 @@
               <q-item-tile sublabel>{{ $ui.dateToString(item.device.modifiedDate()) }}</q-item-tile>
               <q-item-tile sublabel>{{ item.device.type() }}</q-item-tile>
             </q-item-main>
+            <q-item-side right v-if="item.device.hasBattery()">
+              <q-chip small detail icon="battery std" color="primary">
+                {{ item.device.battery() }}%
+              </q-chip>
+            </q-item-side>
             <q-item-side right>
               <q-btn icon="delete" round flat dense color="negative" @click.stop="onRemoveClick(item.device)"/>
             </q-item-side>
@@ -183,54 +156,6 @@ export default {
 
       return list
     },
-
-    /*tree () {
-      var self = this
-
-    	function getChildren(resource){
-    		return self.$store.getters['ething/filter'](function(r){
-    			return r.createdBy() === resource.id() && (r instanceof EThing.Device)
-    		});
-    	}
-
-    	function hasParent(resource){
-    		return !!resource.createdBy();
-    	}
-
-    	var level = 0;
-
-      function create(resource) {
-        var node = {
-    			label: resource.basename(),
-          id: resource.id(),
-          icon: self.$ething.meta.get(resource).icon,
-          color: self.$ething.meta.get(resource).color,
-    			resource: resource,
-    			children: [],
-    			level: level,
-          header: 'generic',
-          // body: 'generic',
-    		};
-
-        level++;
-    		node.children = getChildren(resource).map(function(r){
-    			return create(r);
-    		});
-    		level--;
-
-        return node
-      }
-
-  		var rootNodes = this.$store.getters['ething/filter'](function(r){
-  			return (r instanceof EThing.Device)
-  		}).filter(function(r){
-  			return !hasParent(r)
-      }).map(function(r){
-        return create(r)
-      })
-
-    	return rootNodes;
-    }*/
 
   },
 

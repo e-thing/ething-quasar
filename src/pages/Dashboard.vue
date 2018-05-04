@@ -1,19 +1,33 @@
 <template>
   <q-page>
 
+    <q-window-resize-observable @resize="onResize" />
+
     <q-btn-group flat >
-      <q-btn label="pin resource" @click="pinModal = true"/>
+      <q-btn flat label="pin resource" color="faded" @click="pinModal = true"/>
+      <q-btn flat icon="edit" :color="editing ? 'primary' : 'faded'" label="edit" @click="editing = !editing"/>
     </q-btn-group>
 
-    <grid-layout :layout="layout"
-                 :col-num="6"
-                 :row-height="60"
-                 :is-draggable="draggable"
-                 :is-resizable="resizable"
-                 :is-mirrored="false"
-                 :vertical-compact="true"
-                 :margin="[10, 10]"
-                 :use-css-transforms="true"
+    <div v-if="smallScreen" class="smallScreenContainer">
+      <div v-for="(item) in layout" :key="item.i" :style="{height: (item.h * grid.rowHeight) + 'px'}">
+        <div v-show="editing" class="absolute-center">
+          <q-btn-group flat >
+            <q-btn flat icon="delete" color="negative" @click="removeItem(item)"/>
+          </q-btn-group>
+        </div>
+        <widget v-show="!editing" :type="item.type" :options="item.options" />
+      </div>
+    </div>
+    <grid-layout v-else
+      :layout="layout"
+      :col-num="grid.columnNb"
+      :row-height="grid.rowHeight"
+      :is-draggable="draggable"
+      :is-resizable="resizable"
+      :is-mirrored="false"
+      :vertical-compact="true"
+      :margin="[10, 10]"
+      :use-css-transforms="true"
     >
         <grid-item v-for="(item) in layout" :key="item.i"
            :x="item.x"
@@ -24,9 +38,12 @@
            @resized="resizedEvent"
            @moved="movedEvent"
         >
-            <!--<div class="absolute-center">{{ item.i }}</div>-->
-            <widget :type="item.type" :options="item.options" />
-            <!--<div :is="item.type || 'q-btn'" icon="alarm" :label="item.i" />-->
+            <div v-show="editing" class="absolute-center">
+              <q-btn-group flat >
+                <q-btn flat icon="delete" color="negative" @click="removeItem(item)"/>
+              </q-btn-group>
+            </div>
+            <widget v-show="!editing" :type="item.type" :options="item.options" />
         </grid-item>
     </grid-layout>
 
@@ -41,10 +58,13 @@
         <resource-select :filter="pinResourceFilter" v-model="pinResource"/>
       </q-field>
 
+      <form-schema v-if="pinResourceOptions" :schema="pinResourceOptions" v-model="pinResourceOptionsModel" @error="pinResourceOptionsError = $event"/>
+
       <q-btn
         color="primary"
         @click="pin"
         label="pin"
+        :disable="!pinResource || pinResourceOptionsError"
       />
       <q-btn
         color="negative"
@@ -68,20 +88,6 @@ import ResourceSelect from '../components/ResourceSelect'
 var GridLayout = VueGridLayout.GridLayout
 var GridItem = VueGridLayout.GridItem
 
-var testLayout = [
-    {"x":0,"y":0,"w":2,"h":2,"i":"0",type:"w-label", options: {label: "toto"}},
-    {"x":2,"y":0,"w":2,"h":4,"i":"1", type: "w-knob", options: {icon: "alarm"}},
-    /*{"x":4,"y":0,"w":2,"h":5,"i":"2"},
-    {"x":0,"y":5,"w":2,"h":5,"i":"6"},
-    {"x":2,"y":5,"w":2,"h":5,"i":"7"},
-    {"x":4,"y":5,"w":2,"h":5,"i":"8"},
-    {"x":0,"y":10,"w":2,"h":5,"i":"12"},
-    {"x":2,"y":10,"w":2,"h":5,"i":"13"},
-    {"x":4,"y":8,"w":2,"h":4,"i":"14"},
-    {"x":0,"y":9,"w":2,"h":3,"i":"18"},
-    {"x":2,"y":6,"w":2,"h":2,"i":"19"}*/
-];
-
 const LAYOUT_FILENAME = ".dashboard.json"
 
 export default {
@@ -97,18 +103,60 @@ export default {
   data () {
     return {
         layout: [],
-        draggable: true,
-        resizable: true,
+        grid: {
+          columnNb: 6,
+          rowHeight: 60, // in px
+          minWidth: 680 // in px, below this threshold, switch to small screen layout (ie, no grid)
+        },
         idCnt: 1,
         pinModal: false,
-        pinResource: null
+        pinResource: null,
+        editing: false,
+        pinResourceOptionsModel: {},
+        pinResourceOptionsError: false,
+        smallScreen: false
+    }
+  },
+
+  computed: {
+    resizable () {
+      return this.editing
+    },
+    draggable () {
+      return this.editing
+    },
+    pinResourceWidget () {
+      if (!this.pinResourceWidgetName)
+        return undefined
+      return EThing.widgets.find(this.pinResourceWidgetName)
+    },
+    pinResourceWidgetName () {
+      if (!this.pinResource)
+        return undefined
+      var widgets = EThing.meta.get(this.pinResource).widgets || []
+      return widgets.length ? widgets[0] : undefined
+    },
+    pinResourceWidgetMeta () {
+      if (!this.pinResourceWidget)
+        return undefined
+      return this.pinResourceWidget.meta || {}
+    },
+    pinResourceOptions () {
+      if (!this.pinResourceWidgetMeta || !this.pinResourceWidgetMeta.options)
+        return undefined
+      return Object.assign({type: 'object'},this.pinResourceWidgetMeta.options)
+    }
+  },
+
+  watch: {
+    pinResource () {
+      this.pinResourceOptionsModel = {}
+      this.pinResourceOptionsError = false
     }
   },
 
   methods: {
     movedEvent (i, newX, newY) {
-        var msg = "MOVED i=" + i + ", X=" + newX + ", Y=" + newY;
-        console.log(msg);
         this.save()
     },
     /**
@@ -121,8 +169,6 @@ export default {
      *
      */
     resizedEvent (i, newH, newW, newHPx, newWPx) {
-        var msg = "RESIZED i=" + i + ", H=" + newH + ", W=" + newW + ", H(px)=" + newHPx + ", W(px)=" + newWPx;
-        console.log(msg);
         this.save()
     },
 
@@ -196,16 +242,27 @@ export default {
     },
 
     pin () {
-      var widgetName = EThing.meta.get(this.pinResource).widgets[0]
-      var widget = EThing.widgets.find(widgetName)
+      var meta = this.pinResourceWidgetMeta
+      var minWidthUnit = 1
+      var minHeightUnit = 1
+
+      // map pixel to unit
+      if (meta.minWidth) {
+        var widthUnit = Math.floor(this.grid.minWidth / this.grid.columnNb)
+        minWidthUnit = Math.max(Math.min(Math.round(meta.minWidth / widthUnit), this.grid.columnNb), 1)
+      }
+      if (meta.minHeight) {
+        minHeightUnit = Math.max(Math.round(meta.minHeight / this.grid.rowHeight), 1)
+      }
+
 
       this.addWidget({
-        w: widget.minWidth || 1,
-        h: widget.minHeight || 1,
-        type: widgetName,
-        options: {
+        w: minWidthUnit,
+        h: minHeightUnit,
+        type: this.pinResourceWidgetName,
+        options: Object.assign({
           resource: this.pinResource.id()
-        }
+        }, this.pinResourceOptionsModel)
       })
 
       this.save()
@@ -215,6 +272,23 @@ export default {
 
     pinResourceFilter (r) {
       return EThing.meta.get(r).widgets.length
+    },
+
+    removeItem (item) {
+      var index = this.layout.indexOf(item)
+      if (index !== -1) {
+        this.layout.splice(index, 1)
+        this.save()
+      }
+    },
+
+    onResize (size) {
+      // {
+      //   width: 1200 // width of viewport (in px)
+      //   height: 920 // height of viewport (in px)
+      // }
+
+      this.smallScreen = size.width < this.grid.minWidth
     }
 
   },
@@ -229,7 +303,17 @@ export default {
 <style scoped>
 
 .vue-grid-item {
-    border: 1px solid #e0e0e0
+    border: 1px solid #e0e0e0;
+}
+
+.smallScreenContainer > div {
+  width: 100%;
+  position: relative;
+  border: 1px solid #e0e0e0;
+}
+
+.smallScreenContainer > div:not(:first-child) {
+  margin-top: 10px;
 }
 
 </style>

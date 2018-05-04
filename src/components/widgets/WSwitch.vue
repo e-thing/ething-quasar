@@ -1,6 +1,6 @@
 <template>
   <div class="absolute-center">
-    <q-toggle v-model="state" />
+    <q-toggle :value="state" @input="toggle" />
   </div>
 </template>
 
@@ -31,6 +31,13 @@ export default {
         this.r.getState().then(v => {
           this.state = v
         })
+      },
+
+      toggle (state) {
+        console.log('WSwitch toggle...', state)
+        this.r.setState(state).then(() => {
+          this.state = state
+        })
       }
     },
 
@@ -38,9 +45,10 @@ export default {
       this.update()
     },
 
-    minWidth: 1,
-    minHeight: 1
-
+    meta: {
+      minWidth: 50,
+      minHeight: 50
+    }
 
 
 }

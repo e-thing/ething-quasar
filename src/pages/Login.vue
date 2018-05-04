@@ -131,7 +131,7 @@ export default {
           // The request was made but no response was received
           // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
           // http.ClientRequest in node.js
-          self.$q.notify('Unable to access to the EThing server at ' + server)
+          this.$q.notify('Unable to access to the EThing server at ' + server)
 
         } else {
           // Something happened in setting up the request that triggered an Error

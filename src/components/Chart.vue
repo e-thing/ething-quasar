@@ -144,14 +144,20 @@ Vue.use(VueHighcharts, { Highcharts });
 
 function DataSource () {
     this.sources = []
+    this.history = 'all' // 'all' or secondes
 }
 
 DataSource.prototype.clear = function () {
   this.sources = []
+  this.history = 'all'
+}
+
+DataSource.prototype.setHistory = function (h) {
+  this.history = h
 }
 
 DataSource.prototype.add = function (source, done) {
-
+  var self = this
   var resource = EThing.arbo.findOneById(source.resource)
 
   if (resource instanceof EThing.Table) {
@@ -172,9 +178,17 @@ DataSource.prototype.add = function (source, done) {
         done: [],
         fetch: function (end) {
           var r = EThing.arbo.findOneById(this.resource)
+          var query = null
+
+          if (typeof self.history === 'number') {
+            var d = new Date( Date.now() - (parseInt(self.history)*1000) )
+						query = "date > '"+d.toISOString()+"'";
+          }
+
           r.select({
             datefmt: 'timestamp_ms',
             fields: ['date'].concat(this.keys),
+            query
           }).then( data => {
             this.done.forEach( cb => {
                 cb(data)
@@ -226,7 +240,9 @@ export default {
   props: {
     preferences: {},
     expended: Boolean,
-    dense: Boolean
+    dense: Boolean,
+    readonly: Boolean,
+    history: {}
   },
 
   components: {
@@ -238,7 +254,10 @@ export default {
     var file = false
 
     if (typeof this.preferences === 'string') {
-      file = this.$ething.arbo.findOneById(this.preferences)
+      var r = this.$ething.arbo.findOneById(this.preferences)
+      if (r instanceof this.$ething.File) {
+        file = r
+      }
     }
     else if (this.preferences instanceof this.$ething.File) {
       file = this.preferences
@@ -291,6 +310,8 @@ export default {
 
         this.dataSource.clear()
 
+        this.dataSource.setHistory(this.history || preferences.history || 'all')
+
         var title = preferences.title
         if (this.dense && preferences.subtitle) {
           if (title) {
@@ -330,7 +351,7 @@ export default {
               },
               buttons: {
                   contextButton: {
-                      menuItems: ['refresh','options','save','separator','downloadPNG', 'downloadJPEG', 'downloadPDF']
+                      menuItems: this.readonly ? ['refresh','separator','downloadPNG', 'downloadJPEG', 'downloadPDF'] : ['refresh','options','save','separator','downloadPNG', 'downloadJPEG', 'downloadPDF']
                   }
               }
             },
@@ -537,9 +558,16 @@ export default {
     } else {
 
       var preferences = {}
+      var resource = null
 
+      if (typeof this.preferences === 'string') {
+        resource = this.$ething.arbo.findOneById(this.preferences)
+      }
       if (this.preferences instanceof this.$ething.Table) {
-        var resource = this.preferences
+        resource = this.preferences
+      }
+
+      if (resource) {
         var createdBy = this.$ething.arbo.findOneById(resource.createdBy())
         if (createdBy) {
           preferences.subtitle = createdBy.basename()

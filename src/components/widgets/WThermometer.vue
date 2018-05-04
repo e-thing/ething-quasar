@@ -36,8 +36,11 @@ export default {
       this.update()
     },
 
-    minWidth: 1,
-    minHeight: 3
+    meta: {
+      minWidth: 50,
+      minHeight: 50
+    }
+
 
 
 

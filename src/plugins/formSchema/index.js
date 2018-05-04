@@ -14,6 +14,7 @@ import FormSchemaColor from './FormSchemaColor.vue'
 import FormSchemaJson from './FormSchemaJson.vue'
 import FormSchemaOptional from './FormSchemaOptional.vue'
 import FormSchemaMultiType from './FormSchemaMultiType.vue'
+import FormSchemaNumberSlider from './FormSchemaNumberSlider.vue'
 
 // leave the export, even if you don't use it
 export default ({ app, router, Vue }) => {
@@ -30,6 +31,7 @@ export default ({ app, router, Vue }) => {
   Vue.component('FormSchemaJson', FormSchemaJson)
   Vue.component('FormSchemaOptional', FormSchemaOptional)
   Vue.component('FormSchemaMultiType', FormSchemaMultiType)
+  Vue.component('FormSchemaNumberSlider', FormSchemaNumberSlider)
 
   Vue.config.optionMergeStrategies.validations = Vue.config.optionMergeStrategies.data
 

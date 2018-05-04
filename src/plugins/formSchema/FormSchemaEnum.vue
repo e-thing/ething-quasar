@@ -21,9 +21,10 @@ export default {
 
   computed: {
     selectOptions () {
-      return (this.schema.enum || []).map( (v) => {
+      var enumLabels = this.schema.enumLabels || []
+      return (this.schema.enum || []).map( (v, i) => {
         return {
-            label: String(v),
+            label: i<enumLabels.length ? enumLabels[i] : String(v),
             value: v
         }
       })
