@@ -1,14 +1,29 @@
 <template>
-  <div class="fixed-center">
+  <div class="fixed-center content">
     <div class="q-display-3 text-primary text-center">EThing</div>
 
     <div class="q-pb-md">
+      <q-field
+        :error="$v.server.$error"
+        error-label="required"
+      >
+        <q-input
+          class="q-py-md"
+          ref="server"
+          autofocus
+          v-model="server"
+          float-label="Server Url"
+          @keyup.enter="$refs.login.focus()"
+          @blur="$v.server.$touch"
+        />
+      </q-field>
       <q-field
         :error="$v.form.login.$error"
         error-label="Login is required"
       >
         <q-input
           class="q-py-md"
+          ref="login"
           autofocus
           v-model="form.login"
           float-label="Login"
@@ -33,7 +48,7 @@
       </q-field>
     </div>
 
-    <q-btn :loading="loading" color="primary" class="full-width" @click="onConnect">Connect</q-btn>
+    <q-btn :loading="loading" :disable="$v.$error" color="primary" class="full-width" @click="onConnect">Connect</q-btn>
 
   </div>
 </template>
@@ -41,12 +56,15 @@
 <script>
 import { required } from 'vuelidate/lib/validators'
 
+var defaultServerUrl = 'http://localhost:8000'
+
 export default {
   name: 'PageLogin',
 
   data () {
     return {
       loading: false,
+      server: this.$q.localStorage.get.item('ething.server.url') || defaultServerUrl,
       form: {
         login: '',
         password: ''
@@ -56,6 +74,9 @@ export default {
 
   validations () {
     return {
+      server: {
+        required
+      },
       form: {
         login: { required },
         password: { required  }
@@ -65,53 +86,61 @@ export default {
 
   methods: {
     onConnect () {
-      this.$v.form.$touch()
+      this.$v.$touch()
 
-      if (this.$v.form.$error) {
-        this.$q.notify('Invalid credentials.')
+      if (this.$v.$error) {
         return
       }
 
-      var xhr = new XMLHttpRequest()
-      var self = this
-
       this.loading = true
+      var server = this.server.replace(/\/+$/, '')
 
-      xhr.open("POST", this.$ething.config.serverUrl + '/auth/password', true);
+      const params = new URLSearchParams();
+      params.append('login', this.form.login);
+      params.append('password', this.form.password);
 
-      xhr.withCredentials = true
-			xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+      this.$axios.request({
+        method: 'post',
+        url: server + '/auth/password',
+        withCredentials: true,
+        data: params
+      }).then(response => {
 
-			xhr.onreadystatechange = function() {
-				if (this.readyState == 4){
-          self.loading = false
+        // store it in the localstorage
+        this.$q.localStorage.set('ething.server.url', server)
 
-					/*var data = this.responseText
+        // redirect
+        this.$router.replace(this.$route.query.redirect_uri || '/')
 
-					if(/json/.test(this.getResponseHeader("Content-Type") || '')){
-						data = JSON.parse(data);
-					}*/
+      }).catch(error => {
 
-					if(this.status >= 200 && this.status < 400) {
-						// redirect
-						self.$router.replace(self.$route.query.redirect_uri || '/')
-					}
-					else if (this.status == 401 || this.status == 403) {
-						self.$q.notify('Invalid credentials.')
+        if (error.response) {
+          // The request was made and the server responded with a status code
+          // that falls out of the range of 2xx
+          var status = error.response.status
+
+          if (status == 401 || status == 403) {
+						this.$q.notify('Invalid credentials.')
 					}
           else {
-            self.$q.notify('Could not authenticate.')
+            this.$q.notify('Could not authenticate.')
           }
-				}
-        self.loading = false
-			}
 
-      xhr.onerror = function () {
-        self.loading = false
-        self.$q.notify('Unable to access to the EThing server ' + self.$ething.config.serverUrl)
-      }
 
-			xhr.send('login='+encodeURIComponent(this.form.login)+'&password='+encodeURIComponent(this.form.password))
+        } else if (error.request) {
+          // The request was made but no response was received
+          // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+          // http.ClientRequest in node.js
+          self.$q.notify('Unable to access to the EThing server at ' + server)
+
+        } else {
+          // Something happened in setting up the request that triggered an Error
+          this.$q.notify('Error', error.message)
+        }
+
+      }).finally(() => {
+        this.loading = false
+      })
 
     }
   }
@@ -119,4 +148,7 @@ export default {
 </script>
 
 <style>
+.content {
+  width: 300px;
+}
 </style>

@@ -10,9 +10,9 @@ export default {
   render: function (createElement) {
     var self = this
     return makeForm(createElement, this.schema, this.model, this.level, function (newValue) {
-      self.value = newValue
+      self.setValue(newValue)
     }, function (newValue) {
-      self.error = newValue
+      self.setError(newValue)
     }, {
       required: this.required
     })

@@ -1,10 +1,9 @@
 <template>
   <div class="form-schema-string">
-    <!--<input type="text" v-bind:value="model" v-on:input="value = $event.target.value"/>-->
     <small class="form-schema-description">{{ schema.description }}</small>
     <q-input
       :type="schema.format === 'text' ? 'textarea' : 'text'"
-      v-bind:value="model"
+      v-bind:value="castedModel"
       v-on:input="setValue"
       :error="$v.value.$error"
     />
@@ -22,10 +21,6 @@ export default {
   name: 'FormSchemaString',
 
   mixins: [FormComponent],
-
-  props: {
-    model: String
-  },
 
   validations () {
 
@@ -45,6 +40,12 @@ export default {
       value: validators
     }
   },
+
+  methods: {
+    cast (model) {
+      return String(model)
+    }
+  }
 
 }
 

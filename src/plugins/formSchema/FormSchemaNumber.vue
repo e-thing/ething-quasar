@@ -2,7 +2,7 @@
   <div class="form-schema-number">
     <!--<input type="number" v-bind:value="model" v-on:input="value = $event.target.value"/>-->
     <small class="form-schema-description">{{ schema.description }}</small>
-    <q-input type="number" v-bind:value="model" v-on:input="setValue" :error="$v.value.$error"/>
+    <q-input type="number" v-bind:value="castedModel" v-on:input="setValue" :error="$v.value.$error"/>
     <small class="form-schema-error" v-if="$v.value.$error">{{ errorMessage }}</small>
   </div>
 </template>
@@ -16,10 +16,6 @@ export default {
   name: 'FormSchemaNumber',
 
   mixins: [FormComponent],
-
-  props: {
-    model: Number
-  },
 
   validations () {
 
@@ -38,6 +34,12 @@ export default {
       value: validators
     }
   },
+
+  methods: {
+    cast (model) {
+      return Number(model)
+    }
+  }
 
 }
 

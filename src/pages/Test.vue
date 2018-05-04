@@ -30,6 +30,14 @@ export default {
             type: 'string',
             pattern: '^toto'
           },
+          anything: {},
+          array: {
+            type: 'array',
+            items: {
+              // type: "number",
+              // default: 12
+            }
+          },
           isOk: {
             type: 'boolean'
           },
@@ -89,7 +97,9 @@ export default {
       model: {
         host: 'toto',
         isOk: false,
-        json: '{}'
+        json: '{}',
+        array: [4,5],
+        optional: 'tyty'
       }
     }
   }

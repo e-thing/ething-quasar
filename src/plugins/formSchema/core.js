@@ -46,6 +46,14 @@ var makeForm = function (createElement, schema, model, level, onValueUpdate, onE
   switch (type) {
     case 'object':
       return createElement('form-schema-object', attributes)
+    case 'array':
+      if ((typeof schema.items === 'object' && schema.items!== null) || typeof schema.items === 'undefined') {
+        return createElement('form-schema-array', attributes)
+      }
+      if (Array.isArray(schema.items)) {
+        // todo tupple https://spacetelescope.github.io/understanding-json-schema/reference/array.html
+      }
+      break
     case 'string':
       var format = schema.format
 
@@ -73,15 +81,19 @@ var makeForm = function (createElement, schema, model, level, onValueUpdate, onE
     case 'json':
       return createElement('form-schema-json', attributes)
 
-    default:
-
-      if (Array.isArray(schema.anyOf)) {
-        if (schema.anyOf.filter(item => item.type === 'null').length < schema.anyOf.length) {
-          return createElement('form-schema-optional', attributes)
-        }
-      }
-
   }
+
+  if (Array.isArray(schema.anyOf)) {
+    if (schema.anyOf.filter(item => item.type === 'null').length < schema.anyOf.length) {
+      return createElement('form-schema-optional', attributes)
+    }
+  }
+
+  if (typeof type === 'undefined') {
+    return createElement('form-schema-multi-type', attributes)
+  }
+
+  console.error('unable to render the schema', schema)
 }
 
 var FormComponent = {
@@ -111,12 +123,16 @@ var FormComponent = {
 
   data: function () {
     return {
-      value: this.model,
+      value: typeof this.model != 'undefined' ? this.cast(this.model) : this.model,
       error: false
     }
   },
 
   computed: {
+    castedModel () {
+      return typeof this.model != 'undefined' ? this.cast(this.model) : this.model
+    },
+
     errorMessage () {
       if (typeof this.$v.value.required != 'undefined' && !this.$v.value.required) {
         return 'Field is required'
@@ -166,16 +182,16 @@ var FormComponent = {
   },
 
   watch: {
-    value: function (val, oldVal) {
+    /*value: function (val, oldVal) {
       console.log(this.$options.name + ' value ' + oldVal + ' changed to ' + val)
       this.$emit('input', val)
-    },
-    error: function (val) {
+    },*/
+    /*error: function (val) {
       console.log(this.$options.name + ' error ' + val)
       this.$emit('error', val)
-    },
+    },*/
     '$v.$error' (value) {
-      this.error = value
+      this.setError(value)
     }
   },
 
@@ -183,16 +199,27 @@ var FormComponent = {
     setValue (val) {
       this.value = val
       this.$v.value.$touch()
+      if (typeof this.value != 'undefined'){
+        // console.log(this.$options.name, 'setValue', val)
+        this.$emit('input', val)
+      }
     },
     setError (val) {
       this.error = val
+      this.$emit('error', val)
+    },
+    cast (model) {
+      return model
     }
   },
 
   mounted () {
     if (typeof this.model === 'undefined' && typeof this.schema.default !== 'undefined') {
-      this.setValue(this.schema.default)
+      this.setValue(this.cast(this.schema.default))
+    } else if (this.value !== this.model) {
+      this.setValue(this.value)
     } else {
+      // the model is defined and not casted, no need to update the model
       this.$v.value.$touch()
     }
   }

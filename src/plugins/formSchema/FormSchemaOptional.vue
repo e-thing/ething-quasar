@@ -7,7 +7,7 @@
       <q-toggle v-model="enabled" label="enable"/>
     </div>
 
-    <form-schema ref="sub" v-if="enabled" required :schema="filteredSchema" :model="model" :level="level" @input="setValue" @error="setError"/>
+    <form-schema ref="sub" v-if="enabled" required :schema="filteredSchema" :model="cachedValue" :level="level" @input="onChildValueChange" @error="setError"/>
 
   </div>
 </template>
@@ -38,13 +38,14 @@ export default {
 
   data () {
     return {
-      enabled: false
+      enabled: false,
+      cachedValue: undefined
     }
   },
 
   watch: {
     model () {
-      this.enabled = this.model !== null && typeof this.model !== 'undefined'
+      this.refreshFromModel()
     },
 
     enabled (val) {
@@ -58,6 +59,24 @@ export default {
         }
       })
     }
+  },
+
+  methods: {
+    refreshFromModel () {
+      this.enabled = this.model !== null && typeof this.model !== 'undefined'
+      if (this.enabled) {
+        this.cachedValue = this.model
+      }
+    },
+
+    onChildValueChange (val) {
+      this.cachedValue = val
+      this.setValue(val)
+    }
+  },
+
+  mounted () {
+    this.refreshFromModel()
   },
 
 }

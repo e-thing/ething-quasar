@@ -1,6 +1,7 @@
 import EThing from 'ething-js'
 import resourcesMetaData from '../resources'
 // import { Cookies } from 'quasar'
+import { LocalStorage } from 'quasar'
 
 
 export default ({ app, router, Vue, store }) => {
@@ -11,7 +12,7 @@ export default ({ app, router, Vue, store }) => {
   app.data.error = false
 
   console.log('ething configuring ...')
-  EThing.config.serverUrl = 'http://lebios.no-ip.org'
+
   // EThing.auth.setBasicAuth('ething', 'admin');
 
   EThing.axios.defaults.withCredentials = true
@@ -49,6 +50,24 @@ export default ({ app, router, Vue, store }) => {
     if (!init && to.name !== 'login') {
 
       init = '...'
+
+      var serverUrl = LocalStorage.get.item('ething.server.url')
+
+      if (!serverUrl) {
+        console.warn('no serverUrl found ! need to be authiticated');
+
+        next({
+          name: 'login',
+          replace: true,
+          query: {
+            redirect_uri: to.path
+          }
+        })
+
+        return
+      }
+
+      EThing.config.serverUrl = serverUrl
 
       /*var csrf_token = Cookies.get('Csrf-token')
 
@@ -441,7 +460,7 @@ var SSE = {
 	},
 
   dispatch (event) {
-    console.log(event)
+    //console.log(event)
 
     var name = event.name,
 			isResourceEvent = !!event.data.resource,
@@ -489,7 +508,7 @@ var SSE = {
     if(this.cache[resourceId]) clearTimeout(this.cache[resourceId]);
 		this.cache[resourceId] = setTimeout(() => {
 			delete this.cache[resourceId];
-			console.log("updating resource " + resourceId);
+			//console.log("updating resource " + resourceId);
 			EThing.get(resourceId);
 		}, this.cacheDelay);
   }
