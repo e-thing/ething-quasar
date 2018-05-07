@@ -10,9 +10,6 @@ export default {
       format: 'ething.resource',
       readOnly: true
     },
-    modifiedDate: {
-      readOnly: true
-    },
     data: {
       readOnly: true
     }

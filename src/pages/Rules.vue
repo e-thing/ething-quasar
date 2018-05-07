@@ -12,7 +12,7 @@
           <q-item-tile sublabel>event: {{ rule.event().type }}</q-item-tile>
           <q-item-tile sublabel>executed: {{ rule.scriptExecutionCount() }} times</q-item-tile>
           <q-item-tile sublabel>executed time: {{ rule.scriptExecutionDate() ? $ui.dateToString(rule.scriptExecutionDate()) : 'never' }}</q-item-tile>
-          <q-item-tile sublabel>execution status: {{ rule.scriptReturnCode() ? ('code '+rule.scriptReturnCode()) : 'ok' }}</q-item-tile>
+          <q-item-tile sublabel>execution status: {{ rule.scriptReturnCode() ? ('code '+rule.scriptReturnCode()+' (error)') : 'ok' }}</q-item-tile>
         </q-item-main>
         <q-item-side right>
           <q-btn rounded icon="play arrow" :loading="loading" label="execute" flat dense @click.stop="execute(rule)"/>

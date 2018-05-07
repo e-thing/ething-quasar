@@ -110,6 +110,7 @@ export default {
         this.$q.localStorage.set('ething.server.url', server)
 
         // redirect
+        this.$ething.app.reset()
         this.$router.replace(this.$route.query.redirect_uri || '/')
 
       }).catch(error => {

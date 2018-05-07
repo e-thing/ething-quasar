@@ -3,6 +3,18 @@
 
     <div class="q-my-md q-display-1 q-display-1-opacity">{{ resource.basename() }}</div>
 
+    <!-- atttributes -->
+    <p v-if="data">
+      <div class="q-my-md q-title q-title-opacity">Attributes</div>
+      <div class="row">
+        <template v-for="(value, key) in data">
+          <div class="col-xs-12 col-sm-2 key text-primary">{{ key }}</div>
+          <div class="col-xs-12 col-sm-10 value text-faded">{{ value }}</div>
+        </template>
+      </div>
+    </p>
+
+    <!-- resource -->
     <p v-if="children.length">
       <div class="q-my-md q-title q-title-opacity">Resources</div>
       <q-item v-for="child in children" :key="child.id()" :to="$ui.open(child)">
@@ -76,6 +88,11 @@ export default {
         return r.isTypeof('Devices')
       })
     },
+
+    data () {
+      var data = this.resource.data()
+      return Object.keys(data).length === 0 ? null : data
+    }
 
   },
 

@@ -1,8 +1,8 @@
 <template>
   <q-page padding>
-    
+
     <div class="q-my-md q-display-1 q-display-1-opacity">{{ resource.basename() }}</div>
-    
+
     <resource-editor :resource="resource" @done="onDone" @canceled="onCancel"/>
 
   </q-page>
@@ -34,7 +34,8 @@ export default {
 
   methods: {
     onDone (resource) {
-      this.$router.push({ path: '/data', params: { path: resource.dirname() }})
+      //this.$router.push({ path: '/data', params: { path: resource.dirname() }})
+      this.$router.go(-1)
     },
 
     onCancel () {

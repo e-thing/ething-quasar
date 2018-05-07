@@ -8,23 +8,12 @@ export default {
   virtual: true,
 
   properties: {
-    /*battery: {
-      type: 'number',
-      readOnly: true
-    },
-    lastSeenDate: {
-      type: 'string',
-      format: 'date-time',
+    battery: {
       readOnly: true
     },
     connected: {
-      type: 'boolean',
       readOnly: true
     },
-    location: {
-      type: 'string',
-      default: ''
-    },*/
   },
 
 }

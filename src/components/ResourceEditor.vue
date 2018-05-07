@@ -126,6 +126,9 @@ export default {
             }
           }
 
+          var propertiesKeys = Object.keys(properties)
+          required = required.filter(k => propertiesKeys.indexOf(k) !== -1)
+
           if (!nPromise) {
             post()
           }

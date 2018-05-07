@@ -10,6 +10,25 @@ export default ({ app, router, Vue, store }) => {
   app.data.state = 'begin'
   app.data.error = false
 
+  EThing.app = {
+
+    reset () {
+      app.data.state = 'begin'
+      SSE.stop()
+    },
+
+    disconnect () {
+      EThing.app.reset()
+
+      router.app.$router.push({
+        name: 'login',
+        query: {
+          redirect_uri: router.app.$router.currentRoute.path
+        }
+      })
+    }
+  }
+
   console.log('ething configuring ...')
 
   // EThing.auth.setBasicAuth('ething', 'admin');
@@ -20,26 +39,20 @@ export default ({ app, router, Vue, store }) => {
   EThing.axios.interceptors.response.use(function (response) {
     return response;
   }, function (error) {
-    var status = error.response.status
+    if (error.response) {
+      var status = error.response.status
 
-    if(status == 401 || status == 403){
-      // reset the session
-      app.data.state = 'begin'
-
-      router.app.$router.push({
-        name: 'login',
-        query: {
-          redirect_uri: router.app.$router.currentRoute.path
-        }
-      })
+      if(status == 401 || status == 403){
+        // reset the session
+        EThing.app.disconnect()
+      }
     }
-
     return Promise.reject(error);
   });
 
   router.beforeEach((to, from, next) => {
 
-    // console.log('beforeEach', to, init);
+    //console.log('beforeEach', to, app.data.state);
 
     if (app.data.state === 'begin' && to.name !== 'login') {
 

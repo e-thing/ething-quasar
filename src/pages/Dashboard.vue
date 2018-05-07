@@ -318,13 +318,13 @@ export default {
 <style scoped>
 
 .vue-grid-item {
-    border: 1px solid #e0e0e0;
+    border: 1px solid #f4f4f4;
 }
 
 .smallScreenContainer > div {
   width: 100%;
   position: relative;
-  border: 1px solid #e0e0e0;
+  border: 1px solid #f4f4f4;
 }
 
 .smallScreenContainer > div:not(:first-child) {

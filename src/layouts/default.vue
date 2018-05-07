@@ -102,7 +102,7 @@ export default {
         url: this.$ething.config.serverUrl + '/auth/logout',
         withCredentials: true,
       }).finally(() => {
-        this.$router.push({name: 'login'})
+        this.$ething.app.disconnect()
       })
 
     },
