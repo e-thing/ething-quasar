@@ -14,6 +14,7 @@
         <q-btn class="gt-xs" flat label="Dashboard" @click="$router.push('/dashboard')" />
         <q-btn class="gt-xs" flat label="Devices" @click="$router.push('/devices')" />
         <q-btn class="gt-xs" flat label="Data" @click="$router.push('/data')" />
+        <q-btn class="gt-xs" flat label="Rules" @click="$router.push('/rules')" />
 
         <q-toolbar-title class="gt-xs"/>
 
@@ -45,6 +46,10 @@
         <q-item @click.native="$router.push('/data')">
           <q-item-side icon="mdi-database" />
           <q-item-main label="Data" />
+        </q-item>
+        <q-item @click.native="$router.push('/rules')">
+          <q-item-side icon="event" />
+          <q-item-main label="Rules" />
         </q-item>
 
         <q-item-separator />

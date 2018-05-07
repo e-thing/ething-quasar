@@ -34,10 +34,11 @@ var FormSchemaScope = {
     var selectOptions = []
 
     for (let k in this.$ething.meta.scopes) {
+      let scope = this.$ething.meta.scopes[k]
       selectOptions.push({
         label: k,
         value: k,
-        sublabel: scopes[k].description
+        sublabel: scope.description
       })
     }
 

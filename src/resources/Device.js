@@ -8,7 +8,7 @@ export default {
   virtual: true,
 
   properties: {
-    battery: {
+    /*battery: {
       type: 'number',
       readOnly: true
     },
@@ -24,7 +24,7 @@ export default {
     location: {
       type: 'string',
       default: ''
-    },
+    },*/
   },
-  
+
 }

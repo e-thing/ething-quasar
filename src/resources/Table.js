@@ -6,7 +6,7 @@ export default {
   bases: ['Resource'],
 
   properties: {
-    length: {
+    /*length: {
       type: 'number',
       readOnly: true
     },
@@ -23,7 +23,7 @@ export default {
       type: 'number',
       default: 0,
       description: "This resource will be automatically removed after a specific duration of inactivity.",
-    }
+    }*/
   },
 
   widgets: ['WChart']

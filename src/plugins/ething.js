@@ -407,12 +407,15 @@ function importDefinitions (def) {
   EThing.meta.types = Object.keys(_metadata)
 
   EThing.meta.scopes = def.scopes || {}
+  EThing.meta.events = def.events || {}
 
 }
 
 EThing.meta = {
   get: compile,
-  types: Object.keys(_metadata)
+  types: Object.keys(_metadata),
+  events: {},
+  scopes: {},
 }
 
 // widgets api

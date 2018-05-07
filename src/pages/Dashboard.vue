@@ -49,7 +49,7 @@
 
 
     <q-modal v-model="pinModal" :content-css="{padding: '50px', minWidth: '50vw'}">
-      <div class="q-display-1 q-mb-md">Basic Modal</div>
+      <div class="q-headline q-mb-md">Pin resource</div>
 
       <q-field
         label="Resource"
@@ -67,6 +67,7 @@
         :disable="!pinResource || pinResourceOptionsError"
       />
       <q-btn
+        flat
         color="negative"
         @click="pinModal = false"
         label="Cancel"

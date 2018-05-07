@@ -3,6 +3,7 @@ import File from './File'
 import Folder from './Folder'
 import Table from './Table'
 import Device from './Device'
+import Rule from './Rule'
 
 import Denon from './Denon'
 import Http from './Http'
@@ -29,6 +30,7 @@ export default {
   Folder,
   Table,
   Device,
+  Rule,
 
   Denon,
   Http,

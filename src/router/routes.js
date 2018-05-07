@@ -53,6 +53,10 @@ export default [
         component: () => import('pages/Settings')
       },
       {
+        path: 'rules',
+        component: () => import('pages/Rules')
+      },
+      {
         path: 'test',
         component: () => import('pages/Test')
       }
