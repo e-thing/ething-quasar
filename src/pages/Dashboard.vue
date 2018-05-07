@@ -134,7 +134,17 @@ export default {
       if (!this.pinResource)
         return undefined
       var widgets = EThing.meta.get(this.pinResource).widgets || []
-      return widgets.length ? widgets[0] : undefined
+      return widgets.length ? widgets[0].name : undefined
+    },
+    pinResourceWidgetOptions () {
+      if (!this.pinResource)
+        return undefined
+      var widgets = EThing.meta.get(this.pinResource).widgets || []
+      if (widgets.length) {
+        var cpy = Object.assign({}, widgets[0])
+        delete cpy.name
+        return cpy
+      }
     },
     pinResourceWidgetMeta () {
       if (!this.pinResourceWidget)
@@ -255,6 +265,10 @@ export default {
         minHeightUnit = Math.max(Math.round(meta.minHeight / this.grid.rowHeight), 1)
       }
 
+      console.log('meta.minWidth', meta.minWidth)
+      console.log('meta.minHeight', meta.minHeight)
+      console.log('minWidthUnit', minWidthUnit)
+      console.log('minHeightUnit', minHeightUnit)
 
       this.addWidget({
         w: minWidthUnit,
@@ -262,7 +276,7 @@ export default {
         type: this.pinResourceWidgetName,
         options: Object.assign({
           resource: this.pinResource.id()
-        }, this.pinResourceOptionsModel)
+        }, this.pinResourceOptionsModel, this.pinResourceWidgetOptions)
       })
 
       this.save()

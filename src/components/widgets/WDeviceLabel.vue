@@ -1,7 +1,12 @@
 <template>
   <w-device-layout :resource="resource">
     <div class="absolute-center">
-      <q-toggle :value="state" @input="toggle" />
+      <span class="value">
+          {{ value }}
+      </span>
+      <span v-if="unit" class="unit">
+          {{ unit }}
+      </span>
     </div>
   </w-device-layout>
 </template>
@@ -11,7 +16,7 @@ import WResource from './WResource'
 import WDeviceLayout from './WDeviceLayout'
 
 export default {
-    name: 'WSwitch',
+    name: 'WDeviceLabel',
 
     mixins: [WResource],
 
@@ -19,9 +24,11 @@ export default {
       WDeviceLayout
     },
 
+    props: ['fn', 'unit'],
+
     data () {
         return {
-            state: false
+            value: '?'
         }
     },
 
@@ -33,16 +40,8 @@ export default {
 
     methods: {
       update () {
-        console.log('WSwitch update...')
-        this.r.getState().then(v => {
-          this.state = v
-        })
-      },
-
-      toggle (state) {
-        console.log('WSwitch toggle...', state)
-        this.r.setState(state).then(() => {
-          this.state = state
+        this.r.execute(this.fn).then(v => {
+          this.value = v
         })
       }
     },
@@ -57,9 +56,17 @@ export default {
     }
 
 
+
+
 }
 </script>
 
-<style scoped>
+<style lang="stylus" scoped>
+@import '~variables'
 
+.value
+  color $primary
+
+.unit
+  color $blue-4
 </style>

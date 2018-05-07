@@ -28,6 +28,9 @@ const UI = {
   },
 
   dateToString (d) {
+    if (!d) {
+      return '-'
+    }
     var ts = d.getTime()
     return date.formatDate(ts, 'YYYY-MM-DD HH:mm')
   },

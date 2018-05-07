@@ -25,7 +25,7 @@
             <q-item-side :icon="$ething.meta.get(item.device).icon" inverted :color="$ething.meta.get(item.device).color" />
             <q-item-main>
               <q-item-tile label>{{ item.device.basename() }}</q-item-tile>
-              <q-item-tile sublabel>{{ $ui.dateToString(item.device.modifiedDate()) }}</q-item-tile>
+              <q-item-tile sublabel>{{ $ui.dateToString(item.device.lastSeenDate() || item.device.modifiedDate()) }}</q-item-tile>
               <q-item-tile sublabel>{{ item.device.type() }}</q-item-tile>
             </q-item-main>
             <q-item-side right v-if="item.device.hasBattery()">

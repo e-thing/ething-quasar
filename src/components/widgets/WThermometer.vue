@@ -1,16 +1,35 @@
+<template>
+  <w-device-layout :resource="resource">
+    <div class="absolute-center">
+      <q-knob
+        :value="value"
+        :min="min"
+        :max="max"
+        readonly
+        color="primary"
+      >
+        {{value}} <span class="unit">{{unit}}</span>
+      </q-knob>
+    </div>
+  </w-device-layout>
+</template>
 
 <script>
-
-import WKnob from './WKnob'
 import WResource from './WResource'
+import WDeviceLayout from './WDeviceLayout'
 
 export default {
     name: 'WThermometer',
 
-    mixins: [WKnob, WResource],
+    mixins: [WResource],
+
+    components: {
+      WDeviceLayout
+    },
 
     data () {
       return {
+        value: 0,
         unit: '°C',
         min: -20,
         max: 40
@@ -37,8 +56,8 @@ export default {
     },
 
     meta: {
-      minWidth: 50,
-      minHeight: 50
+      minWidth: 100,
+      minHeight: 100
     }
 
 

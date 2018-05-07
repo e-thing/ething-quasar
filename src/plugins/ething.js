@@ -254,6 +254,14 @@ function compile (type, resource) {
   for(let k in m.properties)
     m.properties[k] = merge(deepCopy(defaultsMetaProperty), m.properties[k])
 
+  for(let k in m.widgets) {
+    if (typeof m.widgets[k] !== 'object') {
+      m.widgets[k] = {
+        name: m.widgets[k]
+      }
+    }
+  }
+
   // add it to the static cache !
   if (!resource) {
     _metadata_cache[type] = m
@@ -397,6 +405,8 @@ function importDefinitions (def) {
   // console.log(meta)
 
   EThing.meta.types = Object.keys(_metadata)
+
+  EThing.meta.scopes = def.scopes || {}
 
 }
 
