@@ -15,7 +15,7 @@
             <q-btn flat icon="delete" color="negative" @click="removeItem(item)"/>
           </q-btn-group>
         </div>
-        <widget v-show="!editing" :type="item.type" :options="item.options" />
+        <widget v-show="!editing" class="fit" :type="item.type" :options="item.options" />
       </div>
     </div>
     <grid-layout v-else
@@ -43,7 +43,7 @@
                 <q-btn flat icon="delete" color="negative" @click="removeItem(item)"/>
               </q-btn-group>
             </div>
-            <widget v-show="!editing" :type="item.type" :options="item.options" />
+            <widget v-show="!editing" class="fit" :type="item.type" :options="item.options" />
         </grid-item>
     </grid-layout>
 

@@ -1,20 +1,29 @@
 <template>
-  <div class="absolute-center">
-    <q-knob
-      :value="value"
-      :min="min"
-      :max="max"
-      readonly
-      color="primary"
-    >
-      {{value}} <span class="unit">{{unit}}</span>
-    </q-knob>
+  <div class="column fit">
+    <div class="col-auto text-center text-faded">
+      {{ title }}
+    </div>
+    <div class="col relative-position">
+      <div class="absolute-center">
+        <q-knob
+          :value="value"
+          :min="min"
+          :max="max"
+          readonly
+          color="primary"
+        >
+          {{value}} <span class="unit">{{unit}}</span>
+        </q-knob>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
 export default {
     name: 'WKnob',
+
+    props: ['title'],
 
     data () {
         return {
