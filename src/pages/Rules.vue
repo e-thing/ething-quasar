@@ -4,23 +4,42 @@
     <q-btn flat label="Add" icon="add" color="secondary" @click="$router.push('/create/Rule')"/>
 
     <q-list no-border>
-      <q-item v-for="rule in rules" :key="rule.id()" append>
-        <q-item-side :icon="$ething.meta.get(rule).icon" inverted :color="$ething.meta.get(rule).color" />
-        <q-item-main>
-          <q-item-tile label>{{ rule.basename() }}</q-item-tile>
-          <q-item-tile sublabel>{{ $ui.dateToString(rule.modifiedDate()) }}</q-item-tile>
-          <q-item-tile sublabel>event: {{ rule.event().type }}</q-item-tile>
-          <q-item-tile sublabel>executed: {{ rule.scriptExecutionCount() }} times</q-item-tile>
-          <q-item-tile sublabel>executed time: {{ rule.scriptExecutionDate() ? $ui.dateToString(rule.scriptExecutionDate()) : 'never' }}</q-item-tile>
-          <q-item-tile sublabel>execution status: {{ rule.scriptReturnCode() ? ('code '+rule.scriptReturnCode()+' (error)') : 'ok' }}</q-item-tile>
-        </q-item-main>
-        <q-item-side right>
-          <q-btn rounded icon="play arrow" :loading="loading" label="execute" flat dense @click.stop="execute(rule)"/>
-        </q-item-side>
-        <q-item-side right>
-          <q-btn icon="settings" round flat dense @click.stop="$router.push('/resource/' + rule.id())"/>
-        </q-item-side>
-      </q-item>
+      <q-collapsible indent v-for="rule in rules" :key="rule.id()" popup >
+        <template slot="header">
+          <q-item-side :icon="$ething.meta.get(rule).icon" inverted :color="$ething.meta.get(rule).color" />
+          <q-item-main>
+            <q-item-tile label>{{ rule.basename() }}</q-item-tile>
+            <q-item-tile sublabel>{{ $ui.dateToString(rule.modifiedDate()) }}</q-item-tile>
+          </q-item-main>
+          <q-item-side right>
+            <q-btn rounded icon="play arrow" :loading="loading" label="execute" flat dense @click.stop="execute(rule)"/>
+          </q-item-side>
+          <q-item-side right>
+            <q-btn icon="settings" round flat dense @click.stop="$router.push('/resource/' + rule.id())"/>
+          </q-item-side>
+        </template>
+
+        <q-item multiline>
+          <q-item-side icon="list" />
+          <q-item-main>
+            <q-item-tile label>Attributes</q-item-tile>
+            <q-item-tile sublabel>event: {{ rule.event().type }}</q-item-tile>
+            <q-item-tile sublabel>executed: {{ rule.scriptExecutionCount() }} times</q-item-tile>
+            <q-item-tile sublabel>executed time: {{ rule.scriptExecutionDate() ? $ui.dateToString(rule.scriptExecutionDate()) : 'never' }}</q-item-tile>
+            <q-item-tile sublabel>execution status: {{ rule.scriptReturnCode() ? ('code '+rule.scriptReturnCode()+' (error)') : 'ok' }}</q-item-tile>
+          </q-item-main>
+        </q-item>
+
+        <q-item multiline>
+          <q-item-side icon="code" />
+          <q-item-main>
+            <q-item-tile label>Script</q-item-tile>
+            <q-item-tile sublabel><q-btn dense outline color="secondary" :label="script(rule).name()" :icon="$ething.meta.get(script(rule)).icon" @click="$ui.open(script(rule))"/></q-item-tile>
+          </q-item-main>
+        </q-item>
+
+
+      </q-collapsible>
     </q-list>
 
     <div v-if="!rules.length">
@@ -103,6 +122,10 @@ export default {
       rule.execute().finally(() => {
         this.loading = false
       })
+    },
+
+    script (rule) {
+      return this.$ething.arbo.get(rule.script())
     }
   }
 

@@ -38,10 +38,14 @@
         <div v-if="files.length">
           <q-item-separator inset v-if="folders.length"/>
           <q-list-header inset>Files</q-list-header>
-          <q-item v-for="file in files" :key="file.id()" :to="$ui.open(file)">
+          <q-item v-for="file in files" :key="file.id()" :to="$ui.route(file)">
             <q-item-side :icon="$ething.meta.get(file).icon" inverted :color="$ething.meta.get(file).color" />
             <q-item-main>
-              <q-item-tile label>{{ file.basename() }}</q-item-tile>
+              <q-item-tile label>
+                {{ file.basename() }}
+                <small v-if="file.createdBy()" class="text-faded">{{ createdBy(file).basename() }}</small>
+                <q-icon v-if="file.public()" name="share" color="warning" />
+              </q-item-tile>
               <q-item-tile sublabel>{{ $ui.dateToString(file.modifiedDate()) }}</q-item-tile>
               <q-item-tile sublabel>{{ $ui.sizeToString(file.size()) }}</q-item-tile>
             </q-item-main>
@@ -57,10 +61,13 @@
         <div v-if="tables.length">
           <q-item-separator inset v-if="folders.length || files.length"/>
           <q-list-header inset>Table</q-list-header>
-          <q-item v-for="table in tables" :key="table.id()" :to="$ui.open(table)">
+          <q-item v-for="table in tables" :key="table.id()" :to="$ui.route(table)">
             <q-item-side :icon="$ething.meta.get(table).icon" inverted :color="$ething.meta.get(table).color" />
             <q-item-main>
-              <q-item-tile label>{{ table.basename() }}</q-item-tile>
+              <q-item-tile label>
+                {{ table.basename() }}
+                <small v-if="table.createdBy()" class="text-faded">{{ createdBy(table).basename() }}</small>
+              </q-item-tile>
               <q-item-tile sublabel>{{ $ui.dateToString(table.modifiedDate()) }}</q-item-tile>
               <q-item-tile sublabel>{{ table.length() }} rows</q-item-tile>
             </q-item-main>
@@ -106,7 +113,6 @@
 </template>
 
 <script>
-import EThing from 'ething-js'
 
 export default {
   name: 'PageData',
@@ -214,6 +220,10 @@ export default {
     create (type) {
       this.$router.push('/create/'+type)
     },
+
+    createdBy (resource) {
+      return resource.createdBy() ? this.$ething.arbo.get(resource.createdBy()) : null
+    }
   }
 }
 </script>

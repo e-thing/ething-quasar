@@ -20,7 +20,7 @@
     <div v-if="listOrdered.length">
       <q-list link no-border>
 
-          <q-item v-for="(item, index) in listOrdered" :key="index" :to="$ui.open(item.device)" class="item">
+          <q-item v-for="(item, index) in listOrdered" :key="index" :to="$ui.route(item.device)" class="item">
             <div v-for="n in item.level" :class="gen(n)"></div>
             <q-item-side :icon="$ething.meta.get(item.device).icon" inverted :color="$ething.meta.get(item.device).color" />
             <q-item-main>

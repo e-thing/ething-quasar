@@ -4,39 +4,47 @@ import { format } from 'quasar'
 const { humanStorageSize } = format
 
 export default ({ app, router, Vue, store }) => {
-  Vue.prototype.$ui = UI
-}
+  Vue.prototype.$ui = {
 
-const UI = {
-
-  open (resource) {
-    if (resource instanceof EThing.File) {
-      if (/\.plot$/.test(resource.basename())) {
-        return '/chart/' + resource.id()
-      } else if (/image/.test(resource.mime())) {
-        return '/image/' + resource.id()
-      } else {
-        return '/text/' + resource.id()
+    route (resource) {
+      if (resource instanceof EThing.File) {
+        if (/\.plot$/.test(resource.basename())) {
+          return '/chart/' + resource.id()
+        } else if (/image/.test(resource.mime())) {
+          return '/image/' + resource.id()
+        } else {
+          return '/text/' + resource.id()
+        }
       }
-    }
-    else if (resource instanceof EThing.Table) {
-      return '/table/' + resource.id()
-    }
-    else if (resource instanceof EThing.Device) {
-      return '/device/' + resource.id()
-    }
-  },
+      else if (resource instanceof EThing.Table) {
+        return '/table/' + resource.id()
+      }
+      else if (resource instanceof EThing.Device) {
+        return '/device/' + resource.id()
+      }
+      else if (resource instanceof EThing.Rule) {
+        return '/rule'
+      }
+    },
 
-  dateToString (d) {
-    if (!d) {
-      return '-'
-    }
-    var ts = d.getTime()
-    return date.formatDate(ts, 'YYYY-MM-DD HH:mm')
-  },
+    open (resource) {
+      var route = this.route(resource)
+      if (route) {
+        router.app.$router.push(route)
+      }
+    },
 
-  sizeToString (s) {
-    return humanStorageSize(s)
-  },
+    dateToString (d) {
+      if (!d) {
+        return '-'
+      }
+      var ts = d.getTime()
+      return date.formatDate(ts, 'YYYY-MM-DD HH:mm')
+    },
 
+    sizeToString (s) {
+      return humanStorageSize(s)
+    },
+
+  }
 }
