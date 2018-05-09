@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "axios": "^0.18.0",
-    "ething-js": "^0.1.4",
+    "ething-js": "^0.1.5",
     "highcharts": "^6.1.0",
     "jsonlint-mod": "^1.7.2",
     "vue-codemirror": "^4.0.5",

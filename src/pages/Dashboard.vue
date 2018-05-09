@@ -184,9 +184,12 @@ export default {
     },
 
     file (callback) {
-      var file = this.$ething.arbo.findOne( (r) => {
-				return r instanceof this.$ething.File && r.name() === LAYOUT_FILENAME;
-			})
+      var files = this.$ething.arbo.glob(LAYOUT_FILENAME).filter(r => r instanceof this.$ething.File)
+      var file = null
+
+      if (files.length) {
+        file = files[0]
+      }
 
       if (typeof callback === 'function'){
         if (!file) {

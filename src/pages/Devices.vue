@@ -172,7 +172,7 @@ export default {
     onRemoveClick (resource) {
       var name = resource.name()
 
-      var children = this.$ething.arbo.find(r => {
+      var children = this.$ething.arbo.list().filter(r => {
         return r.createdBy() === resource.id()
       })
 

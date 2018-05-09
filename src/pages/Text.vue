@@ -83,7 +83,7 @@ export default {
     resource () {
       console.log('resource computed !')
       var id = this.$route.params.id
-      var r = this.$store.getters['ething/findOneById'](id)
+      var r = this.$store.getters['ething/get'](id)
       if (id && id.length) {
         if (!r) {
           this.$router.replace('/404')

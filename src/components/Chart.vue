@@ -158,7 +158,7 @@ DataSource.prototype.setHistory = function (h) {
 
 DataSource.prototype.add = function (source, done) {
   var self = this
-  var resource = EThing.arbo.findOneById(source.resource)
+  var resource = EThing.arbo.get(source.resource)
 
   if (resource instanceof EThing.Table) {
     var s = null
@@ -177,7 +177,7 @@ DataSource.prototype.add = function (source, done) {
         keys: [],
         done: [],
         fetch: function (end) {
-          var r = EThing.arbo.findOneById(this.resource)
+          var r = EThing.arbo.get(this.resource)
           var query = null
 
           if (typeof self.history === 'number') {
@@ -254,7 +254,7 @@ export default {
     var file = false
 
     if (typeof this.preferences === 'string') {
-      var r = this.$ething.arbo.findOneById(this.preferences)
+      var r = this.$ething.arbo.get(this.preferences)
       if (r instanceof this.$ething.File) {
         file = r
       }
@@ -495,7 +495,7 @@ export default {
     },
 
     optionsBuildKeyOptions (resourceId) {
-      return this.$ething.arbo.findOneById(resourceId).keys().map(key => {
+      return this.$ething.arbo.get(resourceId).keys().map(key => {
         return {
           label: key,
           value: key
@@ -561,14 +561,14 @@ export default {
       var resource = null
 
       if (typeof this.preferences === 'string') {
-        resource = this.$ething.arbo.findOneById(this.preferences)
+        resource = this.$ething.arbo.get(this.preferences)
       }
       if (this.preferences instanceof this.$ething.Table) {
         resource = this.preferences
       }
 
       if (resource) {
-        var createdBy = this.$ething.arbo.findOneById(resource.createdBy())
+        var createdBy = this.$ething.arbo.get(resource.createdBy())
         if (createdBy) {
           preferences.subtitle = createdBy.basename()
         }

@@ -27,11 +27,10 @@
 
         <div v-if="folders.length">
           <q-list-header inset>Folders</q-list-header>
-          <q-item v-for="folder in folders" :key="folder.id()" :to="folder.name()" append>
-            <q-item-side :icon="$ething.meta.get(folder).icon" inverted :color="$ething.meta.get(folder).color" />
+          <q-item v-for="(folder, key) in folders" :key="folder" :to="pJoin(path, folder)" append>
+            <q-item-side icon="folder" inverted color="yellow" />
             <q-item-main>
-              <q-item-tile label>{{ folder.basename() }}</q-item-tile>
-              <q-item-tile sublabel>{{ $ui.dateToString(folder.modifiedDate()) }}</q-item-tile>
+              <q-item-tile label>{{ folder }}</q-item-tile>
             </q-item-main>
           </q-item>
         </div>
@@ -117,25 +116,30 @@ export default {
   },
 
   computed: {
+    path () {
+      return this.$route.params.path || ''
+    },
     resources () {
-      return this.$store.getters['ething/glob'](this.$route.params.path || '')
+      return this.$store.getters['ething/glob'](this.path)
     },
     folders () {
-      return this.resources.filter( (r) => r instanceof EThing.Folder ).filter(r => {
-        // only folders that have files or tables in it !
-        return r.find(r => {
-          return r instanceof EThing.File || r instanceof EThing.Table
-        }).length
-      })
+      var path = this.path
+      if (path && !/\/$/.test(path))
+        path += '/'
+      var globReS = new RegExp('^' + path)
+      var globRe = new RegExp('^' + path + '[^/]+/')
+      return this.$store.getters['ething/filter'](r => (r instanceof this.$ething.File || r instanceof this.$ething.Table) && globRe.test(r.name()))
+        .map(r => r.dirname().replace(globReS, '').replace(/\/.*$/, ''))
+        .filter((value, index, self) => self.indexOf(value) === index)
     },
     files () {
-      return this.resources.filter( (r) => r instanceof EThing.File )
+      return this.resources.filter( (r) => r instanceof this.$ething.File )
     },
     tables () {
-      return this.resources.filter( (r) => r instanceof EThing.Table )
+      return this.resources.filter( (r) => r instanceof this.$ething.Table )
     },
     pathItems () {
-      var pathItems = (this.$route.params.path || '').split('/')
+      var pathItems = (this.path).split('/')
       pathItems.unshift('Home')
       var items = []
       var p = '/data'
@@ -157,6 +161,18 @@ export default {
 
   methods: {
 
+    pJoin (a, b) {
+      if (!a) {
+        return b
+      }
+      if (/^\//.test(b)) {
+        // absolute
+        return b
+      }
+      a = a.replace(/\/+$/, '')
+      return a + '/' + b
+    },
+
     settingsClick (resource) {
       this.$router.push('/resource/' + resource.id())
     },
@@ -168,7 +184,7 @@ export default {
     onRemoveClick (resource) {
       var name = resource.name()
 
-      var children = this.$ething.arbo.find(r => {
+      var children = this.$ething.arbo.list().filter(r => {
         return r.createdBy() === resource.id()
       })
 

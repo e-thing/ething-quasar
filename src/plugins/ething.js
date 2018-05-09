@@ -483,7 +483,7 @@ var SSE = {
 			});
 
 		if(isResourceEvent){
-			resource = EThing.arbo.findOneById(event.data.resource);
+			resource = EThing.arbo.get(event.data.resource);
 
 			var resourceId = event.data.resource;
 

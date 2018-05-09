@@ -56,7 +56,7 @@ export default {
           var createdByArr = []
           var p = r
           for (let i = 0; i<2; i++) {
-            var createdBy = p.createdBy() ? this.$ething.arbo.findOneById(p.createdBy()) : null
+            var createdBy = p.createdBy() ? this.$ething.arbo.get(p.createdBy()) : null
             if (createdBy) {
               createdByArr.push(createdBy)
               p = createdBy
@@ -64,7 +64,7 @@ export default {
               break
             }
           }
-          //var createdBy = r.createdBy() ? this.$ething.arbo.findOneById(r.createdBy()) : null
+          //var createdBy = r.createdBy() ? this.$ething.arbo.get(r.createdBy()) : null
           return {
             label: r.name(),
             value: this.useId ? r.id() : r,

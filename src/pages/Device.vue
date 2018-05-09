@@ -56,7 +56,7 @@ export default {
   computed: {
     resource () {
       var id = this.$route.params.id
-      var r = this.$store.getters['ething/findOneById'](id)
+      var r = this.$store.getters['ething/get'](id)
       if (id && id.length) {
         if (!r || !r.isTypeof('Device')) {
           this.$router.replace('/404')

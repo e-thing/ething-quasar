@@ -59,7 +59,7 @@ export default {
   computed: {
     resource () {
       var id = this.$route.params.id
-      var r = this.$store.getters['ething/findOneById'](id)
+      var r = this.$store.getters['ething/get'](id)
       if (id && id.length) {
         if (!r) {
           this.$router.replace('/404')
@@ -109,7 +109,7 @@ export default {
     },
 
     /*title () {
-      var createdBy = this.$ething.arbo.findOneById(this.resource.createdBy())
+      var createdBy = this.$ething.arbo.get(this.resource.createdBy())
       var title = this.resource.name()
       if (createdBy) {
         title += ' - ' + createdBy.basename()
@@ -118,7 +118,7 @@ export default {
     },*/
 
     createdBy () {
-      return this.$ething.arbo.findOneById(this.resource.createdBy())
+      return this.$ething.arbo.get(this.resource.createdBy())
     },
 
 

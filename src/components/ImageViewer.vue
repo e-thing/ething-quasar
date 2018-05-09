@@ -60,21 +60,15 @@ export default {
         var images = []
 
         if (typeof source === 'string') {
-          source = this.$store.getters['ething/findOneById'](id)
+          source = this.$store.getters['ething/get'](id)
         }
 
-        if (source instanceof this.$ething.Resource) {
+        if (source instanceof this.$ething.File) {
+          images = this.$ething.arbo.glob(source.dirname() + '/*')
+        }
 
-          if (source instanceof this.$ething.File) {
-            images = source.parent().children(r => {
-              return this.isImage(r)
-            })
-          } else if (source instanceof this.$ething.Folder) {
-            images = source.children(r => {
-              return this.isImage(r)
-            })
-          }
-
+        if (Array.isArray(images)) {
+          images = images.filter(this.isImage)
         }
 
         return images

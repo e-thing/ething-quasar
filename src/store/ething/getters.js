@@ -6,7 +6,7 @@ export const filter = (state) => (filter) => {
   return state.resources.filter(filter)
 }
 
-export const findOneById = (state) => (id) => {
+export const get = (state) => (id) => {
   return state.resources.find(r => r.id() === id)
 }
 

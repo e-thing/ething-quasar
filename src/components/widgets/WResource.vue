@@ -16,7 +16,7 @@ export default {
         if (this.resource instanceof EThing.Resource) {
           return this.resource
         } else {
-          return this.$store.getters['ething/findOneById'](this.resource)
+          return this.$store.getters['ething/get'](this.resource)
         }
       }
     }
