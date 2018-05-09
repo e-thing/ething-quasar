@@ -29,6 +29,10 @@ export default [
         component: () => import('pages/Text')
       },
       {
+        path: 'script/:id',
+        component: () => import('pages/Script')
+      },
+      {
         path: 'image/:id',
         component: () => import('pages/Image')
       },

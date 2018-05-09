@@ -12,6 +12,8 @@ export default ({ app, router, Vue, store }) => {
           return '/chart/' + resource.id()
         } else if (/image/.test(resource.mime())) {
           return '/image/' + resource.id()
+        } else if ('application/javascript' == resource.mime()) {
+          return '/script/' + resource.id()
         } else {
           return '/text/' + resource.id()
         }
