@@ -190,11 +190,11 @@ export default {
     					});
 
     				  // Plain Text
-    				} else if (/text\/plain/.test(contentType)) {
+    				} else if (/text/.test(contentType)) {
 
     					blobToText(blobData, data => {
                 operation.result = data
-                operation.resultType = 'test'
+                operation.resultType = 'text'
     					});
 
     				  // Image

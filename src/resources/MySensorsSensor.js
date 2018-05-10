@@ -51,6 +51,12 @@ export default {
         'S_CAM',
         'S_UNK',
       ]
+    },
+
+    createdBy: {
+      filter: (r) => {
+        return r.isTypeof('MySensorsNode')
+      }
     }
   },
 
