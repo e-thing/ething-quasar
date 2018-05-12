@@ -27,8 +27,12 @@ module.exports = function (ctx) {
       remove: []
     },
     build: {
+      publicPath: '/client',
       scopeHoisting: true,
-      vueRouterMode: 'history',
+      vueRouterMode: 'hash',
+      env: {
+        API: JSON.stringify(ctx.prod && ctx.mode.spa)
+      },
       // gzip: true,
       // analyze: true,
       // extractCSS: false,

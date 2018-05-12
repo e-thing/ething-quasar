@@ -108,9 +108,10 @@ export default {
 
     reloadContent () {
       this.loading = true
-      this.resource.read().then( (data) => {
+      this.resource.read(true).then( (data) => {
         this.setLangage(this.resource.mime())
-        this.content = data
+
+        this.content = String.fromCharCode.apply(null, new Uint8Array(data))
         this.$nextTick(() => {
           this.markClean()
           this.codemirror().clearHistory()

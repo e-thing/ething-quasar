@@ -64,7 +64,7 @@ export default {
         }
 
         if (source instanceof this.$ething.File) {
-          images = this.$ething.arbo.glob(source.dirname() + '/*')
+          images = this.$ething.arbo.glob(source.dirname() ? (source.dirname() + '/*') : '*')
         }
 
         if (Array.isArray(images)) {

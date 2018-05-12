@@ -60,7 +60,17 @@ export default ({ app, router, Vue, store }) => {
 
       // check if there is a stored session !
 
-      var serverUrl = LocalStorage.get.item('ething.server.url')
+      var serverUrl
+
+      if (process.env.API === true) {
+        var url = window.location.href
+        var arr = url.split("/")
+        serverUrl = arr[0] + "//" + arr[2]
+      } else if (typeof process.env.API === 'string') {
+        serverUrl = process.env.API
+      } else {
+        serverUrl = LocalStorage.get.item('ething.server.url')
+      }
 
       if (!serverUrl) {
         console.warn('no serverUrl found ! need to create a new session');

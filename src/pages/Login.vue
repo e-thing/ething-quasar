@@ -4,6 +4,7 @@
 
     <div class="q-pb-md">
       <q-field
+        v-if="setServer"
         :error="$v.server.$error"
         error-label="required"
       >
@@ -62,9 +63,24 @@ export default {
   name: 'PageLogin',
 
   data () {
+
+    var serverUrl, setServer = false
+
+    if (process.env.API === true) {
+      var url = window.location.href
+      var arr = url.split("/")
+      serverUrl = arr[0] + "//" + arr[2]
+    } else if (typeof process.env.API === 'string') {
+      serverUrl = process.env.API
+    } else {
+      setServer = true
+      serverUrl = this.$q.localStorage.get.item('ething.server.url') || defaultServerUrl
+    }
+    
     return {
+      setServer,
       loading: false,
-      server: this.$q.localStorage.get.item('ething.server.url') || defaultServerUrl,
+      server: serverUrl,
       form: {
         login: '',
         password: ''
@@ -73,15 +89,20 @@ export default {
   },
 
   validations () {
-    return {
-      server: {
-        required
-      },
+    var v = {
       form: {
         login: { required },
         password: { required  }
       }
     }
+
+    if (this.setServer) {
+      v.server = {
+        required
+      }
+    }
+
+    return v
   },
 
   methods: {
