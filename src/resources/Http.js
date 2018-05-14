@@ -1,5 +1,6 @@
 
 import FormSchemaScope from '../plugins/formSchema/FormSchemaScope'
+import EThing from 'ething-js'
 
 export default {
 
@@ -19,7 +20,7 @@ export default {
       type: 'json',
       required: true,
       get (resource) {
-        return resource.getSpecification()
+        return EThing.Device.Http.getSpecification(resource)
       },
       default: {
         "swagger": "2.0",

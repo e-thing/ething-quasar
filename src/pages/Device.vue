@@ -25,7 +25,7 @@
     <div v-if="children.length" class="q-py-md">
       <div class="q-my-md q-title q-title-opacity">Resources</div>
       <q-item v-for="child in children" :key="child.id()" :to="$ui.route(child)">
-        <q-item-side :icon="$ething.meta.get(child).icon" inverted :color="$ething.meta.get(child).color" />
+        <q-item-side :icon="$meta.get(child).icon" inverted :color="$meta.get(child).color" />
         <q-item-main>
           <q-item-tile label>{{ child.basename() }}</q-item-tile>
           <q-item-tile v-if="child.isTypeof('Device')" label><small class="text-faded">{{ child.type() }}</small></q-item-tile>

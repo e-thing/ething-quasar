@@ -6,7 +6,7 @@
     <q-list no-border>
       <q-collapsible indent v-for="rule in rules" :key="rule.id()" popup >
         <template slot="header">
-          <q-item-side :icon="$ething.meta.get(rule).icon" inverted :color="$ething.meta.get(rule).color" />
+          <q-item-side :icon="$meta.get(rule).icon" inverted :color="$meta.get(rule).color" />
           <q-item-main>
             <q-item-tile label>{{ rule.basename() }}</q-item-tile>
             <q-item-tile sublabel>{{ $ui.dateToString(rule.modifiedDate()) }}</q-item-tile>
@@ -34,7 +34,7 @@
           <q-item-side icon="code" />
           <q-item-main>
             <q-item-tile label>Script</q-item-tile>
-            <q-item-tile sublabel><q-btn dense outline color="secondary" :label="script(rule).name()" :icon="$ething.meta.get(script(rule)).icon" @click="$ui.open(script(rule))"/></q-item-tile>
+            <q-item-tile sublabel><q-btn dense outline color="secondary" :label="script(rule).name()" :icon="$meta.get(script(rule)).icon" @click="$ui.open(script(rule))"/></q-item-tile>
           </q-item-main>
         </q-item>
 
@@ -135,8 +135,8 @@ export default {
 
     var eventOptions = []
 
-    for (let k in this.$ething.meta.events) {
-      let event = this.$ething.meta.events[k]
+    for (let k in this.$meta.events) {
+      let event = this.$meta.events[k]
       eventOptions.push({
         label: k,
         value: k,
@@ -182,7 +182,7 @@ export default {
 
       if (this.edit.event) {
 
-        let meta = this.$ething.meta.events[this.edit.event]
+        let meta = this.$meta.events[this.edit.event]
 
         var required = meta.required || []
         var properties = {}

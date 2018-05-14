@@ -7,7 +7,7 @@
           <template v-for="cat in categories">
             <q-list-header inset>{{ cat.name }}</q-list-header>
             <q-item v-close-overlay v-for="type in cat.types" :key="type.type" @click.native="create(type.type)">
-              <q-item-side :icon="$ething.meta.get(type.type).icon" :color="$ething.meta.get(type.type).color" />
+              <q-item-side :icon="$meta.get(type.type).icon" :color="$meta.get(type.type).color" />
               <q-item-main>
                 <q-item-tile label>{{ type.label }}</q-item-tile>
               </q-item-main>
@@ -22,7 +22,7 @@
 
           <q-item v-for="(item, index) in listOrdered" :key="index" :to="$ui.route(item.device)" class="item">
             <div v-for="n in item.level" :class="gen(n)"></div>
-            <q-item-side :icon="$ething.meta.get(item.device).icon" inverted :color="$ething.meta.get(item.device).color" />
+            <q-item-side :icon="$meta.get(item.device).icon" inverted :color="$meta.get(item.device).color" />
             <q-item-main>
               <q-item-tile label>{{ item.device.basename() }}</q-item-tile>
               <q-item-tile sublabel>{{ $ui.dateToString(item.device.lastSeenDate() || item.device.modifiedDate()) }}</q-item-tile>
@@ -61,8 +61,8 @@ export default {
 
     var categories = {}
 
-    this.$ething.meta.types.forEach(type => {
-      var meta = this.$ething.meta.get(type)
+    this.$meta.types.forEach(type => {
+      var meta = this.$meta.get(type)
       if (meta.inheritances.indexOf('Device') !== -1 && !meta.virtual) {
 
         var path = meta.path || []

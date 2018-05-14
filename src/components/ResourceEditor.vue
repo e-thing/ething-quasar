@@ -87,7 +87,7 @@ export default {
           var type = this.resource instanceof EThing.Resource ? this.resource.type() : this.resource
           var resource = this.resource instanceof EThing.Resource ? this.resource : null
 
-          var meta = resource ? EThing.meta.get(resource) : EThing.meta.get(type)
+          var meta = resource ? this.$meta.get(resource) : this.$meta.get(type)
 
           var required = meta.required || []
           var properties = {}
@@ -102,7 +102,7 @@ export default {
           }
           for(let k in meta.properties) {
             let isRequired = meta.properties[k].required || required.indexOf(k)!==-1
-            
+
             if (!meta.properties[k].readOnly || isRequired) {
                 properties[k] = meta.properties[k]
                 if (meta.properties[k].required && required.indexOf(k)===-1) {

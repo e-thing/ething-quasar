@@ -54,8 +54,8 @@ var FormSchemaEthingEvent = {
 
     var eventOptions = []
 
-    for (let k in this.$ething.meta.events) {
-      let event = this.$ething.meta.events[k]
+    for (let k in this.$meta.events) {
+      let event = this.$meta.events[k]
       eventOptions.push({
         label: k,
         value: k,
@@ -82,7 +82,7 @@ var FormSchemaEthingEvent = {
 
       if (this.event) {
 
-        let meta = this.$ething.meta.events[this.event]
+        let meta = this.$meta.events[this.event]
 
         var required = meta.required || []
         var properties = {}

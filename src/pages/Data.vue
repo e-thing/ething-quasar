@@ -8,13 +8,13 @@
     <!--<q-btn-dropdown color="primary" label="Create">
       <q-list link>
         <q-item v-close-overlay @click.native="create('File')">
-          <q-item-side :icon="$ething.meta.get('File').icon" inverted :color="$ething.meta.get('File').color" />
+          <q-item-side :icon="$meta.get('File').icon" inverted :color="$meta.get('File').color" />
           <q-item-main>
             <q-item-tile label>File</q-item-tile>
           </q-item-main>
         </q-item>
         <q-item v-close-overlay @click.native="create('Table')">
-          <q-item-side :icon="$ething.meta.get('Table').icon" inverted :color="$ething.meta.get('Table').color" />
+          <q-item-side :icon="$meta.get('Table').icon" inverted :color="$meta.get('Table').color" />
           <q-item-main>
             <q-item-tile label>Table</q-item-tile>
           </q-item-main>
@@ -39,7 +39,7 @@
           <q-item-separator inset v-if="folders.length"/>
           <q-list-header inset>Files</q-list-header>
           <q-item v-for="file in files" :key="file.id()" :to="$ui.route(file)">
-            <q-item-side :icon="$ething.meta.get(file).icon" inverted :color="$ething.meta.get(file).color" />
+            <q-item-side :icon="$meta.get(file).icon" inverted :color="$meta.get(file).color" />
             <q-item-main>
               <q-item-tile label>
                 {{ file.basename() }}
@@ -62,7 +62,7 @@
           <q-item-separator inset v-if="folders.length || files.length"/>
           <q-list-header inset>Table</q-list-header>
           <q-item v-for="table in tables" :key="table.id()" :to="$ui.route(table)">
-            <q-item-side :icon="$ething.meta.get(table).icon" inverted :color="$ething.meta.get(table).color" />
+            <q-item-side :icon="$meta.get(table).icon" inverted :color="$meta.get(table).color" />
             <q-item-main>
               <q-item-tile label>
                 {{ table.basename() }}
@@ -97,14 +97,14 @@
             direction="up"
         >
             <q-fab-action
-                :color="$ething.meta.get('File').color"
+                :color="$meta.get('File').color"
                 @click="create('File')"
-                :icon="$ething.meta.get('File').icon"
+                :icon="$meta.get('File').icon"
             />
             <q-fab-action
-                :color="$ething.meta.get('Table').color"
+                :color="$meta.get('Table').color"
                 @click="create('Table')"
-                :icon="$ething.meta.get('Table').icon"
+                :icon="$meta.get('Table').icon"
             />
         </q-fab>
     </q-page-sticky>

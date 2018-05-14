@@ -4,7 +4,7 @@
 
     <div class="q-pb-md">
       <q-field
-        v-if="setServer"
+        v-if="$ui.dynamicServerUrl"
         :error="$v.server.$error"
         error-label="required"
       >
@@ -64,23 +64,9 @@ export default {
 
   data () {
 
-    var serverUrl, setServer = false
-
-    if (process.env.API === true) {
-      var url = window.location.href
-      var arr = url.split("/")
-      serverUrl = arr[0] + "//" + arr[2]
-    } else if (typeof process.env.API === 'string') {
-      serverUrl = process.env.API
-    } else {
-      setServer = true
-      serverUrl = this.$q.localStorage.get.item('ething.server.url') || defaultServerUrl
-    }
-    
     return {
-      setServer,
       loading: false,
-      server: serverUrl,
+      server: this.$ui.getServerUrl() || defaultServerUrl,
       form: {
         login: '',
         password: ''
@@ -96,7 +82,7 @@ export default {
       }
     }
 
-    if (this.setServer) {
+    if (this.$ui.dynamicServerUrl) {
       v.server = {
         required
       }
@@ -114,27 +100,11 @@ export default {
       }
 
       this.loading = true
-      var server = this.server.replace(/\/+$/, '')
+      var server = this.server.trim().replace(/\/+$/, '')
 
-      const params = new URLSearchParams();
-      params.append('login', this.form.login);
-      params.append('password', this.form.password);
+      this.$ui.setServerUrl(server)
 
-      this.$axios.request({
-        method: 'post',
-        url: server + '/auth/password',
-        withCredentials: true,
-        data: params
-      }).then(response => {
-
-        // store it in the localstorage
-        this.$q.localStorage.set('ething.server.url', server)
-
-        // redirect
-        this.$ething.app.reset()
-        this.$router.replace(this.$route.query.redirect_uri || '/')
-
-      }).catch(error => {
+      this.$ui.login(this.form.login, this.form.password).catch(error => {
 
         if (error.response) {
           // The request was made and the server responded with a status code

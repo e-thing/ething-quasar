@@ -1,7 +1,7 @@
 <template>
   <q-page padding>
 
-    <div class="q-my-md q-display-1 q-display-1-opacity">{{ $ething.meta.get(type).label || type }}</div>
+    <div class="q-my-md q-display-1 q-display-1-opacity">{{ $meta.get(type).label || type }}</div>
 
     <q-breadcrumbs class="q-pb-md" v-if="pathItems.length>1">
       <q-breadcrumbs-el v-for="(item, index) in pathItems" :key="index" :label="item" />
@@ -32,7 +32,7 @@ export default {
     },
 
     pathItems () {
-      return (this.$ething.meta.get(this.type).path || [])
+      return (this.$meta.get(this.type).path || [])
     }
   },
 
@@ -48,7 +48,7 @@ export default {
   },
 
   mounted () {
-    var meta = this.$ething.meta.get(this.type)
+    var meta = this.$meta.get(this.type)
     if (meta.inheritances.length === 0) {
       this.$router.replace('/404')
     }

@@ -95,15 +95,8 @@ export default {
   },
   methods: {
     logout () {
-      this.$root.state = 'begin'
 
-      this.$axios.request({
-        method: 'get',
-        url: this.$ething.config.serverUrl + '/auth/logout',
-        withCredentials: true,
-      }).finally(() => {
-        this.$ething.app.disconnect()
-      })
+      this.$ui.logout()
 
     },
     reload () {

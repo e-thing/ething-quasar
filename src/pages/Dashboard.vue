@@ -129,18 +129,18 @@ export default {
     pinResourceWidget () {
       if (!this.pinResourceWidgetName)
         return undefined
-      return EThing.widgets.find(this.pinResourceWidgetName)
+      return this.$widget.find(this.pinResourceWidgetName)
     },
     pinResourceWidgetName () {
       if (!this.pinResource)
         return undefined
-      var widgets = EThing.meta.get(this.pinResource).widgets || []
+      var widgets = this.$meta.get(this.pinResource).widgets || []
       return widgets.length ? widgets[0].name : undefined
     },
     pinResourceWidgetOptions () {
       if (!this.pinResource)
         return undefined
-      var widgets = EThing.meta.get(this.pinResource).widgets || []
+      var widgets = this.$meta.get(this.pinResource).widgets || []
       if (widgets.length) {
         var cpy = Object.assign({}, widgets[0])
         delete cpy.name
@@ -289,7 +289,7 @@ export default {
     },
 
     pinResourceFilter (r) {
-      return EThing.meta.get(r).widgets.length
+      return this.$meta.get(r).widgets.length
     },
 
     removeItem (item) {

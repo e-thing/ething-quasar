@@ -8,6 +8,9 @@ module.exports = function (ctx) {
       'axios',
       'ething',
       'ething-ui',
+      'ething-sse',
+      'ething-meta',
+      'ething-widget',
       'formSchema',
       'vuelidate'
     ],

@@ -1,7 +1,7 @@
 <template>
   <q-page>
-    <multipane class="absolute fit vertical-panes" layout="vertical">
-      <div class="pane" :style="{ width: '50%', maxWidth: '75%' }">
+    <multipane class="absolute fit" :class="orientation == 'vertical' ? 'vertical-panes' : 'horizontal-panes'" :layout="orientation">
+      <div class="pane" :style="orientation == 'vertical' ? { width: '50%', maxWidth: '75%' } : { height: '50%', maxHeight: '75%' }">
         <q-btn-group flat >
           <q-btn :loading="saveLoading" label="save" icon="mdi-content-save-outline" @click="save"/>
           <q-btn :loading="exeLoading" label="run" icon="play_arrow" @click="onExecuteClick"/>
@@ -15,7 +15,7 @@
         <div v-if="exeLoading" class="absolute-center text-faded">
           running ...
         </div>
-        <div v-else>
+        <div v-else class="absolute fit">
           <div class="output">
             <div v-for="(item, key) in console.output" :key="key" class="output-line" :class="item.type">
               <pre class="q-ma-none"><code>{{ item.chunk }}</code></pre>
@@ -80,7 +80,8 @@ export default {
       dirty: false,
       console: {
         output: []
-      }
+      },
+      orientation: this.$q.platform.is.mobile ? 'horizontal' : 'vertical',
     }
   },
 
@@ -172,12 +173,20 @@ export default {
 <style lang="stylus">
 @import '~variables'
 
-.pane {
+.vertical-panes > .pane {
   overflow: auto;
 }
 
 .vertical-panes > .pane ~ .pane {
   border-left: 1px solid #ccc;
+}
+
+.horizontal-panes > .pane ~ .pane {
+  border-top: 1px solid #ccc;
+}
+
+.horizontal-panes > .pane {
+  overflow: auto;
 }
 
 .custom-resizer > .pane ~ .pane {
