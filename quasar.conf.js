@@ -55,8 +55,7 @@ module.exports = function (ctx) {
       open: true // opens browser window automatically
     },
     // framework: 'all' --- includes everything; for dev only!
-    framework: 'all',
-    /*framework: {
+    framework: {
       components: [
         'QLayout',
         'QLayoutHeader',
@@ -66,6 +65,14 @@ module.exports = function (ctx) {
         'QToolbar',
         'QToolbarTitle',
         'QBtn',
+        'QBtnGroup',
+        'QBtnDropdown',
+        'QWindowResizeObservable',
+        'QResizeObservable',
+        'QTabs',
+        'QTab',
+        'QTabPane',
+        'QRouteTab',
         'QIcon',
         'QList',
         'QListHeader',
@@ -78,20 +85,35 @@ module.exports = function (ctx) {
         'QBreadcrumbsEl',
         'QTable',
         'QInnerLoading',
-        'QSpinnerGears',
+        'QSpinnerOval',
+        'QSpinnerPie',
         'QField',
         'QInput',
         'QSelect',
+        'QColor',
+        'QChipsInput',
+        'QSlider',
+        'QToggle',
+        'QKnob',
+        'QCollapsible',
+        'QModal',
+        'QAlert',
+        'QChip',
+        'QPageSticky',
+        'QFab',
+        'QFabAction'
         //
       ],
       directives: [
-        'Ripple'
+        'CloseOverlay'
       ],
       // Quasar plugins
       plugins: [
-        'Notify'
+        'Notify',
+        'Dialog',
+        'LocalStorage',
       ]
-    },*/
+    },
     // animations: 'all' --- includes all animations
     animations: [
     ],
