@@ -4,6 +4,11 @@
 
     <highstock class="chart" :class="{ expended: expended }" :options="options" ref="highcharts"></highstock>
 
+    <q-inner-loading class="text-center" :visible="loading">
+      <div class="q-pa-lg text-primary">loading...</div>
+      <q-spinner-oval color="primary" size="50px" />
+    </q-inner-loading>
+
     <q-modal v-model="saveModal" :content-css="{padding: '50px', minWidth: '50vw'}">
 
       <div class="q-display-1 q-mb-md">Chart save</div>
@@ -306,6 +311,8 @@ export default {
   methods: {
       load (preferences) {
 
+        this.loading = true
+
         this.currentPreferences = extend(true, {}, preferences)
 
         this.dataSource.clear()
@@ -477,7 +484,7 @@ export default {
         })
 
         this.dataSource.load( () => {
-          console.log('dataSource.loaded')
+          this.loading = false
           //this.options = options
           // cleaning ...
           // todo: remove empty pane
@@ -486,7 +493,10 @@ export default {
     },
 
     refresh () {
-        this.dataSource.load()
+      this.loading = true
+      this.dataSource.load(() => {
+        this.loading = false
+      })
     },
 
     onOptionsValidate () {

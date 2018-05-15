@@ -1,7 +1,7 @@
 <template>
   <q-page>
 
-    <chart :preferences="resource" />
+    <chart :preferences="resource" expended/>
 
   </q-page>
 </template>
