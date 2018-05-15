@@ -6,6 +6,7 @@
       label="Event"
       helper="Select the event on which this rule will be executed"
       orientation="vertical"
+      class="formFieldRequired"
     >
       <q-select
         :value="event"
@@ -56,11 +57,13 @@ var FormSchemaEthingEvent = {
 
     for (let k in this.$meta.events) {
       let event = this.$meta.events[k]
-      eventOptions.push({
-        label: k,
-        value: k,
-        sublabel: event.description
-      })
+      if (!event.virtual) {
+        eventOptions.push({
+          label: k,
+          value: k,
+          sublabel: event.description
+        })
+      }
     }
 
     return {
@@ -84,7 +87,9 @@ var FormSchemaEthingEvent = {
 
         let meta = this.$meta.events[this.event]
 
-        var required = meta.required || []
+        schema = meta
+
+        /*var required = meta.required || []
         var properties = {}
 
         for(let k in meta.properties) {
@@ -97,7 +102,7 @@ var FormSchemaEthingEvent = {
         }
 
         schema.required = required
-        schema.properties = properties
+        schema.properties = properties*/
 
       }
 

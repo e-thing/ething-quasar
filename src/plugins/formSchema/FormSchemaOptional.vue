@@ -15,6 +15,7 @@
 <script>
 
 import { FormComponent } from './core'
+import { extend } from 'quasar'
 
 export default {
   name: 'FormSchemaOptional',
@@ -24,15 +25,19 @@ export default {
   computed: {
     filteredSchema () {
 
+      var copySchema = Object.assign({}, this.schema)
+      delete copySchema.anyOf
+      delete copySchema.description
+
       // remove the type==null schema
       var anyOf = this.schema.anyOf.filter(item => item.type !== 'null')
       if (anyOf.length == 1) {
-        return anyOf[0]
+        extend(true, copySchema, anyOf[0])
+      } else {
+        copySchema.anyOf = anyOf
       }
 
-      return {
-        anyOf
-      }
+      return copySchema
     }
   },
 

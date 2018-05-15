@@ -37,8 +37,20 @@ export default {
   computed: {
     items () {
       var requiredProperties = this.schema.required || []
+      var readOnlyProperties = []
+
+      for(let k in this.schema.properties) {
+        if (!this.schema.properties[k].readOnly) {
+            if (this.schema.properties[k].required && requiredProperties.indexOf(k)===-1) {
+                requiredProperties.push(k)
+            }
+        } else {
+          readOnlyProperties.push(k)
+        }
+      }
+
       var keyOrdered = requiredProperties.concat(Object.keys(this.schema.properties || {}).filter(k => {
-          return requiredProperties.indexOf(k)===-1
+          return requiredProperties.indexOf(k)===-1 && readOnlyProperties.indexOf(k)===-1
       }))
 
       return keyOrdered.map(key => {
@@ -80,7 +92,7 @@ verticalMargin = 16px
     margin-bottom verticalMargin
 
 .formFieldRequired
-    & .q-field-label-inner:after
+    & > div > .q-field-label > .q-field-label-inner:after
         content '*'
         color $negative
         margin-left 8px

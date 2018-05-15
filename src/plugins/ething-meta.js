@@ -1,5 +1,7 @@
 import EThing from 'ething-js'
 import resourcesMetaData from '../resources'
+import * as formSchemaCore from './formSchema/core'
+import { extend } from 'quasar'
 
 // meta api
 
@@ -300,14 +302,24 @@ function importDefinitions (def) {
   meta.types = Object.keys(_metadata)
 
   meta.scopes = def.scopes || {}
-  meta.events = def.events || {}
+  extend(true, meta.events, def.events)
+
+  formSchemaCore.definitions.events = meta.events
 
 }
 
 export var meta = {
   get: compile,
   types: Object.keys(_metadata),
-  events: {},
+  events: {
+    ResourceEvent: {
+      properties: {
+        resource: {
+          format: 'ething.resource'
+        }
+      }
+    }
+  },
   scopes: {},
   importDefinitions () {
     return EThing.request({

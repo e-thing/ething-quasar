@@ -207,6 +207,7 @@ export default ({ app, router, Vue, store }) => {
         SSE.start()
 
       }).catch( err => {
+        console.error(err)
         // something went wrong !
         app.data.state = 'error'
         app.data.error = err

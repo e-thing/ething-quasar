@@ -1,8 +1,9 @@
 <template>
   <q-select
-   v-bind:value="value"
+   v-bind:value="formattedValue"
    v-on:input="$emit('input', $event)"
    :options="options"
+   :multiple="multiple"
   />
 </template>
 
@@ -17,10 +18,8 @@ export default {
       notType: String,
       filter: {},
       value: {},
-      useId: {
-        type: Boolean,
-        default: false
-      }
+      useId: Boolean,
+      multiple: Boolean
     },
 
     data () {
@@ -28,18 +27,45 @@ export default {
     },
 
     computed: {
+      formattedValue () {
+        if (this.multiple) {
+          if (Array.isArray(this.value)) {
+            return this.value
+          } else if (this.value) {
+            return [this.value]
+          } else {
+            return []
+          }
+        } else {
+          return this.value
+        }
+      },
       resources () {
+
+        var notTypes = null
+        var types = null
+
+        if (this.notType) {
+          notTypes = this.notType.split(/[ ;,]+/)
+        }
+        if (this.type) {
+          types = this.type.split(/[ ;,]+/)
+        }
         return this.$store.getters['ething/filter']( r => {
 
-          if (this.notType) {
-            if (r.isTypeof(this.notType)) {
-              return false
+          if (notTypes) {
+            for(var i in notTypes) {
+              if (r.isTypeof(notTypes[i])) {
+                return false
+              }
             }
           }
 
-          if (this.type) {
-            if (!r.isTypeof(this.type)){
-              return false
+          if (types) {
+            for(var i in types) {
+              if (!r.isTypeof(types[i])){
+                return false
+              }
             }
           }
 
@@ -64,7 +90,7 @@ export default {
               break
             }
           }
-          //var createdBy = r.createdBy() ? this.$ething.arbo.get(r.createdBy()) : null
+
           return {
             label: r.name(),
             value: this.useId ? r.id() : r,

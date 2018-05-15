@@ -2,11 +2,12 @@
   <q-page padding>
 
     <q-btn flat label="Add" icon="add" color="secondary" @click="$router.push('/create/Rule')"/>
+    <q-btn flat label="Emit custom event" icon="wifi_tethering" color="secondary" @click="emitCustomEvent"/>
 
     <q-list no-border>
       <q-collapsible indent v-for="rule in rules" :key="rule.id()" popup >
         <template slot="header">
-          <q-item-side :icon="$meta.get(rule).icon" inverted :color="$meta.get(rule).color" />
+          <q-item-side :icon="$meta.get(rule).icon" inverted :color="color(rule)" />
           <q-item-main>
             <q-item-tile label>{{ rule.basename() }}</q-item-tile>
             <q-item-tile sublabel>{{ $ui.dateToString(rule.modifiedDate()) }}</q-item-tile>
@@ -25,8 +26,13 @@
             <q-item-tile label>Attributes</q-item-tile>
             <q-item-tile sublabel>event: {{ rule.event().type }}</q-item-tile>
             <q-item-tile sublabel>executed: {{ rule.scriptExecutionCount() }} times</q-item-tile>
-            <q-item-tile sublabel>executed time: {{ rule.scriptExecutionDate() ? $ui.dateToString(rule.scriptExecutionDate()) : 'never' }}</q-item-tile>
-            <q-item-tile sublabel>execution status: {{ rule.scriptReturnCode() ? ('code '+rule.scriptReturnCode()+' (error)') : 'ok' }}</q-item-tile>
+            <q-item-tile sublabel>last executed time: {{ rule.scriptExecutionDate() ? $ui.dateToString(rule.scriptExecutionDate()) : 'never' }}</q-item-tile>
+            <q-item-tile sublabel>last execution status:
+              <span v-if="rule.scriptReturnCode()" class="text-negative">
+                code {{ rule.scriptReturnCode() }} (error)
+              </span>
+              <template v-else>ok</template>
+            </q-item-tile>
           </q-item-main>
         </q-item>
 
@@ -46,51 +52,6 @@
       No rules !
     </div>
 
-    <!--
-    <q-modal v-model="edit.enable" :content-css="{padding: '50px', minWidth: '50vw'}">
-      <div class="q-headline q-mb-md">Create a new rule</div>
-
-      <q-field
-        label="Name"
-        helper="The name of this rule"
-      >
-        <q-input v-model="edit.name" />
-      </q-field>
-
-      <q-field
-        label="Event"
-        helper="Select the event on which this rule will be executed"
-      >
-        <q-select
-          v-model="edit.event"
-         :options="edit.eventOptions"
-        />
-      </q-field>
-
-      <form-schema v-if="edit.event" :schema="editEventSchema" v-model="edit.model" @error="edit.error = $event"/>
-
-      <q-field
-        label="Script"
-        helper="Select the script to be executed"
-      >
-        <resource-select :filter="edit.scriptFilter" v-model="edit.script" use-id/>
-      </q-field>
-
-      <q-btn
-        color="primary"
-        @click="create"
-        label="Create"
-        :disable="!edit.name || !edit.event || !edit.script || edit.error"
-      />
-      <q-btn
-        flat
-        color="negative"
-        @click="edit.enable = false"
-        label="Cancel"
-      />
-    </q-modal>
-  -->
-
   </q-page>
 </template>
 
@@ -106,7 +67,8 @@ export default {
 
   data () {
     return {
-      loading: false
+      loading: false,
+      emitCustomEventName: ''
     }
   },
 
@@ -126,6 +88,39 @@ export default {
 
     script (rule) {
       return this.$ething.arbo.get(rule.script())
+    },
+
+    color (rule) {
+      if (rule.enabled()) {
+        if (rule.scriptReturnCode()) {
+          return 'negative'
+        } else {
+          return this.$meta.get(rule).color
+        }
+      } else {
+        return 'faded'
+      }
+    },
+
+    emitCustomEvent () {
+      this.$q.dialog({
+        title: 'Emit a custom event',
+        message: 'Enter the name of the event you want to send. All the rules binded to this custom event name will be triggered.',
+        prompt: {
+          model: this.emitCustomEventName,
+          type: 'text' // optional
+        },
+        cancel: true,
+        color: 'secondary'
+      }).then(data => {
+        data = data.trim()
+        if (data) {
+          this.emitCustomEventName = data
+          this.$ething.request('/rules/trigger/' + encodeURIComponent(data))
+        }
+      }).catch(() => {
+
+      })
     }
   }
 

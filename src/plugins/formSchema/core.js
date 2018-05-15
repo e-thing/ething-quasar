@@ -1,4 +1,8 @@
 import { required } from 'vuelidate/lib/validators'
+import jsonPointer from 'json-pointer'
+import { extend } from 'quasar'
+
+var definitions = {}
 
 var _registeredForms = []
 
@@ -14,8 +18,36 @@ var unregisterForm = function (generator) {
     _registeredForms.splice(index, 1)
 }
 
+var resolveRef = function (schema) {
+  if (typeof schema['$ref'] === 'string') {
+    var copySchema = Object.assign({}, schema)
+    delete copySchema['$ref']
+    schema = resolve(extend(true, copySchema, jsonPointer.get(definitions, schema['$ref'].replace(/^#/, ''))))
+  }
+
+  return schema
+}
+
+var resolveAllOf = function (schema) {
+  if (Array.isArray(schema.allOf)) {
+    var mergedSchema = Object.assign({}, schema)
+    delete mergedSchema.allOf
+    schema.allOf.forEach(s => {
+      mergedSchema = extend(true, mergedSchema, resolve(s))
+    })
+    schema = mergedSchema
+  }
+  return schema
+}
+
+var resolve = function (schema) {
+  return resolveAllOf(resolveRef(schema))
+}
+
 var makeForm = function (createElement, schema, model, level, onValueUpdate, onErrorUpdate, props) {
-  var type = schema.type
+
+  schema = resolve(schema)
+
   var attributes = {
     props: {
       schema,
@@ -29,8 +61,15 @@ var makeForm = function (createElement, schema, model, level, onValueUpdate, onE
     }
   }
 
-  // console.log(type)
+  // console.log(schema)
   // console.log(model)
+
+  if (Array.isArray(schema.anyOf)) {
+    if (schema.anyOf.filter(item => item.type === 'null').length < schema.anyOf.length) {
+      return createElement('form-schema-optional', attributes)
+    }
+    // todo: form-schema-anyof
+  }
 
   for (let i in _registeredForms) {
     let element = _registeredForms[i](schema)
@@ -42,6 +81,8 @@ var makeForm = function (createElement, schema, model, level, onValueUpdate, onE
   if (Array.isArray(schema.enum)) {
     return createElement('form-schema-enum', attributes)
   }
+
+  var type = schema.type
 
   switch (type) {
     case 'object':
@@ -86,12 +127,6 @@ var makeForm = function (createElement, schema, model, level, onValueUpdate, onE
 
   }
 
-  if (Array.isArray(schema.anyOf)) {
-    if (schema.anyOf.filter(item => item.type === 'null').length < schema.anyOf.length) {
-      return createElement('form-schema-optional', attributes)
-    }
-  }
-
   if (typeof type === 'undefined') {
     return createElement('form-schema-multi-type', attributes)
   }
@@ -115,7 +150,13 @@ var FormComponent = {
       type: Number,
       default: 0
     },
-    required: Boolean
+    required: Boolean,
+    definitions: {
+      type: Object,
+      default () {
+        return {}
+      }
+    }
   },
 
   validations () {
@@ -234,5 +275,7 @@ export {
   makeForm,
   FormComponent,
   registerForm,
-  unregisterForm
+  unregisterForm,
+  definitions,
+  resolve
 }

@@ -6,6 +6,8 @@
       :value="castedModel"
       @input="setValue"
       :filter="schema.filter"
+      :type="types"
+      :multiple="multiple"
       use-id
     />
 
@@ -32,7 +34,19 @@ var FormSchemaEthingResource = {
 
   components: {
     ResourceSelect
-  }
+  },
+
+  computed: {
+    types () {
+      if (this.schema.onlyTypes) {
+        return this.schema.onlyTypes.join(' ')
+      }
+    },
+    multiple () {
+      return this.schema.type === 'array'
+    }
+  },
+  
 }
 
 Vue.component('FormSchemaEthingResource', FormSchemaEthingResource)
