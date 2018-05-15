@@ -65,7 +65,8 @@ var makeForm = function (createElement, schema, model, level, onValueUpdate, onE
   // console.log(model)
 
   if (Array.isArray(schema.anyOf)) {
-    if (schema.anyOf.filter(item => item.type === 'null').length < schema.anyOf.length) {
+    var nullItems = schema.anyOf.filter(item => item.type === 'null')
+    if (nullItems.length > 0 && nullItems.length < schema.anyOf.length) {
       return createElement('form-schema-optional', attributes)
     }
     // todo: form-schema-anyof

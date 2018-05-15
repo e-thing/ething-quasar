@@ -46,7 +46,7 @@ var FormSchemaEthingResource = {
       return this.schema.type === 'array'
     }
   },
-  
+
 }
 
 Vue.component('FormSchemaEthingResource', FormSchemaEthingResource)

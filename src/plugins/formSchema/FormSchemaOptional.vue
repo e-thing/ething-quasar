@@ -32,11 +32,11 @@ export default {
       // remove the type==null schema
       var anyOf = this.schema.anyOf.filter(item => item.type !== 'null')
       if (anyOf.length == 1) {
-        extend(true, copySchema, anyOf[0])
+        copySchema = extend(true, copySchema, anyOf[0])
       } else {
         copySchema.anyOf = anyOf
       }
-
+      
       return copySchema
     }
   },
