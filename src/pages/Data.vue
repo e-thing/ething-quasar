@@ -38,49 +38,13 @@
         <div v-if="files.length">
           <q-item-separator inset v-if="folders.length"/>
           <q-list-header inset>Files</q-list-header>
-          <q-item v-for="file in files" :key="file.id()" :to="$ui.route(file)">
-            <q-item-side :icon="$meta.get(file).icon" inverted :color="$meta.get(file).color" />
-            <q-item-main>
-              <q-item-tile label>
-                {{ file.basename() }}
-                <small v-if="file.createdBy()" class="text-faded">{{ createdBy(file).basename() }}</small>
-                <q-icon v-if="file.public()" name="share" color="warning" />
-              </q-item-tile>
-              <q-item-tile sublabel>{{ $ui.dateToString(file.modifiedDate()) }}</q-item-tile>
-              <q-item-tile sublabel>{{ $ui.sizeToString(file.size()) }}</q-item-tile>
-            </q-item-main>
-            <q-item-side right>
-              <q-btn icon="delete" round flat dense color="negative" @click.stop="onRemoveClick(file)"/>
-            </q-item-side>
-            <q-item-side right>
-              <q-btn icon="settings" round flat dense @click.stop="settingsClick(file)"/>
-            </q-item-side>
-          </q-item>
+          <resource-q-item v-for="file in files" :key="file.id()" :resource="file" />
         </div>
 
         <div v-if="tables.length">
           <q-item-separator inset v-if="folders.length || files.length"/>
           <q-list-header inset>Table</q-list-header>
-          <q-item v-for="table in tables" :key="table.id()" :to="$ui.route(table)">
-            <q-item-side :icon="$meta.get(table).icon" inverted :color="$meta.get(table).color" />
-            <q-item-main>
-              <q-item-tile label>
-                {{ table.basename() }}
-                <small v-if="table.createdBy()" class="text-faded">{{ createdBy(table).basename() }}</small>
-              </q-item-tile>
-              <q-item-tile sublabel>{{ $ui.dateToString(table.modifiedDate()) }}</q-item-tile>
-              <q-item-tile sublabel>{{ table.length() }} rows</q-item-tile>
-            </q-item-main>
-            <q-item-side right>
-              <q-btn icon="insert chart" round flat dense color="secondary" @click.stop="chartClick(table)"/>
-            </q-item-side>
-            <q-item-side right>
-              <q-btn icon="delete" round flat dense color="negative" @click.stop="onRemoveClick(table)"/>
-            </q-item-side>
-            <q-item-side right>
-              <q-btn icon="settings" round flat dense @click.stop="settingsClick(table)"/>
-            </q-item-side>
-          </q-item>
+          <resource-q-item v-for="table in tables" :key="table.id()" :resource="table" />
         </div>
 
       </q-list>
@@ -113,12 +77,13 @@
 </template>
 
 <script>
+import ResourceQItem from '../components/ResourceQItem'
 
 export default {
   name: 'PageData',
 
-  data () {
-    return {}
+  components: {
+    ResourceQItem
   },
 
   computed: {
@@ -179,51 +144,9 @@ export default {
       return a + '/' + b
     },
 
-    settingsClick (resource) {
-      this.$router.push('/resource/' + resource.id())
-    },
-
-    chartClick (resource) {
-      this.$router.push('/chart/' + resource.id())
-    },
-
-    onRemoveClick (resource) {
-      var name = resource.name()
-
-      var children = this.$ething.arbo.list().filter(r => {
-        return r.createdBy() === resource.id()
-      })
-
-      var items = []
-
-      if (children.length) {
-        items.push({label: 'Remove also the children resources', value: 'removeChildren', color: 'secondary'})
-      }
-
-      this.$q.dialog({
-        title: 'Remove',
-        message: 'Do you really want to remove definitely the ' + resource.type() + ' "' + resource.name() + '" ?',
-        options: {
-          type: 'checkbox',
-          model: [],
-          items
-        },
-        ok: 'Remove',
-        cancel: 'Cancel'
-      }).then((data) => {
-        resource.remove(data.indexOf('removeChildren') !== -1).then( () => {
-          this.$q.notify(name + ' removed !')
-        })
-      })
-    },
-
     create (type) {
       this.$router.push('/create/'+type)
     },
-
-    createdBy (resource) {
-      return resource.createdBy() ? this.$ething.arbo.get(resource.createdBy()) : null
-    }
   }
 }
 </script>

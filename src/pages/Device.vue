@@ -24,19 +24,7 @@
     <!-- resource -->
     <div v-if="children.length" class="q-py-md">
       <div class="q-my-md q-title q-title-opacity">Resources</div>
-      <q-item v-for="child in children" :key="child.id()" :to="$ui.route(child)">
-        <q-item-side :icon="$meta.get(child).icon" inverted :color="$meta.get(child).color" />
-        <q-item-main>
-          <q-item-tile label>{{ child.basename() }}</q-item-tile>
-          <q-item-tile v-if="child.isTypeof('Device')" label><small class="text-faded">{{ child.type() }}</small></q-item-tile>
-        </q-item-main>
-        <q-item-side v-if="child.isTypeof('Table')" right>
-          <q-btn icon="insert chart" round flat dense color="secondary" @click.stop="$router.push('/chart/' + child.id())"/>
-        </q-item-side>
-        <q-item-side v-if="child.isTypeof('File')" right>{{ $ui.sizeToString(child.size()) }}</q-item-side>
-        <q-item-side v-if="child.isTypeof('Table')" right>{{ child.length() }} rows</q-item-side>
-        <q-item-side right>{{ $ui.dateToString(child.modifiedDate()) }}</q-item-side>
-      </q-item>
+      <resource-q-item v-for="child in children" :key="child.id()" :resource="child" />
     </div>
 
     <!-- api -->
@@ -52,12 +40,14 @@
 <script>
 
 import DeviceApi from '../components/DeviceApi'
+import ResourceQItem from '../components/ResourceQItem'
 
 export default {
   name: 'PageDevice',
 
   components: {
-    DeviceApi
+    DeviceApi,
+    ResourceQItem
   },
 
   computed: {

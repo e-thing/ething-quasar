@@ -112,6 +112,7 @@ module.exports = function (ctx) {
         'Notify',
         'Dialog',
         'LocalStorage',
+        'ActionSheet',
       ]
     },
     // animations: 'all' --- includes all animations

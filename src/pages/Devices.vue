@@ -19,28 +19,7 @@
 
     <div v-if="listOrdered.length">
       <q-list link no-border>
-
-          <q-item v-for="(item, index) in listOrdered" :key="index" :to="$ui.route(item.device)" class="item">
-            <div v-for="n in item.level" :class="gen(n)"></div>
-            <q-item-side :icon="$meta.get(item.device).icon" inverted :color="$meta.get(item.device).color" />
-            <q-item-main>
-              <q-item-tile label>{{ item.device.basename() }}</q-item-tile>
-              <q-item-tile sublabel>{{ $ui.dateToString(item.device.lastSeenDate() || item.device.modifiedDate()) }}</q-item-tile>
-              <q-item-tile sublabel>{{ item.device.type() }}</q-item-tile>
-            </q-item-main>
-            <q-item-side right v-if="item.device.hasBattery()">
-              <q-chip small detail icon="battery std" color="primary">
-                {{ item.device.battery() }}%
-              </q-chip>
-            </q-item-side>
-            <q-item-side right>
-              <q-btn icon="delete" round flat dense color="negative" @click.stop="onRemoveClick(item.device)"/>
-            </q-item-side>
-            <q-item-side right>
-              <q-btn icon="settings" round flat dense @click.stop="settingsClick(item.device)"/>
-            </q-item-side>
-          </q-item>
-
+          <resource-q-item v-for="(item, index) in listOrdered" :key="index" :resource="item.device" :level="item.level" no-parent />
       </q-list>
     </div>
 
@@ -53,9 +32,15 @@
 
 <script>
 import EThing from 'ething-js'
+import ResourceQItem from '../components/ResourceQItem'
+
 
 export default {
   name: 'PageDevices',
+
+  components: {
+    ResourceQItem
+  },
 
   data () {
 
@@ -161,44 +146,6 @@ export default {
 
   methods: {
 
-    gen (n) {
-      return ['pad', 'pad-'+n]
-    },
-
-    settingsClick (resource) {
-      this.$router.push('/resource/' + resource.id())
-    },
-
-    onRemoveClick (resource) {
-      var name = resource.name()
-
-      var children = this.$ething.arbo.list().filter(r => {
-        return r.createdBy() === resource.id()
-      })
-
-      var items = []
-
-      if (children.length) {
-        items.push({label: 'Remove also the children resources', value: 'removeChildren', color: 'secondary'})
-      }
-
-      this.$q.dialog({
-        title: 'Remove',
-        message: 'Do you really want to remove definitely the ' + resource.type() + ' "' + resource.name() + '" ?',
-        options: {
-          type: 'checkbox',
-          model: [],
-          items
-        },
-        ok: 'Remove',
-        cancel: 'Cancel'
-      }).then((data) => {
-        resource.remove(data.indexOf('removeChildren') !== -1).then( () => {
-          this.$q.notify(name + ' removed !')
-        })
-      })
-    },
-
     create (type) {
       this.$router.push('/create/'+type)
     }
@@ -206,38 +153,3 @@ export default {
   }
 }
 </script>
-
-
-<style lang="stylus" scoped>
-@import '~variables'
-
-pad-width = 40px
-pad-start = 34px
-
-.pad:before
-    content ''
-    position absolute
-    right auto
-
-.pad:before
-    border-left 2px solid $purple-2
-    bottom 0px
-    top -0px
-    width 1px
-
-.pad
-  width pad-width
-
-.pad-1:before
-  left pad-start
-
-.pad-2:before
-  left pad-start + 1 * pad-width
-
-.pad-3:before
-  left pad-start + 2 * pad-width
-
-.pad-4:before
-  left pad-start + 3 * pad-width
-
-</style>
