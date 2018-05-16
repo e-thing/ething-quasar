@@ -102,9 +102,7 @@ export default {
       this.loading = true
       var server = this.server.trim().replace(/\/+$/, '')
 
-      this.$ui.setServerUrl(server)
-
-      this.$ui.login(this.form.login, this.form.password).catch(error => {
+      this.$ui.login(server, this.form.login, this.form.password).catch(error => {
 
         if (error.response) {
           // The request was made and the server responded with a status code

@@ -6,6 +6,7 @@ const { humanStorageSize } = format
 import { SSE } from './ething-sse'
 import { meta } from './ething-meta'
 
+const AUTH_REFRESH_INTERVAL = 3600 * 1000
 
 export var UI = {}
 
@@ -99,6 +100,10 @@ export default ({ app, router, Vue, store }) => {
     reset () {
       app.data.state = 'begin'
       SSE.stop()
+      LocalStorage.remove('ething.auth.iat')
+      if (this.authRefreshTimer) {
+        clearInterval(this.authRefreshTimer)
+      }
     },
 
     disconnect () {
@@ -121,7 +126,7 @@ export default ({ app, router, Vue, store }) => {
       })
     },
 
-    login (username, password) {
+    login (serverUrl, username, password) {
 
       const params = new URLSearchParams()
       params.append('login', username)
@@ -129,14 +134,30 @@ export default ({ app, router, Vue, store }) => {
 
       return EThing.axios.request({
         method: 'post',
-        url: EThing.config.serverUrl + '/auth/password',
+        url: serverUrl + '/auth/password',
         data: params
       }).then(response => {
 
-        // redirect
         this.reset()
+
+        this.setServerUrl(serverUrl)
+
+        LocalStorage.set('ething.auth.iat', Date.now())
+
+        // redirect
         router.app.$router.replace(router.app.$route.query.redirect_uri || '/')
 
+      })
+    },
+
+    authRefreshTimer: null,
+
+    authRefresh () {
+      return EThing.axios.request({
+        method: 'post',
+        url: EThing.config.serverUrl + '/auth/refresh',
+      }).then(() => {
+        LocalStorage.set('ething.auth.iat', Date.now())
       })
     }
   })
@@ -205,6 +226,16 @@ export default ({ app, router, Vue, store }) => {
         console.log('ething loaded !')
 
         SSE.start()
+
+        var iat = LocalStorage.get.item('ething.auth.iat')
+
+        if (iat && Date.now() - iat > AUTH_REFRESH_INTERVAL) {
+          UI.authRefresh()
+        }
+
+        UI.authRefreshTimer = setInterval(() => {
+          UI.authRefresh()
+        }, AUTH_REFRESH_INTERVAL)
 
       }).catch( err => {
         console.error(err)

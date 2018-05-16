@@ -67,7 +67,7 @@ export default [
     ]
   },
 
-  { // Always leave this as last one
+  {
     path: '/login',
     name: 'login',
     component: () => import('pages/Login')
