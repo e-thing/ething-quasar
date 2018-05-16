@@ -6,7 +6,7 @@ export default [
     children: [
       {
         path: '',
-        component: () => import('pages/index')
+        redirect: 'dashboard',
       },
       {
         path: 'data/:path*',
