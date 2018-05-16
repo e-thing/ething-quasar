@@ -16,6 +16,7 @@
     "highcharts": "^6.1.0",
     "json-pointer": "^0.6.0",
     "jsonlint-mod": "^1.7.2",
+    "promise.prototype.finally": "^3.1.0",
     "vue-codemirror": "^4.0.5",
     "vue-grid-layout": "^2.1.12",
     "vue-highcharts": "0.0.10",

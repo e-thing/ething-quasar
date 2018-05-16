@@ -5,6 +5,10 @@ import { format } from 'quasar'
 const { humanStorageSize } = format
 import { SSE } from './ething-sse'
 import { meta } from './ething-meta'
+import promiseFinally from 'promise.prototype.finally'
+
+// necessary for older browsers
+promiseFinally.shim()
 
 const AUTH_REFRESH_INTERVAL = 3600 * 1000
 
