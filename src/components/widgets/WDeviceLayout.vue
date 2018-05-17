@@ -1,8 +1,8 @@
 <template>
   <w-layout>
-    <template slot="header">
+    <div slot="header" class="cursor-pointer" @click="$ui.open(r)">
       {{ r.basename() }}
-    </template>
+    </div>
 
     <slot>
 
@@ -31,7 +31,7 @@ export default {
       lastSeenDate () {
         return this.$ui.dateToString(this.r.lastSeenDate())
       }
-    }
+    },
 }
 </script>
 

@@ -237,7 +237,11 @@ function parseDefinition (schema, meta) {
 
         var properties = schema['properties'] || {}
         var required = schema['required'] || []
+        var description = schema['description']
 
+        if (description)
+          meta.description = description
+        
         if(!meta.required)
           meta.required = []
 

@@ -1,8 +1,8 @@
 <template>
   <div>
 
-    <q-list v-for="operation in operations" :key="operation.name">
-      <q-collapsible icon="explore" :label="operation.name" :sublabel="operation.return">
+    <q-list v-for="operation in operations" :key="operation.name" no-border>
+      <q-collapsible icon="explore" :label="operation.name" :sublabel="operation.return" popup>
 
         <vue-markdown v-if="operation.description" class="q-my-md">{{ operation.description }}</vue-markdown>
 

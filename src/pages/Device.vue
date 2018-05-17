@@ -2,7 +2,9 @@
   <q-page padding>
 
     <div class="q-my-md q-display-1 q-display-1-opacity">
+      <q-icon :name="$meta.get(resource).icon" />
       {{ resource.basename() }}
+      <resource-battery-chip :resource="resource" />
       <q-btn class="float-right" flat label="settings" icon="settings" @click="$router.push('/resource/' + resource.id())"/>
     </div>
 
@@ -41,13 +43,15 @@
 
 import DeviceApi from '../components/DeviceApi'
 import ResourceQItem from '../components/ResourceQItem'
+import ResourceBatteryChip from '../components/ResourceBatteryChip'
 
 export default {
   name: 'PageDevice',
 
   components: {
     DeviceApi,
-    ResourceQItem
+    ResourceQItem,
+    ResourceBatteryChip
   },
 
   computed: {

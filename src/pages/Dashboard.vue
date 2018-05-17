@@ -48,10 +48,10 @@
     </grid-layout>
 
 
-    <q-modal v-model="pinModal" :content-css="{padding: '50px', minWidth: '50vw'}">
+    <q-modal v-model="pinModal" :maximized="smallScreen" :content-css="smallScreen ? pinModalCss : pinModalCssBigScreen">
       <div class="q-headline q-mb-md">Pin resource</div>
 
-      <resource-pin-form @done="pin" @cancel="pinModal = false"/>
+      <resource-pin-form :pinned="pinnedResources" @done="pin" @cancel="pinModal = false"/>
 
     </q-modal>
 
@@ -83,6 +83,11 @@ export default {
   },
 
   data () {
+
+    var pinModalCss = {
+      padding: '32px'
+    }
+
     return {
         layout: [],
         grid: {
@@ -93,7 +98,14 @@ export default {
         idCnt: 1,
         pinModal: false,
         editing: false,
-        smallScreen: false
+        smallScreen: false,
+        pinModalCss,
+        pinModalCssBigScreen: Object.assign({
+          minWidth: '50vw',
+          maxWidth: '80vw',
+          height: '100vh',
+          maxHeight: '100vh'
+        }, pinModalCss)
     }
   },
 
@@ -104,21 +116,16 @@ export default {
     draggable () {
       return this.editing
     },
+    pinnedResources () {
+      return this.layout.map(l => l.options.resource).filter(r => !!r)
+    }
   },
 
   methods: {
     movedEvent (i, newX, newY) {
         this.save()
     },
-    /**
-     *
-     * @param i the item id/index
-     * @param newH new height in grid rows
-     * @param newW new width in grid columns
-     * @param newHPx new height in pixels
-     * @param newWPx new width in pixels
-     *
-     */
+
     resizedEvent (i, newH, newW, newHPx, newWPx) {
         this.save()
     },

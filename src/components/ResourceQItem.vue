@@ -1,11 +1,11 @@
 <template>
-  <q-item class="item" @click.native="to" link>
+  <q-item class="item" @click.native="open(resource)" link>
     <div v-for="n in level" :class="gen(n)"></div>
     <q-item-side :icon="$meta.get(resource).icon" inverted :color="$meta.get(resource).color" />
     <q-item-main>
       <q-item-tile label>
         {{ resource.basename() }}
-        <small v-if="showParent" class="parent text-faded cursor-pointer" @click.stop="$ui.open(createdBy)">{{ createdBy.basename() }}</small>
+        <small v-if="showParent" class="parent text-faded" :class="readonly ? '' : 'cursor-pointer'" @click.stop="open(createdBy)">{{ createdBy.basename() }}</small>
         <q-icon v-if="resource.public()" name="share" color="warning" />
       </q-item-tile>
       <q-item-tile sublabel>{{ $ui.dateToString(date) }}</q-item-tile>
@@ -15,9 +15,7 @@
       <q-item-tile sublabel v-if="showLength">{{ resource.length() }} rows</q-item-tile>
     </q-item-main>
     <q-item-side right v-if="showBattery" class="gt-xs">
-      <q-chip small detail icon="battery std" >
-        {{ resource.battery() }}%
-      </q-chip>
+      <resource-battery-chip :resource="resource" />
     </q-item-side>
     <template v-if="!readonly">
       <q-item-side right v-if="showChart" class="gt-xs">
@@ -37,9 +35,14 @@
 </template>
 
 <script>
+import ResourceBatteryChip from './ResourceBatteryChip'
 
 export default {
   name: 'ResourceQItem',
+
+  components: {
+    ResourceBatteryChip
+  },
 
   props: {
     resource: {},
@@ -97,6 +100,25 @@ export default {
 
     gen (n) {
       return ['pad', 'pad-'+n]
+    },
+
+    batteryIcon (level) {
+      if (level > 95) return 'mdi-battery'
+      if (level > 85) return 'mdi-battery-90'
+      if (level > 75) return 'mdi-battery-80'
+      if (level > 65) return 'mdi-battery-70'
+      if (level > 55) return 'mdi-battery-60'
+      if (level > 45) return 'mdi-battery-50'
+      if (level > 35) return 'mdi-battery-40'
+      if (level > 25) return 'mdi-battery-30'
+      if (level > 15) return 'mdi-battery-20'
+      if (level >= 0) return 'mdi-battery-alert'
+      return 'battery unknown'
+    },
+
+    batteryColor (level) {
+      if (level <= 15) return 'negative'
+      if (level <= 40) return 'warning'
     },
 
     settings () {
@@ -174,8 +196,8 @@ export default {
       this.$router.push('/chart/' + this.resource.id())
     },
 
-    to () {
-      if (!this.readonly) this.$ui.open(this.resource)
+    open (r) {
+      if (!this.readonly) this.$ui.open(r)
     }
   }
 

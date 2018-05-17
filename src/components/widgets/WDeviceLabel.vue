@@ -28,18 +28,22 @@ export default {
 
     data () {
         return {
-            value: '?'
+            value: '?',
+            lastUpdate: null
         }
     },
 
     watch: {
       r () {
-        this.update()
+        if (!this.lastUpdate || this.r.modifiedDate() > this.lastUpdate) {
+          this.update()
+        }
       }
     },
 
     methods: {
       update () {
+        this.lastUpdate = this.r.modifiedDate()
         this.r.execute(this.fn).then(v => {
           this.value = v
         })

@@ -1,7 +1,15 @@
 <template>
   <q-page padding>
 
-    <div class="q-my-md q-display-1 q-display-1-opacity">{{ resource.basename() }}</div>
+    <div class="q-my-md q-display-1 q-display-1-opacity">
+      <q-icon :name="$meta.get(resource).icon" />
+      {{ resource.basename() }}
+    </div>
+
+    <div class="q-my-md q-subheading text-faded">
+      <q-icon name="settings" />
+      Settings
+    </div>
 
     <resource-editor :resource="resource" @done="onDone" @canceled="onCancel"/>
 

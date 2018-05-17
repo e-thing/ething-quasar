@@ -304,7 +304,8 @@ export default {
       ],
       saveModal: false,
       filename: filename,
-      file: file
+      file: file,
+      table: null
     }
   },
 
@@ -417,6 +418,9 @@ export default {
                     dataGrouping: {
                         approximation: "average"
                     }
+                },
+                series: {
+                    animation: false
                 }
             },
             series: [],
@@ -551,7 +555,15 @@ export default {
 
     resize: debounce( function () {
       this.chart().reflow()
-    }, 1000)
+    }, 1000),
+
+    onTableUpdate (evt, updatedKeys) {
+      if (updatedKeys.indexOf('contentModifiedDate') !== -1) {
+        this.refresh()
+      }
+    }
+
+
 
   },
 
@@ -571,18 +583,22 @@ export default {
       var resource = null
 
       if (typeof this.preferences === 'string') {
-        resource = this.$ething.arbo.get(this.preferences)
+        resource = this.$store.getters['ething/get'](this.preferences)
       }
       if (this.preferences instanceof this.$ething.Table) {
-        resource = this.preferences
+        resource = this.$store.getters['ething/get'](this.preferences.id())
       }
 
       if (resource) {
+        this.table = resource
+
+        resource.on('updated', this.onTableUpdate)
+
         var createdBy = this.$ething.arbo.get(resource.createdBy())
         if (createdBy) {
-          preferences.subtitle = createdBy.basename()
+          preferences.subtitle = '<a href="#' + this.$ui.route(createdBy) + '">' + createdBy.basename() + '</a>'
         }
-        preferences.title = resource.basename()
+        preferences.title = '<a href="#' + this.$ui.route(resource) + '">' + resource.basename() + '</a>'
         preferences.panes = []
 
         resource.keys().forEach( key => {
@@ -607,6 +623,12 @@ export default {
       this.load(preferences)
     }
 
+  },
+
+  beforeDestroy () {
+    if (this.table) {
+      this.table.off('updated', this.onTableUpdate)
+    }
   }
 
 

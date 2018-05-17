@@ -15,15 +15,22 @@
     >
 
       <template slot="top-left" slot-scope="props">
-        <div class="q-title q-title-opacity">{{ resource.basename() }} <small v-if="createdBy"> - {{ createdBy.basename() }}</small></div>
+        <div class="q-title q-title-opacity">{{ resource.basename() }} <small v-if="createdBy" class="cursor-pointer text-faded" @click="$ui.open(createdBy)"> - {{ createdBy.basename() }}</small></div>
       </template>
 
       <template slot="top-right" slot-scope="props">
+
         <q-table-columns
           color="secondary"
           class="q-mr-sm"
           v-model="visibleColumns"
           :columns="columns"
+        />
+        <q-btn
+          flat round dense
+          icon="mdi-chart-line"
+          color="secondary"
+          @click="$ui.open(resource, 'chart')"
         />
         <q-btn
           flat round dense

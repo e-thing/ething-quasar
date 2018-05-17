@@ -2,9 +2,9 @@
   <div>
     <slot></slot>
 
-    <div v-if="meta.description">
-        {{ meta.description }}
-    </div>
+    <blockquote class="q-mt-xl">
+      <vue-markdown v-if="meta.description">{{ meta.description.trim() }}</vue-markdown>
+    </blockquote>
 
     <form-schema :schema="schema" v-model="model" @error="inputError = $event" class="q-mb-xl"/>
 
@@ -31,9 +31,14 @@
 
 <script>
 import EThing from 'ething-js'
+import VueMarkdown from 'vue-markdown'
 
 export default {
     name: 'ResourceEditor',
+
+    components: {
+      VueMarkdown
+    },
 
     props: ['resource'], // either a resource or a string describing a type
 

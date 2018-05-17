@@ -1,7 +1,7 @@
 <template>
   <w-device-layout :resource="resource">
     <div class="absolute-center">
-      <q-toggle :value="state" @input="toggle" />
+      <q-toggle :value="state" :disable="loading" @input="toggle" />
     </div>
   </w-device-layout>
 </template>
@@ -21,28 +21,35 @@ export default {
 
     data () {
         return {
-            state: false
+            state: false,
+            loading: false,
+            lastUpdate: null
         }
     },
 
     watch: {
       r () {
-        this.update()
+        if (!this.lastUpdate || this.r.modifiedDate() > this.lastUpdate) {
+          this.update()
+        }
       }
     },
 
     methods: {
       update () {
-        console.log('WSwitch update...')
+        this.loading = true
+        this.lastUpdate = this.r.modifiedDate()
         this.r.getState().then(v => {
           this.state = v
+          this.loading = false
         })
       },
 
       toggle (state) {
-        console.log('WSwitch toggle...', state)
+        this.loading = true
         this.r.setState(state).then(() => {
           this.state = state
+          this.loading = false
         })
       }
     },

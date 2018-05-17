@@ -3,24 +3,27 @@
 
     <div v-if="resources.length">
 
-      <div>
-        <q-card
-          v-for="r in resources" :key="r.id()" @click.native="select(r)"
-          inline style="width: 200px; height: 81px" flat square
-          class="cursor-pointer resource q-ma-xs"
-          :color="$meta.get(r).color"
-          text-color="white"
-        >
-          <q-card-title >
-            {{ r.basename() }}
-            <span v-if="r.createdBy()" slot="subtitle">{{ $ething.arbo.get(r.createdBy()).basename() }}</span>
-            <q-icon slot="right" :name="$meta.get(r).icon" color="white"/>
-          </q-card-title>
-          <!--<q-card-separator />
-          <q-card-main>
-            Card Content
-          </q-card-main>-->
-        </q-card>
+      <div class="row gutter-sm">
+        <div class="resource" :class="resources.length>1 ? ('col-xs-12 col-sm-6 col-md-4 col-lg-3 ' + (pinned.find(id => id === r.id()) ? 'pinned' : '')) : 'col-xs-12'" v-for="r in resources" :key="r.id()">
+          <q-card
+            @click.native="select(r)"
+            style="height: 100%" flat square
+            class="cursor-pointer col-xs-12 col-sm-6"
+            :color="$meta.get(r).color"
+            text-color="white"
+
+          >
+            <q-card-title >
+              {{ r.basename() }}
+              <span v-if="r.createdBy()" slot="subtitle">{{ $ething.arbo.get(r.createdBy()).basename() }}</span>
+              <q-icon slot="right" :name="$meta.get(r).icon" color="white"/>
+            </q-card-title>
+            <!--<q-card-separator />
+            <q-card-main>
+              Card Content
+            </q-card-main>-->
+          </q-card>
+        </div>
       </div>
       <!--
       <q-list link no-border>
@@ -51,19 +54,21 @@
       <form-schema v-if="widgetClassMetaOptions" :schema="widgetClassMetaOptions" v-model="options" @error="optionsError = $event"/>
     </div>
 
-    <q-btn
-      v-if="resource"
-      color="primary"
-      @click="done"
-      label="pin"
-      :disable="optionsError"
-    />
-    <q-btn
-      flat
-      color="negative"
-      @click="$emit('cancel')"
-      label="Cancel"
-    />
+    <div class="q-mt-xl">
+      <q-btn
+        v-if="resource"
+        color="primary"
+        @click="done"
+        label="pin"
+        :disable="optionsError"
+      />
+      <q-btn
+        flat
+        color="negative"
+        @click="$emit('cancel')"
+        label="Cancel"
+      />
+    </div>
 
   </div>
 </template>
@@ -77,6 +82,8 @@ export default {
   components: {
     ResourceQItem
   },
+
+  props: ['pinned'],
 
   data () {
       return {
@@ -160,6 +167,8 @@ export default {
           widgetClass: this.widgetClass,
           options: this.options
         })
+
+        this.resetList()
       }
     }
 
@@ -172,5 +181,14 @@ export default {
 
 <style lang="stylus" scoped>
   @import '~variables'
+
+  .resource
+    transition all 0.3s ease
+
+  .resource:hover
+    opacity 0.7 !important
+
+  .resource.pinned
+    opacity 0.4
 
 </style>

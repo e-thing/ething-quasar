@@ -32,19 +32,22 @@ export default {
         value: 0,
         unit: '°C',
         min: -20,
-        max: 40
+        max: 40,
+        lastUpdate: false
       }
     },
 
     watch: {
       r () {
-        this.update()
+        if (!this.lastUpdate || this.r.modifiedDate() > this.lastUpdate) {
+          this.update()
+        }
       }
     },
 
     methods: {
       update () {
-        console.log('WThermometer update...')
+        this.lastUpdate = this.r.modifiedDate()
         this.r.getTemperature().then(v => {
           this.value = v
         })

@@ -51,7 +51,7 @@ export default ({ app, router, Vue, store }) => {
       return dynamicServerUrl && !LocalStorage.get.item('ething.server.url')
     },
 
-    route (resource) {
+    route (resource, more) {
       if (resource instanceof EThing.File) {
         if (/\.plot$/.test(resource.basename())) {
           return '/chart/' + resource.id()
@@ -64,7 +64,11 @@ export default ({ app, router, Vue, store }) => {
         }
       }
       else if (resource instanceof EThing.Table) {
-        return '/table/' + resource.id()
+        if (more === 'chart') {
+          return '/chart/' + resource.id()
+        } else {
+          return '/table/' + resource.id()
+        }
       }
       else if (resource instanceof EThing.Device) {
         return '/device/' + resource.id()
@@ -74,8 +78,8 @@ export default ({ app, router, Vue, store }) => {
       }
     },
 
-    open (resource) {
-      var route = this.route(resource)
+    open (resource, more) {
+      var route = this.route(resource, more)
       if (route) {
         router.app.$router.push(route)
       }
