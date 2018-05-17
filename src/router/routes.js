@@ -18,35 +18,59 @@ export default [
       },
       {
         path: 'table/:id',
-        component: () => import('pages/Table')
+        component: () => import('pages/Table'),
+        meta: {
+          back: true
+        }
       },
       {
         path: 'chart/:id',
-        component: () => import('pages/Chart')
+        component: () => import('pages/Chart'),
+        meta: {
+          back: true
+        }
       },
       {
         path: 'text/:id',
-        component: () => import('pages/Text')
+        component: () => import('pages/Text'),
+        meta: {
+          back: true
+        }
       },
       {
         path: 'script/:id',
-        component: () => import('pages/Script')
+        component: () => import('pages/Script'),
+        meta: {
+          back: true
+        }
       },
       {
         path: 'image/:id',
-        component: () => import('pages/Image')
+        component: () => import('pages/Image'),
+        meta: {
+          back: true
+        }
       },
       {
         path: 'resource/:id',
-        component: () => import('pages/Resource')
+        component: () => import('pages/Resource'),
+        meta: {
+          back: true
+        }
       },
       {
         path: 'create/:type',
-        component: () => import('pages/Create')
+        component: () => import('pages/Create'),
+        meta: {
+          back: true
+        }
       },
       {
         path: 'device/:id',
-        component: () => import('pages/Device')
+        component: () => import('pages/Device'),
+        meta: {
+          back: true
+        }
       },
       {
         path: 'dashboard',

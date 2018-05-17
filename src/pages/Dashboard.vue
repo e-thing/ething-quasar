@@ -4,7 +4,7 @@
     <q-window-resize-observable @resize="onResize" />
 
     <q-btn-group flat >
-      <q-btn flat label="pin resource" color="faded" @click="pinModal = true"/>
+      <q-btn flat icon="mdi-pin" label="pin resource" color="faded" @click="pinModal = true"/>
       <q-btn flat icon="edit" :color="editing ? 'primary' : 'faded'" label="edit" @click="editing = !editing"/>
     </q-btn-group>
 

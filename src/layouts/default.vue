@@ -7,6 +7,8 @@
 
         <q-btn class="xs" flat round dense icon="menu" @click="leftDrawerOpen = !leftDrawerOpen" aria-label="Toggle menu on left side" />
 
+        <q-btn v-if="back" class="electron-only within-iframe-only" flat round dense icon="keyboard_backspace" @click="$router.go(-1)" aria-label="back" />
+
         <q-toolbar-title shrink >
           EThing
         </q-toolbar-title>
@@ -93,6 +95,11 @@ export default {
       leftDrawerOpen: false // this.$q.platform.is.desktop
     }
   },
+  computed: {
+    back () {
+      return this.$route.meta.back
+    }
+  },
   methods: {
     logout () {
 
@@ -103,7 +110,8 @@ export default {
       this.$root.state = 'begin'
       this.$router.go(this.$router.currentRoute)
     }
-  }
+  },
+
 }
 </script>
 

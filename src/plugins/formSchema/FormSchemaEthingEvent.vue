@@ -58,10 +58,17 @@ var FormSchemaEthingEvent = {
     for (let k in this.$meta.events) {
       let event = this.$meta.events[k]
       if (!event.virtual) {
+        var description = event.description
+        if (!description) {
+          (event.allOf || []).forEach(s => {
+            if (s.description) description = s.description
+          })
+        }
+
         eventOptions.push({
           label: k,
           value: k,
-          sublabel: event.description
+          sublabel: description
         })
       }
     }

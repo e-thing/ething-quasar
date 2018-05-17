@@ -1,4 +1,4 @@
-import FormSchemaScope from '../plugins/formSchema/FormSchemaSerialPort'
+import FormSchemaSerialPort from '../plugins/formSchema/FormSchemaSerialPort'
 
 export default {
 

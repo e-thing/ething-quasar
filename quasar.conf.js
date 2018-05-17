@@ -84,6 +84,7 @@ module.exports = function (ctx) {
         'QBreadcrumbs',
         'QBreadcrumbsEl',
         'QTable',
+        'QTableColumns',
         'QInnerLoading',
         'QSpinnerOval',
         'QSpinnerPie',
@@ -101,7 +102,8 @@ module.exports = function (ctx) {
         'QChip',
         'QPageSticky',
         'QFab',
-        'QFabAction'
+        'QFabAction',
+        'QPopover'
         //
       ],
       directives: [

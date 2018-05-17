@@ -9,6 +9,9 @@
       :loading="loading"
       :pagination.sync="serverPagination"
       @request="request"
+      :selection="edit ? 'multiple' : 'none'"
+      :selected.sync="selected"
+      color="secondary"
     >
 
       <template slot="top-left" slot-scope="props">
@@ -24,6 +27,20 @@
         />
         <q-btn
           flat round dense
+          icon="check_box"
+          :color="edit ? 'secondary' : 'faded'"
+          @click="edit = !edit"
+        />
+        <q-btn
+          flat round dense
+          v-if="selected.length"
+          color="negative"
+          icon="delete"
+          @click="removeSelection"
+        />
+        <q-btn
+          flat round dense
+          :color="props.inFullscreen ? 'secondary' : 'faded'"
           :icon="props.inFullscreen ? 'fullscreen_exit' : 'fullscreen'"
           @click="props.toggleFullscreen"
         />
@@ -45,6 +62,7 @@ export default {
     return {
       loading: true,
       serverPagination: {
+        rowsPerPage: 10,
         page: 1,
         sortBy: 'date',
         descending: true,
@@ -52,7 +70,9 @@ export default {
       },
       serverData: [],
       filter: '',
-      visibleColumns: ['date']
+      visibleColumns: ['date'],
+      edit: false,
+      selected: []
     }
   },
 
@@ -183,6 +203,16 @@ export default {
         pagination: this.serverPagination,
         filter: this.filter
       })
+    },
+
+    removeSelection () {
+      if (this.selected.length) {
+        this.loading = true
+        this.resource.removeRow(this.selected.map(item => item.id)).finally(() => {
+          this.loading = false
+          this.selected = []
+        })
+      }
     }
   },
   mounted () {

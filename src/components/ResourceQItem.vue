@@ -5,7 +5,7 @@
     <q-item-main>
       <q-item-tile label>
         {{ resource.basename() }}
-        <small v-if="showParent" class="text-faded">{{ createdBy.basename() }}</small>
+        <small v-if="showParent" class="parent text-faded cursor-pointer" @click.stop="$ui.open(createdBy)">{{ createdBy.basename() }}</small>
         <q-icon v-if="resource.public()" name="share" color="warning" />
       </q-item-tile>
       <q-item-tile sublabel>{{ $ui.dateToString(date) }}</q-item-tile>
@@ -20,7 +20,7 @@
       </q-chip>
     </q-item-side>
     <q-item-side right v-if="showChart" class="gt-xs">
-      <q-btn icon="insert chart" round flat dense color="secondary" @click.stop="chart"/>
+      <q-btn icon="mdi-chart-line" round flat dense color="secondary" @click.stop="chart"/>
     </q-item-side>
     <q-item-side right class="gt-xs">
       <q-btn icon="delete" round flat dense color="negative" @click.stop="remove"/>
@@ -108,7 +108,7 @@ export default {
         actions.push({
           label: 'Plot chart',
           color: 'secondary',
-          icon: 'insert chart',
+          icon: 'mdi-chart-line',
           handler: () => {
             return this.chart()
           }
@@ -180,6 +180,9 @@ export default {
 
 <style lang="stylus" scoped>
 @import '~variables'
+
+.parent:hover
+  text-decoration underline
 
 pad-width = 42px
 pad-width-xs = 28px
