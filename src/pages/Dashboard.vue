@@ -51,27 +51,8 @@
     <q-modal v-model="pinModal" :content-css="{padding: '50px', minWidth: '50vw'}">
       <div class="q-headline q-mb-md">Pin resource</div>
 
-      <q-field
-        label="Resource"
-        helper="Select the resource"
-      >
-        <resource-select :filter="pinResourceFilter" v-model="pinResource"/>
-      </q-field>
+      <resource-pin-form @done="pin" @cancel="pinModal = false"/>
 
-      <form-schema v-if="pinResourceOptions" :schema="pinResourceOptions" v-model="pinResourceOptionsModel" @error="pinResourceOptionsError = $event"/>
-
-      <q-btn
-        color="primary"
-        @click="pin"
-        label="pin"
-        :disable="!pinResource || pinResourceOptionsError"
-      />
-      <q-btn
-        flat
-        color="negative"
-        @click="pinModal = false"
-        label="Cancel"
-      />
     </q-modal>
 
   </q-page>
@@ -84,7 +65,7 @@ import EThing from 'ething-js'
 import VueGridLayout from 'vue-grid-layout'
 import Widget from '../components/Widget'
 import { debounce } from 'quasar'
-import ResourceSelect from '../components/ResourceSelect'
+import ResourcePinForm from '../components/ResourcePinForm'
 
 var GridLayout = VueGridLayout.GridLayout
 var GridItem = VueGridLayout.GridItem
@@ -98,7 +79,7 @@ export default {
     GridLayout,
     GridItem,
     Widget,
-    ResourceSelect
+    ResourcePinForm
   },
 
   data () {
@@ -111,10 +92,7 @@ export default {
         },
         idCnt: 1,
         pinModal: false,
-        pinResource: null,
         editing: false,
-        pinResourceOptionsModel: {},
-        pinResourceOptionsError: false,
         smallScreen: false
     }
   },
@@ -126,44 +104,6 @@ export default {
     draggable () {
       return this.editing
     },
-    pinResourceWidget () {
-      if (!this.pinResourceWidgetName)
-        return undefined
-      return this.$widget.find(this.pinResourceWidgetName)
-    },
-    pinResourceWidgetName () {
-      if (!this.pinResource)
-        return undefined
-      var widgets = this.$meta.get(this.pinResource).widgets || []
-      return widgets.length ? widgets[0].name : undefined
-    },
-    pinResourceWidgetOptions () {
-      if (!this.pinResource)
-        return undefined
-      var widgets = this.$meta.get(this.pinResource).widgets || []
-      if (widgets.length) {
-        var cpy = Object.assign({}, widgets[0])
-        delete cpy.name
-        return cpy
-      }
-    },
-    pinResourceWidgetMeta () {
-      if (!this.pinResourceWidget)
-        return undefined
-      return this.pinResourceWidget.meta || {}
-    },
-    pinResourceOptions () {
-      if (!this.pinResourceWidgetMeta || !this.pinResourceWidgetMeta.options)
-        return undefined
-      return Object.assign({type: 'object'},this.pinResourceWidgetMeta.options)
-    }
-  },
-
-  watch: {
-    pinResource () {
-      this.pinResourceOptionsModel = {}
-      this.pinResourceOptionsError = false
-    }
   },
 
   methods: {
@@ -255,8 +195,10 @@ export default {
       },attr))
     },
 
-    pin () {
-      var meta = this.pinResourceWidgetMeta
+    pin (info) {
+
+      var widgetClass = info.widgetClass
+      var meta = widgetClass.meta || {}
       var minWidthUnit = 1
       var minHeightUnit = 1
 
@@ -269,27 +211,21 @@ export default {
         minHeightUnit = Math.max(Math.round(meta.minHeight / this.grid.rowHeight), 1)
       }
 
-      console.log('meta.minWidth', meta.minWidth)
-      console.log('meta.minHeight', meta.minHeight)
-      console.log('minWidthUnit', minWidthUnit)
-      console.log('minHeightUnit', minHeightUnit)
+      var widgetOptions = Object.assign({}, info.widget)
+      delete widgetOptions.name
 
       this.addWidget({
         w: minWidthUnit,
         h: minHeightUnit,
-        type: this.pinResourceWidgetName,
+        type: info.widgetName,
         options: Object.assign({
-          resource: this.pinResource.id()
-        }, this.pinResourceOptionsModel, this.pinResourceWidgetOptions)
+          resource: info.resource.id()
+        }, info.options, widgetOptions)
       })
 
       this.save()
 
       this.pinModal = false
-    },
-
-    pinResourceFilter (r) {
-      return this.$meta.get(r).widgets.length
     },
 
     removeItem (item) {

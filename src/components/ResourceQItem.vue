@@ -1,5 +1,5 @@
 <template>
-  <q-item :to="$ui.route(resource)" class="item">
+  <q-item class="item" @click.native="to" link>
     <div v-for="n in level" :class="gen(n)"></div>
     <q-item-side :icon="$meta.get(resource).icon" inverted :color="$meta.get(resource).color" />
     <q-item-main>
@@ -19,23 +19,24 @@
         {{ resource.battery() }}%
       </q-chip>
     </q-item-side>
-    <q-item-side right v-if="showChart" class="gt-xs">
-      <q-btn icon="mdi-chart-line" round flat dense color="secondary" @click.stop="chart"/>
-    </q-item-side>
-    <q-item-side right class="gt-xs">
-      <q-btn icon="delete" round flat dense color="negative" @click.stop="remove"/>
-    </q-item-side>
-    <q-item-side right class="gt-xs">
-      <q-btn icon="settings" round flat dense @click.stop="settings"/>
-    </q-item-side>
-    <q-item-side right class="lt-sm">
-      <q-btn icon="more_vert" round flat dense @click.stop="more"/>
-    </q-item-side>
+    <template v-if="!readonly">
+      <q-item-side right v-if="showChart" class="gt-xs">
+        <q-btn icon="mdi-chart-line" round flat dense color="secondary" @click.stop="chart"/>
+      </q-item-side>
+      <q-item-side right class="gt-xs">
+        <q-btn icon="delete" round flat dense color="negative" @click.stop="remove"/>
+      </q-item-side>
+      <q-item-side right class="gt-xs">
+        <q-btn icon="settings" round flat dense @click.stop="settings"/>
+      </q-item-side>
+      <q-item-side right class="lt-sm">
+        <q-btn icon="more_vert" round flat dense @click.stop="more"/>
+      </q-item-side>
+    </template>
   </q-item>
 </template>
 
 <script>
-import widgets from './widgets'
 
 export default {
   name: 'ResourceQItem',
@@ -47,6 +48,7 @@ export default {
       default: 0
     },
     noParent: Boolean,
+    readonly: Boolean
   },
 
   data () {
@@ -171,6 +173,10 @@ export default {
     chart () {
       this.$router.push('/chart/' + this.resource.id())
     },
+
+    to () {
+      if (!this.readonly) this.$ui.open(this.resource)
+    }
   }
 
 

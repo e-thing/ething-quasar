@@ -103,7 +103,12 @@ module.exports = function (ctx) {
         'QPageSticky',
         'QFab',
         'QFabAction',
-        'QPopover'
+        'QPopover',
+        'QOptionGroup',
+        'QCard',
+        'QCardTitle',
+        'QCardMain',
+        'QCardSeparator'
         //
       ],
       directives: [
