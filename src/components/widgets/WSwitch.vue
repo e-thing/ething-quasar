@@ -1,5 +1,5 @@
 <template>
-  <w-device-layout :resource="resource">
+  <w-device-layout :resource="resource" v-bind="$attrs">
     <div class="absolute-center">
       <q-toggle :value="state" :disable="loading" @input="toggle" />
     </div>
@@ -59,8 +59,8 @@ export default {
     },
 
     meta: {
-      minWidth: 50,
-      minHeight: 50
+      minWidth: 60,
+      minHeight: 60
     }
 
 

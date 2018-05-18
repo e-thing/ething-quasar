@@ -7,7 +7,7 @@
 
         <q-btn class="xs" flat round dense icon="menu" @click="leftDrawerOpen = !leftDrawerOpen" aria-label="Toggle menu on left side" />
 
-        <q-btn v-if="back" class="electron-only within-iframe-only" flat round dense icon="keyboard_backspace" @click="$router.go(-1)" aria-label="back" />
+        <q-btn v-if="back" flat round dense icon="keyboard_backspace" @click="$router.go(-1)" aria-label="back" />
 
         <q-toolbar-title shrink >
           EThing
@@ -97,7 +97,7 @@ export default {
   },
   computed: {
     back () {
-      return this.$route.meta.back
+      return this.$route.meta.back && (this.$q.platform.within.iframe || this.$q.platform.is.electron)
     }
   },
   methods: {

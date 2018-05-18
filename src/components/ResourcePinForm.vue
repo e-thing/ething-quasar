@@ -46,7 +46,7 @@
         <q-option-group
           color="secondary"
           type="radio"
-          v-model="widgetName"
+          v-model="widgetType"
           :options="widgetNames"
         />
       </div>
@@ -89,7 +89,7 @@ export default {
       return {
         resource: null,
         resources: this.list(),
-        widgetName: null,
+        widgetType: null,
         optionsError: false,
         options: {}
       }
@@ -105,22 +105,18 @@ export default {
     widgetNames () {
       return (this.widgets || []).map(w => {
         return {
-          label: w.name,
-          value: w.name
+          label: w.type,
+          value: w.type
         }
       })
     },
 
     widget () {
-      return this.widgets.find(w => w.name === this.widgetName)
+      return this.widgets.find(w => w.type === this.widgetType)
     },
 
     widgetClass () {
-      return this.$widget.find(this.widgetName)
-    },
-
-    widgetClassMeta () {
-      return this.widgetClass ? this.widgetClass.meta : {}
+      return this.$widget.find(this.widgetType)
     },
 
     widgetClassMeta () {
@@ -146,7 +142,7 @@ export default {
       this.resources = [resource]
       this.options = {}
       this.optionsError = false
-      this.widgetName = this.widgets[0].name // default
+      this.widgetType = this.widgets[0].type // default
 
       if (this.widgets.length === 1 && !this.widgetClassMetaOptions) {
         this.done()
@@ -159,11 +155,11 @@ export default {
     },
 
     done () {
-      if (this.resource && this.widgetName) {
+      if (this.resource && this.widgetType) {
         this.$emit('done', {
           resource: this.resource,
           widget: this.widget,
-          widgetName: this.widgetName,
+          widgetType: this.widgetType,
           widgetClass: this.widgetClass,
           options: this.options
         })

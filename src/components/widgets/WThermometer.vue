@@ -1,5 +1,5 @@
 <template>
-  <w-device-layout :resource="resource">
+  <w-device-layout :resource="resource" v-bind="$attrs">
     <div class="absolute-center">
       <q-knob
         :value="value"
@@ -59,8 +59,8 @@ export default {
     },
 
     meta: {
-      minWidth: 100,
-      minHeight: 100
+      minWidth: 160,
+      minHeight: 160
     }
 
 

@@ -1,5 +1,5 @@
 <template>
-  <w-device-layout :resource="resource">
+  <w-device-layout :resource="resource" v-bind="$attrs">
     <div class="absolute-center">
       <span class="value">
           {{ value }}

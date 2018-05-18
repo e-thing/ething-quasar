@@ -1,6 +1,6 @@
 <template>
-  <q-page padding>
-    <q-tabs two-lines no-pane-border>
+  <q-page>
+    <q-tabs two-lines no-pane-border color="secondary">
       <!-- Tabs - notice slot="title" -->
       <q-tab default slot="title" label="settings" name="settings" icon="settings" />
       <q-tab slot="title" label="log" name="log" icon="message" />

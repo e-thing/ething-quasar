@@ -65,16 +65,20 @@ export default {
 
     if (resource.attr('sensorType') === 'S_HUM') {
       widget = {
-        name: 'WDeviceLabel',
-        fn: 'getHumidity',
-        unit: '%'
+        type: 'WDeviceLabel',
+        options: {
+          fn: 'getHumidity',
+          unit: '%'
+        }
       }
     }
     else if (resource.attr('sensorType') === 'S_BARO') {
       widget = {
-        name: 'WDeviceLabel',
-        fn: 'getPressure',
-        unit: 'Pa'
+        type: 'WDeviceLabel',
+        options: {
+          fn: 'getPressure',
+          unit: 'Pa'
+        }
       }
     }
 

@@ -1,5 +1,5 @@
 <template>
-  <q-page>
+  <q-page class="bg-grey-2">
 
     <q-window-resize-observable @resize="onResize" />
 
@@ -8,8 +8,8 @@
       <q-btn flat icon="edit" :color="editing ? 'primary' : 'faded'" label="edit" @click="editing = !editing"/>
     </q-btn-group>
 
-    <div v-if="smallScreen" class="smallScreenContainer">
-      <div v-for="(item) in layout" :key="item.i" :style="{height: (item.h * grid.rowHeight) + 'px'}">
+    <div v-if="smallScreen && !$q.platform.is.desktop && !$q.platform.is.electron && !$q.platform.is.chromeExt" class="smallScreenContainer">
+      <div v-for="(item) in layout" :key="item.i" :style="{height: (item.h * grid.rowHeight) + 'px'}" class="bg-white">
         <div v-show="editing" class="absolute-center">
           <q-btn-group flat >
             <q-btn flat icon="delete" color="negative" @click="removeItem(item)"/>
@@ -37,6 +37,7 @@
            :i="item.i"
            @resized="resizedEvent"
            @moved="movedEvent"
+           class="bg-white"
         >
             <div v-show="editing" class="absolute-center">
               <q-btn-group flat >
@@ -218,16 +219,13 @@ export default {
         minHeightUnit = Math.max(Math.round(meta.minHeight / this.grid.rowHeight), 1)
       }
 
-      var widgetOptions = Object.assign({}, info.widget)
-      delete widgetOptions.name
-
       this.addWidget({
         w: minWidthUnit,
         h: minHeightUnit,
-        type: info.widgetName,
+        type: info.widgetType,
         options: Object.assign({
           resource: info.resource.id()
-        }, info.options, widgetOptions)
+        }, info.options, info.widget.options)
       })
 
       this.save()

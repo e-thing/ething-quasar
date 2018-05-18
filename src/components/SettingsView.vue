@@ -8,14 +8,14 @@
       <q-item link tag="label">
         <q-item-main label="Debug" />
         <q-item-side right>
-          <q-toggle v-model="settings.debug" />
+          <q-toggle v-model="settings.debug" color="secondary" />
         </q-item-side>
       </q-item>
 
       <q-item>
         <q-item-side>Log Level</q-item-side>
         <q-item-main>
-          <q-select hide-underline class="q-ma-none full-width" v-model="settings.log.level" :options="logLevels" />
+          <q-select hide-underline class="q-ma-none full-width" v-model="settings.log.level" :options="logLevels" color="secondary" />
         </q-item-main>
       </q-item>
 
@@ -33,21 +33,21 @@
           </q-item-tile>
         </q-item-main>
         <q-item-side right>
-          <q-toggle v-model="settings.auth.localonly" />
+          <q-toggle v-model="settings.auth.localonly" color="secondary" />
         </q-item-side>
       </q-item>
 
       <q-item>
         <q-item-main>
           <q-item-tile label>Login</q-item-tile>
-          <q-input v-model="settings.auth.username"/>
+          <q-input v-model="settings.auth.username" color="secondary"/>
         </q-item-main>
       </q-item>
 
       <q-item>
         <q-item-main>
           <q-item-tile label>Password</q-item-tile>
-          <q-input type="password" v-model="settings.auth.password"/>
+          <q-input type="password" v-model="settings.auth.password" color="secondary"/>
         </q-item-main>
       </q-item>
     </q-list>
@@ -59,7 +59,7 @@
       <q-item>
         <q-item-main>
           <q-item-tile label>Emails</q-item-tile>
-          <q-chips-input v-model="settings.notification.emails" placeholder="emails"/>
+          <q-chips-input v-model="settings.notification.emails" placeholder="emails" color="secondary"/>
         </q-item-main>
       </q-item>
 
@@ -72,28 +72,28 @@
             <q-item>
               <q-item-main>
                 <q-item-tile label>Host</q-item-tile>
-                <q-input v-model="settings.notification.smtp.host" placeholder="smtp.gmail.com"/>
+                <q-input v-model="settings.notification.smtp.host" placeholder="smtp.gmail.com" color="secondary"/>
               </q-item-main>
             </q-item>
 
             <q-item>
               <q-item-main>
                 <q-item-tile label>Port</q-item-tile>
-                <q-input type="number" min="1" max="65535" v-model="settings.notification.smtp.port"/>
+                <q-input type="number" min="1" max="65535" v-model="settings.notification.smtp.port" color="secondary"/>
               </q-item-main>
             </q-item>
 
             <q-item>
               <q-item-main>
                 <q-item-tile label>User</q-item-tile>
-                <q-input v-model="settings.notification.smtp.user" placeholder="<username>@gmail.com"/>
+                <q-input v-model="settings.notification.smtp.user" placeholder="<username>@gmail.com" color="secondary"/>
               </q-item-main>
             </q-item>
 
             <q-item>
               <q-item-main>
                 <q-item-tile label>Password</q-item-tile>
-                <q-input type="password" v-model="settings.notification.smtp.password"/>
+                <q-input type="password" v-model="settings.notification.smtp.password" color="secondary"/>
               </q-item-main>
             </q-item>
           </q-list>
@@ -112,7 +112,7 @@
     </q-alert>
 
     <div class="q-mt-md">
-        <q-btn :loading="saving" color="primary" icon="done" label="save changes" @click="onSave"/>
+        <q-btn :loading="saving" color="secondary" icon="done" label="save changes" @click="onSave"/>
     </div>
 
   </div>

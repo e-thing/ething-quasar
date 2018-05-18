@@ -29,8 +29,8 @@ export default {
           history: {
             description: 'the past data to plot',
             type: 'number',
-            enum: [86400/2, 86400, 86400*2, 86400*7, 'all'],
-            enumLabels: ['12 hours', '1 day', '2 days', '1 week', 'all'],
+            enum: [3600, 3600*6, 3600*12, 86400, 86400*2, 86400*7, 'all'],
+            enumLabels: ['1 hour', '6 hours', '12 hours', '1 day', '2 days', '1 week', 'all'],
             default: 86400
           }
         }

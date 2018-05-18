@@ -1,5 +1,5 @@
 <template>
-  <w-layout>
+  <w-layout v-bind="$attrs">
     <div slot="header" class="cursor-pointer" @click="$ui.open(r)">
       {{ r.basename() }}
     </div>

@@ -1,5 +1,5 @@
 <template>
-  <q-chip small detail :icon="batteryIcon(battery)" :color="batteryColor(battery)" >
+  <q-chip small detail :icon="batteryIcon(battery)" :color="batteryColor(battery)" v-if="typeof battery === 'number'">
     {{ battery }}%
   </q-chip>
 </template>

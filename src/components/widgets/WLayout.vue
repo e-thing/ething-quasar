@@ -1,13 +1,13 @@
 <template>
-  <div class="column fit">
-    <div class="col-auto text-center text-faded">
+  <div class="column">
+    <div class="col-auto text-center text-faded" v-if="!noHeader">
       {{ title }}
       <slot name="header"></slot>
     </div>
     <div class="col relative-position">
       <slot></slot>
     </div>
-    <div class="col-auto text-center text-faded">
+    <div class="col-auto text-center text-faded" v-if="!noFooter">
       <slot name="footer"></slot>
     </div>
   </div>
@@ -17,7 +17,11 @@
 export default {
     name: 'WLayout',
 
-    props: ['title'],
+    props: {
+      title: String,
+      noHeader: Boolean,
+      noFooter: Boolean
+    },
 
 }
 </script>

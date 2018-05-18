@@ -1,5 +1,5 @@
 <template>
-  <q-item class="item" @click.native="open(resource)" link>
+  <q-item class="item" @click.native="open(resource)" :link="!readonly">
     <div v-for="n in level" :class="gen(n)"></div>
     <q-item-side :icon="$meta.get(resource).icon" inverted :color="$meta.get(resource).color" />
     <q-item-main>
@@ -21,6 +21,9 @@
       <q-item-side right v-if="showChart" class="gt-xs">
         <q-btn icon="mdi-chart-line" round flat dense color="secondary" @click.stop="chart"/>
       </q-item-side>
+      <q-item-side right v-if="showDownload" class="gt-xs">
+        <q-btn icon="cloud_download" round flat dense color="secondary" @click.stop="download"/>
+      </q-item-side>
       <q-item-side right class="gt-xs">
         <q-btn icon="delete" round flat dense color="negative" @click.stop="remove"/>
       </q-item-side>
@@ -36,6 +39,7 @@
 
 <script>
 import ResourceBatteryChip from './ResourceBatteryChip'
+import FileSaver from 'file-saver'
 
 export default {
   name: 'ResourceQItem',
@@ -92,6 +96,10 @@ export default {
 
     showChart () {
       return this.resource instanceof this.$ething.Table && this.resource.length()
+    },
+
+    showDownload () {
+      return this.resource instanceof this.$ething.File || this.resource instanceof this.$ething.Table
     }
 
   },
@@ -194,6 +202,42 @@ export default {
 
     chart () {
       this.$router.push('/chart/' + this.resource.id())
+    },
+
+    download () {
+      if (this.resource instanceof this.$ething.File) {
+        this.$ething.request({
+          url: this.resource.getContentUrl(),
+          dataType: 'blob'
+        }).then((data) => {
+          console.log(data)
+          FileSaver.saveAs(data, this.resource.basename())
+        })
+      } else if (this.resource instanceof this.$ething.Table) {
+
+        this.$q.dialog({
+          title: 'Download ' + this.resource.name(),
+          message: 'Format: ',
+          options: {
+            type: 'radio',
+            model: 'csv',
+            items: [
+              {label: 'CSV', value: 'csv'},
+              {label: 'JSON', value: 'json_pretty'}
+            ]
+          },
+          cancel: true,
+          preventClose: true,
+          color: 'secondary'
+        }).then(format => {
+          this.$ething.request({
+            url: this.resource.getContentUrl() + '?fmt=' + format,
+            dataType: 'blob'
+          }).then((data) => {
+            FileSaver.saveAs(data, this.resource.basename() + '.' + (format=='json_pretty' ? 'json' : format))
+          })
+        })
+      }
     },
 
     open (r) {

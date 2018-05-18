@@ -155,3 +155,10 @@ export default {
 
 }
 </script>
+
+<style lang="stylus" scoped>
+  @import '~variables'
+
+  blockquote > div
+    padding-top $space-y-base
+</style>

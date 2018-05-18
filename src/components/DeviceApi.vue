@@ -1,41 +1,42 @@
 <template>
   <div>
 
-    <q-list v-for="operation in operations" :key="operation.name" no-border>
-      <q-collapsible icon="explore" :label="operation.name" :sublabel="operation.return" popup>
+    <q-list no-border>
+      <q-collapsible icon="keyboard_arrow_right" :label="operation.name" :sublabel="operation.return" v-for="operation in operations" :key="operation.name">
 
-        <vue-markdown v-if="operation.description" class="q-my-md">{{ operation.description }}</vue-markdown>
+        <div class="content">
+          <blockquote class="q-my-md"><vue-markdown v-if="operation.description">{{ operation.description }}</vue-markdown></blockquote>
 
-        <form-schema v-if="hasParameters(operation)" :schema="operation.schema" v-model="operation.model" @error="operation.inputError = $event" class="q-my-md"/>
+          <form-schema v-if="hasParameters(operation)" :schema="operation.schema" v-model="operation.model" @error="operation.inputError = $event" class="q-my-md"/>
 
-        <div>
-            <q-btn :loading="operation.loading" :disable="operation.inputError" color="primary" icon="done" label="execute" @click="execute(operation)"/>
+          <div class="q-my-md">
+              <q-btn :loading="operation.loading" :disable="operation.inputError" color="primary" icon="done" label="execute" @click="execute(operation)"/>
+          </div>
+
+          <q-alert
+              v-if="operation.error"
+              type="negative"
+              class="q-my-md"
+          >
+            {{ String(operation.error) }}
+          </q-alert>
+
+          <div class="result q-my-md" v-if="operation.result">
+            <img v-if="operation.resultType === 'image'" :src="operation.result" @load="operation.loading = false" />
+            <audio v-else-if="operation.resultType === 'audio'" controls :src="operation.result" :type="operation.resultContentType" />
+            <video v-else-if="operation.resultType === 'video'" controls autoplay :src="operation.result" :type="operation.resultContentType" />
+            <object v-else-if="operation.resultType === 'videoflash'" width="425" height="300" class="videoplayer" data="http://releases.flowplayer.org/swf/flowplayer-3.2.18.swf" type="application/x-shockwave-flash">
+              <param name="movie" value="http://releases.flowplayer.org/swf/flowplayer-3.2.18.swf" />
+              <param name="allowfullscreen" value="true" />
+              <param name="allowscriptaccess" value="always" />
+              <param name="flashvars" :value="'config={\"clip\":{\"url\":\"' + operation.result + '\"},\"playlist\":[{\"url\":\"' + operation.result + '\"}]}'" />
+            </object>
+            <pre v-else-if="operation.resultType === 'json'" v-highlightjs><code class="json">{{ operation.result }}</code></pre>
+            <pre v-else-if="operation.resultType === 'html'" v-highlightjs><code class="html">{{ operation.result }}</code></pre>
+            <pre v-else-if="operation.resultType === 'xml'" v-highlightjs><code class="xml">{{ operation.result }}</code></pre>
+            <pre v-else-if="operation.resultType === 'text'" v-highlightjs><code class="plain">{{ operation.result }}</code></pre>
+          </div>
         </div>
-
-        <q-alert
-            v-if="operation.error"
-            type="negative"
-            class="q-my-md"
-        >
-          {{ String(operation.error) }}
-        </q-alert>
-
-        <div class="result q-my-md" v-if="operation.result">
-          <img v-if="operation.resultType === 'image'" :src="operation.result" @load="operation.loading = false" />
-          <audio v-else-if="operation.resultType === 'audio'" controls :src="operation.result" :type="operation.resultContentType" />
-          <video v-else-if="operation.resultType === 'video'" controls autoplay :src="operation.result" :type="operation.resultContentType" />
-          <object v-else-if="operation.resultType === 'videoflash'" width="425" height="300" class="videoplayer" data="http://releases.flowplayer.org/swf/flowplayer-3.2.18.swf" type="application/x-shockwave-flash">
-            <param name="movie" value="http://releases.flowplayer.org/swf/flowplayer-3.2.18.swf" />
-            <param name="allowfullscreen" value="true" />
-            <param name="allowscriptaccess" value="always" />
-            <param name="flashvars" :value="'config={\"clip\":{\"url\":\"' + operation.result + '\"},\"playlist\":[{\"url\":\"' + operation.result + '\"}]}'" />
-          </object>
-          <pre v-else-if="operation.resultType === 'json'" v-highlightjs><code class="json">{{ operation.result }}</code></pre>
-          <pre v-else-if="operation.resultType === 'html'" v-highlightjs><code class="html">{{ operation.result }}</code></pre>
-          <pre v-else-if="operation.resultType === 'xml'" v-highlightjs><code class="xml">{{ operation.result }}</code></pre>
-          <pre v-else-if="operation.resultType === 'text'" v-highlightjs><code class="plain">{{ operation.result }}</code></pre>
-        </div>
-
       </q-collapsible>
     </q-list>
 
@@ -254,6 +255,15 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
+  @import '~variables'
+
+  blockquote > div
+    padding-top $space-y-base
+
+  @media (min-width: $breakpoint-xs)
+    .content
+      margin-left 3 * $space-y-base
+
   .result
     img
       width auto

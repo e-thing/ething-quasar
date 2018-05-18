@@ -1,6 +1,6 @@
 <template>
   <div class="widget">
-    <componant :is="type" v-bind="options" />
+    <componant :is="type" :style="style" v-bind="attr" :class="inline ? '' : 'fit'"/>
   </div>
 </template>
 
@@ -12,15 +12,46 @@ export default {
 
     components: widgets,
 
-    props: ['type', 'options'],
+    props: {
+      type: String,
+      options: {},
+      inline: Boolean
+    },
 
     data () {
         return {}
     },
 
+    computed: {
+      attr () {
+        return Object.assign({}, this.options, this.$attrs)
+      },
+
+      widgetClass () {
+        return this.$widget.find(this.type)
+      },
+
+      widgetClassMeta () {
+        return this.widgetClass ? this.widgetClass.meta : {}
+      },
+
+      style () {
+        var style = {}
+
+        if (this.widgetClassMeta.minWidth) {
+          style.minWidth = this.widgetClassMeta.minWidth + 'px'
+          if (this.inline) {
+            style.width = style.minWidth
+          }
+        }
+        if (this.widgetClassMeta.minHeight) {
+          style.minHeight = this.widgetClassMeta.minHeight + 'px'
+          style.height = this.inline ? style.minHeight : '1px'
+        }
+
+        return style
+      }
+    }
+
 }
 </script>
-
-<style scoped>
-
-</style>

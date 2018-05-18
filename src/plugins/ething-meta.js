@@ -152,9 +152,10 @@ function compile (type, resource) {
   for(let k in m.widgets) {
     if (typeof m.widgets[k] !== 'object') {
       m.widgets[k] = {
-        name: m.widgets[k]
+        type: m.widgets[k]
       }
     }
+    m.widgets[k].options = m.widgets[k].options || {}
   }
 
   // add it to the static cache !
@@ -241,7 +242,7 @@ function parseDefinition (schema, meta) {
 
         if (description)
           meta.description = description
-        
+
         if(!meta.required)
           meta.required = []
 

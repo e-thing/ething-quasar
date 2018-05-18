@@ -108,7 +108,7 @@ module.exports = function (ctx) {
         'QCard',
         'QCardTitle',
         'QCardMain',
-        'QCardSeparator'
+        'QCardSeparator',
         //
       ],
       directives: [

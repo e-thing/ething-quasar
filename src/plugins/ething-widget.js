@@ -7,7 +7,7 @@ var widget = {
     if (widgets.hasOwnProperty(name)) {
       return widgets[name]
     }
-  }
+  },
 }
 
 // leave the export, even if you don't use it
