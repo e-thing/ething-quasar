@@ -6,6 +6,7 @@ const { humanStorageSize } = format
 import { SSE } from './ething-sse'
 import { meta } from './ething-meta'
 import promiseFinally from 'promise.prototype.finally'
+import qs from 'qs'
 
 // necessary for older browsers
 promiseFinally.shim()
@@ -138,14 +139,14 @@ export default ({ app, router, Vue, store }) => {
 
     login (serverUrl, username, password) {
 
-      const params = new URLSearchParams()
-      params.append('login', username)
-      params.append('password', password)
-
       return EThing.axios.request({
         method: 'post',
         url: serverUrl + '/auth/password',
-        data: params
+        headers: { 'content-type': 'application/x-www-form-urlencoded' },
+        data: qs.stringify({
+          login: username,
+          password: password
+        })
       }).then(response => {
 
         this.reset()

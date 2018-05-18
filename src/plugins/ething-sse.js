@@ -1,5 +1,6 @@
 // import something here
 import EThing from 'ething-js'
+import EventSource from 'eventsource'
 
 // SSE
 
