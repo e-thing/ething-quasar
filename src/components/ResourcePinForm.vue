@@ -1,48 +1,51 @@
 <template>
   <div>
 
-    <div v-if="resources.length">
+    <div class="q-my-md">
+      <div class="q-title q-my-md">Choose the resource to pin</div>
+      <div v-if="resources.length">
 
-      <div class="row gutter-sm">
-        <div class="resource" :class="resources.length>1 ? ('col-xs-12 col-sm-6 col-md-4 col-lg-3 ' + (pinned.find(id => id === r.id()) ? 'pinned' : '')) : 'col-xs-12'" v-for="r in resources" :key="r.id()">
-          <q-card
-            @click.native="select(r)"
-            style="height: 100%" flat square
-            class="cursor-pointer col-xs-12 col-sm-6"
-            :color="$meta.get(r).color"
-            text-color="white"
+        <div class="row gutter-sm">
+          <div class="resource" :class="resources.length>1 ? ('col-xs-12 col-sm-6 col-md-4 col-lg-3 ' + (pinned.find(id => id === r.id()) ? 'pinned' : '')) : 'col-xs-12'" v-for="r in resources" :key="r.id()">
+            <q-card
+              @click.native="select(r)"
+              style="height: 100%" flat square
+              class="cursor-pointer col-xs-12 col-sm-6"
+              :color="$meta.get(r).color"
+              text-color="white"
 
-          >
-            <q-card-title >
-              {{ r.basename() }}
-              <span v-if="r.createdBy()" slot="subtitle">{{ $ething.arbo.get(r.createdBy()).basename() }}</span>
-              <q-icon slot="right" :name="$meta.get(r).icon" color="white"/>
-            </q-card-title>
-            <!--<q-card-separator />
-            <q-card-main>
-              Card Content
-            </q-card-main>-->
-          </q-card>
+            >
+              <q-card-title >
+                {{ r.basename() }}
+                <span v-if="r.createdBy()" slot="subtitle">{{ $ething.arbo.get(r.createdBy()).basename() }}</span>
+                <q-icon slot="right" :name="$meta.get(r).icon" color="white"/>
+              </q-card-title>
+              <!--<q-card-separator />
+              <q-card-main>
+                Card Content
+              </q-card-main>-->
+            </q-card>
+          </div>
         </div>
+        <!--
+        <q-list link no-border>
+          <resource-q-item v-for="r in resources" :key="r.id()" :resource="r" @click.native="select(r)" readonly/>
+        </q-list>
+        -->
+        <q-btn v-if="resource" flat color="faded" label="change" icon="replay" @click="resetList"/>
       </div>
-      <!--
-      <q-list link no-border>
-        <resource-q-item v-for="r in resources" :key="r.id()" :resource="r" @click.native="select(r)" readonly/>
-      </q-list>
-      -->
-      <q-btn v-if="resource" flat color="faded" label="change" icon="replay" @click="resetList"/>
+      <q-alert v-else
+        type="warning"
+        class="q-mb-sm"
+      >
+        No resource found !
+      </q-alert>
     </div>
-    <q-alert v-else
-      type="warning"
-      class="q-mb-sm"
-    >
-      No resource found !
-    </q-alert>
 
     <div v-if="resource">
 
-      <div v-if="widgets.length > 1">
-        <div>Choose the widget type</div>
+      <div v-if="widgets.length > 1" class="q-my-md">
+        <div class="q-title q-my-md">Choose the widget type</div>
         <q-option-group
           color="secondary"
           type="radio"
@@ -51,7 +54,11 @@
         />
       </div>
 
-      <form-schema v-if="widgetClassMetaOptions" :schema="widgetClassMetaOptions" v-model="options" @error="optionsError = $event"/>
+      <div v-if="widgetClassMetaOptions" class="q-my-md">
+        <div class="q-title q-my-md">Options</div>
+        <form-schema :schema="widgetClassMetaOptions" v-model="options" @error="optionsError = $event"/>
+      </div>
+
     </div>
 
     <div class="q-mt-xl">
@@ -104,8 +111,9 @@ export default {
 
     widgetNames () {
       return (this.widgets || []).map(w => {
+        var widgetClass = this.$widget.find(w.type)
         return {
-          label: w.type,
+          label: widgetClass.meta.name || w.type,
           value: w.type
         }
       })

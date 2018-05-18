@@ -1,6 +1,8 @@
 // Configuration for your app
+var pjson = require('./package.json')
 
 module.exports = function (ctx) {
+
   return {
     // app plugins (/src/plugins)
     plugins: [
@@ -34,7 +36,8 @@ module.exports = function (ctx) {
       scopeHoisting: true,
       vueRouterMode: 'hash',
       env: {
-        API: JSON.stringify(ctx.prod && ctx.mode.spa)
+        API: JSON.stringify(ctx.prod && ctx.mode.spa),
+        VERSION: JSON.stringify(pjson.version)
       },
       // gzip: true,
       // analyze: true,

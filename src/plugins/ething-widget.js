@@ -2,6 +2,10 @@
 
 import widgets from '../components/widgets'
 
+for(var k in widgets) {
+  widgets[k].meta = widgets[k].meta || {}
+}
+
 var widget = {
   find (name) {
     if (widgets.hasOwnProperty(name)) {

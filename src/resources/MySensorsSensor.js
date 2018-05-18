@@ -61,30 +61,37 @@ export default {
   },
 
   dynamic (resource) {
-    var widget = null
+    var widgets = []
 
     if (resource.attr('sensorType') === 'S_HUM') {
-      widget = {
+      widgets.push({
+        type: 'WDeviceKnob',
+        options: {
+          fn: 'getHumidity',
+          unit: '%'
+        }
+      })
+      widgets.push({
         type: 'WDeviceLabel',
         options: {
           fn: 'getHumidity',
           unit: '%'
         }
-      }
+      })
     }
     else if (resource.attr('sensorType') === 'S_BARO') {
-      widget = {
+      widgets.push({
         type: 'WDeviceLabel',
         options: {
           fn: 'getPressure',
           unit: 'Pa'
         }
-      }
+      })
     }
 
-    if (widget) {
+    if (widgets.length) {
       return {
-        widgets: [widget]
+        widgets
       }
     }
   }

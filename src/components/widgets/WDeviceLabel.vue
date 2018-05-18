@@ -24,7 +24,10 @@ export default {
       WDeviceLayout
     },
 
-    props: ['fn', 'unit'],
+    props: {
+      fn: {},
+      unit: String,
+    },
 
     data () {
         return {
@@ -55,6 +58,7 @@ export default {
     },
 
     meta: {
+      name: 'label',
       minWidth: 50,
       minHeight: 50
     }

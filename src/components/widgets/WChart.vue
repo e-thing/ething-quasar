@@ -22,6 +22,7 @@ export default {
     },
 
     meta: {
+      name: 'chart',
       minWidth: 250,
       minHeight: 150,
       options: {

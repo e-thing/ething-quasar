@@ -12,7 +12,9 @@ promiseFinally.shim()
 
 const AUTH_REFRESH_INTERVAL = 3600 * 1000
 
-export var UI = {}
+export var UI = {
+  VERSION: process.env.VERSION
+}
 
 export default ({ app, router, Vue, store }) => {
 

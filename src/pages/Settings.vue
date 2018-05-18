@@ -4,6 +4,7 @@
       <!-- Tabs - notice slot="title" -->
       <q-tab default slot="title" label="settings" name="settings" icon="settings" />
       <q-tab slot="title" label="log" name="log" icon="message" />
+      <q-tab slot="title" label="about" name="about" icon="info" />
 
       <!-- Targets -->
       <q-tab-pane name="settings">
@@ -11,6 +12,30 @@
       </q-tab-pane>
       <q-tab-pane name="log">
         <log-view />
+      </q-tab-pane>
+      <q-tab-pane name="about">
+
+        <dl class="horizontal">
+          <dt>UI</dt>
+          <dd>version: {{ $ui.VERSION }}</dd>
+
+          <dt>Server</dt>
+          <dd>version: {{ $meta.info.VERSION }}</dd>
+
+          <dt>JS api</dt>
+          <dd>version: {{ $ething.VERSION }}</dd>
+
+          <dt>Python</dt>
+          <dd>version: {{ $meta.info.python.version }} type: {{ $meta.info.python.type }}</dd>
+
+          <dt>Platform</dt>
+          <dd>{{ $meta.info.platform.name }}</dd>
+
+          <dt>NodeJS</dt>
+          <dd>version: {{ $meta.info.nodejs.version }}</dd>
+
+        </dl>
+
       </q-tab-pane>
 
     </q-tabs>
@@ -27,7 +52,7 @@ export default {
   components: {
     SettingsView,
     LogView
-  }
+  },
 
 }
 </script>

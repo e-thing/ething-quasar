@@ -104,8 +104,8 @@ export default {
         pinModalCssBigScreen: Object.assign({
           minWidth: '50vw',
           maxWidth: '80vw',
-          height: '100vh',
-          maxHeight: '100vh'
+          /*height: '100vh',
+          maxHeight: '100vh'*/
         }, pinModalCss)
     }
   },

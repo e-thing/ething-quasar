@@ -19,7 +19,7 @@ import WResource from './WResource'
 import WDeviceLayout from './WDeviceLayout'
 
 export default {
-    name: 'WThermometer',
+    name: 'WDeviceKnob',
 
     mixins: [WResource],
 
@@ -27,14 +27,24 @@ export default {
       WDeviceLayout
     },
 
+    props: {
+      fn: {},
+      unit: String,
+      min: {
+        type: Number,
+        default: 0
+      },
+      max: {
+        type: Number,
+        default: 100
+      },
+    },
+
     data () {
-      return {
-        value: 0,
-        unit: '°C',
-        min: -20,
-        max: 40,
-        lastUpdate: false
-      }
+        return {
+            value: 0,
+            lastUpdate: null
+        }
     },
 
     watch: {
@@ -48,7 +58,7 @@ export default {
     methods: {
       update () {
         this.lastUpdate = this.r.modifiedDate()
-        this.r.getTemperature().then(v => {
+        this.r.execute(this.fn).then(v => {
           this.value = v
         })
       }
@@ -59,6 +69,7 @@ export default {
     },
 
     meta: {
+      name: 'knob',
       minWidth: 160,
       minHeight: 160
     }
@@ -68,7 +79,3 @@ export default {
 
 }
 </script>
-
-<style scoped>
-
-</style>

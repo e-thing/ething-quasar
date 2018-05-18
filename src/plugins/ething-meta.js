@@ -311,9 +311,12 @@ function importDefinitions (def) {
 
   formSchemaCore.definitions.events = meta.events
 
+  meta.info = def.info || {}
+
 }
 
 export var meta = {
+  info: {},
   get: compile,
   types: Object.keys(_metadata),
   events: {
