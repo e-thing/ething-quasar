@@ -6,10 +6,13 @@
       <span class="vertical-middle">
         {{ resource.basename() }}
       </span>
-      <q-chip small detail icon="access time">
+      <q-chip small detail icon="access time" v-if="resource.lastSeenDate()">
         {{ $ui.dateToString(resource.lastSeenDate()) }}
       </q-chip>
       <resource-battery-chip :resource="resource" class="vertical-middle"/>
+      <q-chip small detail icon="location_on" v-if="resource.location()">
+        {{ resource.location() }}
+      </q-chip>
 
       <q-btn class="float-right" flat rounded label="settings" icon="settings" @click="$router.push('/resource/' + resource.id())"/>
     </div>
@@ -58,7 +61,7 @@
     </q-card>
 
     <!-- api -->
-    <q-card  v-if="children.length" class="q-my-md">
+    <q-card  v-if="resource.methods().length" class="q-my-md">
       <q-card-title class="bg-primary text-white">
         <q-icon name="mdi-database" class="vertical-middle"/>
         <span class="vertical-middle">

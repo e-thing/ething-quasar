@@ -54,7 +54,7 @@ export default {
   computed: {
 
     formattedModel () {
-      return this.schema.type === 'string' ? this.model : JSON.stringify(this.model, null, 4)
+      return this.schema.type === 'string' ? this.castedModel : JSON.stringify(this.castedModel, null, 4)
     }
   },
 
@@ -95,7 +95,7 @@ export default {
           val = null
         }
       }
-      
+
       this.setValue(val)
     }
   }

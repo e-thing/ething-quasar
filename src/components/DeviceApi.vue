@@ -5,7 +5,7 @@
       <q-collapsible icon="keyboard_arrow_right" :label="operation.name" :sublabel="operation.return" v-for="operation in operations" :key="operation.name">
 
         <div class="content">
-          <blockquote class="q-my-md"><vue-markdown v-if="operation.description">{{ operation.description }}</vue-markdown></blockquote>
+          <blockquote class="q-my-md" v-if="operation.description"><vue-markdown>{{ operation.description }}</vue-markdown></blockquote>
 
           <form-schema v-if="hasParameters(operation)" :schema="operation.schema" v-model="operation.model" @error="operation.inputError = $event" class="q-my-md"/>
 

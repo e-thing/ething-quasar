@@ -124,7 +124,7 @@ export default {
                     if (maybePromise instanceof Promise) {
                       nPromise++
                       maybePromise.then((val) => {
-                        model[k] = val
+                        this.$set(this.model, k, val)
                       }).finally(post)
                     } else {
                       model[k] = maybePromise
