@@ -63,7 +63,7 @@
                 Curves
                 <q-btn flat size="md"
                   color="cyan-5"
-                  @click="pane.curves.push({})"
+                  @click="pane.curves.push({type:'line',  data:{}})"
                   label="Add"
                   icon="add"
                 />
@@ -83,8 +83,8 @@
                     <resource-select type="Table" v-model="curve.data.resource" use-id/>
                   </q-field>
 
-                  <q-field label="key" class="q-my-md" orientation="vertical">
-                    <q-select v-model="curve.data.key" :options="optionsBuildKeyOptions(curve.data.resource)"/>
+                  <q-field v-if="curve.data.resource" label="key" class="q-my-md" orientation="vertical">
+                    <q-select v-model="curve.data.key" :options="optionsBuildKeyOptions(curve)"/>
                   </q-field>
 
                   <q-btn flat size="md"
@@ -508,13 +508,19 @@ export default {
       this.optionsModal = false
     },
 
-    optionsBuildKeyOptions (resourceId) {
-      return this.$ething.arbo.get(resourceId).keys().map(key => {
-        return {
-          label: key,
-          value: key
-        }
-      })
+    optionsBuildKeyOptions (curve) {
+      var resource = this.$ething.arbo.get(curve.data.resource)
+      if (resource) {
+        var keys = resource.keys()
+        if (keys.length)
+          curve.data.key = keys[0]
+        return keys.map(key => {
+          return {
+            label: key,
+            value: key
+          }
+        })
+      }
     },
 
     onSave () {
@@ -532,12 +538,14 @@ export default {
         if (this.filename.length) {
           this.$ething.File.create({
             name: this.filename,
-            content: btoa(content)
+            content: content
           }).then( (f) => {
             this.file = f
           })
         }
       }
+
+      this.saveModal = false
     },
 
     chart () {
@@ -571,11 +579,13 @@ export default {
     if (this.file) {
       this.file.read().then(data => {
         try{
-          var preferences = JSON.parse(data);
+          var preferences = typeof data === 'string' ? JSON.parse(data) : data;
           this.optionsData = preferences
           this.load(preferences)
         }
-        catch(e){}
+        catch(e){
+          console.error(e)
+        }
       })
     } else {
 
