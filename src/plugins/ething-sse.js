@@ -10,7 +10,7 @@ export var SSE = {
 
 	start () {
 
-		var source = this.source = new EventSource(EThing.config.serverUrl + "/api/events", { withCredentials: true })
+		var source = this.source = new EventSource(EThing.config.serverUrl + "/api/events", { withCredentials: true, https: {rejectUnauthorized: false} })
 
 		/*source.onopen = function() {
 			console.log("opened")
@@ -30,7 +30,7 @@ export var SSE = {
 	},
 
   dispatch (event) {
-    //console.log(event)
+    // console.log(event)
 
     var name = event.name,
 			isResourceEvent = !!event.data.resource,

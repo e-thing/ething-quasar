@@ -31,6 +31,10 @@ export default [
         }
       },
       {
+        path: 'chart',
+        component: () => import('pages/Chart')
+      },
+      {
         path: 'text/:id',
         component: () => import('pages/Text'),
         meta: {

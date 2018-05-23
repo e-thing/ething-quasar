@@ -2,7 +2,7 @@
   <div>
     <q-resize-observable @resize="onResize" />
 
-    <highstock class="chart" :class="{ expended: expended }" :options="options" ref="highcharts"></highstock>
+    <highstock v-if="options" class="chart" :class="{ expended: expended }" :options="options" ref="highcharts"></highstock>
 
     <q-inner-loading class="text-center" :visible="loading">
       <div class="q-pa-lg text-primary">loading...</div>
@@ -30,7 +30,7 @@
 
     </q-modal>
 
-    <q-modal v-model="optionsModal" :content-css="{padding: '50px', minWidth: '50vw'}">
+    <q-modal v-model="optionsModal" :no-esc-dismiss="!options" :no-backdrop-dismiss="!options" :content-css="{padding: '50px', minWidth: '50vw'}">
       <div class="q-display-1 q-mb-md">Chart options</div>
 
       <q-field label="Title" class="q-my-md" orientation="vertical">
@@ -54,8 +54,17 @@
 
         <div class="q-ml-md q-mb-md">
           <div v-for="(pane, index) in optionsData.panes" :key="index" class="pane">
-            <q-field label="name/unit" class="q-my-md" orientation="vertical">
-              <q-input v-model="pane.name" />
+            <q-field
+              label="name/unit"
+              class="q-my-md"
+              orientation="vertical"
+              :error="$v.optionsData.panes.$each[index].name.$error"
+              error-label="Required"
+            >
+              <q-input
+                v-model="pane.name"
+                :error="$v.optionsData.panes.$each[index].name.$error"
+              />
             </q-field>
 
             <div class="q-my-md">
@@ -71,20 +80,61 @@
 
               <div class="q-ml-md q-mb-md">
                 <div v-for="(curve, cindex) in pane.curves" :key="cindex" class="curve">
-                  <q-field label="name" class="q-my-md" orientation="vertical">
-                    <q-input v-model="curve.name" />
+                  <q-field
+                    label="name"
+                    class="q-my-md"
+                    orientation="vertical"
+                    :error="$v.optionsData.panes.$each[index].curves.$each[cindex].name.$error"
+                    error-label="Required"
+                  >
+                    <q-input
+                      v-model="curve.name"
+                      :error="$v.optionsData.panes.$each[index].curves.$each[cindex].name.$error"
+                    />
                   </q-field>
 
-                  <q-field label="type" class="q-my-md" orientation="vertical">
-                    <q-select v-model="curve.type" :options="serieTypeOptions"/>
+                  <q-field
+                    label="type"
+                    class="q-my-md"
+                    orientation="vertical"
+                    :error="$v.optionsData.panes.$each[index].curves.$each[cindex].type.$error"
+                    error-label="Required"
+                  >
+                    <q-select
+                      v-model="curve.type"
+                      :options="serieTypeOptions"
+                      :error="$v.optionsData.panes.$each[index].curves.$each[cindex].type.$error"
+                    />
                   </q-field>
 
-                  <q-field label="table" class="q-my-md" orientation="vertical">
-                    <resource-select type="Table" v-model="curve.data.resource" use-id/>
+                  <q-field
+                    label="table"
+                    class="q-my-md"
+                    orientation="vertical"
+                    :error="$v.optionsData.panes.$each[index].curves.$each[cindex].data.resource.$error"
+                    error-label="Required"
+                  >
+                    <resource-select
+                      type="Table"
+                      v-model="curve.data.resource"
+                      use-id
+                      :error="$v.optionsData.panes.$each[index].curves.$each[cindex].data.resource.$error"
+                    />
                   </q-field>
 
-                  <q-field v-if="curve.data.resource" label="key" class="q-my-md" orientation="vertical">
-                    <q-select v-model="curve.data.key" :options="optionsBuildKeyOptions(curve)"/>
+                  <q-field
+                    v-if="curve.data.resource"
+                    label="key"
+                    class="q-my-md"
+                    orientation="vertical"
+                    :error="$v.optionsData.panes.$each[index].curves.$each[cindex].data.key.$error"
+                    error-label="Required"
+                  >
+                    <q-select
+                      v-model="curve.data.key"
+                      :options="optionsBuildKeyOptions(curve, $v.optionsData.panes.$each[index].curves.$each[cindex].data.key)"
+                      :error="$v.optionsData.panes.$each[index].curves.$each[cindex].data.key.$error"
+                    />
                   </q-field>
 
                   <q-btn flat size="md"
@@ -110,11 +160,13 @@
 
       <q-btn
         color="primary"
+        :disable="$v.optionsData.$error"
         @click="onOptionsValidate"
         label="Validate"
       />
       <q-btn
         color="negative"
+        flat
         @click="optionsModal = false"
         label="Cancel"
       />
@@ -238,6 +290,7 @@ DataSource.prototype.load = function (done) {
 import { extend } from 'quasar'
 import ResourceSelect from './ResourceSelect'
 import { debounce } from 'quasar'
+import { required, minLength } from 'vuelidate/lib/validators'
 
 export default {
   name: 'Chart',
@@ -275,10 +328,15 @@ export default {
     return {
       loading: false,
       dataSource: new DataSource(),
-      options: {},
+      options: false,
       optionsModal: !(this.preferences),
       optionsData: {
-        panes: []
+        panes: [{
+          curves: [{
+            type:'line',
+            data:{}
+          }]
+        }]
       },
       serieTypeOptions: [
         {
@@ -306,6 +364,44 @@ export default {
       filename: filename,
       file: file,
       table: null
+    }
+  },
+
+  validations () {
+    return {
+      optionsData: {
+        required,
+        panes: {
+          required,
+          minLength: minLength(1),
+          $each: {
+            name: {
+              required
+            },
+            curves: {
+              required,
+              minLength: minLength(1),
+              $each: {
+                name: {
+                  required
+                },
+                type: {
+                  required
+                },
+                data: {
+                  required,
+                  resource: {
+                    required
+                  },
+                  key: {
+                    required
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
 
@@ -512,8 +608,9 @@ export default {
       var resource = this.$ething.arbo.get(curve.data.resource)
       if (resource) {
         var keys = resource.keys()
-        if (keys.length)
-          curve.data.key = keys[0]
+        if (keys.length) {
+          this.$set(curve.data, 'key', keys[0])
+        }
         return keys.map(key => {
           return {
             label: key,
@@ -549,7 +646,7 @@ export default {
     },
 
     chart () {
-      return this.$refs.highcharts.chart
+      return this.$refs.highcharts ? this.$refs.highcharts.chart : undefined
     },
 
     onResize (size) {
@@ -557,12 +654,12 @@ export default {
       //   width: 20 // width of container (in px)
       //   height: 50 // height of container (in px)
       // }
-      // this.chart().reflow()
       this.resize()
     },
 
     resize: debounce( function () {
-      this.chart().reflow()
+      var chart = this.chart()
+      if (chart) chart.reflow()
     }, 1000),
 
     onTableUpdate (evt, updatedKeys) {
@@ -576,6 +673,8 @@ export default {
   },
 
   mounted () {
+    this.$v.optionsData.$touch()
+
     if (this.file) {
       this.file.read().then(data => {
         try{
@@ -629,8 +728,10 @@ export default {
         preferences = this.preferences
       }
 
-      this.optionsData = preferences
-      this.load(preferences)
+      if (preferences) {
+        this.optionsData = preferences
+        this.load(preferences)
+      }
     }
 
   },

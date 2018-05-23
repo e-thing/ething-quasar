@@ -65,10 +65,17 @@
                 @click="create('File')"
                 :icon="$meta.get('File').icon"
             />
+
             <q-fab-action
                 :color="$meta.get('Table').color"
                 @click="create('Table')"
                 :icon="$meta.get('Table').icon"
+            />
+
+            <q-fab-action
+                :color="$meta.get('File').color"
+                @click="$router.push('/chart')"
+                icon="mdi-chart-line"
             />
         </q-fab>
     </q-page-sticky>
