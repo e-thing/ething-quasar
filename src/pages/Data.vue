@@ -50,8 +50,14 @@
       </q-list>
     </div>
 
-    <div v-else class="q-pa-md">
-      No items found.
+    <div v-else class="absolute-center text-center">
+      <p>
+        <img
+          src="~assets/sad.svg"
+          style="width:30vw;max-width:150px;"
+        >
+      </p>
+      <p class="text-faded">Nothing found !</p>
     </div>
 
     <q-page-sticky position="bottom-right" :offset="[18, 18]">

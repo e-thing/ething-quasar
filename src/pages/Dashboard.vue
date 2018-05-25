@@ -1,53 +1,72 @@
 <template>
   <q-page class="bg-grey-2">
 
-    <q-window-resize-observable @resize="onResize" />
-
-    <q-btn-group flat >
-      <q-btn flat icon="mdi-pin" label="pin resource" color="faded" @click="pinModal = true"/>
-      <q-btn flat icon="edit" :color="editing ? 'primary' : 'faded'" label="edit" @click="editing = !editing"/>
-    </q-btn-group>
-
-    <div v-if="smallScreen && !$q.platform.is.desktop && !$q.platform.is.electron && !$q.platform.is.chromeExt" class="smallScreenContainer">
-      <div v-for="(item) in layout" :key="item.i" :style="{height: (item.h * grid.rowHeight) + 'px'}" class="bg-white">
-        <div v-show="editing" class="absolute-center">
-          <q-btn-group flat >
-            <q-btn flat icon="delete" color="negative" @click="removeItem(item)"/>
-          </q-btn-group>
-        </div>
-        <widget v-show="!editing" class="fit" :type="item.type" :options="item.options" />
-      </div>
+    <div v-if="loading">
+      <q-inner-loading class="text-center" :visible="loading">
+        <div class="q-pa-lg text-primary">loading...</div>
+        <q-spinner-oval color="primary" size="50px" />
+      </q-inner-loading>
     </div>
-    <grid-layout v-else
-      :layout="layout"
-      :col-num="grid.columnNb"
-      :row-height="grid.rowHeight"
-      :is-draggable="draggable"
-      :is-resizable="resizable"
-      :is-mirrored="false"
-      :vertical-compact="true"
-      :margin="[10, 10]"
-      :use-css-transforms="true"
-    >
-        <grid-item v-for="(item) in layout" :key="item.i"
-           :x="item.x"
-           :y="item.y"
-           :w="item.w"
-           :h="item.h"
-           :i="item.i"
-           @resized="resizedEvent"
-           @moved="movedEvent"
-           class="bg-white"
-        >
-            <div v-show="editing" class="absolute-center">
-              <q-btn-group flat >
-                <q-btn flat icon="delete" color="negative" @click="removeItem(item)"/>
-              </q-btn-group>
-            </div>
-            <widget v-show="!editing" class="fit" :type="item.type" :options="item.options" />
-        </grid-item>
-    </grid-layout>
 
+    <div v-else-if="layout.length==0" class="absolute-center text-center">
+      <p>
+        <img
+          src="~assets/sad.svg"
+          style="width:30vw;max-width:150px;"
+        >
+      </p>
+      <p class="text-faded">No widgets</p>
+      <q-btn icon="mdi-pin" label="pin resource" color="secondary" @click="pinModal = true"/>
+    </div>
+
+    <div v-else>
+      <q-window-resize-observable @resize="onResize" />
+
+      <q-btn-group flat >
+        <q-btn flat icon="mdi-pin" label="pin resource" color="faded" @click="pinModal = true"/>
+        <q-btn flat icon="edit" :color="editing ? 'primary' : 'faded'" label="edit" @click="editing = !editing"/>
+      </q-btn-group>
+
+      <div v-if="smallScreen && !$q.platform.is.desktop && !$q.platform.is.electron && !$q.platform.is.chromeExt" class="smallScreenContainer">
+        <div v-for="(item) in layout" :key="item.i" :style="{height: (item.h * grid.rowHeight) + 'px'}" class="bg-white">
+          <div v-show="editing" class="absolute-center">
+            <q-btn-group flat >
+              <q-btn flat icon="delete" color="negative" @click="removeItem(item)"/>
+            </q-btn-group>
+          </div>
+          <widget v-show="!editing" class="fit" :type="item.type" :options="item.options" />
+        </div>
+      </div>
+      <grid-layout v-else
+        :layout="layout"
+        :col-num="grid.columnNb"
+        :row-height="grid.rowHeight"
+        :is-draggable="draggable"
+        :is-resizable="resizable"
+        :is-mirrored="false"
+        :vertical-compact="true"
+        :margin="[10, 10]"
+        :use-css-transforms="true"
+      >
+          <grid-item v-for="(item) in layout" :key="item.i"
+             :x="item.x"
+             :y="item.y"
+             :w="item.w"
+             :h="item.h"
+             :i="item.i"
+             @resized="resizedEvent"
+             @moved="movedEvent"
+             class="bg-white"
+          >
+              <div v-show="editing" class="absolute-center">
+                <q-btn-group flat >
+                  <q-btn flat icon="delete" color="negative" @click="removeItem(item)"/>
+                </q-btn-group>
+              </div>
+              <widget v-show="!editing" class="fit" :type="item.type" :options="item.options" />
+          </grid-item>
+      </grid-layout>
+    </div>
 
     <q-modal v-model="pinModal" :maximized="smallScreen" :content-css="smallScreen ? pinModalCss : pinModalCssBigScreen">
       <div class="q-headline q-mb-md">Pin resource</div>
@@ -90,6 +109,7 @@ export default {
     }
 
     return {
+        loading: false,
         layout: [],
         grid: {
           columnNb: 6,
@@ -157,6 +177,8 @@ export default {
     },
 
     load: function() {
+      this.loading = true
+
       var file = this.file()
 
       if (file) {
@@ -175,7 +197,11 @@ export default {
           })
 
           this.layout = layout
+        }).finally(() => {
+          this.loading = false
         })
+      } else {
+        this.loading = false
       }
 
     },

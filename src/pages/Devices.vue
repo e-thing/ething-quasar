@@ -23,8 +23,14 @@
       </q-list>
     </div>
 
-    <div v-else class="q-pa-md">
-    No devices installed.
+    <div v-else class="absolute-center text-center">
+      <p>
+        <img
+          src="~assets/sad.svg"
+          style="width:30vw;max-width:150px;"
+        >
+      </p>
+      <p class="text-faded">No devices installed</p>
     </div>
 
   </q-page>

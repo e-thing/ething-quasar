@@ -37,6 +37,9 @@
       <q-alert v-else
         type="warning"
         class="q-mb-sm"
+        :actions="[
+          { label: 'Add Device', icon: 'add', handler: () => { this.$router.push('/devices') } }
+        ]"
       >
         No resource found !
       </q-alert>
