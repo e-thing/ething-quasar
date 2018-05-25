@@ -1,3 +1,6 @@
+import { format } from 'quasar'
+import { date } from 'quasar'
+
 export default {
   icon: 'mdi-file',
 
@@ -6,24 +9,16 @@ export default {
   bases: ['Resource'],
 
   properties: {
-    /*mime: {
-      type: 'string',
-      readOnly: true
-    },
     size: {
-      type: 'number',
-      readOnly: true
+      getFormatted: function (resource) {
+        return format.humanStorageSize(this.get(resource))
+      }
     },
     contentModifiedDate: {
-      type: 'string',
-      format: 'date-time',
-      readOnly: true
+      getFormatted: function (resource) {
+        return date.formatDate(this.get(resource).getTime(), 'YYYY-MM-DD HH:mm')
+      }
     },
-    expireAfter: {
-      type: 'number',
-      default: 0,
-      description: "This resource will be automatically removed after a specific duration of inactivity.",
-    }*/
   },
 
   dynamic (resource) {

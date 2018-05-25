@@ -1,3 +1,5 @@
+import { date } from 'quasar'
+
 export default {
   icon: 'mdi-table',
 
@@ -6,24 +8,17 @@ export default {
   bases: ['Resource'],
 
   properties: {
-    /*length: {
-      type: 'number',
-      readOnly: true
+    length: {
+      getFormatted: function (resource) {
+        return this.get(resource) + ' rows'
+      }
     },
     contentModifiedDate: {
-      type: 'string',
-      format: 'date-time',
-      readOnly: true
+      getFormatted: function (resource) {
+        return date.formatDate(this.get(resource).getTime(), 'YYYY-MM-DD HH:mm')
+      }
     },
-    maxLength: {
-      type: 'number',
-      default: 0
-    },
-    expireAfter: {
-      type: 'number',
-      default: 0,
-      description: "This resource will be automatically removed after a specific duration of inactivity.",
-    }*/
+    
   },
 
   widgets: ['WChart']

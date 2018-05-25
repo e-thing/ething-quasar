@@ -12,9 +12,15 @@
       <q-item-tile sublabel>{{ $ui.dateToString(date) }}</q-item-tile>
       <q-item-tile sublabel v-if="showType">{{ resource.type() }}</q-item-tile>
       <q-item-tile sublabel v-if="showBattery" class="lt-sm">battery: {{ resource.battery() }}%</q-item-tile>
+      <q-item-tile sublabel v-if="showLocation" class="lt-sm">location: {{ resource.location() }}</q-item-tile>
       <q-item-tile sublabel v-if="showSize">{{ $ui.sizeToString(resource.size()) }}</q-item-tile>
       <q-item-tile sublabel v-if="showLength">{{ resource.length() }} rows</q-item-tile>
     </q-item-main>
+    <q-item-side right v-if="showLocation" class="gt-xs">
+      <q-chip small detail icon="location_on">
+        {{ resource.location() }}
+      </q-chip>
+    </q-item-side>
     <q-item-side right v-if="showBattery" class="gt-xs">
       <resource-battery-chip :resource="resource" />
     </q-item-side>
@@ -89,6 +95,10 @@ export default {
 
     showBattery () {
       return this.resource instanceof this.$ething.Device && this.resource.hasBattery()
+    },
+
+    showLocation () {
+      return this.resource instanceof this.$ething.Device && this.resource.location()
     },
 
     showSize () {

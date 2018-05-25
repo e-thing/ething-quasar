@@ -115,11 +115,7 @@ export default {
                 }
 
                 if (resource) {
-                    let maybePromise
-                    if(typeof meta.properties[k].get === 'function')
-                      maybePromise = meta.properties[k].get(resource)
-                    else
-                      maybePromise = resource.attr(k)
+                    let maybePromise = meta.properties[k].get(resource)
 
                     if (maybePromise instanceof Promise) {
                       nPromise++

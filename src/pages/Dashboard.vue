@@ -193,7 +193,7 @@ export default {
 
           var layout = config.widgets || []
           layout.forEach( w => {
-            w.i = this.idCnt++
+            w.i = String(this.idCnt++)
           })
 
           this.layout = layout
@@ -224,7 +224,7 @@ export default {
         y: 0,
         w: 1,
         h: 1,
-        i: this.idCnt++,
+        i: String(this.idCnt++),
         options: {}
       },attr))
     },

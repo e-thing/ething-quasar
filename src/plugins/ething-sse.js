@@ -1,6 +1,10 @@
 // import something here
 import EThing from 'ething-js'
-import EventSource from 'eventsource'
+
+if (!EventSource) {
+	console.log('load EventSource polyfill')
+	EventSource = require('eventsource')
+}
 
 // SSE
 
@@ -12,9 +16,13 @@ export var SSE = {
 
 		var source = this.source = new EventSource(EThing.config.serverUrl + "/api/events", { withCredentials: true, https: {rejectUnauthorized: false} })
 
-		/*source.onopen = function() {
-			console.log("opened")
-		}*/
+		source.onopen = function() {
+			console.log("SSE connected")
+		}
+
+		source.onerror = function() {
+			console.warn("SSE disconnected")
+		}
 
 		source.onmessage = (event) => {
 			var data = JSON.parse(event.data)

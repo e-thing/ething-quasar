@@ -146,8 +146,15 @@ function compile (type, resource) {
   // add defaults
   m = merge(deepCopy(defaultsMeta), m)
 
-  for(let k in m.properties)
+  for(let k in m.properties) {
     m.properties[k] = merge(deepCopy(defaultsMetaProperty), m.properties[k])
+    if (!m.properties[k].get) {
+      m.properties[k].get = r => r[k] ? r[k]() : r.attr(k)
+    }
+    if (!m.properties[k].getFormatted) {
+      m.properties[k].getFormatted = m.properties[k].get
+    }
+  }
 
   for(let k in m.widgets) {
     if (typeof m.widgets[k] !== 'object') {

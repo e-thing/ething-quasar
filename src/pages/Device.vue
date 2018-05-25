@@ -25,8 +25,28 @@
     <!-- widget -->
     <!-- <resource-widget :resource="resource" no-header no-footer inline/> -->
 
+    <!-- attributes -->
+    <q-card  v-if="attributes.length>0" class="q-my-md attributes" :class="{detailled: showDetailledAttributes}">
+      <q-card-title class="bg-primary text-white">
+        <q-icon name="mdi-format-list-bulleted" class="vertical-middle"/>
+        <span class="vertical-middle">
+          Attributes
+        </span>
+        <q-btn class="float-right" flat rounded size="small" :label="showDetailledAttributes ? 'less' : 'more'" :icon="showDetailledAttributes ? 'expand_less' : 'expand_more'" style="line-height: initial" @click="showDetailledAttributes = !showDetailledAttributes"/>
+      </q-card-title>
+      <q-card-separator />
+      <q-card-main>
+        <div class="row">
+          <template v-for="attr in attributes">
+            <div class="col-xs-12 col-sm-2 key text-secondary" :class="{detailled: attr.detailled}">{{ attr.name }}</div>
+            <div class="col-xs-12 col-sm-10 value" :class="{detailled: attr.detailled}">{{ attr.value }}</div>
+          </template>
+        </div>
+      </q-card-main>
+    </q-card>
+
     <!-- data -->
-    <q-card  v-if="attr" class="q-my-md" >
+    <q-card  v-if="data" class="q-my-md" >
       <q-card-title class="bg-primary text-white">
         <q-icon name="mdi-format-list-bulleted" class="vertical-middle"/>
         <span class="vertical-middle">
@@ -36,8 +56,8 @@
       <q-card-separator />
       <q-card-main>
         <div class="row">
-          <template v-for="(value, key) in attr">
-            <div class="col-xs-12 col-sm-2 key">{{ key }}</div>
+          <template v-for="(value, key) in data">
+            <div class="col-xs-12 col-sm-2 key text-secondary">{{ key }}</div>
             <div class="col-xs-12 col-sm-10 value">{{ value }}</div>
           </template>
         </div>
@@ -95,6 +115,12 @@ export default {
     ResourceWidget
   },
 
+  data () {
+    return {
+      showDetailledAttributes: false
+    }
+  },
+
   computed: {
     resource () {
       var id = this.$route.params.id
@@ -131,9 +157,29 @@ export default {
       })
     },
 
-    attr () {
+    data () {
       var data = this.resource.data()
       return data && Object.keys(data).length > 0 ? data : undefined
+    },
+
+    attributes () {
+      var props = this.$meta.get(this.resource).properties
+      var attributes = []
+      var skippedFields = ['name', 'data', 'description']
+      var detailledFields = ['id', 'modifiedDate', 'createdBy', 'type', 'extends', 'public', 'createdDate', 'methods', 'battery', 'location', 'interfaces', 'connected', 'lastSeenDate']
+      for(let name in props) {
+        if (skippedFields.indexOf(name) !== -1) continue
+
+        let prop = props[name]
+        let value = prop.getFormatted(this.resource)
+
+        attributes.push({
+          name,
+          value,
+          detailled: detailledFields.indexOf(name) !== -1
+        })
+      }
+      return attributes
     },
 
     createdBys () {
@@ -157,5 +203,13 @@ export default {
 }
 </script>
 
-<style>
+<style lang="stylus">
+
+.attributes
+  .key.detailled, .value.detailled
+    display none
+  &.detailled
+    .key.detailled, .value.detailled
+      display block
+
 </style>
