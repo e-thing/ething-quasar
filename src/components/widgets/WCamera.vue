@@ -1,5 +1,5 @@
 <template>
-  <image-viewer :source="r" no-title/>
+  <image-viewer :source="source" no-title/>
 </template>
 
 <script>
@@ -7,16 +7,22 @@ import ImageViewer from '../ImageViewer'
 import WResource from './WResource'
 
 export default {
-    name: 'WCamera',
+    name: 'WImage',
 
     components: {
       ImageViewer
     },
 
+    computed: {
+      source () {
+        return this.r.executeUrl('snapshot')
+      }
+    },
+
     mixins: [WResource],
 
     meta: {
-      name: 'image',
+      name: 'camera',
       minWidth: 320,
       minHeight: 280
     }

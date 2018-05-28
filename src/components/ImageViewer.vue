@@ -3,7 +3,7 @@
         <div class="card-img">
             <div class="img-wrapper">
                 <div class="">
-                  <img :src="currentImageSrc" alt="">
+                  <img :src="currentImage.getSrc()" alt="">
                   <div v-if="!noTitle" class="title text-center text-faded">{{ currentImage.name() }}</div>
                 </div>
             </div>
@@ -19,7 +19,7 @@
                 :class="['thumbnail-image', (activeImage == index) ? 'active' : '']"
                 @click="activateImage(index)"
             >
-                <img :src="getThumbSrc(image)">
+                <img :src="image.getThumbSrc(image)">
             </div>
         </div>
     </div>
@@ -28,89 +28,134 @@
 <script>
 
 export default {
-    name: 'ImageViewer',
+  name: 'ImageViewer',
 
-    props: {
-      source: {},
-      thumbnails: Boolean,
-      controls: Boolean,
-      noTitle: Boolean
-    },
+  props: {
+    /*
+    source:
+      - File: image
+    */
+    source: {},
+    value: {},
+    thumbnails: Boolean,
+    controls: Boolean,
+    noTitle: Boolean
+  },
 
-    data() {
-      return {
-          //Index of the active image on the images array
-          activeImage: 0
-      }
+  data() {
+    return {
+        //Index of the active image on the images array
+        activeImage: 0,
+        images: []
+    }
   },
   computed: {
       // currentImage gets called whenever activeImage changes
       // and is the reason why we don't have to worry about the
       // big image getting updated
       currentImage () {
+          console.log(this.activeImage, this.images)
           return this.images[this.activeImage]
       },
 
-      currentImageSrc () {
-          return this.currentImage.getContentUrl(false)
-      },
+  },
 
-      images () {
-        var source = this.source
-        var images = []
-
-        if (typeof source === 'string') {
-          source = this.$store.getters['ething/get'](id)
-        }
-
-        if (source instanceof this.$ething.File) {
-          images = this.$ething.arbo.glob(source.dirname() ? (source.dirname() + '/*') : '*')
-        }
-
-        if (Array.isArray(images)) {
-          images = images.filter(this.isImage)
-        }
-
-        return images
-      }
+  watch: {
+    source (src) {
+      this.setSource(src)
+    },
+    value (val) {
+      this.activateImage (val)
+    }
   },
 
   mounted () {
-    if (this.source instanceof this.$ething.File) {
-      this.activeImage = this.images.indexOf(this.source)
+    this.setSource(this.source)
+    if (this.value) {
+      this.activateImage(this.value)
     }
   },
 
   methods: {
 
-      isImage (r) {
-        return r instanceof this.$ething.File && /image/.test(r.mime())
-      },
-
-      getThumbSrc (r) {
-        return r.thumbnailLink(false)
+      setSource (source) {
+        if (Array.isArray(source)) {
+          this.images = source.map(s => this.parseSource(s)).filter(s => !!s)
+        } else {
+          var image = this.parseSource(source)
+          this.images = []
+          if (image) {
+            this.images.push(image)
+          }
+        }
       },
 
       // Go forward on the images array
       // or go at the first image if you can't go forward :/
       nextImage() {
-        var active = this.activeImage + 1;
+        var active = this.activeImage + 1
         if(active >= this.images.length) {
-            active = 0;
+            active = 0
         }
-        this.activateImage(active);
+        this.activateImage(active)
       },
+
       // Go backwards on the images array
       // or go at the last image
       prevImage() {
-        var active = this.activeImage - 1;
+        var active = this.activeImage - 1
         if(active < 0) {
-            active = this.images.length - 1;
+            active = this.images.length - 1
         }
-        this.activateImage(active);
+        this.activateImage(active)
       },
+
       activateImage(imageIndex) {
-        this.activeImage = imageIndex;
+        if (typeof imageIndex == 'number') {
+          this.activeImage = imageIndex
+          this.$emit(this.images[this.activeImage].source)
+        } else {
+          var index = this.images.findIndex(s => {
+            return s.source === imageIndex
+          })
+          if (index !== -1) {
+            this.activeImage = index
+          }
+        }
+
+      },
+
+      parseSource (source) {
+        var obj = {}
+
+        if (/^https?:\/\//.test(source)) {
+          obj = {
+            type: 'url',
+            getSrc () {
+              return source
+            },
+            name () {
+              return source
+            }
+          }
+        } else if (source instanceof this.$ething.File) {
+          obj = {
+            type: 'resource.File',
+            getSrc () {
+              return source.getContentUrl(false)
+            },
+            getThumbSrc () {
+              return source.thumbnailLink(false)
+            },
+            name () {
+              return source.name()
+            }
+          }
+        }
+
+        obj.source = source
+
+        return obj
       }
   }
 

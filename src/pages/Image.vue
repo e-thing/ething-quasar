@@ -1,6 +1,6 @@
 <template>
   <q-page>
-    <image-viewer :source="resource" thumbnails controls/>
+    <image-viewer :source="sources" :value="resource" thumbnails controls/>
   </q-page>
 </template>
 
@@ -25,6 +25,10 @@ export default {
       }
       return r
     },
+
+    sources () {
+      return this.$ething.arbo.glob(this.resource.dirname() ? (this.resource.dirname() + '/*') : '*').filter(r => r instanceof this.$ething.File && /^image/.test(r.mime()))
+    }
   }
 }
 </script>
