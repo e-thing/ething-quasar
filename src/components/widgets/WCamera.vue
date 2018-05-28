@@ -1,5 +1,5 @@
 <template>
-  <image-viewer :source="source" no-title/>
+  <image-viewer ref="view" :source="source" no-title/>
 </template>
 
 <script>
@@ -13,10 +13,33 @@ export default {
       ImageViewer
     },
 
+    props: {
+      refreshInterval: {
+        default: 30
+      }
+    },
+
+    data () {
+      return {
+        timerId: null
+      }
+    },
+
     computed: {
       source () {
         return this.r.executeUrl('snapshot')
       }
+    },
+
+    mounted () {
+      this.timerId = setInterval(() => {
+        this.$refs.view.refresh()
+      }, this.refreshInterval * 1000)
+    },
+
+    beforeDestroy () {
+      if(this.timerId !== null)
+        clearInterval(this.timerId)
     },
 
     mixins: [WResource],
@@ -24,7 +47,16 @@ export default {
     meta: {
       name: 'camera',
       minWidth: 320,
-      minHeight: 280
+      minHeight: 280,
+      options: {
+        properties: {
+          refreshInterval: {
+            description: 'set the refresh interval in seconds',
+            type: 'number',
+            default: 30
+          }
+        }
+      }
     }
 
 }

@@ -2,17 +2,17 @@
     <div class="card-carousel" :class="{ hasThumbnails: thumbnails, noTitle: !noTitle }" >
         <div class="card-img">
             <div class="img-wrapper">
-                <div class="">
-                  <img :src="currentImage.getSrc()" alt="">
+                <div v-if="currentImage">
+                  <img :key="imgKey" :src="addTimestampToUrl(currentImage.getSrc())" alt="">
                   <div v-if="!noTitle" class="title text-center text-faded">{{ currentImage.name() }}</div>
                 </div>
             </div>
-            <div class="actions" v-if="controls">
+            <div class="actions" v-if="controls && images.length>1">
                 <q-btn round flat size="lg" icon="chevron left" @click="prevImage" class="prev"/>
                 <q-btn round flat size="lg" icon="chevron right" @click="nextImage" class="next"/>
             </div>
         </div>
-        <div class="thumbnails" v-if="thumbnails">
+        <div class="thumbnails" v-if="thumbnails && images.length>1">
             <div
                 v-for="(image, index) in  images"
                 :key="index"
@@ -46,7 +46,8 @@ export default {
     return {
         //Index of the active image on the images array
         activeImage: 0,
-        images: []
+        images: [],
+        imgKey: 0
     }
   },
   computed: {
@@ -54,7 +55,6 @@ export default {
       // and is the reason why we don't have to worry about the
       // big image getting updated
       currentImage () {
-          console.log(this.activeImage, this.images)
           return this.images[this.activeImage]
       },
 
@@ -113,7 +113,7 @@ export default {
       activateImage(imageIndex) {
         if (typeof imageIndex == 'number') {
           this.activeImage = imageIndex
-          this.$emit(this.images[this.activeImage].source)
+          this.$emit('input', this.images[this.activeImage].source)
         } else {
           var index = this.images.findIndex(s => {
             return s.source === imageIndex
@@ -123,6 +123,11 @@ export default {
           }
         }
 
+      },
+
+      refresh () {
+        console.log('refresh')
+        this.imgKey += 1
       },
 
       parseSource (source) {
@@ -156,6 +161,10 @@ export default {
         obj.source = source
 
         return obj
+      },
+
+      addTimestampToUrl (url) {
+        return url + ( url.indexOf('?') === -1 ? '?' : '&' ) + Date.now()
       }
   }
 
