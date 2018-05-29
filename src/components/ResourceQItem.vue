@@ -231,7 +231,7 @@ export default {
       } else if (this.resource instanceof this.$ething.Table) {
 
         this.$q.dialog({
-          title: 'Download ' + this.resource.name(),
+          title: 'Download "' + this.resource.name() + '"',
           message: 'Format: ',
           options: {
             type: 'radio',

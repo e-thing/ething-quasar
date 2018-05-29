@@ -1,17 +1,27 @@
 <template>
   <w-device-layout :resource="resource" v-bind="$attrs">
     <div class="absolute-center">
-      <q-toggle :value="state" :disable="loading" @input="toggle" />
+      <q-knob
+        :value="value"
+        :min="min"
+        :max="max"
+        :disable="loading"
+        color="primary"
+        @change="setLevel"
+      >
+        {{value}} <span class="unit">{{unit}}</span>
+      </q-knob>
     </div>
   </w-device-layout>
 </template>
+
 
 <script>
 import WResource from './WResource'
 import WDeviceLayout from './WDeviceLayout'
 
 export default {
-    name: 'WSwitch',
+    name: 'WDimmable',
 
     mixins: [WResource],
 
@@ -19,11 +29,23 @@ export default {
       WDeviceLayout
     },
 
+    props: {
+      unit: String,
+      min: {
+        type: Number,
+        default: 0
+      },
+      max: {
+        type: Number,
+        default: 100
+      },
+    },
+
     data () {
         return {
-            state: false,
+            value: 0,
             loading: false,
-            lastUpdate: null
+            lastUpdate: null,
         }
     },
 
@@ -39,17 +61,17 @@ export default {
       update () {
         this.loading = true
         this.lastUpdate = this.r.modifiedDate()
-        this.r.getState().then(v => {
-          this.state = v
+        this.r.getLevel().then(v => {
+          this.value = v
         }).finally(() => {
           this.loading = false
         })
       },
 
-      toggle (state) {
+      setLevel (value) {
         this.loading = true
-        this.r.setState(state).then(() => {
-          this.state = state
+        this.r.setLevel(value).then(() => {
+          this.value = value
           this.setError(false)
         }).catch(err => {
           this.setError(err)
@@ -64,9 +86,9 @@ export default {
     },
 
     meta: {
-      name: 'switch',
-      minWidth: 60,
-      minHeight: 60
+      name: 'qnob',
+      minWidth: 160,
+      minHeight: 160
     }
 
 

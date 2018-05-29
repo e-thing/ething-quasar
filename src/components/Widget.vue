@@ -1,6 +1,6 @@
 <template>
-  <div class="widget">
-    <componant :is="type" :style="style" v-bind="attr" :class="inline ? '' : 'fit'"/>
+  <div class="widget" :class="{'widget-err': !!error}">
+    <componant :is="type" :style="style" v-bind="attr" :class="inline ? '' : 'fit'" @error="error = $event"/>
   </div>
 </template>
 
@@ -19,7 +19,9 @@ export default {
     },
 
     data () {
-        return {}
+        return {
+          error: false
+        }
     },
 
     computed: {
@@ -55,3 +57,11 @@ export default {
 
 }
 </script>
+
+<style lang="stylus" scoped>
+@import '~variables'
+
+.widget.widget-err
+  border 1px solid $negative
+
+</style>

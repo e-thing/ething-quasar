@@ -261,7 +261,7 @@ export default {
     }, 500),
 
     addWidget (attr) {
-      this.layout.push(normalizeLayoutItem(attr))
+      this.layout.push(this.normalizeLayoutItem(attr))
     },
 
     pin (info) {

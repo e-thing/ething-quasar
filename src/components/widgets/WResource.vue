@@ -1,9 +1,12 @@
 
 <script>
 import EThing from 'ething-js'
+import WWidget from './WWidget'
 
 export default {
     name: 'WResource',
+
+    mixins: [WWidget],
 
     props: ['resource'],
 
