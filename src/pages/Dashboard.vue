@@ -60,10 +60,11 @@
           >
               <div v-show="editing" class="absolute-center">
                 <q-btn-group flat >
+                  <q-btn v-if="isEditable(item)" flat icon="settings" color="faded" @click="editItem(item)"/>
                   <q-btn flat icon="delete" color="negative" @click="removeItem(item)"/>
                 </q-btn-group>
               </div>
-              <widget v-show="!editing" class="fit" :type="item.type" :options="item.options" />
+              <widget v-show="!editing" :key="item.key" class="fit" :type="item.type" :options="item.options" />
           </grid-item>
       </grid-layout>
     </div>
@@ -72,6 +73,29 @@
       <div class="q-headline q-mb-md">Pin resource</div>
 
       <resource-pin-form :pinned="pinnedResources" @done="pin" @cancel="pinModal = false"/>
+
+    </q-modal>
+
+    <q-modal v-model="widgetEdit.modal" :content-css="{padding: '50px', minWidth: '50vw'}">
+      <div class="q-headline q-mb-md">Edit</div>
+
+      <div class="q-title q-my-md">Options</div>
+      <form-schema :schema="widgetEdit.schema" v-model="widgetEdit.model" @error="widgetEdit.error = $event"/>
+
+      <div class="q-mt-xl">
+        <q-btn
+          color="primary"
+          @click="widgetEditDone"
+          label="Apply"
+          :disable="widgetEdit.error"
+        />
+        <q-btn
+          flat
+          color="negative"
+          @click="widgetEdit.modal = false"
+          label="Cancel"
+        />
+      </div>
 
     </q-modal>
 
@@ -84,7 +108,7 @@ import Vue from 'vue'
 import EThing from 'ething-js'
 import VueGridLayout from 'vue-grid-layout'
 import Widget from '../components/Widget'
-import { debounce } from 'quasar'
+import { debounce, extend } from 'quasar'
 import ResourcePinForm from '../components/ResourcePinForm'
 
 var GridLayout = VueGridLayout.GridLayout
@@ -126,7 +150,15 @@ export default {
           maxWidth: '80vw',
           /*height: '100vh',
           maxHeight: '100vh'*/
-        }, pinModalCss)
+        }, pinModalCss),
+
+        widgetEdit: {
+          modal: false,
+          item: null,
+          schema: {},
+          model: {},
+          error: false
+        }
     }
   },
 
@@ -192,9 +224,7 @@ export default {
             }
 
           var layout = config.widgets || []
-          layout.forEach( w => {
-            w.i = String(this.idCnt++)
-          })
+          layout = layout.map(this.normalizeLayoutItem)
 
           this.layout = layout
         }).finally(() => {
@@ -204,6 +234,18 @@ export default {
         this.loading = false
       }
 
+    },
+
+    normalizeLayoutItem (item) {
+      return Object.assign({
+        i: String(this.idCnt++),
+        key: 0,
+        x: 0,
+        y: 0,
+        w: 1,
+        h: 1,
+        options: {}
+      }, item)
     },
 
     save: debounce( function(){
@@ -219,14 +261,7 @@ export default {
     }, 500),
 
     addWidget (attr) {
-      this.layout.push(Object.assign({
-        x: 0,
-        y: 0,
-        w: 1,
-        h: 1,
-        i: String(this.idCnt++),
-        options: {}
-      },attr))
+      this.layout.push(normalizeLayoutItem(attr))
     },
 
     pin (info) {
@@ -257,6 +292,36 @@ export default {
       this.save()
 
       this.pinModal = false
+    },
+
+    isEditable (item) {
+      var widgetCls = this.$widget.find(item.type)
+      return widgetCls.meta && widgetCls.meta.options && Object.keys(widgetCls.meta.options).length
+    },
+
+    editItem (item) {
+      var widgetCls = this.$widget.find(item.type)
+      var schema = Object.assign({type: 'object'}, widgetCls.meta.options)
+
+      this.widgetEdit.item = item
+      this.widgetEdit.schema = schema
+      this.widgetEdit.model = extend(true, {}, item.options)
+      this.widgetEdit.error = false
+      this.widgetEdit.modal = true
+
+    },
+
+    widgetEditDone () {
+      if (!this.widgetEdit.error) {
+
+        Object.assign(this.widgetEdit.item.options, this.widgetEdit.model)
+
+        this.widgetEdit.item.key++
+
+        this.widgetEdit.modal = false
+
+        this.save()
+      }
     },
 
     removeItem (item) {
