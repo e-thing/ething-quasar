@@ -5,6 +5,7 @@ import WDeviceLabel from './WDeviceLabel'
 import WDeviceKnob from './WDeviceKnob'
 import WCamera from './WCamera'
 import WDimmable from './WDimmable'
+import WScript from './WScript'
 
 export default {
   WChart,
@@ -13,5 +14,6 @@ export default {
   WDeviceLabel,
   WDeviceKnob,
   WCamera,
-  WDimmable
+  WDimmable,
+  WScript
 }

@@ -148,7 +148,6 @@ export default {
     },
 
     select (resource) {
-      console.log('res selected:', resource)
       this.resource = resource
       this.resources = [resource]
       this.options = {}

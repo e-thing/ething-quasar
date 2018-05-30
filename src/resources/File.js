@@ -26,23 +26,25 @@ export default {
 
     if (resource.extension() === 'plot') {
       icon = 'mdi-file-chart'
-      widgets = ['WChart']
+      widgets.push('WChart')
     } else if (/^text/.test(resource.mime())) {
       icon = 'mdi-file-document'
     } else if (/^image/.test(resource.mime())) {
       icon = 'mdi-file-image'
-      widgets = ['WImage']
+      widgets.push('WImage')
     } else if (/^video/.test(resource.mime())) {
       icon = 'mdi-file-video'
     } else if (/^application/.test(resource.mime())) {
       icon = 'mdi-file-xml'
-    } else {
-      return // default
     }
 
-    return {
-      icon,
-      widgets
+    if (resource.mime() === 'application/javascript') {
+      widgets.push('WScript')
     }
+
+    var m = {}
+    if (icon) m.icon = icon
+    if (widgets) m.widgets = widgets
+    return m
   }
 }

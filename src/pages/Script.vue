@@ -2,28 +2,56 @@
   <q-page>
     <multipane class="absolute fit" :class="orientation == 'vertical' ? 'vertical-panes' : 'horizontal-panes'" :layout="orientation">
       <div class="pane" :style="orientation == 'vertical' ? { width: '50%', maxWidth: '75%' } : { height: '50%', maxHeight: '75%' }">
-        <q-btn-group flat >
-          <q-btn :loading="saveLoading" label="save" icon="mdi-content-save-outline" @click="save"/>
-          <q-btn :loading="exeLoading" label="run" icon="play_arrow" @click="onExecuteClick"/>
-        </q-btn-group>
-        <span class="title text-faded" :class="{dirty: dirty}">{{ resource.name() }}</span>
-
-        <codemirror ref='cm' v-model="content" :options="cmOption" @changes="onChange"></codemirror>
+        <div class="column absolute fit">
+          <div class="col-auto">
+            <q-btn-group flat >
+              <q-btn :loading="saveLoading" label="save" icon="mdi-content-save-outline" @click="save"/>
+              <q-btn :loading="exeLoading" label="run" icon="play_arrow" @click="onExecuteClick"/>
+              <q-btn label="settings" icon="settings" @click="settingsModal = true"/>
+            </q-btn-group>
+            <span class="title text-faded" :class="{dirty: dirty}">{{ resource.name() }}</span>
+          </div>
+          <q-scroll-area class="col" style="height: 100%">
+            <codemirror ref='cm' v-model="content" :options="cmOption" @changes="onChange"></codemirror>
+          </q-scroll-area>
+        </div>
       </div>
       <multipane-resizer></multipane-resizer>
       <div class="pane console" :style="{ flexGrow: 1 }">
         <div v-if="exeLoading" class="absolute-center text-faded">
           running ...
         </div>
-        <div v-else class="absolute fit">
+        <q-scroll-area v-else-if="console.enabled" class="absolute fit" ref="outputScrollArea">
           <div class="output">
             <div v-for="(item, key) in console.output" :key="key" class="output-line" :class="item.type">
               <pre class="q-ma-none"><code>{{ item.chunk }}</code></pre>
             </div>
+            <div class="output-line info">status: {{ console.info.status ? 'success' : 'fail' }}</div>
+            <div class="output-line info">return code: {{ console.info.returnCode }}</div>
+            <div class="output-line info">duration: {{ console.info.executionTime }} secondes</div>
           </div>
-        </div>
+        </q-scroll-area>
       </div>
     </multipane>
+
+    <q-modal v-model="settingsModal" :content-css="{padding: '50px', minWidth: '50vw'}">
+
+      <div class="q-title q-my-md">Settings</div>
+
+      <q-field label="Arguments" class="q-my-md" orientation="vertical">
+        <q-input v-model="args" />
+      </q-field>
+
+      <div class="q-mt-xl">
+        <q-btn
+          flat
+          color="faded"
+          @click="settingsModal = false"
+          label="Close"
+        />
+      </div>
+
+    </q-modal>
   </q-page>
 </template>
 
@@ -79,9 +107,13 @@ export default {
       exeLoading: false,
       dirty: false,
       console: {
-        output: []
+        enabled: false,
+        output: [],
+        info: {}
       },
       orientation: this.$q.platform.is.mobile ? 'horizontal' : 'vertical',
+      settingsModal: false,
+      args: ''
     }
   },
 
@@ -143,11 +175,14 @@ export default {
 
     execute () {
       this.exeLoading = true
-      this.resource.execute().then(result => {
+      this.resource.execute(this.args).then(result => {
         console.log(result)
         this.printResult(result)
       }).finally(() => {
         this.exeLoading = false
+        setTimeout(() => {
+          this.$refs.outputScrollArea.setScrollPosition(1000000000)
+        }, 1)
       })
     },
 
@@ -156,9 +191,13 @@ export default {
     },
 
     printResult (result) {
+      this.console.enabled = true
       this.console.output = result.output
-
-
+      this.console.info = {
+        status: result.ok,
+        returnCode: result.return_code,
+        executionTime: result.executionTime
+      }
     }
   },
 
@@ -174,7 +213,7 @@ export default {
 @import '~variables'
 
 .vertical-panes > .pane {
-  overflow: auto;
+  overflow: hidden;
 }
 
 .vertical-panes > .pane ~ .pane {
@@ -186,7 +225,7 @@ export default {
 }
 
 .horizontal-panes > .pane {
-  overflow: auto;
+  overflow: hidden;
 }
 
 .custom-resizer > .pane ~ .pane {
@@ -225,6 +264,8 @@ export default {
       color: $faded
     &.stderr
       color: $negative
+    &.info
+      color: $blue-7
     &:not(:last-child)
       border-bottom 1px solid $grey-3
 

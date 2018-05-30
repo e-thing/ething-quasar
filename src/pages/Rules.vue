@@ -19,6 +19,10 @@
             <q-item-side right>
               <q-btn icon="settings" round flat dense @click.stop="$router.push('/resource/' + rule.id())"/>
             </q-item-side>
+            <q-item-side right>
+              <q-btn icon="delete" round flat dense color="negative" @click.stop="remove(rule)"/>
+            </q-item-side>
+
           </template>
 
           <q-item multiline>
@@ -45,6 +49,13 @@
             </q-item-main>
           </q-item>
 
+          <q-item multiline v-if="targets(rule).length">
+            <q-item-side icon="mdi-link-variant" />
+            <q-item-main>
+              <q-item-tile label>Targets</q-item-tile>
+              <q-item-tile v-for="target in targets(rule)" :key="target.id()" sublabel><q-btn dense outline color="secondary" :label="target.name()" :icon="$meta.get(target).icon" @click="$ui.open(target)"/></q-item-tile>
+            </q-item-main>
+          </q-item>
 
         </q-collapsible>
       </q-list>
@@ -93,6 +104,38 @@ export default {
       rule.execute().finally(() => {
         this.loading = false
       })
+    },
+
+    remove (rule) {
+      var name = rule.name()
+
+      return this.$q.dialog({
+        title: 'Remove',
+        message: 'Do you really want to remove definitely the Rule "' + name + '" ?',
+        ok: 'Remove',
+        cancel: 'Cancel'
+      }).then((data) => {
+        rule.remove().then( () => {
+          this.$q.notify(name + ' removed !')
+        })
+      })
+    },
+
+    targets (rule) {
+      var resources = []
+      var evtResources = rule.event().resource
+      if (evtResources) {
+        if (typeof evtResources === 'String' && this.$ething.utils.isId(evtResources)) {
+          resources.push(evtResources)
+        } else if (Array.isArray(evtResources)) {
+          resources = evtResources.filter(this.$ething.utils.isId)
+        }
+      }
+
+      if (resources.length) {
+
+      }
+      return resources.map(id => this.$ething.arbo.get(id)).filter(r => !!r)
     },
 
     script (rule) {
