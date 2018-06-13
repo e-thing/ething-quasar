@@ -1,5 +1,6 @@
 import FormSchemaEthingResource from '../plugins/formSchema/FormSchemaEthingResource'
 import FormSchemaEthingEvent from '../plugins/formSchema/FormSchemaEthingEvent'
+import FormSchemaWeekCalendar from '../plugins/formSchema/FormSchemaWeekCalendar'
 import EThing from 'ething-js'
 
 export default {
@@ -18,6 +19,9 @@ export default {
     },
     event: {
       format: 'ething.event',
+    },
+    scheduler: {
+      format: 'week-calendar'
     },
   }
 

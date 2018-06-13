@@ -53,6 +53,17 @@ export default {
           return requiredProperties.indexOf(k)===-1 && readOnlyProperties.indexOf(k)===-1
       }))
 
+      if (this.schema.order) {
+        for (var i = this.schema.order.length; i>0; i--) {
+          var key = this.schema.order[i - 1]
+          var index = keyOrdered.indexOf(key)
+          if (index !== -1) {
+            keyOrdered.splice(index, 1)
+            keyOrdered.unshift(key)
+          }
+        }
+      }
+
       return keyOrdered.map(key => {
         return {
           key,

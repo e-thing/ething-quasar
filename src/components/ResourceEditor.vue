@@ -141,7 +141,10 @@ export default {
               schema: {
                   type: 'object',
                   required,
-                  properties
+                  properties,
+                  order: [
+                    'name'
+                  ]
               },
               meta
           }

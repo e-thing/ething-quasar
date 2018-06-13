@@ -16,6 +16,9 @@
 </template>
 
 <script>
+
+import FormSchemaWeekCalendar from '../plugins/formSchema/FormSchemaWeekCalendar'
+
 export default {
   name: 'PageTest',
 
@@ -25,7 +28,10 @@ export default {
       schema: {
         type: 'object',
         properties: {
-          host: {
+          calendar: {
+            format: 'week-calendar'
+          },
+          /*host: {
             description: 'une description',
             type: 'string',
             pattern: '^toto'
@@ -91,7 +97,7 @@ export default {
                 }
               }
             }
-          }
+          }*/
         }
       },
       model: {
