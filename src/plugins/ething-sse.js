@@ -1,5 +1,6 @@
 // import something here
 import EThing from 'ething-js'
+import { Notify } from 'quasar'
 
 if (!EventSource) {
 	console.log('load EventSource polyfill')
@@ -12,16 +13,56 @@ if (!EventSource) {
 export var SSE = {
 	source: null,
 
-	start () {
+	connected: false,
+	showReconnect: false,
 
+	start () {
+		var self = this
 		var source = this.source = new EventSource(EThing.config.serverUrl + "/api/events", { withCredentials: true, https: {rejectUnauthorized: false} })
 
 		source.onopen = function() {
 			console.log("SSE connected")
+			self.connected = true
+
+			if (self.notification) {
+				self.notification()
+			}
+
+			if (self.showReconnect) {
+				self.notification = Notify.create({
+					type: 'positive',
+					color: 'positive',
+				  message: 'Reconnected to server !',
+					icon: 'thumb_up',
+					position: 'top-right',
+					onDismiss () {
+						delete self.notification
+					}
+				})
+			}
 		}
 
 		source.onerror = function() {
-			console.warn("SSE disconnected")
+			if (self.connected === true) {
+				console.warn("SSE disconnected")
+				self.connected = false
+				self.showReconnect = true
+
+				if (self.notification) {
+					self.notification()
+				}
+
+				self.notification = Notify.create({
+					type: 'negative',
+					color: 'negative',
+				  message: 'Lost connection to server !',
+					icon: 'report_problem',
+					position: 'top-right',
+					onDismiss () {
+						delete self.notification
+					}
+				})
+			}
 		}
 
 		source.onmessage = (event) => {

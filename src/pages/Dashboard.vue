@@ -56,7 +56,7 @@
              :i="item.i"
              @resized="resizedEvent"
              @moved="movedEvent"
-             class="bg-white"
+             class="bg-white gditem"
           >
               <div v-show="editing" class="absolute-center">
                 <q-btn-group flat >
@@ -176,11 +176,11 @@ export default {
 
   methods: {
     movedEvent (i, newX, newY) {
-        this.save()
+      this.save()
     },
 
     resizedEvent (i, newH, newW, newHPx, newWPx) {
-        this.save()
+      this.save()
     },
 
     file (callback) {
@@ -351,6 +351,12 @@ export default {
 </script>
 
 <style scoped>
+
+/* Cf. https://github.com/taye/interact.js/issues/580 */
+.gditem {
+  -ms-touch-action: none;
+      touch-action: none;
+}
 
 .vue-grid-item {
     border: 1px solid #f4f4f4;
