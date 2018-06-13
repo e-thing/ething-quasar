@@ -12,6 +12,7 @@
       :selection="edit ? 'multiple' : 'none'"
       :selected.sync="selected"
       color="secondary"
+      class="absolute fit scroll"
     >
 
       <template slot="top-left" slot-scope="props">
@@ -29,8 +30,14 @@
         <q-btn
           flat round dense
           icon="mdi-chart-line"
-          color="secondary"
+          color="faded"
           @click="$ui.open(resource, 'chart')"
+        />
+        <q-btn
+          flat round dense
+          icon="mdi-information-outline"
+          color="faded"
+          @click="showStats"
         />
         <q-btn
           flat round dense
@@ -53,6 +60,51 @@
         />
       </template>
     </q-table>
+
+    <q-modal v-model="modalStatistics" :content-css="{maxWidth: '400px'}">
+
+      <div class="q-ma-md">
+
+        <div class="q-mb-md q-title q-title-opacity">Statistics</div>
+
+        <div v-if="loadingStatistics" class="text-center q-mb-md">
+          <div class="q-pa-lg text-primary">loading...</div>
+          <q-spinner-oval color="primary" size="50px" />
+        </div>
+
+        <div v-else-if="statistics !== null">
+          <div v-for="key in resource.keys()">
+
+            <div class="q-mb-md q-subheading q-subheading-opacity">{{ key }}</div>
+
+            <div class="row q-mb-md">
+              <template v-for="(value, key) in statistics[key]">
+                <div class="col-xs-12 col-sm-4 key text-secondary">{{ key }}</div>
+                <div class="col-xs-12 col-sm-8 value">{{ format(key, value) }}</div>
+              </template>
+            </div>
+
+          </div>
+
+        </div>
+
+        <q-btn
+          color="faded"
+          @click="modalStatistics = false"
+          label="Close"
+          flat
+        />
+        <q-btn
+          color="faded"
+          :disable="loadingStatistics"
+          @click="computeStats"
+          label="Reload"
+          flat
+        />
+
+      </div>
+
+    </q-modal>
 
   </q-page>
 </template>
@@ -79,7 +131,10 @@ export default {
       filter: '',
       visibleColumns: ['date'],
       edit: false,
-      selected: []
+      selected: [],
+      loadingStatistics: false,
+      statistics: null,
+      modalStatistics: false
     }
   },
 
@@ -220,6 +275,42 @@ export default {
           this.selected = []
         })
       }
+    },
+
+    showStats () {
+      if (this.statistics === null) {
+        this.computeStats()
+      }
+
+      this.modalStatistics = true
+
+    },
+
+    computeStats () {
+
+      this.loadingStatistics = true
+
+      this.statistics = {}
+
+      var promises = this.resource.keys().map(key => {
+        return this.resource.computeStatistics(key).then(stats => {
+          this.statistics[key] = stats
+        })
+      })
+
+      Promise.all(promises).finally( () => {
+        this.loadingStatistics = false
+      })
+    },
+
+    format (key, value) {
+
+      if (/date/i.test(key)) {
+        var d = new Date(value)
+        value = qdate.formatDate(d, 'YYYY-MM-DD HH:mm:ss')
+      }
+
+      return value
     }
   },
   mounted () {
