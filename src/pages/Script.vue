@@ -1,7 +1,7 @@
 <template>
   <q-page>
-    <multipane class="absolute fit" :class="orientation == 'vertical' ? 'vertical-panes' : 'horizontal-panes'" :layout="orientation">
-      <div class="pane" :style="orientation == 'vertical' ? { width: '50%', maxWidth: '75%' } : { height: '50%', maxHeight: '75%' }">
+    <multipane class="absolute fit custom-resizer" :class="orientation == 'vertical' ? 'vertical-panes' : 'horizontal-panes'" :layout="orientation">
+      <div class="pane" :style="orientation == 'vertical' ? { width: '50%', minWidth: '25%', maxWidth: '75%' } : { height: '50%', minHeight: '25%', maxHeight: '75%' }">
         <div class="column absolute fit">
           <div class="col-auto">
             <q-btn-group flat >
@@ -31,6 +31,9 @@
             <div class="output-line info">duration: {{ console.info.executionTime }} secondes</div>
           </div>
         </q-scroll-area>
+        <div v-else class="absolute-center text-light">
+          Console
+        </div>
       </div>
     </multipane>
 
@@ -57,7 +60,7 @@
 
 <script>
 
-import { Multipane, MultipaneResizer } from 'vue-multipane';
+import { Multipane, MultipaneResizer } from '../components/vue-multipane';
 
 import { codemirror } from 'vue-codemirror'
 import 'codemirror/lib/codemirror.css'
@@ -232,25 +235,43 @@ export default {
 }
 .custom-resizer > .multipane-resizer {
   background-color: #f1f1f1;
-  margin: 0; left: 0;
+  margin: 0;
   position: relative;
   &:before {
     display: block;
     content: "";
-    width: 3px;
-    height: 40px;
     position: absolute;
     top: 50%;
     left: 50%;
-    margin-top: -20px;
-    margin-left: -1.5px;
-    border-left: 1px solid #ccc;
-    border-right: 1px solid #ccc;
   }
   &:hover {
     &:before {
       border-color: #999;
     }
+  }
+}
+
+.horizontal-panes.custom-resizer > .multipane-resizer {
+  top: 0;
+  &:before {
+    width: 40px;
+    height: 3px;
+    margin-top: -1.5px;
+    margin-left: -20px;
+    border-top: 1px solid #ccc;
+    border-bottom: 1px solid #ccc;
+  }
+}
+
+.vertical-panes.custom-resizer > .multipane-resizer {
+  left: 0;
+  &:before {
+    width: 3px;
+    height: 40px;
+    margin-top: -20px;
+    margin-left: -1.5px;
+    border-left: 1px solid #ccc;
+    border-right: 1px solid #ccc;
   }
 }
 
