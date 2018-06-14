@@ -81,7 +81,9 @@
           <q-spinner-pie color="primary" size="50px" />
         </div>
       </q-inner-loading>
-      <router-view v-else/>
+      <keep-alive v-else include="PageDashboard,PageDevices,PageData">
+        <router-view/>
+      </keep-alive>
     </q-page-container>
   </q-layout>
 </template>

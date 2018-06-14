@@ -79,7 +79,7 @@
 //import ResourceSelect from '../components/ResourceSelect'
 
 export default {
-  name: 'PageRule',
+  name: 'PageRules',
 
   components: {
     //ResourceSelect

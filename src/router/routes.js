@@ -10,10 +10,12 @@ export default [
       },
       {
         path: 'data/:path*',
+        name: 'data',
         component: () => import('pages/Data')
       },
       {
         path: 'devices',
+        name: 'devices',
         component: () => import('pages/Devices')
       },
       {
@@ -78,6 +80,7 @@ export default [
       },
       {
         path: 'dashboard',
+        name: 'dashboard',
         component: () => import('pages/Dashboard')
       },
       {
@@ -86,6 +89,7 @@ export default [
       },
       {
         path: 'rules',
+        name: 'rules',
         component: () => import('pages/Rules')
       },
       {
