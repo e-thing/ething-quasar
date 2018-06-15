@@ -1,6 +1,6 @@
 <template>
   <div class="form-schema-enum">
-    <small class="form-schema-description">{{ schema.description }}</small>
+    <small v-if="schema.description" class="form-schema-description">{{ schema.description }}</small>
     <q-select
       v-bind:value="model" v-on:input="setValue"
       :options="selectOptions"

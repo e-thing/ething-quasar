@@ -1,6 +1,6 @@
 <template>
   <div class="form-schema-string">
-    <small class="form-schema-description">{{ schema.description }}</small>
+    <small v-if="schema.description" class="form-schema-description">{{ schema.description }}</small>
     <q-input
       :type="schema.format === 'text' ? 'textarea' : 'text'"
       v-bind:value="castedModel"

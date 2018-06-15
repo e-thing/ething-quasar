@@ -1,7 +1,7 @@
 <template>
   <div class="form-schema-optional" :class="{indent: level}">
 
-    <small class="form-schema-description">{{ schema.description }}</small>
+    <small v-if="schema.description" class="form-schema-description">{{ schema.description }}</small>
 
     <div>
       <q-toggle v-model="enabled" label="enable"/>

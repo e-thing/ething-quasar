@@ -1,6 +1,6 @@
 <template>
   <div class="form-schema-serial-port">
-    <small class="form-schema-description">{{ schema.description }}</small>
+    <small v-if="schema.description" class="form-schema-description">{{ schema.description }}</small>
     <q-select
       v-bind:value="model"
       v-on:input="setValue"

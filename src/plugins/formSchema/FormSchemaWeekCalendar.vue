@@ -1,6 +1,6 @@
 <template>
   <div class="form-schema-week-calendar">
-    <small class="form-schema-description">{{ schema.description }}</small>
+    <small v-if="schema.description" class="form-schema-description">{{ schema.description }}</small>
 
     <div v-if="value && value.length">
       <q-item dense v-for="(item, index) in value" :key="index">

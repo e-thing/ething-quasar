@@ -20,20 +20,12 @@
                 <span v-if="r.createdBy()" slot="subtitle">{{ $ething.arbo.get(r.createdBy()).basename() }}</span>
                 <q-icon slot="right" :name="$meta.get(r).icon" color="white"/>
               </q-card-title>
-              <!--<q-card-separator />
-              <q-card-main>
-                Card Content
-              </q-card-main>-->
             </q-card>
           </div>
         </div>
-        <!--
-        <q-list link no-border>
-          <resource-q-item v-for="r in resources" :key="r.id()" :resource="r" @click.native="select(r)" readonly/>
-        </q-list>
-        -->
         <q-btn v-if="resource" flat color="faded" label="change" icon="replay" @click="resetList"/>
       </div>
+
       <q-alert v-else
         type="warning"
         class="q-mb-sm"

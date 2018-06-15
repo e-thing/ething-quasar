@@ -1,7 +1,7 @@
 <template>
   <div class="form-schema-array" :class="{indent: level}">
 
-    <small class="form-schema-description">{{ schema.description }}</small>
+    <small v-if="schema.description" class="form-schema-description">{{ schema.description }}</small>
 
     <div>
       <q-btn flat size="md"

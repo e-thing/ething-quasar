@@ -1,6 +1,6 @@
 <template>
   <div class="form-schema-ething-event" :class="{indent: level}">
-    <small class="form-schema-description">{{ schema.description }}</small>
+    <small v-if="schema.description" class="form-schema-description">{{ schema.description }}</small>
 
     <q-field
       label="Event"

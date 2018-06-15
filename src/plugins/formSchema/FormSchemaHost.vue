@@ -1,6 +1,6 @@
 <template>
   <div class="form-schema-host">
-    <small class="form-schema-description">{{ schema.description }}</small>
+    <small v-if="schema.description" class="form-schema-description">{{ schema.description }}</small>
     <div class="row">
       <q-input
         v-bind:value="castedModel"

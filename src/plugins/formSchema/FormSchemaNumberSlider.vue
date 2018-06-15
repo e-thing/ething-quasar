@@ -1,7 +1,7 @@
 <template>
   <div class="form-schema-number-slider">
     <!--<input type="number" v-bind:value="model" v-on:input="value = $event.target.value"/>-->
-    <small class="form-schema-description">{{ schema.description }}</small>
+    <small v-if="schema.description" class="form-schema-description">{{ schema.description }}</small>
     <q-slider
       :value="castedModel"
       @input="setValue"
