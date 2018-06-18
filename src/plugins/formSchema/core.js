@@ -116,7 +116,7 @@ var makeForm = function (createElement, schema, model, level, onValueUpdate, onE
     case 'long':
     case 'double':
     case 'float':
-      if (typeof schema.minimum === 'number' && typeof schema.maximum === 'number') {
+      if (typeof schema.minimum === 'number' && typeof schema.maximum === 'number' && schema.maximum - schema.minimum <= 100) {
         return createElement('form-schema-number-slider', attributes)
       }
       return createElement('form-schema-number', attributes)

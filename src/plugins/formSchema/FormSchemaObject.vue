@@ -64,6 +64,18 @@ export default {
         }
       }
 
+      // clean errors map
+      var errorsDirty = false
+      Object.keys(this.errors).forEach(key => {
+        if (keyOrdered.indexOf(key) === -1) {
+          delete this.errors[key]
+          errorsDirty = true
+        }
+      })
+      if (errorsDirty) {
+        this.setError(Object.values(this.errors).some(err => err))
+      }
+
       return keyOrdered.map(key => {
         return {
           key,

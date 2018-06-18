@@ -6,6 +6,7 @@ import Rule from './Rule'
 
 import Denon from './Denon'
 import Http from './Http'
+import MQTT from './MQTT'
 import SSH from './SSH'
 import MihomeGateway from './MihomeGateway'
 import MihomeSensorHT from './MihomeSensorHT'
@@ -34,6 +35,7 @@ export default {
 
   Denon,
   Http,
+  MQTT,
   SSH,
   MihomeGateway,
   MihomeSensorHT,
