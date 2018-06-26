@@ -319,6 +319,8 @@ function importDefinitions (def) {
   formSchemaCore.definitions.events = meta.events
 
   meta.info = def.info || {}
+  meta.plugins = def.plugins || {}
+  meta.config = def.config || {}
 
 }
 
@@ -335,6 +337,7 @@ export var meta = {
       }
     }
   },
+  plugins: {},
   scopes: {},
   importDefinitions () {
     return EThing.request({

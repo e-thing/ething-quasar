@@ -1,118 +1,33 @@
 <template>
 
   <div v-if="loading===false">
-    <q-list>
 
-      <q-list-header>General</q-list-header>
+    <div class="q-mt-md">
 
-      <q-item link tag="label">
-        <q-item-main label="Debug" />
-        <q-item-side right>
-          <q-toggle v-model="settings.debug" color="secondary" />
-        </q-item-side>
-      </q-item>
+      <div class="q-title q-title-opacity">General</div>
 
-      <q-item>
-        <q-item-side>Log Level</q-item-side>
-        <q-item-main>
-          <q-select hide-underline class="q-ma-none full-width" v-model="settings.log.level" :options="logLevels" color="secondary" />
-        </q-item-main>
-      </q-item>
+      <form-schema :schema="$meta.config" v-model="settings" @error="error = $event" class="q-my-md"/>
 
-    </q-list>
+    </div>
 
-    <q-list class="q-mt-md">
+    <div v-for="(plugin, name) in plugins" :key="name" v-if="typeof plugin.schema === 'object'" class="q-mt-md">
 
-      <q-list-header>Auth</q-list-header>
+      <div class="q-title q-title-opacity">{{ name }}</div>
 
-      <q-item link tag="label">
-        <q-item-main>
-          <q-item-tile label>Local only</q-item-tile>
-          <q-item-tile sublabel>
-            To restrict access to local ip only.
-          </q-item-tile>
-        </q-item-main>
-        <q-item-side right>
-          <q-toggle v-model="settings.auth.localonly" color="secondary" />
-        </q-item-side>
-      </q-item>
+      <form-schema :schema="plugin.schema" v-model="settings[name]" @error="plugin.error = $event" class="q-my-md"/>
 
-      <q-item>
-        <q-item-main>
-          <q-item-tile label>Login</q-item-tile>
-          <q-input v-model="settings.auth.username" color="secondary"/>
-        </q-item-main>
-      </q-item>
-
-      <q-item>
-        <q-item-main>
-          <q-item-tile label>Password</q-item-tile>
-          <q-input type="password" v-model="settings.auth.password" color="secondary"/>
-        </q-item-main>
-      </q-item>
-    </q-list>
-
-    <q-list class="q-mt-md">
-
-      <q-list-header>Notification</q-list-header>
-
-      <q-item>
-        <q-item-main>
-          <q-item-tile label>Emails</q-item-tile>
-          <q-chips-input v-model="settings.notification.emails" placeholder="emails" color="secondary"/>
-        </q-item-main>
-      </q-item>
-
-      <q-item>
-        <q-item-main>
-          <q-list no-border class="q-mt-md">
-
-            <q-list-header>SMTP server</q-list-header>
-
-            <q-item>
-              <q-item-main>
-                <q-item-tile label>Host</q-item-tile>
-                <q-input v-model="settings.notification.smtp.host" placeholder="smtp.gmail.com" color="secondary"/>
-              </q-item-main>
-            </q-item>
-
-            <q-item>
-              <q-item-main>
-                <q-item-tile label>Port</q-item-tile>
-                <q-input type="number" min="1" max="65535" v-model="settings.notification.smtp.port" color="secondary"/>
-              </q-item-main>
-            </q-item>
-
-            <q-item>
-              <q-item-main>
-                <q-item-tile label>User</q-item-tile>
-                <q-input v-model="settings.notification.smtp.user" placeholder="<username>@gmail.com" color="secondary"/>
-              </q-item-main>
-            </q-item>
-
-            <q-item>
-              <q-item-main>
-                <q-item-tile label>Password</q-item-tile>
-                <q-input type="password" v-model="settings.notification.smtp.password" color="secondary"/>
-              </q-item-main>
-            </q-item>
-          </q-list>
-        </q-item-main>
-      </q-item>
-
-
-    </q-list>
+    </div>
 
     <q-alert
-        v-if="error"
+        v-if="saveError"
         type="negative"
         class="q-mt-md"
     >
-      {{ String(error) }}
+      {{ String(saveError) }}
     </q-alert>
 
     <div class="q-mt-md">
-        <q-btn :loading="saving" color="secondary" icon="done" label="save changes" @click="onSave"/>
+        <q-btn :disable="globalError" :loading="saving" color="secondary" icon="done" label="save changes" @click="onSave"/>
     </div>
 
   </div>
@@ -127,11 +42,27 @@ export default {
     name: 'SettingsView',
 
     data () {
+
+        var plugins = {}
+
+        for (var pluginName in this.$meta.plugins) {
+          var plugin = this.$meta.plugins[pluginName]
+
+          if (plugin.schema) {
+            plugins[pluginName] = {
+              error: false,
+              schema: plugin.schema
+            }
+          }
+        }
+
         return {
           loading: true,
           saving: false,
           error: false,
+          saveError: false,
           settings : {},
+          plugins,
           logLevels: [
             {
               label: 'debug',
@@ -157,6 +88,20 @@ export default {
         }
     },
 
+    computed: {
+      globalError () {
+        var err = this.error
+        if (!err) {
+          for (var name in this.plugins) {
+            if(this.plugins[name].error)
+              err = true
+              break
+          }
+        }
+        return err
+      }
+    },
+
     methods: {
 
       load () {
@@ -165,9 +110,9 @@ export default {
         this.$ething.settings.get().then((settings) => {
           console.log(settings)
 
-          if (!settings.notification.smtp) {
-            settings.notification.smtp = {
-              port: 587
+          for (var name in this.plugins) {
+            if (typeof settings[name] == 'undefined') {
+              settings[name] = {}
             }
           }
 
@@ -177,12 +122,16 @@ export default {
       },
 
       onSave () {
-        console.log(this.settings)
+
+        var settings = this.settings
+
+        console.log(settings)
 
         this.saving = true
+        this.saveError = false
 
-        this.$ething.settings.set(this.settings).catch(err => {
-          this.error = err
+        this.$ething.settings.set(settings).catch(err => {
+          this.saveError = err
         }).finally(() => {
           this.saving = false
         })

@@ -7,7 +7,11 @@
 export default {
   name: 'KnobInput',
 
-  props: ['value'],
+  props: {
+    value: {
+      default: 0
+    }
+  },
 
   meta: {
     options: {
