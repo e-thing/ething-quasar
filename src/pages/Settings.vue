@@ -34,6 +34,9 @@
           <dt>NodeJS</dt>
           <dd>version: {{ $meta.info.nodejs.version }}</dd>
 
+          <dt>Plugins</dt>
+          <dd>{{ plugins }}</dd>
+
         </dl>
 
       </q-tab-pane>
@@ -53,6 +56,12 @@ export default {
     SettingsView,
     LogView
   },
+
+  data () {
+    return {
+      plugins: Object.keys(this.$meta.plugins).join(', ')
+    }
+  }
 
 }
 </script>

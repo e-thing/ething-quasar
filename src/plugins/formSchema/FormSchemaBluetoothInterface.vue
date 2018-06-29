@@ -1,8 +1,9 @@
 <template>
-  <div class="form-schema-serial-port">
+  <div class="form-schema-bluetooth-interface">
     <small v-if="schema.description" class="form-schema-description">{{ schema.description }}</small>
     <div class="row">
       <q-input
+        type="number"
         v-bind:value="castedModel"
         v-on:input="setValue"
         :error="$v.value.$error"
@@ -15,15 +16,16 @@
               <div class="q-ma-md">loading...</div>
               <q-spinner-oval color="primary" size="50px" />
             </div>
-            <div v-else-if="ports.length===0" class="q-ma-md text-faded">no serial port found</div>
+            <div v-else-if="interfaces.length===0" class="q-ma-md text-faded">no bluetooth interface detected</div>
             <q-list separator link v-else>
               <q-btn flat color="faded" icon="refresh" label="refresh" @click="refresh()"/>
-              <q-item v-close-overlay v-for="(port, index) in ports" :key="index" @click.native="setValue(port.device)">
+              <q-item v-close-overlay v-for="(hci, index) in interfaces" :key="index" @click.native="setValue(parseIntFromHci(hci.hci))">
                 <q-item-main>
-                  <q-item-tile label>{{ port.device }}</q-item-tile>
-                  <q-item-tile sublabel v-if="port.product">product: {{ port.product }}</q-item-tile>
-                  <q-item-tile sublabel v-if="port.manufacturer">manufacturer: {{ port.manufacturer }}</q-item-tile>
-                  <q-item-tile sublabel v-if="port.description">description: {{ port.description }}</q-item-tile>
+                  <q-item-tile label>{{ hci.hci }}</q-item-tile>
+                  <q-item-tile sublabel v-if="hci.address">mac: {{ hci.address }}</q-item-tile>
+                  <q-item-tile sublabel v-if="hci.name">name: {{ hci.name }}</q-item-tile>
+                  <q-item-tile sublabel v-if="hci.status">status: {{ hci.status }}</q-item-tile>
+                  <q-item-tile sublabel v-if="hci.manufacturer">manufacturer: {{ hci.manufacturer }}</q-item-tile>
                 </q-item-main>
               </q-item>
             </q-list>
@@ -42,19 +44,19 @@ import { FormComponent, registerForm } from './core'
 import Vue from 'vue'
 
 registerForm(schema => {
-  if (schema.format === 'serial') {
-    return 'form-schema-serial-port'
+  if (schema.format === 'bluetooth-interface') {
+    return 'form-schema-bluetooth-interface'
   }
 })
 
-var FormSchemaSerialPort = {
-  name: 'FormSchemaSerialPort',
+var FormSchemaBluetoothInterface = {
+  name: 'FormSchemaBluetoothInterface',
 
   mixins: [FormComponent],
 
   data () {
     return {
-      ports: [],
+      interfaces: [],
       loading: true,
       loaded: false
     }
@@ -70,20 +72,24 @@ var FormSchemaSerialPort = {
     refresh () {
       this.loading = true
       EThing.request({
-        url: 'utils/serial_ports_list',
+        url: 'utils/bluetooth_list',
         dataType: 'json',
       }).then((data) => {
-        this.ports = data
+        this.interfaces = data
       }).finally(() => {
         this.loading = false
       })
     },
+
+    parseIntFromHci (hci) {
+      return parseInt(hci.match(/^hci([0-9]+)$/)[1])
+    }
   }
 
 }
 
-Vue.component('FormSchemaSerialPort', FormSchemaSerialPort)
+Vue.component('FormSchemaBluetoothInterface', FormSchemaBluetoothInterface)
 
-export default FormSchemaSerialPort
+export default FormSchemaBluetoothInterface
 
 </script>

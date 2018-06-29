@@ -236,6 +236,22 @@ export default ({ app, router, Vue, store }) => {
 
         console.log('ething loaded !')
 
+        var sseReconnectFlag = false
+
+        SSE.onconnect = function(){
+          if (sseReconnectFlag) {
+            // reload the resource !
+            EThing.arbo.load(null, true).then( () => {
+              console.log('ething arbo reloaded !')
+              store.commit('ething/update')
+            })
+          }
+        }
+
+        SSE.ondisconnect = function(){
+          sseReconnectFlag = true
+        }
+
         SSE.start()
 
         var iat = LocalStorage.get.item('ething.auth.iat')

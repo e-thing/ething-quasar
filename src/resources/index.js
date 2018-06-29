@@ -16,9 +16,12 @@ import MySensorsNode from './MySensorsNode'
 import MySensorsSensor from './MySensorsSensor'
 import RFLinkSerialGateway from './RFLinkSerialGateway'
 import RFLinkNode from './RFLinkNode'
+import YeelightDevice from './YeelightDevice'
 import YeelightBulbRGBW from './YeelightBulbRGBW'
 import ZigateSerialGateway from './ZigateSerialGateway'
 import ZigateAqaraTHP from './ZigateAqaraTHP'
+import BleaGateway from './BleaGateway'
+import Miflora from './Miflora'
 
 import Thermometer from './Thermometer'
 import Switch from './Switch'
@@ -45,9 +48,12 @@ export default {
   MySensorsSensor,
   RFLinkSerialGateway,
   RFLinkNode,
+  YeelightDevice,
   YeelightBulbRGBW,
   ZigateSerialGateway,
   ZigateAqaraTHP,
+  BleaGateway,
+  Miflora,
 
   Thermometer,
   Switch,

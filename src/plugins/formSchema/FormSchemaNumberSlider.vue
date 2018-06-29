@@ -8,6 +8,7 @@
       :error="$v.value.$error"
       :min="schema.minimum"
       :max="schema.maximum"
+      :step="schema.multipleOf"
       label-always
     />
     <small class="form-schema-error" v-if="$v.value.$error">{{ errorMessage }}</small>

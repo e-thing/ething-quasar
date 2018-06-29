@@ -1,3 +1,51 @@
+
+const types = {
+  'S_DOOR': { icon: 'mdi-door' },
+  'S_MOTION': { icon: 'mdi-transition' },
+  'S_SMOKE': { icon: 'mdi-smoke-detector' },
+  'S_LIGHT': {},
+  'S_BINARY': {},
+  'S_DIMMER': {},
+  'S_COVER': {},
+  'S_TEMP': {},
+  'S_HUM': { icon: 'mdi-water-percent', widgets: [{type: 'WDeviceKnob', options: { fn: 'getHumidity', unit: '%'}}, {type: 'WDeviceLabel', options: { fn: 'getHumidity', unit: '%'}}] },
+  'S_BARO': { widgets: [{type: 'WDeviceLabel', options: { fn: 'getPressure', unit: 'Pa'}}] },
+  'S_WIND': { icon: 'mdi-weather-windy' },
+  'S_RAIN': { icon: 'mdi-weather-rainy' },
+  'S_UV': { icon: 'mdi-weather-sunny' },
+  'S_WEIGHT': { icon: 'mdi-weight' },
+  'S_POWER': { icon: 'mdi-power-plug' },
+  'S_HEATER': { icon: 'mdi-fire' },
+  'S_DISTANCE': { icon: 'mdi-map-marker-distance' },
+  'S_LIGHT_LEVEL': { icon: 'mdi-lightbulb-on-outline' },
+  'S_ARDUINO_NODE': { icon: 'mdi-chip' },
+  'S_ARDUINO_REPEATER_NODE': { icon: 'mdi-repeat' },
+  'S_LOCK': { icon: 'mdi-lock' },
+  'S_IR': {},
+  'S_WATER': { icon: 'mdi-water', widgets: [{type: 'WDeviceLabel', options: { fn: 'getVolume', unit: 'L'}}] },
+  'S_AIR_QUALITY': {},
+  'S_CUSTOM': {},
+  'S_DUST': {},
+  'S_SCENE_CONTROLLER': {},
+  'S_RGB_LIGHT': {},
+  'S_RGBW_LIGHT': {},
+  'S_COLOR_SENSOR': { icon: 'mdi-palette' },
+  'S_HVAC': { icon: 'mdi-air-conditioner' },
+  'S_MULTIMETER': { icon: 'mdi-power-plug' },
+  'S_SPRINKLER': { icon: 'mdi-water-pump' },
+  'S_WATER_LEAK': { icon: 'mdi-pipe-leak' },
+  'S_SOUND': { icon: 'mdi-surround-sound' },
+  'S_VIBRATION': { icon: 'mdi-vibrate' },
+  'S_MOISTURE': { icon: 'mdi-water-percent' },
+  'S_INFO': { icon: 'mdi-information' },
+  'S_GAS': { icon: 'mdi-gas-cylinder' },
+  'S_GPS': { icon: 'mdi-crosshairs-gps' },
+  'S_WATER_QUALITY': { icon: 'mdi-water' },
+  'S_CAM': { icon: 'mdi-camera' },
+  'S_UNK': { icon: 'mdi-help' },
+}
+
+
 export default {
 
   path: ['MySensors'],
@@ -6,51 +54,7 @@ export default {
 
   properties: {
     sensorType: {
-      enum: [
-        'S_DOOR',
-        'S_MOTION',
-        'S_SMOKE',
-        'S_LIGHT',
-        'S_BINARY',
-        'S_DIMMER',
-        'S_COVER',
-        'S_TEMP',
-        'S_HUM',
-        'S_BARO',
-        'S_WIND',
-        'S_RAIN',
-        'S_UV',
-        'S_WEIGHT',
-        'S_POWER',
-        'S_HEATER',
-        'S_DISTANCE',
-        'S_LIGHT_LEVEL',
-        'S_ARDUINO_NODE',
-        'S_ARDUINO_REPEATER_NODE',
-        'S_LOCK',
-        'S_IR',
-        'S_WATER',
-        'S_AIR_QUALITY',
-        'S_CUSTOM',
-        'S_DUST',
-        'S_SCENE_CONTROLLER',
-        'S_RGB_LIGHT',
-        'S_RGBW_LIGHT',
-        'S_COLOR_SENSOR',
-        'S_HVAC',
-        'S_MULTIMETER',
-        'S_SPRINKLER',
-        'S_WATER_LEAK',
-        'S_SOUND',
-        'S_VIBRATION',
-        'S_MOISTURE',
-        'S_INFO',
-        'S_GAS',
-        'S_GPS',
-        'S_WATER_QUALITY',
-        'S_CAM',
-        'S_UNK',
-      ]
+      enum: Object.keys(types)
     },
 
     createdBy: {
@@ -61,39 +65,20 @@ export default {
   },
 
   dynamic (resource) {
-    var widgets = []
+    var attr = {}
 
-    if (resource.attr('sensorType') === 'S_HUM') {
-      widgets.push({
-        type: 'WDeviceKnob',
-        options: {
-          fn: 'getHumidity',
-          unit: '%'
-        }
-      })
-      widgets.push({
-        type: 'WDeviceLabel',
-        options: {
-          fn: 'getHumidity',
-          unit: '%'
-        }
-      })
-    }
-    else if (resource.attr('sensorType') === 'S_BARO') {
-      widgets.push({
-        type: 'WDeviceLabel',
-        options: {
-          fn: 'getPressure',
-          unit: 'Pa'
-        }
-      })
-    }
+    var sensorType = resource.attr('sensorType')
 
-    if (widgets.length) {
-      return {
-        widgets
+    if (types[sensorType]) {
+      if (types[sensorType].widgets) {
+        attr.widgets = types[sensorType].widgets
+      }
+      if (types[sensorType].icon) {
+        attr.icon = types[sensorType].icon
       }
     }
+
+    return attr
   }
 
 }

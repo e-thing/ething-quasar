@@ -6,7 +6,7 @@
     <q-field
       v-for="item in items"
       :key="item.key"
-      :label="item.key"
+      :label="item.schema.title || item.schema.label || item.key"
       orientation="vertical"
       class="formField"
       :class="{formFieldRequired: item.required}"

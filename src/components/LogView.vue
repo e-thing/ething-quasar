@@ -7,11 +7,14 @@
     <div class="column gutter-y-xs q-mt-sm">
 
       <div class="log row gutter-x-xs" :class="log.cls" v-for="(log, index) in logs" :keys="index">
-        <div class="date col-md-auto col-sm-6 text-faded">
+        <div class="date col-md-auto col-sm-4 text-faded">
           {{ log.date }}
         </div>
-        <div class="level col-md-1 col-sm-6 text-faded">
+        <div class="level col-md-1 col-sm-4 text-faded">
           {{ log.level }}
+        </div>
+        <div class="level col-md-2 col-sm-4 text-faded">
+          {{ log.name }}
         </div>
         <div class="message col-md col-sm-12">
           {{ log.message }}
@@ -49,14 +52,17 @@ export default {
 
           this.logs = logs.map((line) => {
             // parsing
-            var d = line.split('::', 3);
-  					if(d.length==3){
+            var d = line.split('::', 4);
+            console.log(d)
+  					if(d.length==4){
   						var date = d[0].trim(),
-  							level = d[1].trim().toUpperCase(),
-  							message = d[2].trim();
+                name = d[1].trim(),
+  							level = d[2].trim().toUpperCase(),
+  							message = d[3].trim();
 
               return {
                 date,
+                name,
                 level,
                 cls: level.toLowerCase(),
                 message

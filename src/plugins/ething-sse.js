@@ -16,6 +16,9 @@ export var SSE = {
 	connected: false,
 	showReconnect: false,
 
+	onconnect: null,
+	ondisconnect: null,
+
 	start () {
 		var self = this
 		var source = this.source = new EventSource(EThing.config.serverUrl + "/api/events", { withCredentials: true, https: {rejectUnauthorized: false} })
@@ -40,6 +43,10 @@ export var SSE = {
 					}
 				})
 			}
+
+			if (self.onconnect) {
+				self.onconnect.call(self)
+			}
 		}
 
 		source.onerror = function() {
@@ -62,6 +69,10 @@ export var SSE = {
 						delete self.notification
 					}
 				})
+
+				if (self.ondisconnect) {
+					self.ondisconnect.call(self)
+				}
 			}
 		}
 
