@@ -21,7 +21,7 @@
         <div v-if="exeLoading" class="absolute-center text-faded">
           running ...
         </div>
-        <q-scroll-area v-else-if="console.enabled" class="absolute fit" ref="outputScrollArea">
+        <q-scroll-area v-else-if="console.enabled" class="absolute fit" ref="outputScrollArea" :content-style="{height: '100%', 'overflow-y': 'auto'}">
           <div class="output">
             <div v-for="(item, key) in console.output" :key="key" class="output-line" :class="item.type">
               <pre class="q-ma-none"><code>{{ item.chunk }}</code></pre>
@@ -199,7 +199,7 @@ export default {
       this.console.info = {
         status: result.ok,
         returnCode: result.return_code,
-        executionTime: result.executionTime
+        executionTime: result.executionTime.toFixed(3)
       }
     }
   },

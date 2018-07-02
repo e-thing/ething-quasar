@@ -17,6 +17,10 @@
 
 <script>
 
+import EThing from 'ething-js'
+
+
+
 import FormSchemaWeekCalendar from '../plugins/formSchema/FormSchemaWeekCalendar'
 
 export default {
@@ -108,7 +112,8 @@ export default {
         optional: 'tyty'
       }
     }
-  }
+
+  },
 }
 </script>
 

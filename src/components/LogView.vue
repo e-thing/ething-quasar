@@ -2,6 +2,13 @@
 
   <div v-if="loading===false">
 
+    <q-input v-model="filter" placeholder="filter" class="inline"/>
+    <q-select
+      class="inline"
+      v-model="length"
+      :options="lengthOptions"
+      suffix="results"
+    />
     <q-btn color="primary" flat icon="refresh" label="refresh" @click="load"/>
 
     <div class="column gutter-y-xs q-mt-sm">
@@ -35,8 +42,15 @@ export default {
     data () {
         return {
           loading: true,
+          logs: [],
+          filter: '',
           length: 100,
-          logs: []
+          lengthOptions: [100, 200, 500, 1000].map(l => {
+            return {
+              label: String(l),
+              value: l
+            }
+          })
         }
     },
 
@@ -46,14 +60,14 @@ export default {
         this.loading = true
 
         this.$ething.request({
-          url: 'utils/read_log?line='+this.length,
+          url: 'utils/read_log?line='+this.length+'&filter='+ encodeURIComponent(this.filter),
           dataType: 'json',
         }).then(logs => {
 
           this.logs = logs.map((line) => {
             // parsing
             var d = line.split('::', 4);
-            console.log(d)
+            
   					if(d.length==4){
   						var date = d[0].trim(),
                 name = d[1].trim(),
