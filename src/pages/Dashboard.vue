@@ -373,3 +373,16 @@ export default {
 }
 
 </style>
+
+<style>
+.vue-resizable-handle {
+  width: 40px;
+  height: 40px;
+  transition: all 0.5s;
+  transform-origin: right bottom;
+}
+
+.vue-resizable-handle:hover {
+  transform: scale(3);
+}
+</style>
