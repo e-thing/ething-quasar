@@ -20,40 +20,56 @@
               <q-btn icon="settings" round flat dense @click.stop="$router.push('/resource/' + rule.id())"/>
             </q-item-side>
             <q-item-side right>
-              <q-btn icon="delete" round flat dense color="negative" @click.stop="remove(rule)"/>
+              <q-btn icon="delete" round flat dense @click.stop="remove(rule)"/>
             </q-item-side>
 
           </template>
+
+          <q-item multiline v-if="rule.description()">
+            <q-item-main class="text-faded">
+              {{ rule.description() }}
+            </q-item-main>
+          </q-item>
 
           <q-item multiline>
             <q-item-side icon="list" />
             <q-item-main>
               <q-item-tile label>Attributes</q-item-tile>
-              <q-item-tile sublabel>event: {{ rule.event().type }}</q-item-tile>
-              <q-item-tile sublabel>executed: {{ rule.scriptExecutionCount() }} times</q-item-tile>
-              <q-item-tile sublabel>last executed time: {{ rule.scriptExecutionDate() ? $ui.dateToString(rule.scriptExecutionDate()) : 'never' }}</q-item-tile>
-              <q-item-tile sublabel>last execution status:
-                <span v-if="rule.scriptReturnCode()" class="text-negative">
-                  code {{ rule.scriptReturnCode() }} (error)
-                </span>
-                <template v-else>ok</template>
+              <q-item-tile sublabel>executed: {{ rule.executionCount() }} times</q-item-tile>
+              <q-item-tile sublabel>last executed time: {{ rule.executionDate() ? $ui.dateToString(rule.executionDate()) : 'never' }}</q-item-tile>
+            </q-item-main>
+          </q-item>
+
+          <q-item multiline>
+            <q-item-side icon="event" />
+            <q-item-main>
+              <q-item-tile label>Event: {{ rule.event().type }}</q-item-tile>
+              <q-item-tile sublabel v-for="(attr, index) in listAttr(rule.event(), 'events')" :key="index" >
+                {{ attr.name }}:
+                <template v-if="attr.type === 'resources'">
+                  <template v-for="(r, index) in resolve(attr.value)">
+                    <span v-if="index > 0">, </span>
+                    <span class="cursor-pointer" @click.stop="$ui.open(r)">{{ r.basename() }}</span>
+                  </template>
+                </template>
+                <template v-else>{{ attr.value }}</template>
               </q-item-tile>
             </q-item-main>
           </q-item>
 
           <q-item multiline>
-            <q-item-side icon="code" />
+            <q-item-side icon="mdi-run" />
             <q-item-main>
-              <q-item-tile label>Script</q-item-tile>
-              <q-item-tile sublabel><q-btn dense outline color="secondary" :label="script(rule).name()" :icon="$meta.get(script(rule)).icon" @click="$ui.open(script(rule))"/></q-item-tile>
-            </q-item-main>
-          </q-item>
-
-          <q-item multiline v-if="targets(rule).length">
-            <q-item-side icon="mdi-link-variant" />
-            <q-item-main>
-              <q-item-tile label>Targets</q-item-tile>
-              <q-item-tile v-for="target in targets(rule)" :key="target.id()" sublabel><q-btn dense outline color="secondary" :label="target.name()" :icon="$meta.get(target).icon" @click="$ui.open(target)"/></q-item-tile>
+              <q-item-tile label>Action: {{ rule.action().type }}</q-item-tile>
+              <q-item-tile sublabel v-for="(attr, index) in listAttr(rule.action(), 'actions')" :key="index" >
+                {{ attr.name }}:
+                <template v-if="attr.type === 'resources'">
+                  <template v-for="(r, index) in resolve(attr.value)">
+                    <span class="cursor-pointer" @click.stop="$ui.open(r)">{{ r.basename() }}</span>
+                  </template>
+                </template>
+                <template v-else>{{ attr.value }}</template>
+              </q-item-tile>
             </q-item-main>
           </q-item>
 
@@ -77,6 +93,7 @@
 
 <script>
 //import ResourceSelect from '../components/ResourceSelect'
+import {resolve} from '../plugins/formSchema/core'
 
 export default {
   name: 'PageRules',
@@ -121,34 +138,9 @@ export default {
       })
     },
 
-    targets (rule) {
-      var resources = []
-      var evtResources = rule.event().resource
-      if (evtResources) {
-        if (typeof evtResources === 'String' && this.$ething.utils.isId(evtResources)) {
-          resources.push(evtResources)
-        } else if (Array.isArray(evtResources)) {
-          resources = evtResources.filter(this.$ething.utils.isId)
-        }
-      }
-
-      if (resources.length) {
-
-      }
-      return resources.map(id => this.$ething.arbo.get(id)).filter(r => !!r)
-    },
-
-    script (rule) {
-      return this.$ething.arbo.get(rule.script())
-    },
-
     color (rule) {
       if (rule.enabled()) {
-        if (rule.scriptReturnCode()) {
-          return 'negative'
-        } else {
-          return this.$meta.get(rule).color
-        }
+        return this.$meta.get(rule).color
       } else {
         return 'faded'
       }
@@ -177,6 +169,52 @@ export default {
 
     add () {
       this.$router.push('/create/Rule')
+    },
+
+    listAttr (item, type) {
+      var attrs = []
+      var schema = resolve(this.$meta[type][item.type] || {})
+
+      for(var k in item) {
+        if (k!=='type') {
+          var attrSchema = (schema.properties || {})[k]
+          if (attrSchema) {
+            var value = item[k]
+            if (String(value)) {
+
+              var type = ''
+
+              if (attrSchema.format === 'ething.resource') {
+                if (this.$ething.utils.isId(value)) {
+                  value = [value]
+                }
+                if(Array.isArray(value)) {
+                  type = 'resources'
+                }
+              }
+
+              attrs.push({
+                name: k,
+                schema: attrSchema,
+                value,
+                type
+              })
+
+            }
+          }
+        }
+      }
+
+      return attrs
+    },
+
+    resolve (resources) {
+      return resources.map(id => {
+        if (this.$ething.utils.isId(id)) {
+          var r = this.$ething.arbo.get(id)
+          return r || id
+        }
+      })
     }
   }
 

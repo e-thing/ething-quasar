@@ -169,7 +169,8 @@ var FormComponent = {
   data: function () {
     return {
       value: typeof this.model != 'undefined' ? this.cast(this.model) : this.model,
-      error: false
+      error: false,
+      mutableSchema: extend(true, {}, this.schema)
     }
   },
 
@@ -255,10 +256,57 @@ var FormComponent = {
     },
     cast (model) {
       return model
+    },
+    parent () {
+      var p = this.$parent
+      while (p && typeof p.schema === 'undefined') {
+        p = p.$parent
+      }
+      return p
+    },
+    root () {
+      var root = this
+      var p = this.$parent
+      while (p) {
+        if (typeof p.schema !== 'undefined')
+          root = p
+        p = p.$parent
+      }
+      return root
+    },
+    find (id) {
+      var root = this.root()
+      return this._find(root, id)
+    },
+    _find (node, id) {
+      if (node.schema && node.schema.id === id) {
+        return node
+      }
+      for (let i in node.$children) {
+        var n = this._find(node.$children[i], id)
+        if (n)
+          return n
+      }
     }
   },
 
   mounted () {
+
+    if (this.schema.dependencies) {
+
+      for (let id in this.schema.dependencies) {
+        let callback = this.schema.dependencies[id]
+        let node = this.find(id)
+        if (node && callback) {
+          node.$on('input', val => {
+            callback(val, this, node)
+          })
+          callback(node.value, this, node)
+        }
+      }
+
+    }
+
     if (typeof this.model === 'undefined' && typeof this.schema.default !== 'undefined') {
       this.setValue(this.cast(this.schema.default))
     } else if (this.value !== this.model) {

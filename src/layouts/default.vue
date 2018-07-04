@@ -99,7 +99,7 @@ export default {
   },
   computed: {
     back () {
-      return this.$route.meta.back && (this.$q.platform.within.iframe || this.$q.platform.is.electron)
+      return this.$route.meta.back && (this.$q.platform.within.iframe || this.$q.platform.is.electron || this.$ui.kioskMode)
     }
   },
   methods: {

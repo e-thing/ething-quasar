@@ -48,13 +48,6 @@ export default {
     ResourceQItem
   },
 
-  created: function () {
-    console.log("home should be created every time,but only first")
-  },
-  activated: function () {
-    console.log("home is activated")
-  },
-
   data () {
 
     var categories = {}

@@ -1,5 +1,6 @@
 import FormSchemaEthingResource from '../plugins/formSchema/FormSchemaEthingResource'
 import FormSchemaEthingEvent from '../plugins/formSchema/FormSchemaEthingEvent'
+import FormSchemaEthingAction from '../plugins/formSchema/FormSchemaEthingAction'
 import FormSchemaWeekCalendar from '../plugins/formSchema/FormSchemaWeekCalendar'
 import EThing from 'ething-js'
 
@@ -11,18 +12,21 @@ export default {
   bases: ['Resource'],
 
   properties: {
-    script: {
-      format: 'ething.resource',
-      filter: (r) => {
-        return (r instanceof EThing.File) && r.mime() == 'application/javascript'
-      }
-    },
     event: {
       format: 'ething.event',
+    },
+    action: {
+      format: 'ething.action',
     },
     scheduler: {
       format: 'week-calendar'
     },
+    /*actions: {
+      type: 'array',
+      items: {
+        format: 'ething.action'
+      }
+    },*/
   }
 
 }

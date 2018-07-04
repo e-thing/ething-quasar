@@ -36,12 +36,13 @@ export default {
 
   computed: {
     items () {
-      var requiredProperties = this.schema.required || []
+      var schema = this.mutableSchema
+      var requiredProperties = schema.required || []
       var readOnlyProperties = []
 
-      for(let k in this.schema.properties) {
-        if (!this.schema.properties[k].readOnly) {
-            if (this.schema.properties[k].required && requiredProperties.indexOf(k)===-1) {
+      for(let k in schema.properties) {
+        if (!schema.properties[k].readOnly) {
+            if (schema.properties[k].required && requiredProperties.indexOf(k)===-1) {
                 requiredProperties.push(k)
             }
         } else {
@@ -49,13 +50,13 @@ export default {
         }
       }
 
-      var keyOrdered = requiredProperties.concat(Object.keys(this.schema.properties || {}).filter(k => {
+      var keyOrdered = requiredProperties.concat(Object.keys(schema.properties || {}).filter(k => {
           return requiredProperties.indexOf(k)===-1 && readOnlyProperties.indexOf(k)===-1
       }))
 
-      if (this.schema.order) {
-        for (var i = this.schema.order.length; i>0; i--) {
-          var key = this.schema.order[i - 1]
+      if (schema.order) {
+        for (var i = schema.order.length; i>0; i--) {
+          var key = schema.order[i - 1]
           var index = keyOrdered.indexOf(key)
           if (index !== -1) {
             keyOrdered.splice(index, 1)
@@ -79,7 +80,7 @@ export default {
       return keyOrdered.map(key => {
         return {
           key,
-          schema: this.schema.properties[key],
+          schema: schema.properties[key],
           required:  requiredProperties.indexOf(key) !== -1,
           model: (this.model || {})[key]
         }

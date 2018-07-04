@@ -2,6 +2,7 @@ import EThing from 'ething-js'
 import { LocalStorage } from 'quasar'
 import { date } from 'quasar'
 import { format } from 'quasar'
+import { Notify } from 'quasar'
 const { humanStorageSize } = format
 import { SSE } from './ething-sse'
 import { meta } from './ething-meta'
@@ -17,7 +18,36 @@ export var UI = {
   VERSION: process.env.VERSION
 }
 
+function getParameterByName(name, url) {
+    if (!url) url = window.location.href;
+    name = name.replace(/[\[\]]/g, "\\$&");
+    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, " "));
+}
+
+UI.kioskMode = getParameterByName('kiosk') === '1'
+
 export default ({ app, router, Vue, store }) => {
+
+  EThing.on('Notified', function(evt) {
+    console.log(evt)
+    Notify.create({
+      type: 'info',
+      message: evt.data.message,
+      detail: evt.data.subject,
+      position: 'bottom-right',
+      timeout: 15000,
+      actions: [
+        {
+          label: 'Close',
+          handler: () => {}
+        }
+      ],
+    })
+  })
 
   var serverUrl = null, dynamicServerUrl = false
 
@@ -28,8 +58,11 @@ export default ({ app, router, Vue, store }) => {
   } else if (typeof process.env.API === 'string') {
     serverUrl = process.env.API
   } else {
-    serverUrl = LocalStorage.get.item('ething.server.url')
-    dynamicServerUrl = true
+    serverUrl = getParameterByName('server')
+    if (!serverUrl) {
+      serverUrl = LocalStorage.get.item('ething.server.url')
+      dynamicServerUrl = true
+    }
   }
 
   if (serverUrl) {
