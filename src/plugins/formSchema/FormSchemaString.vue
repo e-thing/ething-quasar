@@ -43,7 +43,7 @@ export default {
 
   methods: {
     cast (model) {
-      return String(model)
+      return model === null ? '' : String(model)
     }
   }
 

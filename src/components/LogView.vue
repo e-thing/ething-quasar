@@ -64,29 +64,32 @@ export default {
           dataType: 'json',
         }).then(logs => {
 
-          this.logs = logs.map((line) => {
+          this.logs = []
+          logs.forEach((line) => {
             // parsing
             var d = line.split('::', 4);
-            
+
   					if(d.length==4){
   						var date = d[0].trim(),
                 name = d[1].trim(),
   							level = d[2].trim().toUpperCase(),
   							message = d[3].trim();
 
-              return {
+              this.logs.push({
                 date,
                 name,
                 level,
                 cls: level.toLowerCase(),
                 message
-              }
-  					}
+              })
+  					} else {
+              if (this.logs.length)
+                this.logs[this.logs.length -1].message += "\n" + line
+            }
 
-            return
-          }).filter(log => {
-            return !!log
-          }).reverse()
+          })
+
+          this.logs.reverse()
         }).finally(() => {
           this.loading = false
         })

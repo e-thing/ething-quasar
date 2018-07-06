@@ -113,7 +113,8 @@ module.exports = function (ctx) {
         'QCardTitle',
         'QCardMain',
         'QCardSeparator',
-        'QScrollArea'
+        'QScrollArea',
+        'QPullToRefresh'
         //
       ],
       directives: [
@@ -185,6 +186,8 @@ module.exports = function (ctx) {
 
         // Window only
         // win32metadata: { ... }
+        platform: 'all',
+        arch: 'all'
       }
     },
 

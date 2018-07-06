@@ -69,6 +69,8 @@ export default ({ app, router, Vue, store }) => {
     EThing.config.serverUrl = serverUrl
   }
 
+  UI.autoLogin = /\/\/localhost/.test(EThing.config.serverUrl)
+
   Vue.prototype.$ui = UI
 
   Object.assign(UI, {

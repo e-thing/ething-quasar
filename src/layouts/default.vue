@@ -21,7 +21,7 @@
         <q-toolbar-title class="gt-xs"/>
 
         <q-btn class="gt-xs" flat dense icon="settings" aria-label="settings" @click="$router.push('/settings')"/>
-        <q-btn class="gt-xs" flat dense icon="exit to app" aria-label="logout" @click="logout" />
+        <q-btn v-if="!$ui.autoLogin" class="gt-xs" flat dense icon="exit to app" aria-label="logout" @click="logout" />
 
       </q-toolbar>
 
@@ -60,7 +60,7 @@
           <q-item-side icon="settings" />
           <q-item-main label="Settings" />
         </q-item>
-        <q-item @click.native="logout">
+        <q-item v-if="!$ui.autoLogin" @click.native="logout">
           <q-item-side icon="exit to app" />
           <q-item-main label="Logout" />
         </q-item>
@@ -82,7 +82,9 @@
         </div>
       </q-inner-loading>
       <keep-alive v-else include="PageDashboard,PageDevices,PageData">
-        <router-view/>
+        <q-pull-to-refresh :handler="refresher">
+          <router-view/>
+        </q-pull-to-refresh>
       </keep-alive>
     </q-page-container>
   </q-layout>
@@ -111,6 +113,11 @@ export default {
     reload () {
       this.$root.state = 'begin'
       this.$router.go(this.$router.currentRoute)
+    },
+    refresher (done) {
+      console.log('refresh')
+      this.$router.go()
+      done()
     }
   },
 
