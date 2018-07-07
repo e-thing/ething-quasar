@@ -3,7 +3,9 @@
         <div class="card-img">
             <div class="img-wrapper">
                 <div v-if="currentImage">
-                  <img :key="imgKey" :src="addTimestampToUrl(currentImage.getSrc())" alt="">
+                  <img :key="imgKey" :src="addTimestampToUrl(currentImage.getSrc())" alt="" @load="onload" @error="onerror">
+                  <div v-if="loading" class="loader text-center">loading...</div>
+                  <div v-if="error" class="error text-center text-negative">Error</div>
                   <div v-if="!noTitle" class="title text-center text-faded">{{ currentImage.name() }}</div>
                 </div>
             </div>
@@ -47,7 +49,8 @@ export default {
         //Index of the active image on the images array
         activeImage: 0,
         images: [],
-        imgKey: 0
+        imgKey: 0,
+        loading: false
     }
   },
   computed: {
@@ -66,6 +69,13 @@ export default {
     },
     value (val) {
       this.activateImage (val)
+    },
+    activeImage : {
+      handler () {
+        this.loading = true
+        this.error = false
+      },
+      immediate: true
     }
   },
 
@@ -127,6 +137,8 @@ export default {
 
       refresh () {
         console.log('refresh')
+        this.loading = true
+        this.error = false
         this.imgKey += 1
       },
 
@@ -165,6 +177,16 @@ export default {
 
       addTimestampToUrl (url) {
         return url + ( url.indexOf('?') === -1 ? '?' : '&' ) + Date.now()
+      },
+
+      onload () {
+        this.loading = false
+        this.error = false
+      },
+
+      onerror (err) {
+        this.loading = false
+        this.error = true
       }
   }
 
@@ -262,6 +284,18 @@ export default {
     bottom: 0px;
     width: 100%;
     padding: 5px 0;
+}
+
+.loader {
+    position: absolute;
+    bottom: 50%;
+    width: 100%;
+}
+
+.error {
+    position: absolute;
+    bottom: 50%;
+    width: 100%;
 }
 
 .actions {

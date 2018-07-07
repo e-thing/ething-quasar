@@ -1,26 +1,36 @@
 <template>
   <q-page class="q-mb-xl">
 
+    <div class="row justify-between">
     <q-breadcrumbs class="q-pa-md">
       <q-breadcrumbs-el v-for="(item, index) in pathItems" :key="index" :label="item.label" :icon="item.icon" :to="item.link" />
     </q-breadcrumbs>
 
-    <!--<q-btn-dropdown color="primary" label="Create">
+    <q-btn-dropdown color="primary" label="Create" icon="add" flat >
       <q-list link>
         <q-item v-close-overlay @click.native="create('File')">
-          <q-item-side :icon="$meta.get('File').icon" inverted :color="$meta.get('File').color" />
+          <q-item-side :icon="$meta.get('File').icon" :color="$meta.get('File').color" />
           <q-item-main>
             <q-item-tile label>File</q-item-tile>
           </q-item-main>
         </q-item>
+
         <q-item v-close-overlay @click.native="create('Table')">
-          <q-item-side :icon="$meta.get('Table').icon" inverted :color="$meta.get('Table').color" />
+          <q-item-side :icon="$meta.get('Table').icon" :color="$meta.get('Table').color" />
           <q-item-main>
             <q-item-tile label>Table</q-item-tile>
           </q-item-main>
         </q-item>
+
+        <q-item v-close-overlay @click.native="$router.push('/chart')">
+          <q-item-side icon="mdi-chart-line" :color="$meta.get('File').color" />
+          <q-item-main>
+            <q-item-tile label>Chart</q-item-tile>
+          </q-item-main>
+        </q-item>
       </q-list>
-    </q-btn-dropdown>-->
+    </q-btn-dropdown>
+    </div>
 
     <div v-if="resources.length">
       <q-list link no-border>
@@ -60,6 +70,7 @@
       <p class="text-faded">Nothing found !</p>
     </div>
 
+    <!-- does not work along with pull-to-refresh
     <q-page-sticky position="bottom-right" :offset="[18, 18]">
         <q-fab
             color="primary"
@@ -84,7 +95,7 @@
                 icon="mdi-chart-line"
             />
         </q-fab>
-    </q-page-sticky>
+    </q-page-sticky>-->
 
   </q-page>
 </template>
