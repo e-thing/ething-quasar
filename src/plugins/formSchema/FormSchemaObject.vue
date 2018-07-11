@@ -9,7 +9,7 @@
       :label="item.schema.title || item.schema.label || item.key"
       orientation="vertical"
       class="formField"
-      :class="{formFieldRequired: item.required}"
+      :class="{formFieldRequired: item.required, 'q-field-with-error': !!errors[item.key]}"
     >
       <form-schema :required="item.required" :schema="item.schema" :model="item.model" :level="level+1" @input="onChildValueChange(item, $event)" @error="onChildErrorChange(item, $event)"/>
     </q-field>
@@ -39,6 +39,7 @@ export default {
       var schema = this.mutableSchema
       var requiredProperties = schema.required || []
       var readOnlyProperties = []
+      var disabledProperties = []
 
       for(let k in schema.properties) {
         if (!schema.properties[k].readOnly) {
@@ -48,11 +49,14 @@ export default {
         } else {
           readOnlyProperties.push(k)
         }
+        if (schema.properties[k]._disabled) {
+          disabledProperties.push(k)
+        }
       }
 
       var keyOrdered = requiredProperties.concat(Object.keys(schema.properties || {}).filter(k => {
           return requiredProperties.indexOf(k)===-1 && readOnlyProperties.indexOf(k)===-1
-      }))
+      })).filter(k => disabledProperties.indexOf(k)===-1 && !!schema.properties[k])
 
       if (schema.order) {
         for (var i = schema.order.length; i>0; i--) {
@@ -96,7 +100,7 @@ export default {
     },
 
     onChildErrorChange (item, val) {
-      this.errors[item.key] = val
+      this.$set(this.errors, item.key, val)
       this.setError(Object.values(this.errors).some(err => err))
     }
   }

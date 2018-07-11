@@ -2,7 +2,7 @@
 
   <div v-if="loading===false">
 
-    <div class="q-mt-md">
+    <div class="q-mt-xl">
 
       <div class="q-title q-title-opacity">General</div>
 
@@ -10,7 +10,7 @@
 
     </div>
 
-    <div v-for="(plugin, name) in plugins" :key="name" v-if="typeof plugin.schema === 'object'" class="q-mt-md">
+    <div v-for="(plugin, name) in plugins" :key="name" v-if="typeof plugin.schema === 'object'" class="q-mt-xl">
 
       <div class="q-title q-title-opacity">{{ name }}</div>
 
@@ -21,12 +21,12 @@
     <q-alert
         v-if="saveError"
         type="negative"
-        class="q-mt-md"
+        class="q-mt-xl"
     >
       {{ String(saveError) }}
     </q-alert>
 
-    <div class="q-mt-md">
+    <div class="q-mt-xl">
         <q-btn :disable="globalError" :loading="saving" color="secondary" icon="done" label="save changes" @click="onSave"/>
     </div>
 
@@ -146,3 +146,12 @@ export default {
 
 }
 </script>
+
+<style lang="stylus" scoped>
+@import '~variables'
+
+.q-title
+  border-bottom 1px solid $grey-3
+  padding-bottom $space-y-base
+
+</style>

@@ -21,7 +21,6 @@ export default {
 
   computed: {
     selectOptions () {
-      console.log('selectOptions')
       var enumLabels = this.mutableSchema.enumLabels || []
       return (this.mutableSchema.enum || []).map( (v, i) => {
         return {

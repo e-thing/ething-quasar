@@ -243,7 +243,7 @@ DataSource.prototype.add = function (source, done) {
           }
 
           r.select({
-            datefmt: 'timestamp_ms',
+            //datefmt: 'timestamp_ms',
             fields: ['date'].concat(this.keys),
             query
           }).then( data => {
@@ -264,7 +264,8 @@ DataSource.prototype.add = function (source, done) {
       var formattedData = data.filter(d => {
         return d.hasOwnProperty(key)
       }).map(d => {
-        return [d.date, d[key]]
+        var date = new Date(d.date)
+        return [date.getTime(), parseFloat(d[key])]
       })
 
       done(formattedData)
@@ -527,6 +528,9 @@ export default {
             subtitle: {
                 text: this.dense ? null : preferences.subtitle
             },
+            time: {
+              useUTC: false
+            }
         }
 
         var marge = 5; // vertical space between 2 panes (in %)

@@ -82,9 +82,9 @@
         </div>
       </q-inner-loading>
       <keep-alive v-else include="PageDashboard,PageDevices,PageData">
-        <q-pull-to-refresh :handler="refresher">
+        <componant :is="pullToRefreshEnabled ? 'q-pull-to-refresh' : 'div'" :handler="refresher">
           <router-view/>
-        </q-pull-to-refresh>
+        </componant>
       </keep-alive>
     </q-page-container>
   </q-layout>
@@ -102,6 +102,9 @@ export default {
   computed: {
     back () {
       return this.$route.meta.back && (this.$q.platform.within.iframe || this.$q.platform.is.electron || this.$ui.kioskMode)
+    },
+    pullToRefreshEnabled () {
+      return this.$q.platform.has.touch && !this.$q.platform.is.desktop
     }
   },
   methods: {

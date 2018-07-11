@@ -69,7 +69,9 @@ export default ({ app, router, Vue, store }) => {
     EThing.config.serverUrl = serverUrl
   }
 
-  UI.autoLogin = /\/\/localhost/.test(EThing.config.serverUrl)
+  if (!dynamicServerUrl) {
+    UI.autoLogin = /\/\/localhost/.test(EThing.config.serverUrl)
+  }
 
   Vue.prototype.$ui = UI
 

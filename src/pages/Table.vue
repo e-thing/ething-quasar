@@ -32,18 +32,27 @@
           icon="mdi-chart-line"
           color="faded"
           @click="$ui.open(resource, 'chart')"
+          :disable="isEmpty"
         />
         <q-btn
           flat round dense
           icon="mdi-information-outline"
           color="faded"
           @click="showStats"
+          :disable="isEmpty"
+        />
+        <q-btn
+          flat round dense
+          icon="add"
+          color="faded"
+          @click="showAddRow"
         />
         <q-btn
           flat round dense
           icon="check_box"
           :color="edit ? 'secondary' : 'faded'"
           @click="edit = !edit"
+          :disable="isEmpty"
         />
         <q-btn
           flat round dense
@@ -106,6 +115,87 @@
 
     </q-modal>
 
+    <q-modal v-model="add.modal" :content-css="{minWidth: '50%'}">
+
+      <div class="q-ma-md">
+
+        <div class="q-mb-md q-title q-title-opacity">Insert data</div>
+
+        <div>
+          <div v-for="(item, index) in add.data" :key="index" class="q-my-lg add-row-item">
+
+            <q-field
+              class="q-my-md"
+            >
+              <q-input v-model.trim="item.key" stack-label="Column name" @focus="addRowShowKeySuggestion(index)">
+                <q-autocomplete
+                  ref="addRowKeyAutocomplete"
+                  :min-characters="0"
+                  @selected="selected"
+                  :filter="addRowKeyFilter"
+                  :static-data="{field: 'value', list: addRowListKeys()}"
+                />
+              </q-input>
+            </q-field>
+
+            <q-field
+              class="q-my-md"
+              icon="keyboard_arrow_right"
+              label="Type"
+            >
+              <q-select
+                v-model="item.type"
+                :options="add.typeOptions"
+              />
+            </q-field>
+
+            <q-field
+              class="q-my-md"
+              icon="keyboard_arrow_right"
+              label="Value"
+            >
+              <q-input v-if="item.type==='string'" v-model="item.value" />
+              <q-input v-else-if="item.type==='number'" v-model="item.value"/>
+              <q-select
+                v-else-if="item.type==='boolean'"
+                v-model="item.value"
+                :options="[{label: 'True', value: true}, {label: 'False', value: false}]"
+              />
+            </q-field>
+
+          </div>
+        </div>
+
+        <q-btn
+          color="primary"
+          @click="addRowTmpl"
+          icon="add"
+          label="add another column"
+          flat
+          size="md"
+          class="float-right"
+        />
+
+        <div>
+          <q-btn
+            color="primary"
+            :disable="add.error"
+            @click="addRow"
+            label="Add"
+            :loading="add.loading"
+          />
+          <q-btn
+            color="negative"
+            @click="add.modal = false"
+            label="Close"
+            flat
+          />
+        </div>
+
+      </div>
+
+    </q-modal>
+
   </q-page>
 </template>
 
@@ -134,7 +224,18 @@ export default {
       selected: [],
       loadingStatistics: false,
       statistics: null,
-      modalStatistics: false
+      modalStatistics: false,
+      add: {
+        modal: false,
+        error: false,
+        data: [],
+        typeOptions: ['string', 'number', 'boolean'].map(t => {
+          return {
+            label: t,
+            value: t
+          }
+        })
+      }
     }
   },
 
@@ -203,6 +304,9 @@ export default {
       return this.$ething.arbo.get(this.resource.createdBy())
     },
 
+    isEmpty () {
+      return this.serverData.length === 0
+    }
 
   },
 
@@ -303,6 +407,59 @@ export default {
       })
     },
 
+    showAddRow () {
+      if (this.add.data.length === 0) {
+        this.addRowTmpl()
+      }
+      this.add.modal = true
+    },
+
+    addRowTmpl () {
+      var keys = this.resource.keys()
+      this.add.data.push({
+        key: keys.length ? keys[0] : '',
+        type: 'number',
+        value: 0
+      })
+    },
+
+    addRowListKeys () {
+      return this.resource.keys().map(k => {
+        return {
+          label: k,
+          value: k
+        }
+      })
+    },
+
+    addRowKeyFilter(terms, { field, list }) {
+      return list
+    },
+
+    addRowShowKeySuggestion(index) {
+      this.$refs['addRowKeyAutocomplete'][index].trigger()
+    },
+
+    addRow () {
+      var d = {}
+      this.add.data.forEach(item => {
+        if (item.key) {
+          var v = item.value
+          if (item.type === 'number') {
+            v = parseFloat(v)
+          }
+          d[item.key] = v
+        }
+      })
+      if (Object.keys(d).length > 0) {
+        this.add.loading = true
+        this.resource.insert(d).finally( () => {
+          this.add.loading = false
+          this.add.modal = false
+        })
+      }
+    },
+
     format (key, value) {
 
       if (/date/i.test(key)) {
@@ -321,5 +478,11 @@ export default {
 }
 </script>
 
-<style>
+<style lang="stylus" scoped>
+@import '~variables'
+
+.add-row-item
+  &:not(:first-child)
+    border-top 1px solid $blue-2
+
 </style>

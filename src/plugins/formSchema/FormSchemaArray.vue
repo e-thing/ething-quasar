@@ -11,23 +11,26 @@
       />
     </div>
 
-    <q-field
+    <div
       v-for="(item, key) in items"
       :key="key"
-      :label="'#' + key"
-      orientation="vertical"
       class="formField"
     >
+      <div>
+        <span class="q-field-label" style="vertical-align: middle">#{{ key }}</span>
+
+        <q-btn flat size="sm"
+          color="negative"
+          @click="removeItem(key)"
+          label="remove"
+          icon="delete"
+          style="vertical-align: middle"
+        />
+      </div>
+
       <form-schema :schema="item.schema" :model="getModel(key)" :level="level+1" @input="onChildValueChange(key, $event)" @error="onChildErrorChange(key, $event)"/>
 
-      <q-btn flat size="md"
-        color="negative"
-        @click="removeItem(key)"
-        label="remove"
-        icon="delete"
-      />
-
-    </q-field>
+    </div>
 
     <small class="form-schema-error" v-if="$v.value.$error">{{ errorMessage }}</small>
 

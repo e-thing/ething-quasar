@@ -125,6 +125,8 @@ var makeForm = function (createElement, schema, model, level, onValueUpdate, onE
       return createElement('form-schema-boolean', attributes)
     case 'json':
       return createElement('form-schema-json', attributes)
+    case 'binary':
+      return createElement('form-schema-file', attributes)
 
   }
 
@@ -236,8 +238,12 @@ var FormComponent = {
       console.log(this.$options.name + ' error ' + val)
       this.$emit('error', val)
     },*/
-    '$v.$error' (value) {
-      this.setError(value)
+    '$v.$error' : {
+      handler (value, oldValue) {
+        if (value !== oldValue)
+          this.setError(value)
+      },
+      immediate: true
     }
   },
 
@@ -259,7 +265,7 @@ var FormComponent = {
     },
     parent () {
       var p = this.$parent
-      while (p && typeof p.schema === 'undefined') {
+      while (p && (typeof p.schema === 'undefined' || p._isWrapper())) {
         p = p.$parent
       }
       return p
@@ -268,7 +274,7 @@ var FormComponent = {
       var root = this
       var p = this.$parent
       while (p) {
-        if (typeof p.schema !== 'undefined')
+        if (typeof p.schema !== 'undefined' && p._isWrapper && !p._isWrapper())
           root = p
         p = p.$parent
       }
@@ -279,7 +285,7 @@ var FormComponent = {
       return this._find(root, id)
     },
     _find (node, id) {
-      if (node.schema && node.schema.id === id) {
+      if (node.schema && node.schema.id === id && !node._isWrapper()) {
         return node
       }
       for (let i in node.$children) {
@@ -287,12 +293,15 @@ var FormComponent = {
         if (n)
           return n
       }
+    },
+    _isWrapper () {
+      return this.$options.name === 'FormSchema'
     }
   },
 
   mounted () {
 
-    if (this.schema.dependencies) {
+    if (this.schema.dependencies && !this._isWrapper()) {
 
       for (let id in this.schema.dependencies) {
         let callback = this.schema.dependencies[id]
@@ -302,6 +311,10 @@ var FormComponent = {
             callback(val, this, node)
           })
           callback(node.value, this, node)
+        } else {
+          if (!node) {
+            console.warn('[form-schema] node with id ""' + id + '" not found for ' + this.$options.name)
+          }
         }
       }
 

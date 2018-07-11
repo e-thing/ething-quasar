@@ -2,6 +2,7 @@ import EThing from 'ething-js'
 import resourcesMetaData from '../resources'
 import * as formSchemaCore from './formSchema/core'
 import { extend } from 'quasar'
+import FormSchemaCron from './formSchema/FormSchemaCron'
 
 // meta api
 
@@ -331,10 +332,50 @@ export var meta = {
   get: compile,
   types: Object.keys(_metadata),
   events: {
+    TableDataThresholdEvent: {
+      properties: {
+        key: {
+          id: 'TableDataThresholdEvent.key',
+          enum: [],
+          dependencies: {
+            'ResourceEvent.resource': function (ids, self, node) {
+              var keys = [];
+              (ids || []).forEach( id => {
+                var r = self.$ething.arbo.get(id)
+                if (r) {
+                  keys = keys.concat(r.keys())
+                }
+              })
+              // unique
+              keys = keys.filter( (value, index, self) => {
+                return self.indexOf(value) === index
+              })
+              self.$set(self.mutableSchema, 'enum', keys)
+            }
+          }
+        },
+        threshold_mode: {
+          enumLabels: ['greater than', 'greater than or equal to', 'less than', 'less than or equal to'],
+          default: 'gt'
+        },
+        threshold_value: {
+          default: 0
+        },
+      }
+    },
     ResourceEvent: {
       properties: {
         resource: {
+          id: 'ResourceEvent.resource',
           format: 'ething.resource'
+        }
+      }
+    },
+    Timer: {
+      properties: {
+        cron_expression: {
+          title: 'when',
+          format: 'cron'
         }
       }
     }
@@ -370,6 +411,12 @@ export var meta = {
                 methods = r.methods()
               }
               self.$set(self.mutableSchema, 'enum', methods)
+              /*if (id) {
+                self.$set(self.parent().mutableSchema.properties, 'method', self.mutableSchema)
+              } else {
+                console.log(self.parent().mutableSchema)
+                self.$delete(self.parent().mutableSchema.properties, 'method')
+              }*/
             }
           }
         },
@@ -379,7 +426,9 @@ export var meta = {
               var r = self.$ething.arbo.get(self.find('ExecuteDevice.device').value)
               if (r && method) {
                 r.getApi(method).then( (api) => {
-                  self.mutableSchema = Object.assign(self.mutableSchema, api.schema)
+                  self.mutableSchema = Object.assign(self.mutableSchema, api.schema, {
+                    '_disabled': true
+                  })
                 })
               }
             }

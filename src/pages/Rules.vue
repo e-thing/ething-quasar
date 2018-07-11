@@ -94,6 +94,7 @@
 <script>
 //import ResourceSelect from '../components/ResourceSelect'
 import {resolve} from '../plugins/formSchema/core'
+import cronstrue from 'cronstrue'
 
 export default {
   name: 'PageRules',
@@ -192,9 +193,12 @@ export default {
                   type = 'resources'
                 }
               }
+              else if(attrSchema.format === 'cron') {
+                value = cronstrue.toString(value)
+              }
 
               attrs.push({
-                name: k,
+                name: attrSchema.title || k,
                 schema: attrSchema,
                 value,
                 type

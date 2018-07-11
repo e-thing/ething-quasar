@@ -15,7 +15,7 @@
       />
     </q-field>
 
-    <form-schema v-if="event" :schema="eventSchema" :model="model" @input="setOptions" @error="setError"/>
+    <form-schema v-if="event" :key="formId" :schema="eventSchema" :model="model" @input="setOptions" @error="setError"/>
 
     <small class="form-schema-error" v-if="$v.value.$error">{{ errorMessage }}</small>
   </div>
@@ -74,7 +74,8 @@ var FormSchemaEthingEvent = {
     }
 
     return {
-      eventOptions
+      eventOptions,
+      formId: 0
     }
   },
 
@@ -96,24 +97,17 @@ var FormSchemaEthingEvent = {
 
         schema = meta
 
-        /*var required = meta.required || []
-        var properties = {}
-
-        for(let k in meta.properties) {
-          if (!meta.properties[k].readOnly) {
-              properties[k] = meta.properties[k]
-              if (meta.properties[k].required && required.indexOf(k)===-1) {
-                  required.push(k)
-              }
-          }
-        }
-
-        schema.required = required
-        schema.properties = properties*/
-
       }
 
       return schema
+    }
+  },
+
+  watch: {
+    eventSchema (val, oldVal) {
+      if (val !== oldVal) {
+        this.formId++ // force to reload the form-schema component
+      }
     }
   },
 

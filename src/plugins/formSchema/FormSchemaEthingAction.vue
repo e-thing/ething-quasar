@@ -15,7 +15,7 @@
       />
     </q-field>
 
-    <form-schema v-if="action" :schema="actionSchema" :model="model" @input="setOptions" @error="setError"/>
+    <form-schema v-if="action" :key="formId" :schema="actionSchema" :model="model" @input="setOptions" @error="setError"/>
 
     <small class="form-schema-error" v-if="$v.value.$error">{{ errorMessage }}</small>
   </div>
@@ -26,6 +26,7 @@
 import ResourceSelect from '../../components/ResourceSelect'
 import { FormComponent, registerForm } from './core'
 import Vue from 'vue'
+
 
 registerForm(schema => {
   if (schema.format === 'ething.action') {
@@ -74,7 +75,8 @@ var FormSchemaEthingAction = {
     }
 
     return {
-      actionOptions
+      actionOptions,
+      formId: 0
     }
   },
 
@@ -96,6 +98,14 @@ var FormSchemaEthingAction = {
       }
 
       return schema
+    }
+  },
+
+  watch: {
+    actionSchema (val, oldVal) {
+      if (val !== oldVal) {
+        this.formId++ // force to reload the form-schema component
+      }
     }
   },
 

@@ -1,6 +1,15 @@
 <template>
   <q-page padding>
-    <div class="row">
+
+    <cron v-model="cron" />
+
+    <div>
+    cron: {{ cron }}
+    </div>
+
+    <!--<q-btn label="done" @click="serialize" />-->
+
+    <!--<div class="row">
       <div class="col-6">
         <form-schema :schema="schema" v-model="model" @error="error = $event" />
       </div>
@@ -9,7 +18,7 @@
         <div v-if="error">error</div>
         <div v-else>ok</div>
       </div>
-    </div>
+    </div>-->
 
 
   </q-page>
@@ -20,14 +29,23 @@
 import EThing from 'ething-js'
 
 
-
 import FormSchemaWeekCalendar from '../plugins/formSchema/FormSchemaWeekCalendar'
+import Cron from '../components/Cron'
 
 export default {
   name: 'PageTest',
 
+  components: {
+    Cron
+  },
+
   data () {
+
     return {
+
+      cron: '0 9 * * *',
+
+
       error: false,
       schema: {
         type: 'object',
@@ -116,6 +134,3 @@ export default {
   },
 }
 </script>
-
-<style>
-</style>
