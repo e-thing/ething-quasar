@@ -380,6 +380,7 @@ export var meta = {
       }
     }
   },
+
   actions: {
     RunScript: {
       properties: {
@@ -411,12 +412,6 @@ export var meta = {
                 methods = r.methods()
               }
               self.$set(self.mutableSchema, 'enum', methods)
-              /*if (id) {
-                self.$set(self.parent().mutableSchema.properties, 'method', self.mutableSchema)
-              } else {
-                console.log(self.parent().mutableSchema)
-                self.$delete(self.parent().mutableSchema.properties, 'method')
-              }*/
             }
           }
         },
@@ -426,10 +421,15 @@ export var meta = {
               var r = self.$ething.arbo.get(self.find('ExecuteDevice.device').value)
               if (r && method) {
                 r.getApi(method).then( (api) => {
-                  self.mutableSchema = Object.assign(self.mutableSchema, api.schema, {
-                    '_disabled': true
-                  })
+                  self.mutableSchema = Object.assign(self.mutableSchema, api.schema)
+                  if (Object.keys(self.mutableSchema.properties).length) {
+                    self.$set(self.parent().mutableSchema.properties, 'args', self.mutableSchema)
+                  } else {
+                    self.$delete(self.parent().mutableSchema.properties, 'args')
+                  }
                 })
+              } else {
+                self.$delete(self.parent().mutableSchema.properties, 'args')
               }
             }
           }

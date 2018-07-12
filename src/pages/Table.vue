@@ -126,8 +126,15 @@
 
             <q-field
               class="q-my-md"
+              :error="$v.add.data.$each[index].key.$error"
+              error-label="required"
             >
-              <q-input v-model.trim="item.key" stack-label="Column name" @focus="addRowShowKeySuggestion(index)">
+              <q-input
+                v-model.trim="item.key"
+                stack-label="Column name"
+                @focus="addRowShowKeySuggestion(index)"
+                @blur="$v.add.data.$each[index].key.$touch"
+              >
                 <q-autocomplete
                   ref="addRowKeyAutocomplete"
                   :min-characters="0"
@@ -153,18 +160,38 @@
               class="q-my-md"
               icon="keyboard_arrow_right"
               label="Value"
+              :error="$v.add.data.$each[index].value.$error"
+              error-label="required"
             >
-              <q-input v-if="item.type==='string'" v-model="item.value" />
-              <q-input v-else-if="item.type==='number'" v-model="item.value"/>
+              <q-input
+                v-if="item.type==='string'"
+                v-model="item.value"
+                @blur="$v.add.data.$each[index].value.$touch"
+              />
+              <q-input
+                v-else-if="item.type==='number'"
+                v-model="item.value"
+                type="number"
+                @blur="$v.add.data.$each[index].value.$touch"
+              />
               <q-select
                 v-else-if="item.type==='boolean'"
                 v-model="item.value"
                 :options="[{label: 'True', value: true}, {label: 'False', value: false}]"
+                @blur="$v.add.data.$each[index].value.$touch"
               />
             </q-field>
 
           </div>
         </div>
+
+        <q-alert
+            v-if="add.error"
+            type="negative"
+            class="q-my-md"
+        >
+          {{ String(add.error) }}
+        </q-alert>
 
         <q-btn
           color="primary"
@@ -202,6 +229,7 @@
 <script>
 
 import { date as qdate } from 'quasar'
+import { required } from 'vuelidate/lib/validators'
 
 
 export default {
@@ -235,6 +263,23 @@ export default {
             value: t
           }
         })
+      }
+    }
+  },
+
+  validations () {
+    return {
+      add: {
+        data: {
+          $each: {
+            key: {
+              required
+            },
+            value: {
+              required
+            }
+          }
+        }
       }
     }
   },
@@ -316,6 +361,27 @@ export default {
         this.reloadData()
       }
     },
+
+    'add.data': {
+      handler: function (values, oldValues) {
+        values.forEach( item => {
+          if (typeof item.value != item.type) {
+            switch (item.type) {
+              case 'boolean':
+                item.value = !!item.value
+                break;
+              case 'string':
+                item.value = String(item.value)
+                break;
+              case 'number':
+                item.value = 0
+                break;
+            }
+          }
+        })
+      },
+      deep: true
+    }
 
     /*columns: function (col, oldCol) {
       console.log('columns',col, oldCol)
@@ -453,9 +519,13 @@ export default {
       })
       if (Object.keys(d).length > 0) {
         this.add.loading = true
-        this.resource.insert(d).finally( () => {
-          this.add.loading = false
+        this.resource.insert(d).then( () => {
+          this.add.error = false
           this.add.modal = false
+        }).catch( e => {
+          this.add.error = e
+        }).finally( () => {
+          this.add.loading = false
         })
       }
     },

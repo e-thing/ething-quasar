@@ -265,37 +265,84 @@ var FormComponent = {
     },
     parent () {
       var p = this.$parent
-      while (p && (typeof p.schema === 'undefined' || p._isWrapper())) {
+      while (p && (!p._isWrapper || p._isWrapper())) {
         p = p.$parent
       }
       return p
     },
     root () {
-      var root = this
-      var p = this.$parent
+      var root;
+      var p = this
       while (p) {
-        if (typeof p.schema !== 'undefined' && p._isWrapper && !p._isWrapper())
-          root = p
-        p = p.$parent
+        root = p
+        p = p.parent()
       }
       return root
     },
-    find (id) {
-      var root = this.root()
-      return this._find(root, id)
+    children () {
+      return this._children(this)
     },
-    _find (node, id) {
-      if (node.schema && node.schema.id === id && !node._isWrapper()) {
+    _children (node) {
+      var ret = []
+
+      var _ch = node.$children
+      for (var i in node.$children) {
+        let c = node.$children[i]
+        if (c._isWrapper && !c._isWrapper()) {
+          ret.push(c)
+        } else {
+          ret = ret.concat(this._children(c))
+        }
+      }
+
+      return ret
+    },
+    find (id) {
+      // find the closest node with the given id (necessary because multiple schema may have the same id (ie: array items))
+
+      // 1 - find under this node
+      var n = this._find_down(this, id)
+      if (n) return n
+
+      // 2 - iterate through the parent and the siblings
+      return this._find_up(this, id)
+    },
+
+    _find_up (node, id) {
+      // 1 - the parent ?
+      var p = node.parent()
+      if (!p) return // no need to go any further
+      if (p._is(id)) return p
+      // 2 - find amongs the siblings
+      var children = p.children()
+      for (var i in children) {
+        var child = children[i]
+        if (child !== node){
+          var n = this._find_down(child, id)
+          if (n) return n
+        }
+      }
+
+      // go one level upper
+      return this._find_up(p)
+    },
+
+    _find_down (node, id) {
+      if (node._is(id)) {
         return node
       }
-      for (let i in node.$children) {
-        var n = this._find(node.$children[i], id)
+      var children = node.children()
+      for (let i in children) {
+        var n = this._find_down(children[i], id)
         if (n)
           return n
       }
     },
     _isWrapper () {
       return this.$options.name === 'FormSchema'
+    },
+    _is (id) {
+      return this.schema.id === id && !this._isWrapper()
     }
   },
 

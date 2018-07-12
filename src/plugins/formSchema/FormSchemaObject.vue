@@ -9,7 +9,7 @@
       :label="item.schema.title || item.schema.label || item.key"
       orientation="vertical"
       class="formField"
-      :class="{formFieldRequired: item.required, 'q-field-with-error': !!errors[item.key]}"
+      :class="{formFieldRequired: item.required, 'formFieldError': !!errors[item.key]}"
     >
       <form-schema :required="item.required" :schema="item.schema" :model="item.model" :level="level+1" @input="onChildValueChange(item, $event)" @error="onChildErrorChange(item, $event)"/>
     </q-field>
@@ -124,5 +124,9 @@ verticalMargin = 16px
         content '*'
         color $negative
         margin-left 8px
+
+.formFieldError
+  & > div > .q-field-label > .q-field-label-inner
+    color $negative
 
 </style>

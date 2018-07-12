@@ -12,21 +12,29 @@ export default {
   bases: ['Resource'],
 
   properties: {
-    event: {
-      format: 'ething.event',
+    events: {
+      items: {
+        format: 'ething.event'
+      },
+      _label: function (index, item) {
+        var cp = Object.assign({}, item)
+        delete cp.type
+        return item.type + ' (' + this.$ui.describe(cp) + ')'
+      }
     },
-    action: {
-      format: 'ething.action',
+    actions: {
+      items: {
+        format: 'ething.action'
+      },
+      _label: function (index, item) {
+        var cp = Object.assign({}, item)
+        delete cp.type
+        return item.type + ' (' + this.$ui.describe(cp) + ')'
+      }
     },
     scheduler: {
       format: 'week-calendar'
     },
-    /*actions: {
-      type: 'array',
-      items: {
-        format: 'ething.action'
-      }
-    },*/
   }
 
 }

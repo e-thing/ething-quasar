@@ -40,11 +40,21 @@
             </q-item-main>
           </q-item>
 
-          <q-item multiline>
+          <q-item multiline v-if="rule.attr('scheduler', []).length > 0">
+            <q-item-side icon="schedule" />
+            <q-item-main>
+              <q-item-tile label>Schedules</q-item-tile>
+              <q-item-tile sublabel v-for="(item, index) in rule.attr('scheduler', [])" :key="index">
+                {{ schedulerItemToString(item) }}
+              </q-item-tile>
+            </q-item-main>
+          </q-item>
+
+          <q-item multiline v-for="(event, index) in rule.attr('events', [])" :key="index">
             <q-item-side icon="event" />
             <q-item-main>
-              <q-item-tile label>Event: {{ rule.event().type }}</q-item-tile>
-              <q-item-tile sublabel v-for="(attr, index) in listAttr(rule.event(), 'events')" :key="index" >
+              <q-item-tile label>Event {{ index + 1 }} : {{ event.type }}</q-item-tile>
+              <q-item-tile sublabel v-for="(attr, index) in listAttr(event, 'events')" :key="index" >
                 {{ attr.name }}:
                 <template v-if="attr.type === 'resources'">
                   <template v-for="(r, index) in resolve(attr.value)">
@@ -57,11 +67,11 @@
             </q-item-main>
           </q-item>
 
-          <q-item multiline>
+          <q-item multiline v-for="(action, index) in rule.attr('actions', [])" :key="index">
             <q-item-side icon="mdi-run" />
             <q-item-main>
-              <q-item-tile label>Action: {{ rule.action().type }}</q-item-tile>
-              <q-item-tile sublabel v-for="(attr, index) in listAttr(rule.action(), 'actions')" :key="index" >
+              <q-item-tile label>Action {{ index + 1 }} : {{ action.type }}</q-item-tile>
+              <q-item-tile sublabel v-for="(attr, index) in listAttr(action, 'actions')" :key="index" >
                 {{ attr.name }}:
                 <template v-if="attr.type === 'resources'">
                   <template v-for="(r, index) in resolve(attr.value)">
@@ -219,6 +229,16 @@ export default {
           return r || id
         }
       })
+    },
+
+    schedulerItemToString (item) {
+      const weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+
+      if (item.start.weekDay === item.end.weekDay) {
+        return weekDays[item.start.weekDay] + ' ' + item.start.hour + 'h - ' + item.end.hour + 'h'
+      } else {
+        return weekDays[item.start.weekDay] + ' ' + item.start.hour + 'h - ' + weekDays[item.end.weekDay] + ' ' + item.end.hour + 'h'
+      }
     }
   }
 

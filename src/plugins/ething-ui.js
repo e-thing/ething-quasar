@@ -137,6 +137,46 @@ export default ({ app, router, Vue, store }) => {
       return humanStorageSize(s)
     },
 
+    /**
+    return a formatted string describing an object
+    exemple:
+      { "key1": 0, "key2": "value"}
+      will output
+      "key1:  0, key2: value"
+    **/
+    describe (obj) {
+      var s = []
+
+      const toString = function (v) {
+        if (EThing.utils.isId(v)) {
+          const r = EThing.arbo.get(v)
+          if (r) {
+            return r.name()
+          }
+        }
+        if (Array.isArray(v)) {
+          return v.map( i => toString(i) ).join(' ')
+        }
+        if (typeof v === 'object' && v !== null) {
+          if (Object.keys(v).length === 0) return ''
+          /*if (typeof v.toString === 'function')
+            return v.toString()*/
+          return '{...}'
+        }
+        if (v===null) return ''
+        return String(v)
+      }
+
+      for (var k in obj) {
+        let v = obj[k]
+        var l = toString(v)
+
+        if (!l || typeof v === 'undefined') continue
+        s.push(k + ': ' + l)
+      }
+      return s.join(', ')
+    }
+
   })
 
   app.data = app.data || {}
