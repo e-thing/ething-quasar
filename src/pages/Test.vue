@@ -1,6 +1,12 @@
 <template>
   <q-page padding>
 
+    <q-btn label="open" @click="modal = true"/>
+
+    <modal title="title" v-model="modal">
+      body
+    </modal>
+
     <cron v-model="cron" />
 
     <div>
@@ -43,6 +49,7 @@ export default {
 
     return {
 
+      modal: false,
       cron: '0 9 * * *',
 
 

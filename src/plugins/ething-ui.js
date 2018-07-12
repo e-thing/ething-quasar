@@ -8,6 +8,7 @@ import { SSE } from './ething-sse'
 import { meta } from './ething-meta'
 import promiseFinally from 'promise.prototype.finally'
 import qs from 'qs'
+import Modal from '../components/Modal'
 
 // necessary for older browsers
 promiseFinally.shim()
@@ -31,6 +32,8 @@ function getParameterByName(name, url) {
 UI.kioskMode = getParameterByName('kiosk') === '1'
 
 export default ({ app, router, Vue, store }) => {
+
+  Vue.component('Modal', Modal)
 
   EThing.on('Notified', function(evt) {
     console.log(evt)

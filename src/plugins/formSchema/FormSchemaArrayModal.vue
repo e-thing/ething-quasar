@@ -25,6 +25,24 @@
 
         <q-btn flat size="sm"
           color="secondary"
+          @click="moveItem(key, 'up')"
+          icon="arrow_drop_up"
+          class="col-auto"
+          flat
+          v-if="key > 0"
+        />
+
+        <q-btn flat size="sm"
+          color="secondary"
+          @click="moveItem(key, 'down')"
+          icon="arrow_drop_down"
+          class="col-auto"
+          flat
+          v-if="key < items.length -1"
+        />
+
+        <q-btn flat size="sm"
+          color="secondary"
           @click="editItem(key)"
           label="edit"
           icon="edit"
@@ -39,8 +57,6 @@
           class="col-auto"
         />
       </div>
-
-      <!--<form-schema :schema="item.schema" :model="getModel(key)" :level="level+1" @input="onChildValueChange(key, $event)" @error="onChildErrorChange(key, $event)"/>-->
 
     </div>
 
@@ -104,7 +120,7 @@ export default {
     if (typeof this.schema.minItems === 'number') {
       validators.minLength = minLength(this.schema.minItems)
     }
-    
+
     if (typeof this.schema.maxItems === 'number') {
       validators.maxLength = maxLength(this.schema.maxItems)
     }
@@ -167,6 +183,13 @@ export default {
 
       var a = (this.value || []).slice()
       a.splice(key, 1)
+      this.setValue(a)
+    },
+
+    moveItem (key, dir) {
+      var a = (this.value || []).slice()
+      var rm = a.splice(key, 1)
+      a.splice(key+(dir==='up' ? -1 : 1), 0, rm[0])
       this.setValue(a)
     },
 

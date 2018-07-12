@@ -265,7 +265,12 @@ DataSource.prototype.add = function (source, done) {
         return d.hasOwnProperty(key)
       }).map(d => {
         var date = new Date(d.date)
-        return [date.getTime(), parseFloat(d[key])]
+        var v = d[key]
+        if (typeof v != 'number') {
+          if (typeof v === 'string') v = parseFloat(d[key])
+          else if (typeof v === 'boolean') v = v ? 1 : 0
+        }
+        return [date.getTime(), v]
       })
 
       done(formattedData)

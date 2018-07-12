@@ -50,35 +50,36 @@
             </q-item-main>
           </q-item>
 
-          <q-item multiline v-for="(event, index) in rule.attr('events', [])" :key="index">
+          <q-item multiline v-for="(event, i) in rule.attr('events', [])" :key="'event-'+i">
             <q-item-side icon="event" />
             <q-item-main>
-              <q-item-tile label>Event {{ index + 1 }} : {{ event.type }}</q-item-tile>
+              <q-item-tile label>Event {{ i + 1 }} : {{ event.type }}</q-item-tile>
               <q-item-tile sublabel v-for="(attr, index) in listAttr(event, 'events')" :key="index" >
                 {{ attr.name }}:
                 <template v-if="attr.type === 'resources'">
-                  <template v-for="(r, index) in resolve(attr.value)">
-                    <span v-if="index > 0">, </span>
+                  <template v-for="(r, j) in resolve(attr.value)">
+                    <span v-if="j > 0">, </span>
                     <span class="cursor-pointer" @click.stop="$ui.open(r)">{{ r.basename() }}</span>
                   </template>
                 </template>
-                <template v-else>{{ attr.value }}</template>
+                <template v-else>{{ attr.label }}</template>
               </q-item-tile>
             </q-item-main>
           </q-item>
 
-          <q-item multiline v-for="(action, index) in rule.attr('actions', [])" :key="index">
+          <q-item multiline v-for="(action, i) in rule.attr('actions', [])" :key="'action-'+i">
             <q-item-side icon="mdi-run" />
             <q-item-main>
-              <q-item-tile label>Action {{ index + 1 }} : {{ action.type }}</q-item-tile>
+              <q-item-tile label>Action {{ i + 1 }} : {{ action.type }}</q-item-tile>
               <q-item-tile sublabel v-for="(attr, index) in listAttr(action, 'actions')" :key="index" >
                 {{ attr.name }}:
                 <template v-if="attr.type === 'resources'">
-                  <template v-for="(r, index) in resolve(attr.value)">
+                  <template v-for="(r, j) in resolve(attr.value)">
+                    <span v-if="j > 0">, </span>
                     <span class="cursor-pointer" @click.stop="$ui.open(r)">{{ r.basename() }}</span>
                   </template>
                 </template>
-                <template v-else>{{ attr.value }}</template>
+                <template v-else>{{ attr.label }}</template>
               </q-item-tile>
             </q-item-main>
           </q-item>
@@ -191,7 +192,8 @@ export default {
           var attrSchema = (schema.properties || {})[k]
           if (attrSchema) {
             var value = item[k]
-            if (String(value)) {
+            var label = String(value)
+            if (label && value!==null && typeof value != 'undefined' && !(typeof value == 'object' && Object.keys(value).length==0)) {
 
               var type = ''
 
@@ -204,13 +206,14 @@ export default {
                 }
               }
               else if(attrSchema.format === 'cron') {
-                value = cronstrue.toString(value)
+                label = cronstrue.toString(value)
               }
 
               attrs.push({
                 name: attrSchema.title || k,
                 schema: attrSchema,
                 value,
+                label,
                 type
               })
 
