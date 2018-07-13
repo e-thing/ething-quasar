@@ -42,12 +42,12 @@
   <body>
     <% if (!htmlWebpackPlugin.options.ctx.mode.electron) { %>
       <noscript>
-        This is your fallback content in case JavaScript fails to load.
+        This application needs JavaScript to be enabled.
       </noscript>
     <% } %>
 
     <!-- DO NOT touch the following <div> -->
-    <div id="q-app"></div>
+    <div id="q-app">Please wait. The application is loading...</div>
 
     <!-- DO NOT touch the following -->
     <%= htmlWebpackPlugin.options.bodyScripts %>

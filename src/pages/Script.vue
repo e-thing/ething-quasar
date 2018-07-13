@@ -28,7 +28,7 @@
             </div>
             <div class="output-line info">status: {{ console.info.status ? 'success' : 'fail' }}</div>
             <div class="output-line info">return code: {{ console.info.returnCode }}</div>
-            <div class="output-line info">duration: {{ console.info.executionTime }} secondes</div>
+            <div class="output-line info" v-if="typeof console.info.executionTime == 'number'">duration: {{ console.info.executionTime }} secondes</div>
           </div>
         </q-scroll-area>
         <div v-else class="absolute-center text-light">
@@ -37,24 +37,13 @@
       </div>
     </multipane>
 
-    <q-modal v-model="settingsModal" :content-css="{padding: '50px', minWidth: '50vw'}">
-
-      <div class="q-title q-my-md">Settings</div>
+    <modal v-model="settingsModal" title="Settings" icon="settings" valid-btn-hide cancel-btn-label="Close" cancel-btn-color="faded">
 
       <q-field label="Arguments" class="q-my-md" orientation="vertical">
         <q-input v-model="args" />
       </q-field>
 
-      <div class="q-mt-xl">
-        <q-btn
-          flat
-          color="faded"
-          @click="settingsModal = false"
-          label="Close"
-        />
-      </div>
-
-    </q-modal>
+    </modal>
   </q-page>
 </template>
 
@@ -181,6 +170,12 @@ export default {
       this.resource.execute(this.args).then(result => {
         console.log(result)
         this.printResult(result)
+      }).catch( err => {
+        console.error(err)
+        this.printResult({
+          status: false,
+          returnCode: -2
+        })
       }).finally(() => {
         this.exeLoading = false
         setTimeout(() => {
@@ -199,7 +194,7 @@ export default {
       this.console.info = {
         status: result.ok,
         returnCode: result.return_code,
-        executionTime: result.executionTime.toFixed(3)
+        executionTime: typeof result.executionTime == 'number' ? result.executionTime.toFixed(3) : null
       }
     }
   },

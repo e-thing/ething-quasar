@@ -4,34 +4,27 @@
 
     <highstock v-if="options" class="chart" :class="{ expended: expended }" :options="options" ref="highcharts"></highstock>
 
+    <div v-else class="absolute-center text-center">
+      <q-btn label="new plot" icon="timeline" @click="optionsModal = true" flat color="primary"/>
+    </div>
+
     <q-inner-loading class="text-center" :visible="loading">
       <div class="q-pa-lg text-primary">loading...</div>
       <q-spinner-oval color="primary" size="50px" />
     </q-inner-loading>
 
-    <q-modal v-model="saveModal" :content-css="{padding: '50px', minWidth: '50vw'}">
+    <modal v-model="saveModal" title="Chart save" icon="save" size="xs" valid-btn-label="Save" @valid="onSave" @show="$v.filename.$touch">
 
-      <div class="q-display-1 q-mb-md">Chart save</div>
-
-      <q-field label="Filename" class="q-my-md" orientation="vertical">
-        <q-input v-model="filename" />
+      <q-field label="Filename" class="q-my-md" orientation="vertical"
+        :error="$v.filename.$error"
+        error-label="Required"
+      >
+        <q-input v-model="filename" @input="$v.filename.$touch"/>
       </q-field>
 
-      <q-btn
-        color="primary"
-        @click="onSave"
-        label="Save"
-      />
-      <q-btn
-        color="negative"
-        @click="saveModal = false"
-        label="Cancel"
-      />
+    </modal>
 
-    </q-modal>
-
-    <q-modal v-model="optionsModal" :no-esc-dismiss="!options" :no-backdrop-dismiss="!options" :content-css="{padding: '50px', minWidth: '50vw'}">
-      <div class="q-display-1 q-mb-md">Chart options</div>
+    <modal v-model="optionsModal" size="lg" :no-esc-dismiss="!options" :no-backdrop-dismiss="!options" title="Chart options" icon="edit" :valid-btn-disable="$v.optionsData.$error" @valid="onOptionsValidate">
 
       <q-field label="Title" class="q-my-md" orientation="vertical">
         <q-input v-model="optionsData.title" />
@@ -46,7 +39,7 @@
           Panes
           <q-btn flat size="md"
             color="blue-5"
-            @click="optionsData.panes.push({})"
+            @click="optionsData.panes.push({}); $v.optionsData.$touch()"
             label="Add pane"
             icon="add"
           />
@@ -63,6 +56,7 @@
             >
               <q-input
                 v-model="pane.name"
+                @blur="$v.optionsData.panes.$each[index].name.$touch"
                 :error="$v.optionsData.panes.$each[index].name.$error"
               />
             </q-field>
@@ -72,7 +66,7 @@
                 Curves
                 <q-btn flat size="md"
                   color="cyan-5"
-                  @click="pane.curves.push({type:'line',  data:{}})"
+                  @click="pane.curves.push({type:'line',  data:{}}); $v.optionsData.$touch()"
                   label="Add"
                   icon="add"
                 />
@@ -89,6 +83,7 @@
                   >
                     <q-input
                       v-model="curve.name"
+                      @blur="$v.optionsData.panes.$each[index].curves.$each[cindex].name.$touch"
                       :error="$v.optionsData.panes.$each[index].curves.$each[cindex].name.$error"
                     />
                   </q-field>
@@ -103,6 +98,7 @@
                     <q-select
                       v-model="curve.type"
                       :options="serieTypeOptions"
+                      @blur="$v.optionsData.panes.$each[index].curves.$each[cindex].type.$touch"
                       :error="$v.optionsData.panes.$each[index].curves.$each[cindex].type.$error"
                     />
                   </q-field>
@@ -118,6 +114,7 @@
                       type="Table"
                       v-model="curve.data.resource"
                       use-id
+                      @input="$v.optionsData.panes.$each[index].curves.$each[cindex].data.resource.$touch"
                       :error="$v.optionsData.panes.$each[index].curves.$each[cindex].data.resource.$error"
                     />
                   </q-field>
@@ -133,6 +130,7 @@
                     <q-select
                       v-model="curve.data.key"
                       :options="optionsBuildKeyOptions(curve, $v.optionsData.panes.$each[index].curves.$each[cindex].data.key)"
+                      @input="$v.optionsData.panes.$each[index].curves.$each[cindex].data.key.$touch"
                       :error="$v.optionsData.panes.$each[index].curves.$each[cindex].data.key.$error"
                     />
                   </q-field>
@@ -158,19 +156,7 @@
 
       </div>
 
-      <q-btn
-        color="primary"
-        :disable="$v.optionsData.$error"
-        @click="onOptionsValidate"
-        label="Validate"
-      />
-      <q-btn
-        color="negative"
-        flat
-        @click="optionsModal = false"
-        label="Cancel"
-      />
-    </q-modal>
+    </modal>
 
   </div>
 </template>
@@ -375,6 +361,9 @@ export default {
 
   validations () {
     return {
+      filename: {
+        required
+      },
       optionsData: {
         required,
         panes: {

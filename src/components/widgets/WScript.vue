@@ -57,7 +57,7 @@ export default {
           for (var k in this.args) {
             let value = this.args[k]
             if ( typeof value === 'undefined' || value === null || value === '') continue
-            args += ' --' + k + ' "' + value + '"'
+            args += ' --' + k + '="' + value + '"'
           }
         }
 
@@ -98,8 +98,10 @@ export default {
             type: 'string'
           },
           inputs: {
+            description: 'For dynamic arguments add some inputs',
             type: 'array',
             items: {
+              description: 'This input will be transmitted to the script (through --<name>=<value>).',
               type: 'script-input-item',
               required: ['name', 'type'],
               properties: {
@@ -111,6 +113,9 @@ export default {
                   enum: ['number', 'string']
                 }
               }
+            },
+            _label: function(index, item) {
+              return item.name + ' [' + item.type + ']'
             }
           }
         }

@@ -105,6 +105,7 @@ module.exports = function (ctx) {
         'QKnob',
         'QCollapsible',
         'QModal',
+        'QModalLayout',
         'QAlert',
         'QChip',
         'QPageSticky',

@@ -8,22 +8,11 @@
 
     <small class="form-schema-error" v-if="$v.value.$error">{{ errorMessage }}</small>
 
-    <q-modal v-model="editing">
+    <modal v-model="editing" title="Cron editor" icon="event" @valid="apply">
+
       <cron :value="castedModel" @input="editedExp = $event" class="q-ma-md"/>
-      <div class="q-ma-md">
-        <q-btn
-          color="primary"
-          @click="apply"
-          label="Apply"
-        />
-        <q-btn
-          flat
-          color="negative"
-          @click="editing = false"
-          label="Cancel"
-        />
-      </div>
-    </q-modal>
+      
+    </modal>
   </div>
 </template>
 

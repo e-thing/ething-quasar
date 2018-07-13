@@ -4,9 +4,7 @@
       {{ r.basename() }}
     </div>
 
-    <slot>
-
-    </slot>
+    <slot></slot>
 
     <small slot="footer">
       {{ lastSeenDate }}

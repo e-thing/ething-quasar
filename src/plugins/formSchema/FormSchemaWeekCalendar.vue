@@ -22,8 +22,8 @@
       flat
     />
 
-    <q-modal v-model="modal" :content-css="{minWidth: '50vw', maxHeight: '90vh'}">
-      <div class="overflow-hidden q-ma-md">
+    <modal v-model="modal" title="Scheduler" icon="schedule" valid-btn-hide cancel-btn-label="Close" cancel-btn-color="faded">
+      <div class="overflow-hidden">
         <div class="row gutter-xs non-selectable">
           <div class="col day" v-for="day in days">
             <div class="column">
@@ -38,15 +38,7 @@
           </div>
         </div>
       </div>
-
-      <q-btn
-        class="q-ma-md"
-        color="faded"
-        @click="modal=false"
-        label="Close"
-        flat
-      />
-    </q-modal>
+    </modal>
   </div>
 </template>
 

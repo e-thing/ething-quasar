@@ -62,26 +62,11 @@
 
     <small class="form-schema-error" v-if="$v.value.$error">{{ errorMessage }}</small>
 
-    <q-modal v-model="edit.show" :content-css="{padding: '32px', minWidth: '50vw'}">
+    <modal v-model="edit.show" title="Add item" icon="add" :valid-btn-disable="edit.error" valid-btn-label="Add" @valid="onEditDone">
 
       <form-schema :schema="schema.items || {}" v-model="edit.model" @error="edit.error = $event"/>
 
-      <div class="q-mt-md">
-        <q-btn
-          color="primary"
-          @click="onEditDone"
-          label="Add"
-          :disable="edit.error"
-        />
-        <q-btn
-          color="negative"
-          @click="edit.show = false"
-          label="Cancel"
-          flat
-        />
-      </div>
-
-    </q-modal>
+    </modal>
 
   </div>
 </template>

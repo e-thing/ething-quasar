@@ -22,6 +22,7 @@
 
 <script>
 
+import { Notify } from 'quasar'
 import { codemirror } from 'vue-codemirror'
 import 'codemirror/lib/codemirror.css'
 import 'codemirror/mode/javascript/javascript.js'
@@ -43,6 +44,9 @@ export default {
   data () {
     return {
       content: '',
+      contentDate: null,
+      warnedContentDate: null,
+      contentModifiedNotification: null,
       cmOption: {
         mode: 'text/plain',
         tabSize: 4,
@@ -81,7 +85,6 @@ export default {
 
   computed: {
     resource () {
-      console.log('resource computed !')
       var id = this.$route.params.id
       var r = this.$store.getters['ething/get'](id)
       if (id && id.length) {
@@ -93,6 +96,43 @@ export default {
       return r
     },
 
+  },
+
+  watch: {
+    resource: {
+      handler (r) {
+        var currentContentDate = r.contentModifiedDate()
+        if (this.contentDate) {
+          if (currentContentDate > this.contentDate && currentContentDate.getTime() != this.warnedContentDate) {
+            this.warnedContentDate = currentContentDate.getTime()
+            console.log('the content has been updated !')
+            if (this.dirty) {
+              // Warn the user
+              if (this.contentModifiedNotification) {
+                this.contentModifiedNotification()
+                this.contentModifiedNotification = null
+              }
+              this.contentModifiedNotification = Notify.create({
+                message: 'The content of this file has changed in the server and differ from your current version !',
+                timeout: 50000,
+                type: 'negative',
+              })
+            } else {
+              // reload the content
+              this.reloadContent()
+            }
+          }
+        }
+      },
+      immediate: true
+    },
+
+    contentDate (v) {
+      if (v === null && this.contentModifiedNotification) {
+        this.contentModifiedNotification()
+        this.contentModifiedNotification = null
+      }
+    }
   },
 
   methods: {
@@ -108,10 +148,12 @@ export default {
 
     reloadContent () {
       this.loading = true
+      this.contentDate = null
       this.resource.read(true).then( (data) => {
         this.setLangage(this.resource.mime())
 
         this.content = String.fromCharCode.apply(null, new Uint8Array(data))
+        this.contentDate = this.resource.contentModifiedDate()
         this.$nextTick(() => {
           this.markClean()
           this.codemirror().clearHistory()
@@ -143,7 +185,9 @@ export default {
 
     save () {
       this.saveLoading = true
+      this.contentDate = null
       this.resource.write(this.content).then(() => {
+        this.contentDate = this.resource.contentModifiedDate()
         this.dirty = false
         this.markClean()
       }).finally( () => {

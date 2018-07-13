@@ -1,8 +1,8 @@
 <template>
-  <div>
+  <modal icon="mdi-pin" ref="modal" :value="value" @input="$emit('input', $event)" title="Pin resource" v-bind="$attrs" size="lg" valid-btn-label="pin" :valid-btn-disable="!resource || optionsError" @valid="done">
 
     <div class="q-my-md">
-      <div class="q-title q-my-md">Choose the resource to pin</div>
+      <div class="q-title q-my-md">Select the resource to pin</div>
       <div v-if="resources.length">
 
         <div class="row gutter-sm">
@@ -15,9 +15,9 @@
               text-color="white"
 
             >
-              <q-card-title >
-                {{ r.basename() }}
-                <span v-if="r.createdBy()" slot="subtitle">{{ $ething.arbo.get(r.createdBy()).basename() }}</span>
+              <q-card-title>
+                <div class="ellipsis">{{ r.basename() }}</div>
+                <div v-if="r.createdBy()" class="ellipsis" slot="subtitle">{{ $ething.arbo.get(r.createdBy()).basename() }}</div>
                 <q-icon slot="right" :name="$meta.get(r).icon" color="white"/>
               </q-card-title>
             </q-card>
@@ -56,23 +56,7 @@
 
     </div>
 
-    <div class="q-mt-xl">
-      <q-btn
-        v-if="resource"
-        color="primary"
-        @click="done"
-        label="pin"
-        :disable="optionsError"
-      />
-      <q-btn
-        flat
-        color="negative"
-        @click="$emit('cancel')"
-        label="Cancel"
-      />
-    </div>
-
-  </div>
+  </modal>
 </template>
 
 <script>
@@ -85,7 +69,7 @@ export default {
     ResourceQItem
   },
 
-  props: ['pinned'],
+  props: ['pinned', 'value'],
 
   data () {
       return {
@@ -167,6 +151,8 @@ export default {
         })
 
         this.resetList()
+
+        this.$refs.modal.hide()
       }
     }
 

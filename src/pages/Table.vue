@@ -70,39 +70,9 @@
       </template>
     </q-table>
 
-    <q-modal v-model="modalStatistics" :content-css="{maxWidth: '400px'}">
+    <modal v-model="modalStatistics" title="Statistics" icon="mdi-information-outline" valid-btn-hide cancel-btn-label="Close" cancel-btn-color="faded">
 
-      <div class="q-ma-md">
-
-        <div class="q-mb-md q-title q-title-opacity">Statistics</div>
-
-        <div v-if="loadingStatistics" class="text-center q-mb-md">
-          <div class="q-pa-lg text-primary">loading...</div>
-          <q-spinner-oval color="primary" size="50px" />
-        </div>
-
-        <div v-else-if="statistics !== null">
-          <div v-for="key in resource.keys()">
-
-            <div class="q-mb-md q-subheading q-subheading-opacity">{{ key }}</div>
-
-            <div class="row q-mb-md">
-              <template v-for="(value, key) in statistics[key]">
-                <div class="col-xs-12 col-sm-4 key text-secondary">{{ key }}</div>
-                <div class="col-xs-12 col-sm-8 value">{{ format(key, value) }}</div>
-              </template>
-            </div>
-
-          </div>
-
-        </div>
-
-        <q-btn
-          color="faded"
-          @click="modalStatistics = false"
-          label="Close"
-          flat
-        />
+      <span slot="buttons">
         <q-btn
           color="faded"
           :disable="loadingStatistics"
@@ -110,89 +80,37 @@
           label="Reload"
           flat
         />
+      </span>
+
+      <div v-if="loadingStatistics" class="text-center q-mb-md">
+        <div class="q-pa-lg text-primary">loading...</div>
+        <q-spinner-oval color="primary" size="50px" />
+      </div>
+
+      <div v-else-if="statistics !== null">
+        <div v-for="key in resource.keys()">
+
+          <div class="q-mb-md q-mt-lg q-title q-title-opacity"><q-icon name="mdi-menu-right" /> column: {{ key }}</div>
+
+          <div class="row q-mb-md q-ml-lg">
+            <div v-if="statistics[key]">
+              <template v-for="(value, key) in statistics[key]">
+                <div class="col-xs-12 col-sm-4 key text-secondary">{{ key }}</div>
+                <div class="col-xs-12 col-sm-8 value">{{ format(key, value) }}</div>
+              </template>
+            </div>
+            <div v-else class="text-faded">No data</div>
+          </div>
+
+        </div>
 
       </div>
 
-    </q-modal>
+    </modal>
 
-    <q-modal v-model="add.modal" :content-css="{minWidth: '50%'}">
+    <modal v-model="add.modal" title="Insert data" icon="add" valid-btn-label="Add" :valid-btn-disable="add.error" :valid-btn-loading="add.loading" @valid="addRow">
 
-      <div class="q-ma-md">
-
-        <div class="q-mb-md q-title q-title-opacity">Insert data</div>
-
-        <div>
-          <div v-for="(item, index) in add.data" :key="index" class="q-my-lg add-row-item">
-
-            <q-field
-              class="q-my-md"
-              :error="$v.add.data.$each[index].key.$error"
-              error-label="required"
-            >
-              <q-input
-                v-model.trim="item.key"
-                stack-label="Column name"
-                @focus="addRowShowKeySuggestion(index)"
-                @blur="$v.add.data.$each[index].key.$touch"
-              >
-                <q-autocomplete
-                  ref="addRowKeyAutocomplete"
-                  :min-characters="0"
-                  @selected="selected"
-                  :filter="addRowKeyFilter"
-                  :static-data="{field: 'value', list: addRowListKeys()}"
-                />
-              </q-input>
-            </q-field>
-
-            <q-field
-              class="q-my-md"
-              icon="keyboard_arrow_right"
-              label="Type"
-            >
-              <q-select
-                v-model="item.type"
-                :options="add.typeOptions"
-              />
-            </q-field>
-
-            <q-field
-              class="q-my-md"
-              icon="keyboard_arrow_right"
-              label="Value"
-              :error="$v.add.data.$each[index].value.$error"
-              error-label="required"
-            >
-              <q-input
-                v-if="item.type==='string'"
-                v-model="item.value"
-                @blur="$v.add.data.$each[index].value.$touch"
-              />
-              <q-input
-                v-else-if="item.type==='number'"
-                v-model="item.value"
-                type="number"
-                @blur="$v.add.data.$each[index].value.$touch"
-              />
-              <q-select
-                v-else-if="item.type==='boolean'"
-                v-model="item.value"
-                :options="[{label: 'True', value: true}, {label: 'False', value: false}]"
-                @blur="$v.add.data.$each[index].value.$touch"
-              />
-            </q-field>
-
-          </div>
-        </div>
-
-        <q-alert
-            v-if="add.error"
-            type="negative"
-            class="q-my-md"
-        >
-          {{ String(add.error) }}
-        </q-alert>
-
+      <span slot="buttons">
         <q-btn
           color="primary"
           @click="addRowTmpl"
@@ -202,26 +120,81 @@
           size="md"
           class="float-right"
         />
+      </span>
 
-        <div>
-          <q-btn
-            color="primary"
-            :disable="add.error"
-            @click="addRow"
-            label="Add"
-            :loading="add.loading"
-          />
-          <q-btn
-            color="negative"
-            @click="add.modal = false"
-            label="Close"
-            flat
-          />
+      <div>
+        <div v-for="(item, index) in add.data" :key="index" class="q-my-lg add-row-item">
+
+          <q-field
+            class="q-my-md"
+            :error="$v.add.data.$each[index].key.$error"
+            error-label="required"
+          >
+            <q-input
+              v-model.trim="item.key"
+              stack-label="Column name"
+              @focus="addRowShowKeySuggestion(index)"
+              @blur="$v.add.data.$each[index].key.$touch"
+            >
+              <q-autocomplete
+                ref="addRowKeyAutocomplete"
+                :min-characters="0"
+                @selected="selected"
+                :filter="addRowKeyFilter"
+                :static-data="{field: 'value', list: addRowListKeys()}"
+              />
+            </q-input>
+          </q-field>
+
+          <q-field
+            class="q-my-md"
+            icon="keyboard_arrow_right"
+            label="Type"
+          >
+            <q-select
+              v-model="item.type"
+              :options="add.typeOptions"
+            />
+          </q-field>
+
+          <q-field
+            class="q-my-md"
+            icon="keyboard_arrow_right"
+            label="Value"
+            :error="$v.add.data.$each[index].value.$error"
+            error-label="required"
+          >
+            <q-input
+              v-if="item.type==='string'"
+              v-model="item.value"
+              @blur="$v.add.data.$each[index].value.$touch"
+            />
+            <q-input
+              v-else-if="item.type==='number'"
+              v-model="item.value"
+              type="number"
+              @blur="$v.add.data.$each[index].value.$touch"
+            />
+            <q-select
+              v-else-if="item.type==='boolean'"
+              v-model="item.value"
+              :options="[{label: 'True', value: true}, {label: 'False', value: false}]"
+              @blur="$v.add.data.$each[index].value.$touch"
+            />
+          </q-field>
+
         </div>
-
       </div>
 
-    </q-modal>
+      <q-alert
+          v-if="add.error"
+          type="negative"
+          class="q-my-md"
+      >
+        {{ String(add.error) }}
+      </q-alert>
+
+    </modal>
 
   </q-page>
 </template>

@@ -58,46 +58,31 @@
              @moved="movedEvent"
              class="bg-white gditem"
           >
-              <div v-show="editing" class="absolute-center">
-                <q-btn-group flat >
+              <div v-show="editing" class="absolute fit widget-edit-layer">
+                <q-btn-group flat class="absolute-center" >
                   <q-btn v-if="isEditable(item)" flat icon="settings" color="faded" @click="editItem(item)"/>
                   <q-btn flat icon="delete" color="negative" @click="removeItem(item)"/>
                 </q-btn-group>
               </div>
-              <widget v-show="!editing" :key="item.key" class="fit" :type="item.type" :options="item.options" />
+              <div v-show="item.hasContentOverflow && !editing" class="absolute fit widget-overflow-layer">
+                <div class="absolute-center">
+                  This widget needs to be resized
+                </div>
+              </div>
+              <widget :ref="'widget_' + item.i" :key="item.key" class="absolute fit" :type="item.type" :options="item.options" />
           </grid-item>
       </grid-layout>
     </div>
 
-    <q-modal v-model="pinModal" :maximized="smallScreen" :content-css="smallScreen ? pinModalCss : pinModalCssBigScreen">
-      <div class="q-headline q-mb-md">Pin resource</div>
+    <resource-pin-form v-model="pinModal" :pinned="pinnedResources" :maximized="smallScreen" @done="pin"/>
 
-      <resource-pin-form :pinned="pinnedResources" @done="pin" @cancel="pinModal = false"/>
 
-    </q-modal>
-
-    <q-modal v-model="widgetEdit.modal" :content-css="{padding: '50px', minWidth: '50vw'}">
-      <div class="q-headline q-mb-md">Edit</div>
+    <modal v-model="widgetEdit.modal" title="Edit" icon="edit" :valid-btn-disable="widgetEdit.error" @valid="widgetEditDone">
 
       <div class="q-title q-my-md">Options</div>
       <form-schema :schema="widgetEdit.schema" v-model="widgetEdit.model" @error="widgetEdit.error = $event"/>
 
-      <div class="q-mt-xl">
-        <q-btn
-          color="primary"
-          @click="widgetEditDone"
-          label="Apply"
-          :disable="widgetEdit.error"
-        />
-        <q-btn
-          flat
-          color="negative"
-          @click="widgetEdit.modal = false"
-          label="Cancel"
-        />
-      </div>
-
-    </q-modal>
+    </modal>
 
   </q-page>
 </template>
@@ -128,10 +113,6 @@ export default {
 
   data () {
 
-    var pinModalCss = {
-      padding: '32px'
-    }
-
     return {
         loading: false,
         layout: [],
@@ -144,13 +125,6 @@ export default {
         pinModal: false,
         editing: false,
         smallScreen: false,
-        pinModalCss,
-        pinModalCssBigScreen: Object.assign({
-          minWidth: '50vw',
-          maxWidth: '80vw',
-          /*height: '100vh',
-          maxHeight: '100vh'*/
-        }, pinModalCss),
 
         widgetEdit: {
           modal: false,
@@ -175,11 +149,40 @@ export default {
   },
 
   methods: {
+
+    getItem (index) {
+      for (var i in this.layout) {
+        if (this.layout[i].i === index) {
+          return this.layout[i]
+        }
+      }
+    },
+
+    checkWidgetsContentOverflow () {
+      for (let i in this.layout) {
+        let item = this.layout[i]
+        let component = this.$refs['widget_' + item.i][0]
+        if (component) {
+          setTimeout(() => {
+            this.$set(item, 'hasContentOverflow', component.hasContentOverflow())
+          }, 200)
+        }
+      }
+    },
+
     movedEvent (i, newX, newY) {
       this.save()
     },
 
     resizedEvent (i, newH, newW, newHPx, newWPx) {
+      var component = this.$refs['widget_' + i][0]
+
+      if (component) {
+        setTimeout(() => {
+          this.$set(this.getItem(i), 'hasContentOverflow', component.hasContentOverflow())
+        }, 200)
+      }
+
       this.save()
     },
 
@@ -227,6 +230,11 @@ export default {
           layout = layout.map(this.normalizeLayoutItem)
 
           this.layout = layout
+
+          setTimeout(() => {
+            this.checkWidgetsContentOverflow()
+          }, 1)
+
         }).finally(() => {
           this.loading = false
         })
@@ -244,6 +252,7 @@ export default {
         y: 0,
         w: 1,
         h: 1,
+        hasContentOverflow: false,
         options: {}
       }, item)
     },
@@ -254,6 +263,8 @@ export default {
         config.widgets = this.layout.map( item => {
           var w = Object.assign({}, item)
           delete w.i
+          delete w.key
+          delete w.hasContentOverflow
           return w
         })
         file.write( JSON.stringify(config, null, 4) )
@@ -350,7 +361,8 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="stylus" scoped>
+@import '~variables'
 
 /* Cf. https://github.com/taye/interact.js/issues/580 */
 .gditem {
@@ -372,6 +384,20 @@ export default {
   margin-top: 10px;
 }
 
+.widget-edit-layer {
+  z-index: 3;
+  background-color: rgba(255, 255, 255, 0.84);
+}
+
+.widget-overflow-layer {
+  z-index: 2;
+  color: white;
+  background-color: $orange-5;
+  opacity: 0.6;
+  font-size: small;
+  text-align: center;
+}
+
 </style>
 
 <style>
@@ -380,6 +406,7 @@ export default {
   height: 40px;
   transition: all 0.5s;
   transform-origin: right bottom;
+  z-index: 5;
 }
 
 .vue-resizable-handle:hover {

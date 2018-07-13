@@ -1,11 +1,12 @@
 <template>
   <div class="widget" :class="{'widget-err': !!error}">
-    <componant :is="type" :style="style" v-bind="attr" :class="inline ? '' : 'fit'" @error="error = $event"/>
+    <componant ref="widget" :is="type" :style="style" v-bind="attr" :class="inline ? '' : 'fit'" @error="error = $event"/>
   </div>
 </template>
 
 <script>
 import widgets from './widgets'
+
 
 export default {
     name: 'Widget',
@@ -53,6 +54,13 @@ export default {
 
         return style
       }
+    },
+
+    methods: {
+      hasContentOverflow () {
+        var el = this.$refs.widget.$el
+        return el.scrollWidth > el.clientWidth
+      }
     }
 
 }
@@ -61,7 +69,9 @@ export default {
 <style lang="stylus" scoped>
 @import '~variables'
 
-.widget.widget-err
-  border 1px solid $negative
+.widget
+  overflow hidden
+  &.widget-err
+    border 1px solid $negative
 
 </style>

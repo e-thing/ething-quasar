@@ -104,7 +104,7 @@ export default {
       return this.$route.meta.back && (this.$q.platform.within.iframe || this.$q.platform.is.electron || this.$ui.kioskMode)
     },
     pullToRefreshEnabled () {
-      return this.$q.platform.has.touch && !this.$q.platform.is.desktop
+      return this.$q.platform.has.touch && (!this.$q.platform.is.desktop || this.$ui.kioskMode)
     }
   },
   methods: {

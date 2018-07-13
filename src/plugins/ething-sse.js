@@ -101,25 +101,34 @@ export var SSE = {
 			});
 
 		if(isResourceEvent){
-			resource = EThing.arbo.get(event.data.resource);
-
 			var resourceId = event.data.resource;
 
-			switch(name){
-				case 'ResourceMetaUpdated':
-					var mtime = new Date(event.data.rModifiedDate);
-					if(!resource || mtime > resource.modifiedDate()){
-						this.fetch(resourceId);
-					}
-					break;
-				case 'ResourceCreated':
-					if(!resource){
-						this.fetch(resourceId);
-					}
-					break;
-				case 'ResourceDeleted':
+			resource = EThing.arbo.get(resourceId);
+
+			if (event.data.resource_json) {
+				if (name === 'ResourceDeleted') {
 					EThing.arbo.remove(resourceId);
-					break;
+				} else {
+					EThing.arbo.update(EThing.instanciate(event.data.resource_json))
+				}
+			} else {
+
+				switch(name){
+					case 'ResourceMetaUpdated':
+						var mtime = new Date(event.data.rModifiedDate);
+						if(!resource || mtime > resource.modifiedDate()){
+							this.fetch(resourceId);
+						}
+						break;
+					case 'ResourceCreated':
+						if(!resource){
+							this.fetch(resourceId);
+						}
+						break;
+					case 'ResourceDeleted':
+						EThing.arbo.remove(resourceId);
+						break;
+				}
 			}
 
 			if(resource){

@@ -1,19 +1,66 @@
 <template>
-  <q-modal ref="modal" class="column" :value="value" @input="$emit('input', $event)">
-    <div v-if="title" class="col-auto q-pa-md bg-primary text-white title">{{ title }}</div>
-    <div class="col q-pa-md">
-      <slot></slot>
-    </div>
-    <div v-if="btns.length>0" class="q-px-md q-pb-md">
-      <q-btn
-        v-for="(btn, index) in btns" :key="index"
-        :color="btn.color"
-        @click="onBtnClick(btn)"
-        :label="btn.label"
-        :flat="btn.flat"
-        :disable="btn.disable"
-      />
-    </div>
+  <q-modal ref="modal" class="column" :value="value" @input="$emit('input', $event)" v-bind="$attrs" :content-css="contentCss" @show="$emit('show', $event)">
+    <q-modal-layout
+      header-class="no-shadow"
+      footer-class="no-shadow"
+    >
+
+      <q-toolbar v-if="title" slot="header">
+        <q-icon
+          v-if="icon"
+          :name="icon"
+          class="q-ml-sm"
+        />
+        <q-toolbar-title>
+          {{ title }}
+        </q-toolbar-title>
+
+        <q-btn
+          v-if="!$attrs['no-esc-dismiss']"
+          flat round dense
+          icon="close"
+          @click="hide"
+        />
+      </q-toolbar>
+
+      <div class="q-py-md q-px-lg">
+        <slot></slot>
+      </div>
+
+      <q-toolbar v-if="!noButtons" slot="footer" inverted >
+        <q-toolbar-title>
+          <q-btn
+            v-if="!validBtnHide"
+            :color="validBtnColor"
+            @click="onValidBtnClick()"
+            :label="validBtnLabel"
+            :disable="validBtnDisable"
+            :loading="validBtnLoading"
+          />
+
+          <q-btn
+            v-if="!cancelBtnHide"
+            :color="cancelBtnColor"
+            @click="onCancelBtnClick()"
+            :label="cancelBtnLabel"
+            :disable="cancelBtnDisable"
+            flat
+          />
+
+          <q-btn
+            v-for="(btn, index) in buttons" :key="index"
+            :color="btn.color"
+            @click="onBtnClick(btn)"
+            :label="btn.label"
+            :flat="btn.flat"
+            :disable="btn.disable"
+          />
+
+          <slot name="buttons"></slot>
+        </q-toolbar-title>
+      </q-toolbar>
+
+    </q-modal-layout>
   </q-modal>
 </template>
 
@@ -24,59 +71,76 @@ export default {
 
     props: {
       title: String,
+      icon: String,
       value: {},
+
+      size: {
+        type: String,
+        default: 'md'
+      },
+
+      noButtons: Boolean,
+
       validBtnHide: Boolean,
-      validBtnDisabled: Boolean,
+      validBtnDisable: Boolean,
+      validBtnLoading: Boolean,
       validBtnLabel: {
         type: String,
         default: 'Valid'
       },
+      validBtnColor: {
+        type: String,
+        default: 'primary'
+      },
+
       cancelBtnHide: Boolean,
-      cancelBtnDisabled: Boolean,
+      cancelBtnDisable: Boolean,
       cancelBtnLabel: {
         type: String,
         default: 'Cancel'
       },
+      cancelBtnColor: {
+        type: String,
+        default: 'negative'
+      },
+
       buttons: Array
     },
 
     data () {
 
-      var btns = []
+      return {}
+    },
 
-      if (!this.validBtnHide) {
-        btns.push({
-          label: this.validBtnLabel,
-          color: 'primary',
-          onclick:  () => {
-            this.$emit('valid')
-          },
-          disable: this.validBtnDisabled
-        })
-      }
+    computed: {
+      contentCss () {
+        var css = {}
 
-      if (!this.cancelBtnHide) {
-        btns.push({
-          label: this.cancelBtnLabel,
-          color: 'negative',
-          flat: true,
-          onclick:  () => {
-            this.$emit('cancel')
-            this.hide()
-          },
-          disable: this.cancelBtnDisabled
-        })
-      }
+        if ( this.size == 'xs') {
+          css = {minWidth: '30vw', minHeight: '40vh'}
+        } else if ( this.size == 'sm') {
+          css = {minWidth: '40vw', minHeight: '50vh'}
+        } else if ( this.size == 'md') {
+          css = {minWidth: '50vw', minHeight: '70vh'}
+        } else if ( this.size == 'lg') {
+          css = {minWidth: '70vw', minHeight: '80vh'}
+        } else if ( this.size == 'xl') {
+          css = {minWidth: '90vw', minHeight: '90vh'}
+        }
 
-      if (this.buttons) btns = btns.concat(this.buttons)
-
-      return {
-        btns
+        return css
       }
     },
 
     methods: {
 
+      onValidBtnClick () {
+        this.$emit('valid')
+      },
+      onCancelBtnClick () {
+        this.$emit('cancel')
+        this.hide()
+      },
       onBtnClick (btn) {
         btn.onclick.call(this)
       },
@@ -97,5 +161,11 @@ export default {
 
 <style lang="stylus" scoped>
 @import '~variables'
+
+.no-shadow {
+  -webkit-box-shadow: none;
+	-moz-box-shadow: none;
+	box-shadow: none;
+}
 
 </style>
