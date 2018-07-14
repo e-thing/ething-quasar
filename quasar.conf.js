@@ -117,8 +117,7 @@ module.exports = function (ctx) {
         'QCardTitle',
         'QCardMain',
         'QCardSeparator',
-        'QScrollArea',
-        'QPullToRefresh'
+        'QScrollArea'
         //
       ],
       directives: [

@@ -20,6 +20,7 @@
 
         <q-toolbar-title class="gt-xs"/>
 
+        <q-btn v-if="refreshEnabled" class="gt-xs" flat dense icon="refresh" aria-label="refresh" @click="refresh"/>
         <q-btn class="gt-xs" flat dense icon="settings" aria-label="settings" @click="$router.push('/settings')"/>
         <q-btn v-if="!$ui.autoLogin" class="gt-xs" flat dense icon="exit to app" aria-label="logout" @click="logout" />
 
@@ -82,9 +83,7 @@
         </div>
       </q-inner-loading>
       <keep-alive v-else include="PageDashboard,PageDevices,PageData">
-        <componant :is="pullToRefreshEnabled ? 'q-pull-to-refresh' : 'div'" :handler="refresher">
-          <router-view/>
-        </componant>
+        <router-view/>
       </keep-alive>
     </q-page-container>
   </q-layout>
@@ -103,24 +102,20 @@ export default {
     back () {
       return this.$route.meta.back && (this.$q.platform.within.iframe || this.$q.platform.is.electron || this.$ui.kioskMode)
     },
-    pullToRefreshEnabled () {
+    refreshEnabled () {
       return this.$q.platform.has.touch && (!this.$q.platform.is.desktop || this.$ui.kioskMode)
     }
   },
   methods: {
     logout () {
-
       this.$ui.logout()
-
     },
     reload () {
       this.$root.state = 'begin'
       this.$router.go(this.$router.currentRoute)
     },
-    refresher (done) {
-      console.log('refresh')
+    refresh () {
       this.$router.go()
-      done()
     }
   },
 
