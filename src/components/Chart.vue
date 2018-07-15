@@ -479,7 +479,8 @@ export default {
                 enabled: !this.dense
             },
             tooltip: {
-                xDateFormat: '%Y-%m-%d %H:%M'
+                xDateFormat: '%Y-%m-%d %H:%M',
+                valueDecimals: 3
             },
             navigator: {
               enabled: !this.dense
