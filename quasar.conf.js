@@ -14,7 +14,8 @@ module.exports = function (ctx) {
       'ething-meta',
       'ething-widget',
       'formSchema',
-      'vuelidate'
+      'vuelidate',
+      'highlightjs'
     ],
     css: [
       'app.styl'
@@ -27,10 +28,6 @@ module.exports = function (ctx) {
       'fontawesome'
     ],
     supportIE: true,
-    vendor: {
-      add: [],
-      remove: []
-    },
     build: {
       publicPath: '/client',
       scopeHoisting: true,
@@ -40,7 +37,7 @@ module.exports = function (ctx) {
         VERSION: JSON.stringify(pjson.version)
       },
       // gzip: true,
-      // analyze: true,
+      analyze: true,
       // extractCSS: false,
       // useNotifier: false,
       extendWebpack (cfg) {

@@ -34,7 +34,7 @@
             <pre v-else-if="operation.resultType === 'json'" v-highlightjs><code class="json">{{ operation.result }}</code></pre>
             <pre v-else-if="operation.resultType === 'html'" v-highlightjs><code class="html">{{ operation.result }}</code></pre>
             <pre v-else-if="operation.resultType === 'xml'" v-highlightjs><code class="xml">{{ operation.result }}</code></pre>
-            <pre v-else-if="operation.resultType === 'text'" v-highlightjs><code class="plain">{{ operation.result }}</code></pre>
+            <pre v-else-if="operation.resultType === 'text'"><code class="plain">{{ operation.result }}</code></pre>
           </div>
         </div>
       </q-collapsible>
@@ -46,11 +46,7 @@
 <script>
 import EThing from 'ething-js'
 import VueMarkdown from 'vue-markdown'
-import VueHighlightJS from 'vue-highlightjs'
 import Vue from 'vue'
-import '../statics/css/highlight.js.9.9.0.default.min.css'
-
-Vue.use(VueHighlightJS)
 
 var supportsAudioPlayback = function (contentType) {
   var audioElement = document.createElement('audio')

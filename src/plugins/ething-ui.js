@@ -236,7 +236,10 @@ export default ({ app, router, Vue, store }) => {
         LocalStorage.set('ething.auth.iat', Date.now())
 
         // redirect
-        router.app.$router.replace(router.app.$route.query.redirect_uri || '/')
+        var redirect = router.app.$route.query.redirect_uri || '/'
+        if (redirect === '/login')
+          redirect = '/'
+        router.app.$router.replace(redirect)
 
       })
     },
