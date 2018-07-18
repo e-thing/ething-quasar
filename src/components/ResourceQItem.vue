@@ -5,9 +5,9 @@
     <q-item-main>
       <q-item-tile label>
         <span class="vertical-middle text-black">{{ resource.basename() }}</span>
-        <small v-if="showParent" class="parent text-faded vertical-middle" :class="readonly ? '' : 'cursor-pointer'" @click.stop="open(createdBy)">{{ createdBy.basename() }}</small>
-        <q-icon v-if="showConnected && !resource.connected()" class="vertical-middle" name="mdi-lan-disconnect" color="warning" />
-        <q-icon v-if="resource.public()" class="vertical-middle" name="share" color="warning" />
+        <small v-if="showParent" class="parent text-faded vertical-bottom on-right" :class="readonly ? '' : 'cursor-pointer'" @click.stop="open(createdBy)">{{ createdBy.basename() }}</small>
+        <q-icon v-if="showConnected && !resource.connected()" class="vertical-middle on-right" name="mdi-lan-disconnect" color="warning" />
+        <q-icon v-if="resource.public()" class="vertical-middle on-right" name="share" color="warning" />
       </q-item-tile>
       <q-item-tile sublabel>{{ $ui.dateToString(date) }}</q-item-tile>
       <q-item-tile sublabel v-if="showType">{{ resource.type() }}</q-item-tile>
