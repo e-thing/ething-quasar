@@ -2,6 +2,7 @@ import WChart from './WChart'
 import WImage from './WImage'
 import WSwitch from './WSwitch'
 import WDeviceLabel from './WDeviceLabel'
+import WDeviceMultiLabel from './WDeviceMultiLabel'
 import WDeviceKnob from './WDeviceKnob'
 import WCamera from './WCamera'
 import WDimmable from './WDimmable'
@@ -12,6 +13,7 @@ export default {
   WImage,
   WSwitch,
   WDeviceLabel,
+  WDeviceMultiLabel,
   WDeviceKnob,
   WCamera,
   WDimmable,
