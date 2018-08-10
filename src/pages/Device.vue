@@ -81,7 +81,7 @@
     </q-card>
 
     <!-- api -->
-    <q-card  v-if="resource.methods().length" class="q-my-md">
+    <q-card  v-if="Object.keys($meta.get(resource).methods).length" class="q-my-md">
       <q-card-title class="bg-primary text-white">
         <q-icon name="mdi-database" class="vertical-middle"/>
         <span class="vertical-middle">
@@ -126,7 +126,7 @@ export default {
       var id = this.$route.params.id
       var r = this.$store.getters['ething/get'](id)
       if (id && id.length) {
-        if (!r || !r.isTypeof('Device')) {
+        if (!r || !r.isTypeof('resources/Device')) {
           this.$router.replace('/404')
         }
       }
@@ -141,19 +141,19 @@ export default {
 
     tables () {
       return this.children.filter(r => {
-        return r.isTypeof('Table')
+        return r.isTypeof('resources/Table')
       })
     },
 
     files () {
       return this.children.filter(r => {
-        return r.isTypeof('Files')
+        return r.isTypeof('resources/File')
       })
     },
 
     devices () {
       return this.children.filter(r => {
-        return r.isTypeof('Devices')
+        return r.isTypeof('resources/Device')
       })
     },
 

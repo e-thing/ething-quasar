@@ -7,7 +7,7 @@
     <slot></slot>
 
     <small slot="footer">
-      {{ lastSeenDate }}
+      {{ date }}
     </small>
   </w-layout>
 </template>
@@ -26,8 +26,13 @@ export default {
     },
 
     computed: {
-      lastSeenDate () {
-        return this.$ui.dateToString(this.r.lastSeenDate())
+      date () {
+        var lastSeenDate = this.r.lastSeenDate()
+        var date = this.r.modifiedDate()
+        if (lastSeenDate && lastSeenDate > date) {
+          date = lastSeenDate
+        }
+        return this.$ui.dateToString(date)
       }
     },
 }

@@ -156,7 +156,7 @@ export default {
         customize (schema, resource, type) {
           if (!resource) {
             // only when creating a new resource
-            if (type === 'File') {
+            if (type === 'resources/File') {
 
               schema.properties.content = {
                 id: 'resource.content',
@@ -171,7 +171,7 @@ export default {
                 }
               }
             }
-            else if (type === 'Table') {
+            else if (type === 'resources/Table') {
 
               schema.properties.content = {
                 id: 'resource.content',
@@ -201,7 +201,7 @@ export default {
                         return error('no data for the item ' + i)
                       }
                     }
-                    
+
                     done(d)
                   }
 

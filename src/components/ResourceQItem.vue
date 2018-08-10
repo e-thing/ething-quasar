@@ -10,7 +10,7 @@
         <q-icon v-if="resource.public()" class="vertical-middle on-right" name="share" color="warning" />
       </q-item-tile>
       <q-item-tile sublabel>{{ $ui.dateToString(date) }}</q-item-tile>
-      <q-item-tile sublabel v-if="showType">{{ resource.type() }}</q-item-tile>
+      <q-item-tile sublabel v-if="showType">{{ resource.type().replace('resources/', '') }}</q-item-tile>
       <q-item-tile sublabel v-if="showBattery" class="lt-sm">battery: {{ resource.battery() }}%</q-item-tile>
       <q-item-tile sublabel v-if="showLocation" class="lt-sm">location: {{ resource.location() }}</q-item-tile>
       <q-item-tile sublabel v-if="showSize">{{ $ui.sizeToString(resource.size()) }}</q-item-tile>
@@ -71,10 +71,12 @@ export default {
 
   computed: {
     date () {
+      var modifiedDate = this.resource.modifiedDate()
       if (this.resource instanceof this.$ething.Device) {
-        return this.resource.lastSeenDate() || this.resource.modifiedDate()
+        var lastSeenDate = this.resource.lastSeenDate()
+        if (lastSeenDate && lastSeenDate > modifiedDate) return lastSeenDate
       }
-      return this.resource.modifiedDate()
+      return modifiedDate
     },
 
     createdBy () {

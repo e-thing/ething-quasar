@@ -2,7 +2,7 @@
   <w-device-layout :resource="resource" v-bind="$attrs">
     <div class="absolute-center">
       <span class="value">
-          {{ value }}
+          {{ value===null ? '?' : value }}
       </span>
       <span v-if="unit" class="unit">
           {{ unit }}
@@ -12,49 +12,20 @@
 </template>
 
 <script>
-import WResource from './WResource'
+import WDeviceRead from './WDeviceRead'
 import WDeviceLayout from './WDeviceLayout'
 
 export default {
     name: 'WDeviceLabel',
 
-    mixins: [WResource],
+    mixins: [WDeviceRead],
 
     components: {
       WDeviceLayout
     },
 
     props: {
-      fn: {},
       unit: String,
-    },
-
-    data () {
-        return {
-            value: '?',
-            lastUpdate: null
-        }
-    },
-
-    watch: {
-      r () {
-        if (!this.lastUpdate || this.r.modifiedDate() > this.lastUpdate) {
-          this.update()
-        }
-      }
-    },
-
-    methods: {
-      update () {
-        this.lastUpdate = this.r.modifiedDate()
-        this.r.execute(this.fn).then(v => {
-          this.value = v
-        })
-      }
-    },
-
-    mounted () {
-      this.update()
     },
 
     meta: {

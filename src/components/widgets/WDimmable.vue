@@ -5,7 +5,7 @@
         :value="value"
         :min="min"
         :max="max"
-        :disable="loading"
+        :disable="writing"
         color="primary"
         @change="setLevel"
       >
@@ -17,13 +17,13 @@
 
 
 <script>
-import WResource from './WResource'
+import WDeviceReadWrite from './WDeviceReadWrite'
 import WDeviceLayout from './WDeviceLayout'
 
 export default {
     name: 'WDimmable',
 
-    mixins: [WResource],
+    mixins: [WDeviceReadWrite],
 
     components: {
       WDeviceLayout
@@ -41,48 +41,17 @@ export default {
       },
     },
 
-    data () {
-        return {
-            value: 0,
-            loading: false,
-            lastUpdate: null,
-        }
-    },
-
-    watch: {
-      r () {
-        if (!this.lastUpdate || this.r.modifiedDate() > this.lastUpdate) {
-          this.update()
-        }
-      }
-    },
-
     methods: {
-      update () {
-        this.loading = true
-        this.lastUpdate = this.r.modifiedDate()
-        this.r.getLevel().then(v => {
-          this.value = v
-        }).finally(() => {
-          this.loading = false
-        })
-      },
 
       setLevel (value) {
-        this.loading = true
-        this.r.setLevel(value).then(() => {
-          this.value = value
-          this.setError(false)
-        }).catch(err => {
-          this.setError(err)
-        }).finally(() => {
-          this.loading = false
-        })
-      }
-    },
 
-    mounted () {
-      this.update()
+        this.write(value)
+          .then(() => {
+            this.setError(false)
+          }).catch(err => {
+            this.setError(err)
+          })
+      }
     },
 
     meta: {

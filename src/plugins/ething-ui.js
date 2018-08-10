@@ -305,7 +305,7 @@ export default ({ app, router, Vue, store }) => {
 
       console.log('initializing...');
 
-      var metaDfr = meta.importDefinitions()
+      var metaDfr = meta.loadDefinitions()
 
       var arboDfr = EThing.arbo.load(null, true).then( () => {
         console.log('ething arbo loaded !')

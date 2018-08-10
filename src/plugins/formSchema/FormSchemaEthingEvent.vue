@@ -55,8 +55,8 @@ var FormSchemaEthingEvent = {
 
     var eventOptions = []
 
-    for (let k in this.$meta.events) {
-      let event = this.$meta.events[k]
+    for (let k in this.$meta.definitions.events) {
+      let event = this.$meta.definitions.events[k]
       if (!event.virtual) {
         var description = event.description
         if (!description) {
@@ -93,7 +93,7 @@ var FormSchemaEthingEvent = {
 
       if (this.event) {
 
-        let meta = this.$meta.events[this.event]
+        let meta = this.$meta.definitions.events[this.event]
 
         schema = meta
 

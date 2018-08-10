@@ -6,7 +6,7 @@
         <q-list link>
           <template v-for="cat in categories">
             <q-list-header inset>{{ cat.name }}</q-list-header>
-            <q-item v-close-overlay v-for="type in cat.types" :key="type.type" @click.native="create(type.type)">
+            <q-item v-close-overlay v-for="type in cat.types" :key="type.type" @click.native="create(type.name)">
               <q-item-side :icon="$meta.get(type.type).icon" :color="$meta.get(type.type).color" />
               <q-item-main>
                 <q-item-tile label>{{ type.label }}</q-item-tile>
@@ -52,12 +52,14 @@ export default {
 
     var categories = {}
 
-    this.$meta.types.forEach(type => {
-      var meta = this.$meta.get(type)
-      if (meta.inheritances.indexOf('Device') !== -1 && !meta.virtual) {
+    var resourcesDefinitions = this.$meta.definitions.resources
+    Object.keys(resourcesDefinitions).forEach(name => {
+      var meta = resourcesDefinitions[name]
+      console.log(name)
+      if (meta.inheritances.indexOf('resources/Device') !== -1 && !meta.virtual && !meta.disableCreation) {
 
         var path = meta.path || []
-        var label = meta.label || type
+        var label = meta.label || name
         var category = path.length>0 ? path[0] : 'other'
 
         if (!categories[category]) {
@@ -68,7 +70,8 @@ export default {
 
         categories[category].types.push({
           label,
-          type
+          name,
+          type: 'resources/' + name
         })
       }
     })

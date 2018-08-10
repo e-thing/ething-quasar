@@ -19,6 +19,7 @@
 <script>
 import WResource from './WResource'
 import WDeviceLayout from './WDeviceLayout'
+import WDeviceRead from './WDeviceRead'
 
 export default {
     name: 'WDeviceMultiLabel',
@@ -59,14 +60,10 @@ export default {
             value: '?'
           }
 
-          if (item.fn) {
-            c.value = '...'
-            this.r.execute(item.fn).then(v => {
-              c.value = v
-            })
-          } else if (item.dataProp) {
-            c.value = this.r.data(item.dataProp, '')
-          }
+          c.value = '...'
+          WDeviceRead.read(item, this.r).then(v => {
+            c.value = v
+          })
 
           return c
         })

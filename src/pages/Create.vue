@@ -30,7 +30,7 @@ export default {
 
   computed: {
     type () {
-      return this.$route.params.type
+      return 'resources/' + this.$route.params.type
     },
 
     pathItems () {

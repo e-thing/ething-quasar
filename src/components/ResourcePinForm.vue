@@ -39,12 +39,12 @@
 
     <div v-if="resource">
 
-      <div v-if="widgets.length > 1" class="q-my-md">
+      <div v-if="Object.keys(widgets).length > 1" class="q-my-md">
         <div class="q-title q-my-md">Choose the widget type</div>
         <q-option-group
           color="secondary"
           type="radio"
-          v-model="widgetType"
+          v-model="widgetId"
           :options="widgetNames"
         />
       </div>
@@ -75,7 +75,7 @@ export default {
       return {
         resource: null,
         resources: this.list(),
-        widgetType: null,
+        widgetId: null,
         optionsError: false,
         options: {}
       }
@@ -89,21 +89,22 @@ export default {
     },
 
     widgetNames () {
-      return (this.widgets || []).map(w => {
-        var widgetClass = this.$widget.find(w.type)
+      var widgets = this.widgets || {}
+      return Object.keys(widgets).map(k => {
+        var w = widgets[k]
         return {
-          label: widgetClass.meta.name || w.type,
-          value: w.type
+          label: w.label,
+          value: k
         }
       })
     },
 
     widget () {
-      return this.widgets.find(w => w.type === this.widgetType)
+      return this.widgets[this.widgetId]
     },
 
     widgetClass () {
-      return this.$widget.find(this.widgetType)
+      return this.$widget.find(this.widget.type)
     },
 
     widgetClassMeta () {
@@ -120,7 +121,7 @@ export default {
   methods: {
 
     list () {
-      return this.$store.getters['ething/filter']((r) => this.$meta.get(r).widgets.length)
+      return this.$store.getters['ething/filter']((r) => Object.keys(this.$meta.get(r).widgets).length)
     },
 
     select (resource) {
@@ -128,9 +129,9 @@ export default {
       this.resources = [resource]
       this.options = {}
       this.optionsError = false
-      this.widgetType = this.widgets[0].type // default
+      this.widgetId = Object.keys(this.widgets)[0] // default
 
-      if (this.widgets.length === 1 && !this.widgetClassMetaOptions) {
+      if (Object.keys(this.widgets).length === 1 && !this.widgetClassMetaOptions) {
         this.done()
       }
     },
@@ -141,11 +142,11 @@ export default {
     },
 
     done () {
-      if (this.resource && this.widgetType) {
+      if (this.resource && this.widgetId) {
         this.$emit('done', {
           resource: this.resource,
           widget: this.widget,
-          widgetType: this.widgetType,
+          widgetId: this.widgetId,
           widgetClass: this.widgetClass,
           options: this.options
         })

@@ -185,7 +185,7 @@ export default {
 
     listAttr (item, type) {
       var attrs = []
-      var schema = resolve(this.$meta[type][item.type] || {})
+      var schema = resolve(this.$meta.definitions[type][item.type] || {})
 
       for(var k in item) {
         if (k!=='type') {

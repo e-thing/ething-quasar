@@ -1,452 +1,267 @@
 import EThing from 'ething-js'
-import resourcesMetaData from '../resources'
+import localDefinitions from '../definitions'
 import * as formSchemaCore from './formSchema/core'
 import { extend } from 'quasar'
-import FormSchemaCron from './formSchema/FormSchemaCron'
 
-// meta api
 
-const defaultsMeta = {
-    color: 'grey',
-    icon: 'mdi-help',
-    description: '',
-    bases: [],
-    interfaces: [],
-    required: [],
-    properties: {},
-    virtual: false,
-    widgets: []
+
+function getFromPath (obj, path) {
+
+  var parts = path.split('/')
+  var p = obj
+
+  for (var i in parts) {
+    var key = parts[i]
+    if (typeof p === 'object' && p !== null) {
+      p = p[key]
+    } else {
+      return
+    }
+  }
+
+  return p
 }
 
-const defaultsMetaProperty = {
-    readOnly: false,
-    required: false,
-    get: null, // (resource) => value
+function walkThrough (obj, ref, fn) {
+  if (typeof fn === 'undefined' && typeof ref === 'function') {
+    fn = ref
+    ref = null
+  }
+
+  ref = ref || {}
+
+  var stop_ = false
+  var stop = () => {
+    stop_ = true
+  }
+
+  obj = fn (obj, ref, stop)
+
+  if (!stop_ && typeof obj === 'object' && obj !== null) {
+    for (var k in obj) {
+      var value = obj[k]
+
+      if (typeof value === 'object' && value !== null) {
+        obj[k] = walkThrough (value, ref[k], fn)
+      }
+    }
+  }
+
+  return obj
 }
 
-var _metadata = resourcesMetaData
-var _metadata_cache = {}
-var _metadata_cache_dyn = {}
+function resolve(node, definitions) {
+  if (typeof node['$ref'] === 'string') {
+    var ref = node['$ref']
 
-function deepCopy(o) {
-  var copy = o,k;
+    if (/^#\//.test(ref)) {
+      ref = ref.substr(2)
 
-  if (o && typeof o === 'object') {
-    copy = Object.prototype.toString.call(o) === '[object Array]' ? [] : {};
-    for (k in o) {
-      copy[k] = deepCopy(o[k]);
-    }
-  }
-
-  return copy;
-}
-
-function _compile (type, resource, dynamic_interface) {
-
-  // console.log('compile ' + type + (resource ? ' for resource ' + resource.id() : ''))
-
-  var m = {
-    inheritances: [] // this array will hold all the dependencies name (interfaces + bases)
-  }
-
-  if (_metadata.hasOwnProperty(type)) {
-
-    m = merge(m, deepCopy(_metadata[type]))
-    var dynamic = null
-
-    if (resource && typeof m.dynamic == 'function') {
-      dynamic = m.dynamic(resource)
-    }
-
-    delete m.dynamic
-
-    if (typeof m.virtual == 'undefined')
-      m.virtual = false
-
-    if (typeof dynamic == 'object' && dynamic !== null)
-      merge(m, dynamic)
-
-    var bases = (m.bases || []).reverse()
-    delete m.bases
-    var interfaces = (m.interfaces || []).reverse()
-    delete m.interfaces
-
-    var inherited = {
-      inheritances: []
-    }
-
-    for(let b in bases) {
-      inherited.inheritances.push(bases[b])
-      merge(inherited, _compile(bases[b], resource))
-    }
-
-    for(let i in interfaces) {
-      inherited.inheritances.push(interfaces[i])
-      merge(inherited, _compile(interfaces[i], resource))
-    }
-
-    inherited.inheritances = [...new Set(inherited.inheritances)]
-
-    if (dynamic_interface && resource) {
-      // dynamic interfaces
-      resource.interfaces().reverse().forEach(i => {
-        if (inherited.inheritances.indexOf(i)===-1) {
-          // it is a dynamic interface
-          // console.log('dynamic interface ' + i + ' for ' + resource.name() + ' ' + resource.type())
-          inherited.inheritances.push(i)
-          merge(inherited, _compile(i, resource))
-        }
-      })
-    }
-
-    m = merge(inherited, m)
-  }
-
-  // console.log(type, 'inheritances:', deepCopy(m.inheritances))
-
-  // console.log('end compile ' + type + (resource ? ' for resource ' + resource.id() : ''))
-
-  return m
-}
-
-function compile (type, resource) {
-
-  if (type instanceof EThing.Resource) {
-    resource = type
-    type = ''
-    var types = resource.types()
-    for(var i in types){
-      if (_metadata.hasOwnProperty(types[i])) {
-        type = types[i]
-        break
-      }
-    }
-  }
-
-  // check the cache
-  if (!resource) {
-    // static
-    if (_metadata_cache.hasOwnProperty(type)) {
-      return _metadata_cache[type]
-    }
-  } else {
-    if (_metadata_cache_dyn.hasOwnProperty(resource.id())) {
-      var cache = _metadata_cache_dyn[resource.id()]
-      if (cache.type === type) {
-        if (cache.ts >= resource.modifiedDate().getTime()) {
-          return cache.meta
-        } else {
-          delete _metadata_cache_dyn[resource.id()]
-        }
-      }
-    }
-  }
-
-  var m = _compile(type, resource, resource && resource.isTypeof('Device'))
-
-  // add defaults
-  m = merge(deepCopy(defaultsMeta), m)
-
-  for(let k in m.properties) {
-    m.properties[k] = merge(deepCopy(defaultsMetaProperty), m.properties[k])
-    if (!m.properties[k].get) {
-      m.properties[k].get = r => r[k] ? r[k]() : r.attr(k)
-    }
-    if (!m.properties[k].getFormatted) {
-      m.properties[k].getFormatted = m.properties[k].get
-    }
-  }
-
-  for(let k in m.widgets) {
-    if (typeof m.widgets[k] !== 'object') {
-      m.widgets[k] = {
-        type: m.widgets[k]
-      }
-    }
-    m.widgets[k].options = m.widgets[k].options || {}
-  }
-
-  // add it to the static cache !
-  if (!resource) {
-    _metadata_cache[type] = m
-  } else {
-    _metadata_cache_dyn[resource.id()] = {
-      ts: Date.now(),
-      meta: m,
-      type
-    }
-  }
-
-  return m
-}
-
-function merge (a, b) {
-  if (b) {
-    for(let i in b){
-      if(typeof b[i] != typeof a[i] || a[i] === null) {
-        a[i] = b[i]
-      } else if (typeof b[i] === 'object' && b[i] !== null) {
-        if (Array.isArray(b[i])) {
-          var cpy = b[i]
-          a[i].forEach(item => {
-            if(cpy.indexOf(item)===-1)
-              cpy.push(item)
-          })
-          a[i] = cpy
-        } else {
-          merge(a[i], b[i])
-        }
-      } else {
-        a[i] = b[i]
-      }
-    }
-  }
-
-  return a
-}
-
-function parseDefinition (schema, meta) {
-
-  if (schema['virtual'] === true) {
-    meta.virtual = true
-  }
-
-  if (typeof schema['allOf'] != 'undefined') {
-    schema['allOf'].forEach( (subSchema) => {
-      parseDefinition(subSchema, meta)
-    })
-  } else {
-
-    if(typeof schema['$ref'] === 'string') {
-
-      var ref = schema['$ref']
-
-      if (/^#\/resources\//.test(ref)) {
-        var base = ref.replace("#/resources/", "")
-
-        if(!meta.bases)
-          meta.bases = []
-
-        meta.bases.push(base)
-      }
-      else if (/^#\/interfaces\//.test(ref)) {
-        var iface = ref.replace("#/interfaces/", "")
-
-        if(!meta.interfaces)
-          meta.interfaces = []
-
-        meta.interfaces.push(iface)
-      }
-      else {
-        console.warn('meta parsing error [unknown ref] ', ref)
-      }
+      return resolve(getFromPath(definitions, ref), definitions)
 
     } else {
-      if(schema['type']==='object') {
+      console.warn('invalid JSON reference: ' + ref)
+      return {}
+    }
+  }
+  else if (typeof node['allOf'] !== 'undefined') {
+    var allOf = node['allOf']
 
-        var properties = schema['properties'] || {}
-        var required = schema['required'] || []
-        var description = schema['description']
+    var resolvedNode = {}
 
-        if (description)
-          meta.description = description
+    for (let i in allOf) {
+      let dep = allOf[i]
+      let name = null
 
-        if(!meta.required)
-          meta.required = []
-
-        meta.required = required.concat(meta.required)
-
-        if(!meta.properties)
-          meta.properties = {}
-
-        for(let propertyName in properties) {
-          meta.properties[propertyName] = properties[propertyName]
-        }
-
-      } else {
-        console.warn('meta parsing error [type must be an object] ', schema)
+      if (typeof dep['$ref'] === 'string') {
+        name = dep['$ref'].substr(2)
       }
+
+      dep = resolve(dep, definitions)
+
+      if (dep['type'] !== 'class') {
+        return node // do not resolve something else than class !
+      }
+
+      var resolvedInheritances = []
+      resolvedInheritances = resolvedInheritances.concat(resolvedNode.inheritances || [])
+      if (name !== null) {
+        resolvedInheritances.push(name)
+      }
+      resolvedInheritances = resolvedInheritances.concat(dep.inheritances || [])
+
+      mergeClass(resolvedNode, dep)
+
+      // do not inherit the folowing attributes
+      resolvedNode.inheritances = resolvedInheritances
+      resolvedNode.virtual = false
+
     }
 
+    var node = extend(true, {}, node)
+    delete node.allOf
+    node.type = 'class'
+
+    mergeClass(resolvedNode, node)
+
+    return resolvedNode
+
+  } else {
+    return node
   }
 }
 
+function mergeClass(a, b) {
+
+  if (!b) return a
+
+  // empty Object
+  if (Object.keys(b).length === 0 && b.constructor === Object) return a
+
+  var aPropKeys = Object.keys(a.properties || {})
+  var bPropKeys = Object.keys(b.properties || {})
+  var mergedPropKeys = bPropKeys
+  aPropKeys.forEach(k => {
+    if (mergedPropKeys.indexOf(k) === -1) {
+      mergedPropKeys.push(k)
+    }
+  })
+
+  var merged = extend(true, a, b)
+
+  // reorder properties :
+  var orderedProperties = {}
+  mergedPropKeys.forEach(k => {
+    orderedProperties[k] = merged.properties[k]
+  })
+  merged.properties = orderedProperties
+
+  return merged
+}
+
+function normalize (obj) {
+
+  if (obj['type'] === 'class') {
+
+    obj = extend(true, {
+      color: 'grey',
+      icon: 'mdi-help',
+      description: '',
+      required: [],
+      properties: {},
+      methods: {},
+      virtual: false,
+      widgets: {},
+      inheritances: [],
+      disableCreation: false,
+      dynamic: null
+    }, obj)
+
+    for (let k in obj.properties) {
+      let p = obj.properties[k]
+      if (!p.get) {
+        p.get = r => r[k] ? r[k]() : r.attr(k)
+      }
+      if (!p.getFormatted) {
+        p.getFormatted = p.get
+      }
+    }
+
+    for (let k in obj.widgets) {
+      obj.widgets[k] = extend({
+        label: k,
+        description: '',
+        type: null,
+        options: {}
+      }, obj.widgets[k])
+    }
+  }
+
+  return obj
+}
+
+
 function importDefinitions (def) {
-  var meta_ = {}
 
-  for(let type in def.resources) {
-    let resource = def.resources[type]
-    let m = {}
+  var definitions = def.definitions
 
-    parseDefinition(resource, m)
-
-    meta_[type] = m
-  }
-
-  for(let type in def.interfaces) {
-    let iface = def.interfaces[type]
-    let m = {}
-
-    parseDefinition(iface, m)
-
-    meta_[type] = m
-  }
-
-  // merge with user defined definitions
-  for(let type in meta_) {
-    if (_metadata[type]) {
-      // console.log('merging ' + type)
-      meta_[type] = merge(meta_[type], _metadata[type])
+  // merge with locals
+  walkThrough(definitions, localDefinitions, (node, local, stop) => {
+    if (typeof node['type'] !== 'undefined' || typeof node['allOf'] !== 'undefined') {
+      mergeClass(node, local)
+      stop()
     }
-  }
+    return node
+  })
 
-  for(let type in _metadata) {
-    if (!meta_[type]) {
-      // console.log('adding ' + type)
-      meta_[type] = _metadata[type]
+  // resolve references
+  walkThrough(definitions, (node, _, stop) => {
+    if (typeof node['type'] !== 'undefined' || typeof node['allOf'] !== 'undefined') {
+      node = resolve(node, definitions)
+      stop()
     }
-  }
+    return node
+  })
 
-  _metadata = meta_
+  console.log(definitions)
 
-  // console.log('after merging')
-  // console.log(meta)
+  extend(formSchemaCore.definitions, definitions)
 
-  meta.types = Object.keys(_metadata)
-
+  meta.definitions = definitions
   meta.scopes = def.scopes || {}
-  extend(true, meta.events, def.events)
-  extend(true, meta.actions, def.actions)
-
-  formSchemaCore.definitions.events = meta.events
-  formSchemaCore.definitions.actions = meta.actions
-
   meta.info = def.info || {}
   meta.plugins = def.plugins || {}
   meta.config = def.config || {}
 
 }
 
+var cached_meta_types = {}
+
 export var meta = {
   info: {},
-  get: compile,
-  types: Object.keys(_metadata),
-  events: {
-    TableDataThresholdEvent: {
-      properties: {
-        key: {
-          id: 'TableDataThresholdEvent.key',
-          enum: [],
-          dependencies: {
-            'ResourceEvent.resource': function (ids, self, node) {
-              var keys = [];
-              (ids || []).forEach( id => {
-                var r = self.$ething.arbo.get(id)
-                if (r) {
-                  keys = keys.concat(r.keys())
-                }
-              })
-              // unique
-              keys = keys.filter( (value, index, self) => {
-                return self.indexOf(value) === index
-              })
-              self.$set(self.mutableSchema, 'enum', keys)
-            }
-          }
-        },
-        threshold_mode: {
-          enumLabels: ['greater than', 'greater than or equal to', 'less than', 'less than or equal to'],
-          default: 'gt'
-        },
-        threshold_value: {
-          default: 0
-        },
-      }
-    },
-    ResourceEvent: {
-      properties: {
-        resource: {
-          id: 'ResourceEvent.resource',
-          format: 'ething.resource'
-        }
-      }
-    },
-    Timer: {
-      properties: {
-        cron_expression: {
-          title: 'when',
-          format: 'cron'
-        }
-      }
-    }
-  },
+  get (type) {
+    var resource = null
 
-  actions: {
-    RunScript: {
-      properties: {
-        script: {
-          format: 'ething.resource',
-          filter: (r) => {
-            return (r instanceof EThing.File) && r.mime() == 'application/javascript'
-          }
-        },
+    if (type instanceof EThing.Resource) {
+      resource = type
+      type = type.type()
+    }
+
+    // check in cache first
+    if (resource) {
+      var id = resource.id()
+      if (id in cached_meta_types) {
+        return cached_meta_types[id]
       }
-    },
-    ExecuteDevice: {
-      properties: {
-        device: {
-          id: 'ExecuteDevice.device',
-          format: 'ething.resource',
-          filter: (r) => {
-            return (r instanceof EThing.Device)
-          }
-        },
-        method: {
-          id: 'ExecuteDevice.method',
-          enum: [],
-          dependencies: {
-            'ExecuteDevice.device': function (id, self, node) {
-              var r = self.$ething.arbo.get(id)
-              var methods = []
-              if (r) {
-                methods = r.methods()
-              }
-              self.$set(self.mutableSchema, 'enum', methods)
-            }
-          }
-        },
-        args: {
-          dependencies: {
-            'ExecuteDevice.method': function (method, self, node) {
-              var r = self.$ething.arbo.get(self.find('ExecuteDevice.device').value)
-              if (r && method) {
-                r.getApi(method).then( (api) => {
-                  self.mutableSchema = Object.assign(self.mutableSchema, api.schema)
-                  if (Object.keys(self.mutableSchema.properties).length) {
-                    self.$set(self.parent().mutableSchema.properties, 'args', self.mutableSchema)
-                  } else {
-                    self.$delete(self.parent().mutableSchema.properties, 'args')
-                  }
-                })
-              } else {
-                self.$delete(self.parent().mutableSchema.properties, 'args')
-              }
-            }
-          }
-        }
-      }
-    },
-    Notify: {
-      properties: {
-        message: {
-          format: 'text'
-        }
+    } else {
+      if (type in cached_meta_types) {
+        return cached_meta_types[type]
       }
     }
+
+    // generate schema
+    var m = normalize(getFromPath(meta.definitions, type) || {})
+
+    // store it in cache
+    if (resource) {
+      var id = resource.id()
+      if (m.dynamic) {
+        var dyn_m = m.dynamic.call(m, resource)
+        if (dyn_m) {
+          extend(true, m, dyn_m)
+        }
+      }
+      cached_meta_types[id] = m
+    } else {
+      cached_meta_types[type] = m
+    }
+
+    return m
   },
+  definitions: {},
   plugins: {},
   scopes: {},
-  importDefinitions () {
+  loadDefinitions () {
     return EThing.request({
       url: 'utils/definitions',
       dataType: 'json',

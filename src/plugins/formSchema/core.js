@@ -87,6 +87,7 @@ var makeForm = function (createElement, schema, model, level, onValueUpdate, onE
 
   switch (type) {
     case 'object':
+    case 'class':
       return createElement('form-schema-object', attributes)
     case 'array':
       if ((typeof schema.items === 'object' && schema.items!== null) || typeof schema.items === 'undefined') {

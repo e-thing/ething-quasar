@@ -111,7 +111,7 @@
                     error-label="Required"
                   >
                     <resource-select
-                      type="Table"
+                      type="resources/Table"
                       v-model="curve.data.resource"
                       use-id
                       @input="$v.optionsData.panes.$each[index].curves.$each[cindex].data.resource.$touch"

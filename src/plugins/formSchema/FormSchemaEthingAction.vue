@@ -56,8 +56,8 @@ var FormSchemaEthingAction = {
 
     var actionOptions = []
 
-    for (let k in this.$meta.actions) {
-      let action = this.$meta.actions[k]
+    for (let k in this.$meta.definitions.actions) {
+      let action = this.$meta.definitions.actions[k]
       if (!action.virtual) {
         var description = action.description
         if (!description) {
@@ -93,7 +93,7 @@ var FormSchemaEthingAction = {
       }
 
       if (this.action) {
-        let meta = this.$meta.actions[this.action]
+        let meta = this.$meta.definitions.actions[this.action]
         schema = meta
       }
 

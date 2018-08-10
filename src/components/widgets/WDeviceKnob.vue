@@ -2,7 +2,7 @@
   <w-device-layout :resource="resource" v-bind="$attrs">
     <div class="absolute-center">
       <q-knob
-        :value="value"
+        :value="value===null ? 0 : value"
         :min="min"
         :max="max"
         readonly
@@ -15,20 +15,19 @@
 </template>
 
 <script>
-import WResource from './WResource'
+import WDeviceRead from './WDeviceRead'
 import WDeviceLayout from './WDeviceLayout'
 
 export default {
     name: 'WDeviceKnob',
 
-    mixins: [WResource],
+    mixins: [WDeviceRead],
 
     components: {
       WDeviceLayout
     },
 
     props: {
-      fn: {},
       unit: String,
       min: {
         type: Number,
@@ -38,34 +37,6 @@ export default {
         type: Number,
         default: 100
       },
-    },
-
-    data () {
-        return {
-            value: 0,
-            lastUpdate: null
-        }
-    },
-
-    watch: {
-      r () {
-        if (!this.lastUpdate || this.r.modifiedDate() > this.lastUpdate) {
-          this.update()
-        }
-      }
-    },
-
-    methods: {
-      update () {
-        this.lastUpdate = this.r.modifiedDate()
-        this.r.execute(this.fn).then(v => {
-          this.value = v
-        })
-      }
-    },
-
-    mounted () {
-      this.update()
     },
 
     meta: {

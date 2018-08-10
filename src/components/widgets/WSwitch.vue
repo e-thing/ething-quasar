@@ -1,66 +1,36 @@
 <template>
   <w-device-layout :resource="resource" v-bind="$attrs">
     <div class="absolute-center">
-      <q-toggle :value="state" :disable="loading" @input="toggle" />
+      <q-toggle :value="!!value" :disable="reading || writing" @input="toggle" />
     </div>
   </w-device-layout>
 </template>
 
 <script>
-import WResource from './WResource'
+import WDeviceReadWrite from './WDeviceReadWrite'
 import WDeviceLayout from './WDeviceLayout'
 
 export default {
     name: 'WSwitch',
 
-    mixins: [WResource],
+    mixins: [WDeviceReadWrite],
 
     components: {
       WDeviceLayout
     },
 
-    data () {
-        return {
-            state: false,
-            loading: false,
-            lastUpdate: null
-        }
-    },
-
-    watch: {
-      r () {
-        if (!this.lastUpdate || this.r.modifiedDate() > this.lastUpdate) {
-          this.update()
-        }
-      }
-    },
-
     methods: {
-      update () {
-        this.loading = true
-        this.lastUpdate = this.r.modifiedDate()
-        this.r.getState().then(v => {
-          this.state = v
-        }).finally(() => {
-          this.loading = false
-        })
-      },
 
       toggle (state) {
-        this.loading = true
-        this.r.setState(state).then(() => {
-          this.state = state
-          this.setError(false)
-        }).catch(err => {
-          this.setError(err)
-        }).finally(() => {
-          this.loading = false
-        })
-      }
-    },
 
-    mounted () {
-      this.update()
+        this.write(state)
+          .then(() => {
+            this.setError(false)
+          }).catch(err => {
+            this.setError(err)
+          })
+
+      }
     },
 
     meta: {

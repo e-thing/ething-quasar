@@ -81,7 +81,7 @@ export default {
 
     data () {
         return {
-          operations: []
+          operations: this.buildApi()
         }
     },
 
@@ -91,21 +91,34 @@ export default {
 
     methods: {
 
-      getApi () {
-        this.device.getApi().then( (api) => {
-          this.operations = api.methods.map( m => {
-            return Object.assign({
-              inputError: false,
-              error: false,
-              loading: false,
-              result: null,
-              resultType: null,
-              resultContentType: null,
-              schema: {},
-              model: {}
-            }, m)
+      buildApi () {
+        var methods = this.$meta.get(this.device).methods
+        var operations = []
+
+        for(let name in methods) {
+          let method = methods[name]
+
+          operations.push({
+            name,
+            description: method.description,
+            return: method.return,
+            inputError: false,
+            error: false,
+            loading: false,
+            result: null,
+            resultType: null,
+            resultContentType: null,
+            schema: {
+              additionalProperties: false,
+              properties: method.arguments,
+              required: method.required,
+              type: 'object'
+            },
+            model: {}
           })
-        })
+        }
+
+        return operations
       },
 
       hasParameters (operation) {
@@ -241,10 +254,6 @@ export default {
     		return this.$ething.toApiUrl(url,true);
       },
 
-    },
-
-    mounted () {
-      this.getApi()
     }
 
 }

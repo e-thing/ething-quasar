@@ -218,6 +218,7 @@ export default {
 
       if (file) {
         file.read().then( (config) => {
+          
           if(typeof config == 'string')
 						try{
 							config = JSON.parse(config);
@@ -294,7 +295,7 @@ export default {
       this.addWidget({
         w: minWidthUnit,
         h: minHeightUnit,
-        type: info.widgetType,
+        type: info.widget.type,
         options: Object.assign({
           resource: info.resource.id()
         }, info.options, info.widget.options)
