@@ -1,24 +1,30 @@
-import {get} from '../../plugins/ething.meta'
-import { extend } from 'quasar'
+import {meta} from '../../plugins/ething.meta'
 
 
 export default {
+
+  widgets: {
+    'sensors': {
+      label: 'sensor values',
+      description: 'show all the sensors values',
+      type: 'WGenericSensor'
+    }
+
+  },
 
   dynamic (resource) {
 
     var interfaces = resource.types().filter(t => /^interfaces\//.test(t))
 
-    var meta = extend(true, {}, this)
+    // copy
+    var m = {}
 
     interfaces.forEach(interfaceName => {
-
-      var interfaceMeta = get(interfaceName)
-
-      extend(true, meta, interfaceMeta)
-
+      // extend
+      meta.mergeClass(m, meta.get(interfaceName, true))
     })
 
-    return meta
+    return m
   }
 
 }

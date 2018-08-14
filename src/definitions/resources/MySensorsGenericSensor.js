@@ -1,6 +1,6 @@
-export default {
+import FormSchemaSerialPort from '../../plugins/formSchema/FormSchemaSerialPort'
 
-  disableCreation: true,
+export default {
 
   widgets: {
     'sensors': {

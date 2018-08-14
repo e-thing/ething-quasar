@@ -67,7 +67,7 @@ var FormSchemaEthingEvent = {
 
         eventOptions.push({
           label: k,
-          value: k,
+          value: 'events/' + k,
           sublabel: description
         })
       }
@@ -93,7 +93,8 @@ var FormSchemaEthingEvent = {
 
       if (this.event) {
 
-        let meta = this.$meta.definitions.events[this.event]
+
+        let meta = this.$meta.definitions.events[this.event.replace(/^events\//, '')]
 
         schema = meta
 

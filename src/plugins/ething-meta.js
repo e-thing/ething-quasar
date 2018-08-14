@@ -127,6 +127,14 @@ function mergeClass(a, b) {
     }
   })
 
+  // append required of b in a
+  var mergedRequired = [].concat(a.required || []);
+  (b.required || []).forEach(p => {
+    if (mergedRequired.indexOf(p) === -1) {
+      mergedRequired.push(p)
+    }
+  })
+
   var merged = extend(true, a, b)
 
   // reorder properties :
@@ -135,6 +143,8 @@ function mergeClass(a, b) {
     orderedProperties[k] = merged.properties[k]
   })
   merged.properties = orderedProperties
+
+  merged.required = mergedRequired
 
   return merged
 }
@@ -215,19 +225,19 @@ function importDefinitions (def) {
 
 }
 
+
 var cached_meta_types = {}
 
-export var meta = {
-  info: {},
-  get (type) {
-    var resource = null
+function get (type, raw) {
+  var resource = null
 
-    if (type instanceof EThing.Resource) {
-      resource = type
-      type = type.type()
-    }
+  if (type instanceof EThing.Resource) {
+    resource = type
+    type = type.type()
+  }
 
-    // check in cache first
+  // check in cache first
+  if (!raw) {
     if (resource) {
       var id = resource.id()
       if (id in cached_meta_types) {
@@ -238,26 +248,40 @@ export var meta = {
         return cached_meta_types[type]
       }
     }
+  }
 
-    // generate schema
-    var m = normalize(getFromPath(meta.definitions, type) || {})
+  // generate schema
+  var m = getFromPath(meta.definitions, type) || {}
 
-    // store it in cache
+  // normalize
+  if (!raw) {
+    m = normalize(m)
+  }
+
+  // store it in cache
+  if (!raw) {
     if (resource) {
       var id = resource.id()
       if (m.dynamic) {
         var dyn_m = m.dynamic.call(m, resource)
         if (dyn_m) {
-          extend(true, m, dyn_m)
+          mergeClass(m, dyn_m)
         }
       }
       cached_meta_types[id] = m
     } else {
       cached_meta_types[type] = m
     }
+  }
 
-    return m
-  },
+  return m
+}
+
+
+export var meta = {
+  info: {},
+  mergeClass,
+  get,
   definitions: {},
   plugins: {},
   scopes: {},

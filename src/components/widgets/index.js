@@ -7,6 +7,7 @@ import WDeviceKnob from './WDeviceKnob'
 import WCamera from './WCamera'
 import WDimmable from './WDimmable'
 import WScript from './WScript'
+import WGenericSensor from './WGenericSensor'
 
 export default {
   WChart,
@@ -17,5 +18,6 @@ export default {
   WDeviceKnob,
   WCamera,
   WDimmable,
-  WScript
+  WScript,
+  WGenericSensor
 }

@@ -53,7 +53,8 @@
           <q-item multiline v-for="(event, i) in rule.attr('events', [])" :key="'event-'+i">
             <q-item-side icon="event" />
             <q-item-main>
-              <q-item-tile label>Event {{ i + 1 }} : {{ event.type }}</q-item-tile>
+              <q-item-tile v-if="rule.attr('events', []).length>1" label>Event {{ i + 1 }} : {{ event.type }}</q-item-tile>
+              <q-item-tile v-else label>Event : {{ event.type }}</q-item-tile>
               <q-item-tile sublabel v-for="(attr, index) in listAttr(event, 'events')" :key="index" >
                 {{ attr.name }}:
                 <template v-if="attr.type === 'resources'">
@@ -70,7 +71,8 @@
           <q-item multiline v-for="(action, i) in rule.attr('actions', [])" :key="'action-'+i">
             <q-item-side icon="mdi-run" />
             <q-item-main>
-              <q-item-tile label>Action {{ i + 1 }} : {{ action.type }}</q-item-tile>
+              <q-item-tile v-if="rule.attr('actions', []).length>1" label>Action {{ i + 1 }} : {{ action.type }}</q-item-tile>
+              <q-item-tile v-else label>Action : {{ action.type }}</q-item-tile>
               <q-item-tile sublabel v-for="(attr, index) in listAttr(action, 'actions')" :key="index" >
                 {{ attr.name }}:
                 <template v-if="attr.type === 'resources'">

@@ -68,7 +68,7 @@ var FormSchemaEthingAction = {
 
         actionOptions.push({
           label: k,
-          value: k,
+          value: 'actions/' + k,
           sublabel: description
         })
       }
@@ -93,7 +93,7 @@ var FormSchemaEthingAction = {
       }
 
       if (this.action) {
-        let meta = this.$meta.definitions.actions[this.action]
+        let meta = this.$meta.definitions.actions[this.action.replace(/^actions\//, '')]
         schema = meta
       }
 
