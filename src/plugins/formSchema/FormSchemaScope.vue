@@ -16,7 +16,7 @@
 <script>
 
 import { FormComponent, registerForm } from './core'
-import Vue from 'vue'
+
 
 registerForm(schema => {
   if (schema.format === 'scope') {
@@ -24,7 +24,7 @@ registerForm(schema => {
   }
 })
 
-var FormSchemaScope = {
+export default {
   name: 'FormSchemaScope',
 
   mixins: [FormComponent],
@@ -61,10 +61,6 @@ var FormSchemaScope = {
   }
 
 }
-
-Vue.component('FormSchemaScope', FormSchemaScope)
-
-export default FormSchemaScope
 
 </script>
 

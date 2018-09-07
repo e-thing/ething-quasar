@@ -9,6 +9,8 @@ import { meta } from './ething-meta'
 import promiseFinally from 'promise.prototype.finally'
 import qs from 'qs'
 import Modal from '../components/Modal'
+import * as quasar from 'quasar'
+
 
 // necessary for older browsers
 promiseFinally.shim()
@@ -32,6 +34,9 @@ function getParameterByName(name, url) {
 UI.kioskMode = getParameterByName('kiosk') === '1'
 
 export default ({ app, router, Vue, store }) => {
+
+  window.Vue = Vue
+  window.quasar = quasar
 
   Vue.component('Modal', Modal)
 
@@ -76,7 +81,7 @@ export default ({ app, router, Vue, store }) => {
     UI.autoLogin = /\/\/localhost/.test(EThing.config.serverUrl)
   }
 
-  Vue.prototype.$ui = UI
+  Vue.prototype.$ui = window.UI = UI
 
   Object.assign(UI, {
     dynamicServerUrl,

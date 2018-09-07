@@ -11,16 +11,14 @@
     <modal v-model="editing" title="Cron editor" icon="event" @valid="apply">
 
       <cron :value="castedModel" @input="editedExp = $event" class="q-ma-md"/>
-      
+
     </modal>
   </div>
 </template>
 
 <script>
 
-import EThing from 'ething-js'
 import { FormComponent, registerForm } from './core'
-import Vue from 'vue'
 import Cron from '../../components/Cron'
 import cronstrue from 'cronstrue'
 
@@ -31,7 +29,7 @@ registerForm(schema => {
   }
 })
 
-var FormSchemaCron = {
+export default {
   name: 'FormSchemaCron',
 
   mixins: [FormComponent],
@@ -61,9 +59,5 @@ var FormSchemaCron = {
   }
 
 }
-
-Vue.component('FormSchemaCron', FormSchemaCron)
-
-export default FormSchemaCron
 
 </script>

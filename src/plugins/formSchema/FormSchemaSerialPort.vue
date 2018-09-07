@@ -39,7 +39,7 @@
 
 import EThing from 'ething-js'
 import { FormComponent, registerForm } from './core'
-import Vue from 'vue'
+
 
 registerForm(schema => {
   if (schema.format === 'serial') {
@@ -47,7 +47,7 @@ registerForm(schema => {
   }
 })
 
-var FormSchemaSerialPort = {
+export default {
   name: 'FormSchemaSerialPort',
 
   mixins: [FormComponent],
@@ -81,9 +81,5 @@ var FormSchemaSerialPort = {
   }
 
 }
-
-Vue.component('FormSchemaSerialPort', FormSchemaSerialPort)
-
-export default FormSchemaSerialPort
 
 </script>

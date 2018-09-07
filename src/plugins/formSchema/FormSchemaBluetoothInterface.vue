@@ -41,7 +41,7 @@
 
 import EThing from 'ething-js'
 import { FormComponent, registerForm } from './core'
-import Vue from 'vue'
+
 
 registerForm(schema => {
   if (schema.format === 'bluetooth-interface') {
@@ -49,7 +49,7 @@ registerForm(schema => {
   }
 })
 
-var FormSchemaBluetoothInterface = {
+export default {
   name: 'FormSchemaBluetoothInterface',
 
   mixins: [FormComponent],
@@ -87,9 +87,5 @@ var FormSchemaBluetoothInterface = {
   }
 
 }
-
-Vue.component('FormSchemaBluetoothInterface', FormSchemaBluetoothInterface)
-
-export default FormSchemaBluetoothInterface
 
 </script>

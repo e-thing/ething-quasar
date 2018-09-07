@@ -236,7 +236,7 @@ function importDefinitions (def, done) {
     var definitions = def.definitions
 
     // merge with locals
-    walkThrough(definitions, localDefinitions, (node, local, stop) => {
+    walkThrough(definitions, meta.definitions, (node, local, stop) => {
       if (typeof node['type'] !== 'undefined' || typeof node['allOf'] !== 'undefined') {
         mergeClass(node, local)
         stop()
@@ -323,7 +323,7 @@ export var meta = {
   info: {},
   mergeClass,
   get,
-  definitions: {},
+  definitions: localDefinitions,
   plugins: {},
   scopes: {},
   loadDefinitions () {
@@ -347,6 +347,5 @@ export default ({ app, router, Vue }) => {
   Vue.prototype.$meta = meta
 
   // make it global, needed for importing plugin index.js
-  window.Vue = Vue
   window.meta = meta
 }

@@ -38,7 +38,7 @@
 
 import EThing from 'ething-js'
 import { FormComponent, registerForm } from './core'
-import Vue from 'vue'
+
 
 registerForm(schema => {
   if (schema.format === 'host') {
@@ -79,7 +79,7 @@ function refresh (force, cb) {
 
 }
 
-var FormSchemaHost = {
+export default {
   name: 'FormSchemaHost',
 
   mixins: [FormComponent],
@@ -110,10 +110,6 @@ var FormSchemaHost = {
   }
 
 }
-
-Vue.component('FormSchemaHost', FormSchemaHost)
-
-export default FormSchemaHost
 
 </script>
 

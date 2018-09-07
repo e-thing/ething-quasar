@@ -45,7 +45,7 @@
 <script>
 
 import { FormComponent, registerForm } from './core'
-import Vue from 'vue'
+
 
 registerForm(schema => {
   if (schema.format === 'week-calendar') {
@@ -55,7 +55,7 @@ registerForm(schema => {
 
 const weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
-var FormSchemaWeekCalendar = {
+export default {
   name: 'FormSchemaWeekCalendar',
 
   mixins: [FormComponent],
@@ -173,10 +173,6 @@ var FormSchemaWeekCalendar = {
     this.updateValue()
   }
 }
-
-Vue.component('FormSchemaWeekCalendar', FormSchemaWeekCalendar)
-
-export default FormSchemaWeekCalendar
 
 </script>
 

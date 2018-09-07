@@ -25,7 +25,7 @@
 
 import ResourceSelect from '../../components/ResourceSelect'
 import { FormComponent, registerForm } from './core'
-import Vue from 'vue'
+
 
 registerForm(schema => {
   if (schema.format === 'ething.event') {
@@ -33,7 +33,7 @@ registerForm(schema => {
   }
 })
 
-var FormSchemaEthingEvent = {
+export default {
   name: 'FormSchemaEthingEvent',
 
   mixins: [FormComponent],
@@ -127,10 +127,6 @@ var FormSchemaEthingEvent = {
     }
   }
 }
-
-Vue.component('FormSchemaEthingEvent', FormSchemaEthingEvent)
-
-export default FormSchemaEthingEvent
 
 </script>
 
