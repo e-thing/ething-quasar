@@ -190,38 +190,79 @@ function normalize (obj) {
   return obj
 }
 
+function getScript(source, callback) {
+    var script = document.createElement('script');
+    var prior = document.getElementsByTagName('script')[0];
+    script.async = 1;
 
-function importDefinitions (def) {
+    script.onload = script.onreadystatechange = function( _, isAbort ) {
+        if(isAbort || !script.readyState || /loaded|complete/.test(script.readyState) ) {
+            script.onload = script.onreadystatechange = null;
+            script = undefined;
 
-  var definitions = def.definitions
+            if(!isAbort) { if(callback) callback(); }
+        }
+    };
 
-  // merge with locals
-  walkThrough(definitions, localDefinitions, (node, local, stop) => {
-    if (typeof node['type'] !== 'undefined' || typeof node['allOf'] !== 'undefined') {
-      mergeClass(node, local)
-      stop()
+    script.src = source;
+    prior.parentNode.insertBefore(script, prior);
+}
+
+function importDefinitions (def, done) {
+
+  // load plugins index.js file
+  var plugins = def.plugins || {}
+
+  var pluginPromises = []
+  for (let name in plugins) {
+    let plugin = plugins[name]
+    if (plugin.js_index) {
+      pluginPromises.push(new Promise(function(resolve, reject) {
+        getScript(EThing.config.serverUrl + '/api/plugin/' + name + '/index.js', () => {
+          console.log('plugin ' + name + ' index.js loaded')
+          resolve()
+        })
+      }))
     }
-    return node
-  })
+  }
 
-  // resolve references
-  walkThrough(definitions, (node, _, stop) => {
-    if (typeof node['type'] !== 'undefined' || typeof node['allOf'] !== 'undefined') {
-      node = resolve(node, definitions)
-      stop()
-    }
-    return node
-  })
-
-  console.log(definitions)
-
-  extend(formSchemaCore.definitions, definitions)
-
-  meta.definitions = definitions
   meta.scopes = def.scopes || {}
   meta.info = def.info || {}
-  meta.plugins = def.plugins || {}
+  meta.plugins = plugins
   meta.config = def.config || {}
+
+  Promise.all(pluginPromises).then(() => {
+
+    var definitions = def.definitions
+
+    // merge with locals
+    walkThrough(definitions, localDefinitions, (node, local, stop) => {
+      if (typeof node['type'] !== 'undefined' || typeof node['allOf'] !== 'undefined') {
+        mergeClass(node, local)
+        stop()
+      }
+      return node
+    })
+
+    // resolve references
+    walkThrough(definitions, (node, _, stop) => {
+      if (typeof node['type'] !== 'undefined' || typeof node['allOf'] !== 'undefined') {
+        node = resolve(node, definitions)
+        stop()
+      }
+      return node
+    })
+
+    console.log(definitions)
+
+    extend(formSchemaCore.definitions, definitions)
+
+    meta.definitions = definitions
+
+    if (done)
+      done(meta)
+
+  })
 
 }
 
@@ -286,12 +327,14 @@ export var meta = {
   plugins: {},
   scopes: {},
   loadDefinitions () {
-    return EThing.request({
-      url: 'utils/definitions',
-      dataType: 'json',
-    }).then( (def) => {
-      console.log('ething meta loaded !')
-      importDefinitions(def)
+    return new Promise(function(resolve, reject) {
+      EThing.request({
+        url: 'utils/definitions',
+        dataType: 'json',
+      }).then( (def) => {
+        console.log('ething meta loaded !')
+        importDefinitions(def, resolve)
+      })
     })
   }
 
@@ -302,4 +345,8 @@ export var meta = {
 // leave the export, even if you don't use it
 export default ({ app, router, Vue }) => {
   Vue.prototype.$meta = meta
+
+  // make it global, needed for importing plugin index.js
+  window.Vue = Vue
+  window.meta = meta
 }

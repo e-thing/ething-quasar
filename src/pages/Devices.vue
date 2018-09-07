@@ -55,7 +55,6 @@ export default {
     var resourcesDefinitions = this.$meta.definitions.resources
     Object.keys(resourcesDefinitions).forEach(name => {
       var meta = resourcesDefinitions[name]
-      console.log(name)
       if (meta.inheritances.indexOf('resources/Device') !== -1 && !meta.virtual && !meta.disableCreation) {
 
         var path = meta.path || []

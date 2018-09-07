@@ -1,4 +1,4 @@
-import {meta} from '../../plugins/ething.meta'
+import {meta} from '../../plugins/ething-meta'
 
 
 export default {
