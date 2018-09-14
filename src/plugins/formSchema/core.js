@@ -100,7 +100,7 @@ var makeForm = function (createElement, schema, model, level, onValueUpdate, onE
     case 'string':
       var format = schema.format
 
-      if (format === 'date-time') {
+      if (format === 'date-time' || format === 'date' || format === 'time') {
         return createElement('form-schema-date', attributes)
       }
       else if (format === 'color') {
@@ -325,7 +325,7 @@ var FormComponent = {
       }
 
       // go one level upper
-      return this._find_up(p)
+      return this._find_up(p, id)
     },
 
     _find_down (node, id) {

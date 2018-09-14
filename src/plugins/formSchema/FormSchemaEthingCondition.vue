@@ -1,21 +1,21 @@
 <template>
-  <div class="form-schema-ething-event" :class="{indent: level}">
+  <div class="form-schema-ething-condition" :class="{indent: level}">
     <small v-if="schema.description" class="form-schema-description">{{ schema.description }}</small>
 
     <q-field
-      label="Event"
-      helper="Select the event on which this rule will be executed"
+      label="Condition"
+      helper="Select a condition"
       orientation="vertical"
       class="formFieldRequired"
     >
       <q-select
-        :value="event"
+        :value="condition"
         @input="setType"
-       :options="eventOptions"
+       :options="conditionOptions"
       />
     </q-field>
 
-    <form-schema v-if="event" :key="formId" :schema="eventSchema" :model="model" @input="setOptions" @error="setError"/>
+    <form-schema v-if="condition" :key="formId" :schema="conditionSchema" :model="model" @input="setOptions" @error="setError"/>
 
     <small class="form-schema-error" v-if="$v.value.$error">{{ errorMessage }}</small>
   </div>
@@ -25,17 +25,16 @@
 
 import ResourceSelect from '../../components/ResourceSelect'
 import { FormComponent, registerForm } from './core'
-import { extend } from 'quasar'
 
 
 registerForm(schema => {
-  if (schema.format === 'ething.event') {
-    return 'form-schema-ething-event'
+  if (schema.format === 'ething.condition') {
+    return 'form-schema-ething-condition'
   }
 })
 
 export default {
-  name: 'FormSchemaEthingEvent',
+  name: 'FormSchemaEthingCondition',
 
   mixins: [FormComponent],
 
@@ -54,69 +53,47 @@ export default {
 
   data () {
 
-    var eventOptions = []
+    var conditionOptions = []
 
-    for (let k in this.$meta.definitions.events) {
-      let event = this.$meta.definitions.events[k]
-      if (!event.virtual) {
-        var description = event.description
+    for (let k in this.$meta.definitions.conditions) {
+      let condition = this.$meta.definitions.conditions[k]
+      if (!condition.virtual) {
+        var description = condition.description
         if (!description) {
-          (event.allOf || []).forEach(s => {
+          (condition.allOf || []).forEach(s => {
             if (s.description) description = s.description
           })
         }
 
-        eventOptions.push({
+        conditionOptions.push({
           label: k,
-          value: 'events/' + k,
+          value: 'conditions/' + k,
           sublabel: description
         })
       }
     }
 
     return {
-      eventOptions,
+      conditionOptions,
       formId: 0
     }
   },
 
   computed: {
-    event () {
+    condition () {
       return this.model ? this.model.type : undefined
     },
 
-    eventSchema () {
+    conditionSchema () {
       var schema = {
           type: 'object',
           required: [],
           properties: {}
       }
 
-      if (this.event) {
-
-
-        let meta = this.$meta.get(this.event)
-
+      if (this.condition) {
+        let meta = this.$meta.get(this.condition)
         schema = meta
-
-        if (meta.inheritances.indexOf("events/ResourceEvent") !== -1 && meta.signal) {
-
-          var signal = meta.signal
-          var meta = this.$meta
-
-          schema = extend(true, {
-            properties: {
-              resource: {
-                filter (r) {
-                  var signals = meta.get(r).signals
-                  return signals.indexOf(signal) !== -1
-                }
-              }
-            }
-          }, schema)
-        }
-
-
       }
 
       return schema
@@ -124,7 +101,7 @@ export default {
   },
 
   watch: {
-    eventSchema (val, oldVal) {
+    conditionSchema (val, oldVal) {
       if (val !== oldVal) {
         this.formId++ // force to reload the form-schema component
       }
@@ -141,15 +118,10 @@ export default {
 
     setOptions (options) {
       this.setValue(Object.assign({
-        type: this.event,
+        type: this.condition,
       }, options))
     }
   }
 }
 
 </script>
-
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-
-</style>

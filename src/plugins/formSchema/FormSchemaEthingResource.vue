@@ -5,7 +5,7 @@
     <resource-select
       :value="castedModel"
       @input="setValue"
-      :filter="schema.filter"
+      :filter="filter"
       :type="types"
       :multiple="multiple"
       use-id
@@ -44,6 +44,14 @@ export default {
     },
     multiple () {
       return this.schema.type === 'array'
+    },
+    filter () {
+      var schema = this.schema
+      if (schema.filter) {
+        return function (r) {
+          return schema.filter.call(schema, r)
+        }
+      }
     }
   },
 

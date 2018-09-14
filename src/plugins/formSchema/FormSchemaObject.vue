@@ -14,7 +14,7 @@
       <form-schema :required="item.required" :schema="item.schema" :model="item.model" :level="level+1" @input="onChildValueChange(item, $event)" @error="onChildErrorChange(item, $event)"/>
     </q-field>
 
-    <small class="form-schema-error" v-if="$v.value.$error">{{ errorMessage }}</small>
+    <small class="form-schema-error" v-if="$v.value.$error && $v.value.required">{{ errorMessage }}</small>
 
   </div>
 </template>

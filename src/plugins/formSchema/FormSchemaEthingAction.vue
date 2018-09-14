@@ -92,7 +92,7 @@ export default {
       }
 
       if (this.action) {
-        let meta = this.$meta.definitions.actions[this.action.replace(/^actions\//, '')]
+        let meta = this.$meta.get(this.action)
         schema = meta
       }
 

@@ -21,12 +21,14 @@ import FormSchemaFile from './FormSchemaFile.vue'
 import FormSchemaBluetoothInterface from './FormSchemaBluetoothInterface'
 import FormSchemaCron from './FormSchemaCron'
 import FormSchemaEthingAction from './FormSchemaEthingAction'
+import FormSchemaEthingCondition from './FormSchemaEthingCondition'
 import FormSchemaEthingEvent from './FormSchemaEthingEvent'
 import FormSchemaEthingResource from './FormSchemaEthingResource'
 import FormSchemaHost from './FormSchemaHost'
 import FormSchemaScope from './FormSchemaScope'
 import FormSchemaSerialPort from './FormSchemaSerialPort'
 import FormSchemaWeekCalendar from './FormSchemaWeekCalendar'
+import FormSchemaScheduler from './FormSchemaScheduler'
 
 // leave the export, even if you don't use it
 export default ({ app, router, Vue }) => {
@@ -50,12 +52,15 @@ export default ({ app, router, Vue }) => {
   Vue.component('FormSchemaBluetoothInterface', FormSchemaBluetoothInterface)
   Vue.component('FormSchemaCron', FormSchemaCron)
   Vue.component('FormSchemaEthingAction', FormSchemaEthingAction)
+  Vue.component('FormSchemaEthingCondition', FormSchemaEthingCondition)
   Vue.component('FormSchemaEthingEvent', FormSchemaEthingEvent)
   Vue.component('FormSchemaEthingResource', FormSchemaEthingResource)
   Vue.component('FormSchemaHost', FormSchemaHost)
   Vue.component('FormSchemaScope', FormSchemaScope)
   Vue.component('FormSchemaSerialPort', FormSchemaSerialPort)
-  Vue.component('FormSchemaWeekCalendar', FormSchemaWeekCalendar)
+  Vue.component('FormSchemaWeekCalendar', FormSchemaWeekCalendar) // deprecated !
+  Vue.component('FormSchemaScheduler', FormSchemaScheduler)
+  
 
   Vue.config.optionMergeStrategies.validations = Vue.config.optionMergeStrategies.data
 

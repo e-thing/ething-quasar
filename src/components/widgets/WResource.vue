@@ -19,7 +19,11 @@ export default {
         if (this.resource instanceof EThing.Resource) {
           return this.resource
         } else {
-          return this.$store.getters['ething/get'](this.resource)
+          var r = this.$store.getters['ething/get'](this.resource)
+          if (!r) {
+            this.setError('the resource does not exist anymore !')
+          }
+          return r
         }
       }
     }

@@ -22,12 +22,14 @@ function getFromPath (obj, path) {
   return p
 }
 
-function walkThrough (obj, ref, fn) {
+function walkThrough (obj, ref, fn, path) {
   if (typeof fn === 'undefined' && typeof ref === 'function') {
+    path = fn
     fn = ref
     ref = null
   }
 
+  path = path || []
   ref = ref || {}
 
   var stop_ = false
@@ -35,14 +37,16 @@ function walkThrough (obj, ref, fn) {
     stop_ = true
   }
 
-  obj = fn (obj, ref, stop)
+  obj = fn (obj, ref, stop, path.join('/'))
 
   if (!stop_ && typeof obj === 'object' && obj !== null) {
     for (var k in obj) {
       var value = obj[k]
 
       if (typeof value === 'object' && value !== null) {
-        obj[k] = walkThrough (value, ref[k], fn)
+        var pathCopy = path.slice(0) // shallow copy
+        pathCopy.push(k)
+        obj[k] = walkThrough (value, ref[k], fn, pathCopy)
       }
     }
   }
@@ -135,6 +139,14 @@ function mergeClass(a, b) {
     }
   })
 
+  // append signals of b in a
+  var mergedSignals = [].concat(a.signals || []);
+  (b.signals || []).forEach(p => {
+    if (mergedSignals.indexOf(p) === -1) {
+      mergedSignals.push(p)
+    }
+  })
+
   var merged = extend(true, a, b)
 
   // reorder properties :
@@ -145,6 +157,8 @@ function mergeClass(a, b) {
   merged.properties = orderedProperties
 
   merged.required = mergedRequired
+
+  merged.signals = mergedSignals
 
   return merged
 }
@@ -160,6 +174,7 @@ function normalize (obj) {
       required: [],
       properties: {},
       methods: {},
+      signals: [],
       virtual: false,
       widgets: {},
       inheritances: [],
@@ -236,16 +251,16 @@ function importDefinitions (def, done) {
     var definitions = def.definitions
 
     // merge with locals
-    walkThrough(definitions, meta.definitions, (node, local, stop) => {
+    walkThrough(definitions, meta.definitions, (node, local, stop, path) => {
       if (typeof node['type'] !== 'undefined' || typeof node['allOf'] !== 'undefined') {
-        mergeClass(node, local)
+        node = mergeClass(node, local)
         stop()
       }
       return node
     })
 
     // resolve references
-    walkThrough(definitions, (node, _, stop) => {
+    walkThrough(definitions, (node, _, stop, path) => {
       if (typeof node['type'] !== 'undefined' || typeof node['allOf'] !== 'undefined') {
         node = resolve(node, definitions)
         stop()

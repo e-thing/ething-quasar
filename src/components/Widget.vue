@@ -1,6 +1,7 @@
 <template>
   <div class="widget" :class="{'widget-err': !!error}">
-    <componant ref="widget" :is="type" :style="style" v-bind="attr" :class="inline ? '' : 'fit'" @error="error = $event"/>
+    <div v-if="!!error" class="widget-err-content absolute-center text-center">{{ error }}</div>
+    <componant v-else ref="widget" :is="type" :style="style" v-bind="attr" :class="inline ? '' : 'fit'" @error="error = $event"/>
   </div>
 </template>
 
@@ -58,8 +59,11 @@ export default {
 
     methods: {
       hasContentOverflow () {
-        var el = this.$refs.widget.$el
-        return el.scrollWidth > el.clientWidth
+        var widgetRef = this.$refs.widget
+        if (widgetRef) {
+          var el = widgetRef.$el
+          return el.scrollWidth > el.clientWidth
+        }
       }
     }
 
@@ -73,5 +77,8 @@ export default {
   overflow hidden
   &.widget-err
     border 1px solid $negative
+    background-color $red-1
+  & .widget-err-content
+    color $negative
 
 </style>
