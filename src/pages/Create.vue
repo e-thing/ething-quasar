@@ -3,7 +3,7 @@
 
     <div class="q-my-md q-display-1 q-display-1-opacity">
       <q-icon :name="$meta.get(type).icon" />
-      {{ $meta.get(type).label || type }}
+      {{ $meta.get(type).label || defaultLabel }}
     </div>
 
     <q-breadcrumbs class="q-pb-md" v-if="pathItems.length>1">
@@ -31,6 +31,10 @@ export default {
   computed: {
     type () {
       return 'resources/' + this.$route.params.type
+    },
+
+    defaultLabel () {
+      return this.type.split('/').pop()
     },
 
     pathItems () {

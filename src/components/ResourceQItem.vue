@@ -227,7 +227,6 @@ export default {
           url: this.resource.getContentUrl(),
           dataType: 'blob'
         }).then((data) => {
-          console.log(data)
           FileSaver.saveAs(data, this.resource.basename())
         })
       } else if (this.resource instanceof this.$ething.Table) {

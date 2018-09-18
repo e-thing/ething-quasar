@@ -40,23 +40,35 @@
             </q-item-main>
           </q-item>
 
-          <q-item multiline v-if="rule.attr('scheduler', []).length > 0">
-            <q-item-side icon="schedule" />
+          <q-item multiline v-for="(event, i) in rule.attr('events', [])" :key="'event-'+i">
+            <q-item-side icon="event" />
             <q-item-main>
-              <q-item-tile label>Schedules</q-item-tile>
-              <q-item-tile sublabel v-for="(item, index) in rule.attr('scheduler', [])" :key="index">
-                {{ schedulerItemToString(item) }}
+              <q-item-tile v-if="rule.attr('events', []).length>1" label>Event {{ i + 1 }} : {{ formatType(event.type) }}</q-item-tile>
+              <q-item-tile v-else label>Event : {{ formatType(event.type) }}</q-item-tile>
+              <q-item-tile sublabel v-for="(attr, index) in listAttr(event, 'events')" :key="index" >
+                <template v-if="!!attr.name">
+                  {{ attr.name }}:
+                </template>
+                <template v-if="attr.type === 'resources'">
+                  <template v-for="(r, j) in resolve(attr.value)">
+                    <span v-if="j > 0">, </span>
+                    <span class="cursor-pointer" @click.stop="$ui.open(r)">{{ r.basename() }}</span>
+                  </template>
+                </template>
+                <template v-else>{{ attr.label }}</template>
               </q-item-tile>
             </q-item-main>
           </q-item>
 
-          <q-item multiline v-for="(event, i) in rule.attr('events', [])" :key="'event-'+i">
-            <q-item-side icon="event" />
+          <q-item multiline v-for="(condition, i) in rule.attr('conditions', [])" :key="'condition-'+i">
+            <q-item-side icon="mdi-help" />
             <q-item-main>
-              <q-item-tile v-if="rule.attr('events', []).length>1" label>Event {{ i + 1 }} : {{ event.type }}</q-item-tile>
-              <q-item-tile v-else label>Event : {{ event.type }}</q-item-tile>
-              <q-item-tile sublabel v-for="(attr, index) in listAttr(event, 'events')" :key="index" >
-                {{ attr.name }}:
+              <q-item-tile v-if="rule.attr('conditions', []).length>1" label>Condition {{ i + 1 }} : {{ formatType(condition.type) }}</q-item-tile>
+              <q-item-tile v-else label>Condition : {{ formatType(condition.type) }}</q-item-tile>
+              <q-item-tile sublabel v-for="(attr, index) in listAttr(condition, 'conditions')" :key="index" >
+                <template v-if="!!attr.name">
+                  {{ attr.name }}:
+                </template>
                 <template v-if="attr.type === 'resources'">
                   <template v-for="(r, j) in resolve(attr.value)">
                     <span v-if="j > 0">, </span>
@@ -69,12 +81,14 @@
           </q-item>
 
           <q-item multiline v-for="(action, i) in rule.attr('actions', [])" :key="'action-'+i">
-            <q-item-side icon="mdi-run" />
+            <q-item-side icon="mdi-play" />
             <q-item-main>
-              <q-item-tile v-if="rule.attr('actions', []).length>1" label>Action {{ i + 1 }} : {{ action.type }}</q-item-tile>
-              <q-item-tile v-else label>Action : {{ action.type }}</q-item-tile>
+              <q-item-tile v-if="rule.attr('actions', []).length>1" label>Action {{ i + 1 }} : {{ formatType(action.type) }}</q-item-tile>
+              <q-item-tile v-else label>Action : {{ formatType(action.type) }}</q-item-tile>
               <q-item-tile sublabel v-for="(attr, index) in listAttr(action, 'actions')" :key="index" >
-                {{ attr.name }}:
+                <template v-if="!!attr.name">
+                  {{ attr.name }}:
+                </template>
                 <template v-if="attr.type === 'resources'">
                   <template v-for="(r, j) in resolve(attr.value)">
                     <span v-if="j > 0">, </span>
@@ -105,9 +119,10 @@
 </template>
 
 <script>
-//import ResourceSelect from '../components/ResourceSelect'
-import {resolve} from '../plugins/formSchema/core'
+
 import cronstrue from 'cronstrue'
+import FormSchemaScheduler from '../plugins/formSchema/FormSchemaScheduler'
+
 
 export default {
   name: 'PageRules',
@@ -187,7 +202,7 @@ export default {
 
     listAttr (item, type) {
       var attrs = []
-      var schema = resolve(this.$meta.definitions[type][item.type] || {})
+      var schema = this.$meta.get(item.type)
 
       for(var k in item) {
         if (k!=='type') {
@@ -209,6 +224,18 @@ export default {
               }
               else if(attrSchema.format === 'cron') {
                 label = cronstrue.toString(value)
+              }
+              else if(attrSchema.format === 'scheduler') {
+                for (var i in value) {
+                  attrs.push({
+                    name: null,
+                    schema: attrSchema,
+                    value: value[i],
+                    label: FormSchemaScheduler.methods.toString(value[i]),
+                    type
+                  })
+                }
+                continue
               }
 
               attrs.push({
@@ -236,15 +263,10 @@ export default {
       })
     },
 
-    schedulerItemToString (item) {
-      const weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+    formatType (type) {
+      return type.split('/').pop()
+    },
 
-      if (item.start.weekDay === item.end.weekDay) {
-        return weekDays[item.start.weekDay] + ' ' + item.start.hour + 'h - ' + item.end.hour + 'h'
-      } else {
-        return weekDays[item.start.weekDay] + ' ' + item.start.hour + 'h - ' + weekDays[item.end.weekDay] + ' ' + item.end.hour + 'h'
-      }
-    }
   }
 
 }

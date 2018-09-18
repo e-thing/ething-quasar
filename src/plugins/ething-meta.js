@@ -149,10 +149,16 @@ function mergeClass(a, b) {
 
   var merged = extend(true, a, b)
 
-  // reorder properties :
+  // reorder properties and remove any invalid anyOf :
   var orderedProperties = {}
   mergedPropKeys.forEach(k => {
-    orderedProperties[k] = merged.properties[k]
+    if(k in merged.properties) {
+      var prop = merged.properties[k]
+      if (prop.anyOf && prop.type) {
+        delete prop['anyOf']
+      }
+      orderedProperties[k] = prop
+    }
   })
   merged.properties = orderedProperties
 

@@ -4,6 +4,8 @@
       <!-- Tabs - notice slot="title" -->
       <q-tab default slot="title" label="settings" name="settings" icon="settings" />
       <q-tab slot="title" label="log" name="log" icon="message" />
+      <q-tab slot="title" label="api key" name="apikey" icon="mdi-key" />
+      <q-tab slot="title" label="data" name="backup" icon="mdi-database" />
       <q-tab slot="title" label="about" name="about" icon="info" />
 
       <!-- Targets -->
@@ -13,6 +15,13 @@
       <q-tab-pane name="log">
         <log-view />
       </q-tab-pane>
+      <q-tab-pane name="apikey">
+        <apikey-view />
+      </q-tab-pane>
+      <q-tab-pane name="backup">
+        <backup-view />
+      </q-tab-pane>
+
       <q-tab-pane name="about">
 
         <dl class="horizontal">
@@ -48,13 +57,17 @@
 <script>
 import SettingsView from '../components/SettingsView'
 import LogView from '../components/LogView'
+import ApikeyView from '../components/ApikeyView'
+import BackupView from '../components/BackupView'
 
 export default {
   name: 'PageSettings',
 
   components: {
     SettingsView,
-    LogView
+    LogView,
+    ApikeyView,
+    BackupView
   },
 
   data () {

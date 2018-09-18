@@ -134,6 +134,7 @@ export default ({ app, router, Vue, store }) => {
     },
 
     dateToString (d) {
+      if (typeof d === 'string') d = new Date(d)
       if (!d) {
         return '-'
       }

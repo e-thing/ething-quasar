@@ -114,6 +114,7 @@ module.exports = function (ctx) {
         'QCardTitle',
         'QCardMain',
         'QCardSeparator',
+        'QCardActions',
         'QScrollArea',
         'QSearch'
         //

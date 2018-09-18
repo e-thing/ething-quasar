@@ -47,6 +47,38 @@ registerForm(schema => {
 
 const weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
+function pad(n, width, z) {
+  z = z || '0';
+  n = n + '';
+  return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
+}
+
+function toString (item) {
+  var mode = item.mode
+  var start = item.start
+  var end = item.end
+
+  switch (mode) {
+    case 'daily':
+      return 'every day between ' + start.hour + ':' + pad(start.minute, 2) + ' and ' + end.hour + ':' + pad(end.minute, 2)
+    case 'weekly':
+      return 'between ' + weekDays[start.weekday - 1] + ' ' + start.hour + ':' + pad(start.minute, 2) + ' and ' + weekDays[end.weekday - 1] + ' ' + end.hour + ':' + pad(end.minute, 2)
+    case 'monthly':
+      return 'between ' + start.monthday + dateSuffix(start.monthday) + ' ' + start.hour + ':' + pad(start.minute, 2) + ' and ' + end.monthday + dateSuffix(end.monthday) + ' ' + end.hour + ':' + pad(end.minute, 2)
+  }
+}
+
+function dateSuffix (dayOfMounth) {
+  if (dayOfMounth < 10 || dayOfMounth >= 20) {
+    dayOfMounth = dayOfMounth % 10
+    if (dayOfMounth == 1) return 'st'
+    if (dayOfMounth == 2) return 'nd'
+    if (dayOfMounth == 3) return 'rd'
+  }
+  return 'th'
+}
+
+
 export default {
   name: 'FormSchemaScheduler',
 
@@ -140,35 +172,7 @@ export default {
 
   methods: {
 
-    toString (item) {
-      var mode = item.mode
-      var start = item.start
-      var end = item.end
-
-      switch (mode) {
-        case 'daily':
-          return 'every day between ' + start.hour + ':' + start.minute + ' and ' + end.hour + ':' + end.minute
-        case 'weekly':
-          return 'between ' + weekDays[start.weekday - 1] + ' ' + start.hour + ':' + start.minute + ' and ' + weekDays[end.weekday - 1] + ' ' + end.hour + ':' + end.minute
-        case 'monthly':
-          return 'between ' + start.monthday + this.dateSuffix(start.monthday) + ' ' + start.hour + ':' + start.minute + ' and ' + end.monthday + this.dateSuffix(end.monthday) + ' ' + end.hour + ':' + end.minute
-      }
-      if (item.start.weekDay === item.end.weekDay) {
-        return weekDays[item.start.weekDay] + ' ' + item.start.hour + 'h - ' + item.end.hour + 'h'
-      } else {
-        return weekDays[item.start.weekDay] + ' ' + item.start.hour + 'h - ' + weekDays[item.end.weekDay] + ' ' + item.end.hour + 'h'
-      }
-    },
-
-    dateSuffix (dayOfMounth) {
-      if (dayOfMounth < 10 || dayOfMounth >= 20) {
-        dayOfMounth = dayOfMounth % 10
-        if (dayOfMounth == 1) return 'st'
-        if (dayOfMounth == 2) return 'nd'
-        if (dayOfMounth == 3) return 'rd'
-      }
-      return 'th'
-    },
+    toString,
 
     add () {
       var items = this.value ? this.value.slice(0) : []
@@ -191,5 +195,6 @@ export default {
     }
   },
 }
+
 
 </script>
