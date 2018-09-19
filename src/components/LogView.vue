@@ -2,25 +2,27 @@
 
   <div v-if="loading===false">
 
-    <q-input v-model="filter" placeholder="filter" class="inline"/>
+    <q-input v-model="filter" placeholder="filter" class="inline" hide-underline color="secondary"/>
     <q-select
       class="inline"
       v-model="length"
       :options="lengthOptions"
       suffix="results"
+      color="secondary"
+      hide-underline
     />
-    <q-btn color="primary" flat icon="refresh" label="refresh" @click="load"/>
+    <q-btn color="secondary" flat icon="refresh" label="refresh" @click="load"/>
 
     <div class="column gutter-y-xs q-mt-sm">
 
       <div class="log row gutter-x-xs" :class="log.cls" v-for="(log, index) in logs" :keys="index">
-        <div class="date col-md-auto col-sm-4 text-faded">
+        <div class="date col-md-auto col-sm-4">
           {{ log.date }}
         </div>
-        <div class="level col-md-1 col-sm-4 text-faded">
+        <div class="level col-md-1 col-sm-4">
           {{ log.level }}
         </div>
-        <div class="level col-md-2 col-sm-4 text-faded">
+        <div class="level col-md-2 col-sm-4">
           {{ log.name }}
         </div>
         <div class="message col-md col-sm-12">
@@ -115,7 +117,7 @@ export default {
     color $tertiary
 
   &.info
-    color $info
+    color $secondary
 
   &.warning
     color $warning

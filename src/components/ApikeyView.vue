@@ -17,7 +17,7 @@
           </div>
         </div>
 
-        <div class="item row items-center gutter-x-sm" v-for="apikey in apikeys" :keys="apikey.id">
+        <div class="item row items-center gutter-x-sm" v-for="apikey in apikeys" :key="apikey.id">
           <div class="date col-xs-5 col-sm-4 col-md-3 text-faded ellipsis">
             {{ $ui.dateToString(apikey.modifiedDate) }}
           </div>

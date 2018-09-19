@@ -32,7 +32,7 @@
 
   </div>
 
-  <div v-else>loading ...</div>
+  <div v-else class="absolute-center text-faded">loading ...</div>
 
 </template>
 

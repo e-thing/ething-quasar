@@ -6,6 +6,7 @@
       <q-tab slot="title" label="log" name="log" icon="message" />
       <q-tab slot="title" label="api key" name="apikey" icon="mdi-key" />
       <q-tab slot="title" label="data" name="backup" icon="mdi-database" />
+      <q-tab slot="title" label="plugins" name="plugins" icon="mdi-puzzle" />
       <q-tab slot="title" label="about" name="about" icon="info" />
 
       <!-- Targets -->
@@ -20,6 +21,9 @@
       </q-tab-pane>
       <q-tab-pane name="backup">
         <backup-view />
+      </q-tab-pane>
+      <q-tab-pane name="plugins">
+        <plugins-view />
       </q-tab-pane>
 
       <q-tab-pane name="about">
@@ -43,9 +47,6 @@
           <dt>NodeJS</dt>
           <dd>version: {{ $meta.info.nodejs.version }}</dd>
 
-          <dt>Plugins</dt>
-          <dd>{{ plugins }}</dd>
-
         </dl>
 
       </q-tab-pane>
@@ -59,6 +60,7 @@ import SettingsView from '../components/SettingsView'
 import LogView from '../components/LogView'
 import ApikeyView from '../components/ApikeyView'
 import BackupView from '../components/BackupView'
+import PluginsView from '../components/PluginsView'
 
 export default {
   name: 'PageSettings',
@@ -67,17 +69,9 @@ export default {
     SettingsView,
     LogView,
     ApikeyView,
-    BackupView
+    BackupView,
+    PluginsView
   },
-
-  data () {
-    return {
-      plugins: Object.keys(this.$meta.plugins).join(', ')
-    }
-  }
 
 }
 </script>
-
-<style>
-</style>
