@@ -1,15 +1,11 @@
 import EThing from 'ething-js'
-import { LocalStorage } from 'quasar'
-import { date } from 'quasar'
-import { format } from 'quasar'
-import { Notify } from 'quasar'
+import { LocalStorage, date, format, Notify } from 'quasar'
 const { humanStorageSize } = format
 import { SSE } from './ething-sse'
 import { meta } from './ething-meta'
 import promiseFinally from 'promise.prototype.finally'
 import qs from 'qs'
 import Modal from '../components/Modal'
-import * as quasar from 'quasar'
 
 
 // necessary for older browsers
@@ -36,7 +32,6 @@ UI.kioskMode = getParameterByName('kiosk') === '1'
 export default ({ app, router, Vue, store }) => {
 
   window.Vue = Vue
-  window.quasar = quasar
 
   Vue.component('Modal', Modal)
 
@@ -310,6 +305,10 @@ export default ({ app, router, Vue, store }) => {
       app.data.state = 'initializing'
 
       console.log('initializing...');
+
+      var appInstance = app.router.app
+      window.app = appInstance
+      window.quasar = appInstance.$q
 
       var metaDfr = meta.loadDefinitions()
 

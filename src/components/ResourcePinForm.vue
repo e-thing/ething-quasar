@@ -13,11 +13,10 @@
               class="cursor-pointer col-xs-12 col-sm-6"
               :color="$meta.get(r).color"
               text-color="white"
-
             >
               <q-card-title>
                 <div class="ellipsis">{{ r.basename() }}</div>
-                <div v-if="r.createdBy()" class="ellipsis" slot="subtitle">{{ $ething.arbo.get(r.createdBy()).basename() }}</div>
+                <div v-if="$ething.arbo.get(r.createdBy())" class="ellipsis" slot="subtitle">{{ $ething.arbo.get(r.createdBy()).basename() }}</div>
                 <q-icon slot="right" :name="$meta.get(r).icon" color="white"/>
               </q-card-title>
             </q-card>
