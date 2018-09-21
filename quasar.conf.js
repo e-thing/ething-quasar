@@ -8,14 +8,8 @@ module.exports = function (ctx) {
     plugins: [
       'i18n',
       'axios',
-      'ething',
       'ething-ui',
-      'ething-sse',
-      'ething-meta',
-      'ething-widget',
-      'formSchema',
-      'vuelidate',
-      'highlightjs'
+      'ething-quasar-core'
     ],
     css: [
       'app.styl'

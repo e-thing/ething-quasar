@@ -11,13 +11,13 @@
               @click.native="select(r)"
               style="height: 100%" flat square
               class="cursor-pointer col-xs-12 col-sm-6"
-              :color="$meta.get(r).color"
+              :color="$ethingUI.meta.get(r).color"
               text-color="white"
             >
               <q-card-title>
                 <div class="ellipsis">{{ r.basename() }}</div>
                 <div v-if="$ething.arbo.get(r.createdBy())" class="ellipsis" slot="subtitle">{{ $ething.arbo.get(r.createdBy()).basename() }}</div>
-                <q-icon slot="right" :name="$meta.get(r).icon" color="white"/>
+                <q-icon slot="right" :name="$ethingUI.meta.get(r).icon" color="white"/>
               </q-card-title>
             </q-card>
           </div>
@@ -59,7 +59,7 @@
 </template>
 
 <script>
-import ResourceQItem from '../components/ResourceQItem'
+import ResourceQItem from 'ething-quasar-core/src/components/ResourceQItem'
 
 export default {
   name: 'ResourcePinForm',
@@ -84,7 +84,7 @@ export default {
 
     widgets () {
       if (!this.resource) return
-      return this.$meta.get(this.resource).widgets
+      return this.$ethingUI.meta.get(this.resource).widgets
     },
 
     widgetNames () {
@@ -103,7 +103,7 @@ export default {
     },
 
     widgetClass () {
-      return this.$widget.find(this.widget.type)
+      return this.$ethingUI.widget.find(this.widget.type)
     },
 
     widgetClassMeta () {
@@ -120,7 +120,7 @@ export default {
   methods: {
 
     list () {
-      return this.$store.getters['ething/filter']((r) => Object.keys(this.$meta.get(r).widgets).length)
+      return this.$store.getters['ething/filter']((r) => Object.keys(this.$ethingUI.meta.get(r).widgets).length)
     },
 
     select (resource) {

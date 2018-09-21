@@ -92,7 +92,7 @@
 import Vue from 'vue'
 import EThing from 'ething-js'
 import VueGridLayout from 'vue-grid-layout'
-import Widget from '../components/Widget'
+import Widget from 'ething-quasar-core/src/components/Widget'
 import { debounce, extend } from 'quasar'
 import ResourcePinForm from '../components/ResourcePinForm'
 
@@ -308,12 +308,12 @@ export default {
     },
 
     isEditable (item) {
-      var widgetCls = this.$widget.find(item.type)
+      var widgetCls = this.$ethingUI.widget.find(item.type)
       return widgetCls && widgetCls.meta && widgetCls.meta.options && Object.keys(widgetCls.meta.options).length
     },
 
     editItem (item) {
-      var widgetCls = this.$widget.find(item.type)
+      var widgetCls = this.$ethingUI.widget.find(item.type)
       if (!widgetCls) return
       var schema = Object.assign({type: 'object'}, widgetCls.meta.options)
 

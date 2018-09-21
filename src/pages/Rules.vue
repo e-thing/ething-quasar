@@ -8,10 +8,10 @@
       <q-list no-border>
         <q-collapsible indent v-for="rule in rules" :key="rule.id()" popup >
           <template slot="header">
-            <q-item-side :icon="$meta.get(rule).icon" inverted :color="color(rule)" />
+            <q-item-side :icon="$ethingUI.meta.get(rule).icon" inverted :color="color(rule)" />
             <q-item-main>
               <q-item-tile label>{{ rule.basename() }}</q-item-tile>
-              <q-item-tile sublabel>{{ $ui.dateToString(rule.modifiedDate()) }}</q-item-tile>
+              <q-item-tile sublabel>{{ $ethingUI.utils.dateToString(rule.modifiedDate()) }}</q-item-tile>
             </q-item-main>
             <q-item-side right>
               <q-btn rounded icon="play arrow" :loading="loading" label="execute" flat dense @click.stop="execute(rule)"/>
@@ -36,7 +36,7 @@
             <q-item-main>
               <q-item-tile label>Attributes</q-item-tile>
               <q-item-tile sublabel>executed: {{ rule.executionCount() }} times</q-item-tile>
-              <q-item-tile sublabel>last executed time: {{ rule.executionDate() ? $ui.dateToString(rule.executionDate()) : 'never' }}</q-item-tile>
+              <q-item-tile sublabel>last executed time: {{ rule.executionDate() ? $ethingUI.utils.dateToString(rule.executionDate()) : 'never' }}</q-item-tile>
             </q-item-main>
           </q-item>
 
@@ -121,7 +121,7 @@
 <script>
 
 import cronstrue from 'cronstrue'
-import FormSchemaScheduler from '../plugins/formSchema/FormSchemaScheduler'
+import FormSchemaScheduler from 'ething-quasar-core/src/plugins/formSchema/FormSchemaScheduler'
 
 
 export default {
@@ -169,7 +169,7 @@ export default {
 
     color (rule) {
       if (rule.enabled()) {
-        return this.$meta.get(rule).color
+        return this.$ethingUI.meta.get(rule).color
       } else {
         return 'faded'
       }
@@ -202,7 +202,7 @@ export default {
 
     listAttr (item, type) {
       var attrs = []
-      var schema = this.$meta.get(item.type)
+      var schema = this.$ethingUI.meta.get(item.type)
 
       for(var k in item) {
         if (k!=='type') {

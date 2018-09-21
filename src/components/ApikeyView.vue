@@ -19,7 +19,7 @@
 
         <div class="item row items-center gutter-x-sm" v-for="apikey in apikeys" :key="apikey.id">
           <div class="date col-xs-5 col-sm-4 col-md-3 text-faded ellipsis">
-            {{ $ui.dateToString(apikey.modifiedDate) }}
+            {{ $ethingUI.utils.dateToString(apikey.modifiedDate) }}
           </div>
           <div class="key col">
             {{ apikey.value }}

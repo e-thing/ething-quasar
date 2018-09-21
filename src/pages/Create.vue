@@ -2,8 +2,8 @@
   <q-page padding>
 
     <div class="q-my-md q-display-1 q-display-1-opacity">
-      <q-icon :name="$meta.get(type).icon" />
-      {{ $meta.get(type).label || defaultLabel }}
+      <q-icon :name="$ethingUI.meta.get(type).icon" />
+      {{ $ethingUI.meta.get(type).label || defaultLabel }}
     </div>
 
     <q-breadcrumbs class="q-pb-md" v-if="pathItems.length>1">
@@ -19,7 +19,7 @@
 
 <script>
 
-import ResourceEditor from '../components/ResourceEditor'
+import ResourceEditor from 'ething-quasar-core/src/components/ResourceEditor'
 
 export default {
   name: 'PageResource',
@@ -38,7 +38,7 @@ export default {
     },
 
     pathItems () {
-      return (this.$meta.get(this.type).path || [])
+      return (this.$ethingUI.meta.get(this.type).path || [])
     }
   },
 
@@ -54,7 +54,7 @@ export default {
   },
 
   mounted () {
-    var meta = this.$meta.get(this.type)
+    var meta = this.$ethingUI.meta.get(this.type)
     if (meta.inheritances.length === 0) {
       this.$router.replace('/404')
     }

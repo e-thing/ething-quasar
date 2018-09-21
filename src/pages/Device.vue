@@ -2,12 +2,12 @@
   <q-page padding>
 
     <div class="q-my-md q-display-1 q-display-1-opacity">
-      <q-icon :name="$meta.get(resource).icon" class="vertical-middle"/>
+      <q-icon :name="$ethingUI.meta.get(resource).icon" class="vertical-middle"/>
       <span class="vertical-middle">
         {{ resource.basename() }}
       </span>
       <q-chip small square detail icon="access time" v-if="resource.lastSeenDate()" class="q-ml-sm">
-        {{ $ui.dateToString(resource.lastSeenDate()) }}
+        {{ $ethingUI.utils.dateToString(resource.lastSeenDate()) }}
       </q-chip>
       <resource-battery-chip :resource="resource" class="vertical-middle q-ml-sm" square/>
       <q-chip small square detail icon="location_on" v-if="resource.location()" class="q-ml-sm">
@@ -18,7 +18,7 @@
     </div>
 
     <q-breadcrumbs v-if="createdBys.length" class="q-py-md">
-      <q-breadcrumbs-el v-for="(item, index) in createdBys" :key="index" :label="item.basename()" :to="$ui.route(item)" />
+      <q-breadcrumbs-el v-for="(item, index) in createdBys" :key="index" :label="item.basename()" :to="$ethingUI.route(item)" />
       <q-breadcrumbs-el label="" />
     </q-breadcrumbs>
 
@@ -81,7 +81,7 @@
     </q-card>
 
     <!-- api -->
-    <q-card  v-if="Object.keys($meta.get(resource).methods).length" class="q-my-md">
+    <q-card  v-if="Object.keys($ethingUI.meta.get(resource).methods).length" class="q-my-md">
       <q-card-title class="bg-primary text-white">
         <q-icon name="mdi-database" class="vertical-middle"/>
         <span class="vertical-middle">
@@ -100,10 +100,10 @@
 
 <script>
 
-import DeviceApi from '../components/DeviceApi'
-import ResourceQItem from '../components/ResourceQItem'
-import ResourceBatteryChip from '../components/ResourceBatteryChip'
-import ResourceWidget from '../components/ResourceWidget'
+import DeviceApi from 'ething-quasar-core/src/components/DeviceApi'
+import ResourceQItem from 'ething-quasar-core/src/components/ResourceQItem'
+import ResourceBatteryChip from 'ething-quasar-core/src/components/ResourceBatteryChip'
+import ResourceWidget from 'ething-quasar-core/src/components/ResourceWidget'
 
 export default {
   name: 'PageDevice',
@@ -163,7 +163,7 @@ export default {
     },
 
     attributes () {
-      var props = this.$meta.get(this.resource).properties
+      var props = this.$ethingUI.meta.get(this.resource).properties
       var attributes = []
       var skippedFields = ['name', 'data', 'description']
       var detailledFields = ['id', 'modifiedDate', 'createdBy', 'type', 'extends', 'public', 'createdDate', 'methods', 'battery', 'location', 'interfaces', 'connected', 'lastSeenDate']

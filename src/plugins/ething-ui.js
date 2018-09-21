@@ -1,15 +1,9 @@
 import EThing from 'ething-js'
-import { LocalStorage, date, format, Notify } from 'quasar'
-const { humanStorageSize } = format
-import { SSE } from './ething-sse'
-import { meta } from './ething-meta'
-import promiseFinally from 'promise.prototype.finally'
+import { LocalStorage, Notify } from 'quasar'
+import { ethingUI } from 'ething-quasar-core'
 import qs from 'qs'
-import Modal from '../components/Modal'
 
-
-// necessary for older browsers
-promiseFinally.shim()
+console.log('ethingUI:', ethingUI)
 
 const AUTH_REFRESH_INTERVAL = 3600 * 1000
 
@@ -17,23 +11,11 @@ export var UI = {
   VERSION: process.env.VERSION
 }
 
-function getParameterByName(name, url) {
-    if (!url) url = window.location.href;
-    name = name.replace(/[\[\]]/g, "\\$&");
-    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
-        results = regex.exec(url);
-    if (!results) return null;
-    if (!results[2]) return '';
-    return decodeURIComponent(results[2].replace(/\+/g, " "));
-}
+var getParameterByName = ethingUI.utils.getParameterByName
 
 UI.kioskMode = getParameterByName('kiosk') === '1'
 
 export default ({ app, router, Vue, store }) => {
-
-  window.Vue = Vue
-
-  Vue.component('Modal', Modal)
 
   EThing.on('Notified', function(evt) {
     console.log(evt)
@@ -94,92 +76,12 @@ export default ({ app, router, Vue, store }) => {
       return dynamicServerUrl && !LocalStorage.get.item('ething.server.url')
     },
 
-    route (resource, more) {
-      if (resource instanceof EThing.File) {
-        if (/\.plot$/.test(resource.basename())) {
-          return '/chart/' + resource.id()
-        } else if (/image/.test(resource.mime())) {
-          return '/image/' + resource.id()
-        } else if ('application/javascript' == resource.mime()) {
-          return '/script/' + resource.id()
-        } else {
-          return '/text/' + resource.id()
-        }
-      }
-      else if (resource instanceof EThing.Table) {
-        if (more === 'chart') {
-          return '/chart/' + resource.id()
-        } else {
-          return '/table/' + resource.id()
-        }
-      }
-      else if (resource instanceof EThing.Device) {
-        return '/device/' + resource.id()
-      }
-      else if (resource instanceof EThing.Rule) {
-        return '/rule'
-      }
-    },
-
     open (resource, more) {
-      var route = this.route(resource, more)
+      var route = ethingUI.route(resource, more)
       if (route) {
         router.app.$router.push(route)
       }
     },
-
-    dateToString (d) {
-      if (typeof d === 'string') d = new Date(d)
-      if (!d) {
-        return '-'
-      }
-      var ts = d.getTime()
-      return date.formatDate(ts, 'YYYY-MM-DD HH:mm')
-    },
-
-    sizeToString (s) {
-      return humanStorageSize(s)
-    },
-
-    /**
-    return a formatted string describing an object
-    exemple:
-      { "key1": 0, "key2": "value"}
-      will output
-      "key1:  0, key2: value"
-    **/
-    describe (obj) {
-      var s = []
-
-      const toString = function (v) {
-        if (EThing.utils.isId(v)) {
-          const r = EThing.arbo.get(v)
-          if (r) {
-            return r.name()
-          }
-        }
-        if (Array.isArray(v)) {
-          return v.map( i => toString(i) ).join(' ')
-        }
-        if (typeof v === 'object' && v !== null) {
-          if (Object.keys(v).length === 0) return ''
-          /*if (typeof v.toString === 'function')
-            return v.toString()*/
-          return '{...}'
-        }
-        if (v===null) return ''
-        return String(v)
-      }
-
-      for (var k in obj) {
-        let v = obj[k]
-        var l = toString(v)
-
-        if (!l || typeof v === 'undefined') continue
-        s.push(k + ': ' + l)
-      }
-      return s.join(', ')
-    }
 
   })
 
@@ -309,8 +211,9 @@ export default ({ app, router, Vue, store }) => {
       var appInstance = app.router.app
       window.app = appInstance
       window.quasar = appInstance.$q
+      window.Vue = Vue
 
-      var metaDfr = meta.loadDefinitions()
+      var metaDfr = ethingUI.meta.loadDefinitions()
 
       var arboDfr = EThing.arbo.load(null, true).then( () => {
         console.log('ething arbo loaded !')
@@ -326,7 +229,7 @@ export default ({ app, router, Vue, store }) => {
 
         var sseReconnectFlag = false
 
-        SSE.onconnect = function(){
+        ethingUI.sse.onconnect = function(){
           if (sseReconnectFlag) {
             // reload the resource !
             EThing.arbo.load(null, true).then( () => {
@@ -336,11 +239,11 @@ export default ({ app, router, Vue, store }) => {
           }
         }
 
-        SSE.ondisconnect = function(){
+        ethingUI.sse.ondisconnect = function(){
           sseReconnectFlag = true
         }
 
-        SSE.start()
+        ethingUI.sse.start()
 
         var iat = LocalStorage.get.item('ething.auth.iat')
 

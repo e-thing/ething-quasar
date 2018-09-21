@@ -12,23 +12,10 @@
   },
   "dependencies": {
     "axios": "^0.18.0",
-    "cronstrue": "^1.31.0",
-    "csvtojson": "^2.0.6",
-    "ething-js": "^0.1.10",
-    "eventsource": "^1.0.5",
-    "file-saver": "^1.3.8",
-    "highcharts": "^6.1.0",
-    "json-pointer": "^0.6.0",
-    "jsonlint-mod": "^1.7.2",
-    "promise.prototype.finally": "^3.1.0",
+    "ething-quasar-core": "git+https://git@github.com/e-thing/ething-quasar-core.git",
     "qs": "^6.5.2",
-    "vue-codemirror": "^4.0.5",
     "vue-grid-layout": "^2.1.13",
-    "vue-highcharts": "0.0.10",
-    "vue-highlightjs": "^1.3.3",
-    "vue-i18n": "^7.3.3",
-    "vue-markdown": "^2.2.4",
-    "vuelidate": "^0.6.2"
+    "vue-i18n": "^7.3.3"
   },
   "devDependencies": {
     "babel-eslint": "^8.2.1",

@@ -7,7 +7,7 @@
 </template>
 
 <script>
-import Chart from '../components/Chart'
+import Chart from 'ething-quasar-core/src/components/Chart'
 
 export default {
   name: 'PageChart',

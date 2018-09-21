@@ -2,7 +2,7 @@
   <q-page padding>
 
     <div class="q-my-md q-display-1 q-display-1-opacity">
-      <q-icon :name="$meta.get(resource).icon" />
+      <q-icon :name="$ethingUI.meta.get(resource).icon" />
       {{ resource.basename() }}
     </div>
 
@@ -18,7 +18,7 @@
 
 <script>
 
-import ResourceEditor from '../components/ResourceEditor'
+import ResourceEditor from 'ething-quasar-core/src/components/ResourceEditor'
 
 export default {
   name: 'PageResource',
