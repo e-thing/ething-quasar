@@ -218,7 +218,7 @@ export default {
 
       if (file) {
         file.read().then( (config) => {
-          
+
           if(typeof config == 'string')
 						try{
 							config = JSON.parse(config);
@@ -279,6 +279,7 @@ export default {
     pin (info) {
 
       var widgetClass = info.widgetClass
+      if (!widgetClass) return
       var meta = widgetClass.meta || {}
       var minWidthUnit = 1
       var minHeightUnit = 1
@@ -308,11 +309,12 @@ export default {
 
     isEditable (item) {
       var widgetCls = this.$widget.find(item.type)
-      return widgetCls.meta && widgetCls.meta.options && Object.keys(widgetCls.meta.options).length
+      return widgetCls && widgetCls.meta && widgetCls.meta.options && Object.keys(widgetCls.meta.options).length
     },
 
     editItem (item) {
       var widgetCls = this.$widget.find(item.type)
+      if (!widgetCls) return
       var schema = Object.assign({type: 'object'}, widgetCls.meta.options)
 
       this.widgetEdit.item = item

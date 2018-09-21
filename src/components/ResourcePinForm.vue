@@ -5,7 +5,7 @@
       <div class="q-title q-my-md">Select the resource to pin</div>
       <div v-if="resources.length">
 
-        <div class="row gutter-sm">
+        <div class="row gutter-xs">
           <div class="resource" :class="resources.length>1 ? ('col-xs-12 col-sm-6 col-md-4 col-lg-3 ' + (pinned.find(id => id === r.id()) ? 'pinned' : '')) : 'col-xs-12'" v-for="r in resources" :key="r.id()">
             <q-card
               @click.native="select(r)"

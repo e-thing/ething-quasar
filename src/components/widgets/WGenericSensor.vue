@@ -16,7 +16,7 @@ export default {
 
         for(var key in data) {
           computedItems.append({
-            key,
+            label: key,
             unit: null,
             value: data[key]
           })

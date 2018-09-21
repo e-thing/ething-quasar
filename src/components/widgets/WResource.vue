@@ -21,7 +21,7 @@ export default {
         } else {
           var r = this.$store.getters['ething/get'](this.resource)
           if (!r) {
-            this.setError('the resource does not exist anymore !')
+            this.setError('the resource does not exist anymore ! ('+this.resource+')')
           }
           return r
         }

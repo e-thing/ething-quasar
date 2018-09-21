@@ -40,7 +40,7 @@
     <modal v-model="settingsModal" title="Settings" icon="settings" valid-btn-hide cancel-btn-label="Close" cancel-btn-color="faded">
 
       <q-field label="Arguments" class="q-my-md" orientation="vertical">
-        <q-input v-model="args" />
+        <q-input v-model="args" placeholder="--name=value -k --key" />
       </q-field>
 
     </modal>

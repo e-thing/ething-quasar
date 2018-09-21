@@ -6,15 +6,15 @@
       <span class="vertical-middle">
         {{ resource.basename() }}
       </span>
-      <q-chip small detail icon="access time" v-if="resource.lastSeenDate()">
+      <q-chip small square detail icon="access time" v-if="resource.lastSeenDate()" class="q-ml-sm">
         {{ $ui.dateToString(resource.lastSeenDate()) }}
       </q-chip>
-      <resource-battery-chip :resource="resource" class="vertical-middle"/>
-      <q-chip small detail icon="location_on" v-if="resource.location()">
+      <resource-battery-chip :resource="resource" class="vertical-middle q-ml-sm" square/>
+      <q-chip small square detail icon="location_on" v-if="resource.location()" class="q-ml-sm">
         {{ resource.location() }}
       </q-chip>
 
-      <q-btn class="float-right" flat rounded label="settings" icon="settings" @click="$router.push('/resource/' + resource.id())"/>
+      <q-btn class="float-right" flat label="settings" icon="settings" @click="$router.push('/resource/' + resource.id())"/>
     </div>
 
     <q-breadcrumbs v-if="createdBys.length" class="q-py-md">

@@ -21,8 +21,6 @@ export default {
       options: {
         attr: 'temperature',
         unit: '°C',
-        min: -20,
-        max: 40,
       }
     }
   }

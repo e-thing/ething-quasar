@@ -4,10 +4,10 @@
     <div class="row justify-between">
 
       <div>
-        <q-btn label="All" flat rounded color="faded" @click="category = ''"/>
-        <q-btn label="Sensor" flat rounded color="faded" @click="category = 'sensor'"/>
-        <q-btn label="Switch/Light" flat rounded color="faded" @click="category = 'switch'"/>
-        <q-btn label="Camera" flat rounded color="faded" @click="category = 'camera'"/>
+        <q-btn label="All" flat rounded :color="category==='' ? 'primary' : 'faded'" @click="category = ''"/>
+        <q-btn label="Sensor" flat rounded :color="category==='sensor' ? 'primary' : 'faded'" @click="category = 'sensor'"/>
+        <q-btn label="Switch/Light" flat rounded :color="category==='switch' ? 'primary' : 'faded'" @click="category = 'switch'"/>
+        <q-btn label="Camera" flat rounded :color="category==='camera' ? 'primary' : 'faded'" @click="category = 'camera'"/>
       </div>
 
       <div class="row">
@@ -29,7 +29,7 @@
       </div>
     </div>
 
-    <div v-if="listOrdered.length">
+    <div v-if="deviceFiltered.length">
       <q-list link no-border>
           <resource-q-item v-for="(item, index) in deviceFiltered" :key="index" :resource="item.device" :level="item.level" no-parent />
       </q-list>
@@ -42,7 +42,7 @@
           style="width:30vw;max-width:150px;"
         >
       </p>
-      <p class="text-faded">No devices installed</p>
+      <p class="text-faded">No devices found</p>
     </div>
 
   </q-page>
