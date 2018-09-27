@@ -18,7 +18,7 @@
             <template v-for="cat in categories">
               <q-list-header inset>{{ cat.name }}</q-list-header>
               <q-item v-close-overlay v-for="type in cat.types" :key="type.type" @click.native="create(type.name)">
-                <q-item-side :icon="$ethingUI.meta.get(type.type).icon" :color="$ethingUI.meta.get(type.type).color" />
+                <q-item-side :icon="$ethingUI.get(type.type).icon" :color="$ethingUI.get(type.type).color" />
                 <q-item-main>
                   <q-item-tile label>{{ type.label }}</q-item-tile>
                 </q-item-main>
@@ -64,7 +64,7 @@ export default {
 
     var categories = {}
 
-    var resourcesDefinitions = this.$ethingUI.meta.definitions.resources
+    var resourcesDefinitions = this.$ethingUI.definitions.resources
     Object.keys(resourcesDefinitions).forEach(name => {
       var meta = resourcesDefinitions[name]
       if (meta.inheritances.indexOf('resources/Device') !== -1 && !meta.virtual && !meta.disableCreation) {

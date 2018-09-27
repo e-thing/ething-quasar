@@ -33,19 +33,19 @@
           <dd>version: {{ $ui.VERSION }}</dd>
 
           <dt>Server</dt>
-          <dd>version: {{ $ethingUI.meta.info.VERSION }}</dd>
+          <dd>version: {{ $ethingUI.info.VERSION }}</dd>
 
           <dt>JS api</dt>
           <dd>version: {{ $ething.VERSION }}</dd>
 
           <dt>Python</dt>
-          <dd>version: {{ $ethingUI.meta.info.python.version }} type: {{ $ethingUI.meta.info.python.type }}</dd>
+          <dd>version: {{ $ethingUI.info.python.version }} type: {{ $ethingUI.info.python.type }}</dd>
 
           <dt>Platform</dt>
-          <dd>{{ $ethingUI.meta.info.platform.name }}</dd>
+          <dd>{{ $ethingUI.info.platform.name }}</dd>
 
           <dt>NodeJS</dt>
-          <dd>version: {{ $ethingUI.meta.info.nodejs.version }}</dd>
+          <dd>version: {{ $ethingUI.info.nodejs.version }}</dd>
 
         </dl>
 

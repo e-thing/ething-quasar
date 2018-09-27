@@ -2,7 +2,7 @@
   <q-page padding>
 
     <div class="q-my-md q-display-1 q-display-1-opacity">
-      <q-icon :name="$ethingUI.meta.get(resource).icon" class="vertical-middle"/>
+      <q-icon :name="$ethingUI.get(resource).icon" class="vertical-middle"/>
       <span class="vertical-middle">
         {{ resource.basename() }}
       </span>
@@ -81,7 +81,7 @@
     </q-card>
 
     <!-- api -->
-    <q-card  v-if="Object.keys($ethingUI.meta.get(resource).methods).length" class="q-my-md">
+    <q-card  v-if="Object.keys($ethingUI.get(resource).methods).length" class="q-my-md">
       <q-card-title class="bg-primary text-white">
         <q-icon name="mdi-database" class="vertical-middle"/>
         <span class="vertical-middle">
@@ -163,7 +163,7 @@ export default {
     },
 
     attributes () {
-      var props = this.$ethingUI.meta.get(this.resource).properties
+      var props = this.$ethingUI.get(this.resource).properties
       var attributes = []
       var skippedFields = ['name', 'data', 'description']
       var detailledFields = ['id', 'modifiedDate', 'createdBy', 'type', 'extends', 'public', 'createdDate', 'methods', 'battery', 'location', 'interfaces', 'connected', 'lastSeenDate']

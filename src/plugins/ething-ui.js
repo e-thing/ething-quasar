@@ -1,9 +1,7 @@
 import EThing from 'ething-js'
 import { LocalStorage, Notify } from 'quasar'
-import { ethingUI } from 'ething-quasar-core'
+import EThingUI from 'ething-quasar-core'
 import qs from 'qs'
-
-console.log('ethingUI:', ethingUI)
 
 const AUTH_REFRESH_INTERVAL = 3600 * 1000
 
@@ -11,7 +9,7 @@ export var UI = {
   VERSION: process.env.VERSION
 }
 
-var getParameterByName = ethingUI.utils.getParameterByName
+var getParameterByName = EThingUI.utils.getParameterByName
 
 UI.kioskMode = getParameterByName('kiosk') === '1'
 
@@ -77,7 +75,7 @@ export default ({ app, router, Vue, store }) => {
     },
 
     open (resource, more) {
-      var route = ethingUI.route(resource, more)
+      var route = EThingUI.route(resource, more)
       if (route) {
         router.app.$router.push(route)
       }
@@ -213,7 +211,7 @@ export default ({ app, router, Vue, store }) => {
       window.quasar = appInstance.$q
       window.Vue = Vue
 
-      var metaDfr = ethingUI.meta.loadDefinitions()
+      var metaDfr = EThingUI.loadMeta()
 
       var arboDfr = EThing.arbo.load(null, true).then( () => {
         console.log('ething arbo loaded !')
@@ -228,22 +226,55 @@ export default ({ app, router, Vue, store }) => {
         console.log('ething loaded !')
 
         var sseReconnectFlag = false
+        var sseNotification = null
 
-        ethingUI.sse.onconnect = function(){
+        EThingUI.SSE.on('connected', function(){
+
+          if (sseNotification) {
+    				sseNotification()
+    			}
+
           if (sseReconnectFlag) {
             // reload the resource !
             EThing.arbo.load(null, true).then( () => {
               console.log('ething arbo reloaded !')
               store.commit('ething/update')
             })
+
+            sseNotification = Notify.create({
+    					type: 'positive',
+    					color: 'positive',
+    				  message: 'Reconnected to server !',
+    					icon: 'thumb_up',
+    					position: 'top-right',
+    					onDismiss () {
+    						sseNotification = null
+    					}
+    				})
           }
-        }
+        })
 
-        ethingUI.sse.ondisconnect = function(){
+        EThingUI.SSE.on('disconnected', function(){
           sseReconnectFlag = true
-        }
 
-        ethingUI.sse.start()
+          if (sseNotification) {
+    				sseNotification()
+    			}
+
+          sseNotification = Notify.create({
+  					type: 'negative',
+  					color: 'negative',
+  				  message: 'Lost connection to server !',
+  					icon: 'report_problem',
+  					position: 'top-right',
+  					timeout: 0,
+  					onDismiss () {
+  						sseNotification = null
+  					}
+  				})
+        })
+
+        EThingUI.SSE.start()
 
         var iat = LocalStorage.get.item('ething.auth.iat')
 

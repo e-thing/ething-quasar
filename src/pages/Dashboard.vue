@@ -16,25 +16,27 @@
         >
       </p>
       <p class="text-faded">No widgets</p>
-      <q-btn icon="mdi-pin" label="pin resource" color="secondary" @click="pinModal = true"/>
+      <q-btn icon="mdi-pin" label="pin resource" color="secondary" @click="pinResourceModal = true"/>
+      <q-btn icon="mdi-pin" label="pin widget" color="secondary" @click="pinWidgetModal = true"/>
     </div>
 
     <div v-else>
       <q-window-resize-observable @resize="onResize" />
 
       <q-btn-group flat >
-        <q-btn flat icon="mdi-pin" label="pin resource" color="faded" @click="pinModal = true"/>
+        <q-btn flat icon="mdi-pin" label="pin resource" color="faded" @click="pinResourceModal = true"/>
+        <q-btn flat icon="mdi-pin" label="pin widget" color="faded" @click="pinWidgetModal = true"/>
         <q-btn flat icon="edit" :color="editing ? 'primary' : 'faded'" label="edit" @click="editing = !editing"/>
       </q-btn-group>
 
       <div v-if="smallScreen && !$q.platform.is.desktop && !$q.platform.is.electron && !$q.platform.is.chromeExt" class="smallScreenContainer">
-        <div v-for="(item) in layout" :key="item.i" :style="{height: (item.h * grid.rowHeight) + 'px'}" class="bg-white">
+        <div v-for="(layoutItem) in layout" :key="layoutItem.i" :style="{height: (layoutItem.h * grid.rowHeight) + 'px'}" class="bg-white">
           <div v-show="editing" class="absolute-center">
             <q-btn-group flat >
-              <q-btn flat icon="delete" color="negative" @click="removeItem(item)"/>
+              <q-btn flat icon="delete" color="negative" @click="removeItem(layoutItem)"/>
             </q-btn-group>
           </div>
-          <widget v-show="!editing" class="fit" :type="item.type" :options="item.options" />
+          <widget v-show="!editing" class="fit" :widgetClass="layoutItem.component" :widgetOptions="layoutItem.item.options" />
         </div>
       </div>
       <grid-layout v-else
@@ -43,39 +45,42 @@
         :row-height="grid.rowHeight"
         :is-draggable="draggable"
         :is-resizable="resizable"
-        :is-mirrored="false"
+        :is-mirrored="true"
         :vertical-compact="true"
         :margin="[10, 10]"
         :use-css-transforms="true"
       >
-          <grid-item v-for="(item) in layout" :key="item.i"
-             :x="item.x"
-             :y="item.y"
-             :w="item.w"
-             :h="item.h"
-             :i="item.i"
+          <grid-item v-for="(layoutItem) in layout" :key="layoutItem.i"
+             :x="layoutItem.x"
+             :y="layoutItem.y"
+             :w="layoutItem.w"
+             :h="layoutItem.h"
+             :i="layoutItem.i"
+             :minW="layoutItem.minW"
+             :minH="layoutItem.minH"
              @resized="resizedEvent"
              @moved="movedEvent"
              class="bg-white gditem"
           >
               <div v-show="editing" class="absolute fit widget-edit-layer">
                 <q-btn-group flat class="absolute-center" >
-                  <q-btn v-if="isEditable(item)" flat icon="settings" color="faded" @click="editItem(item)"/>
-                  <q-btn flat icon="delete" color="negative" @click="removeItem(item)"/>
+                  <q-btn v-if="isEditable(layoutItem)" flat icon="settings" color="faded" @click="editItem(layoutItem)"/>
+                  <q-btn flat icon="delete" color="negative" @click="removeItem(layoutItem)"/>
                 </q-btn-group>
               </div>
-              <div v-show="item.hasContentOverflow && !editing" class="absolute fit widget-overflow-layer">
+              <div v-show="layoutItem.hasContentOverflow && !editing" class="absolute fit widget-overflow-layer">
                 <div class="absolute-center">
                   This widget needs to be resized
                 </div>
               </div>
-              <widget :ref="'widget_' + item.i" :key="item.key" class="absolute fit" :type="item.type" :options="item.options" />
+              <widget :ref="'widget_' + layoutItem.i" :key="layoutItem.key" class="absolute fit" :widgetClass="layoutItem.component" :widgetOptions="layoutItem.item.options" />
           </grid-item>
       </grid-layout>
     </div>
 
-    <resource-pin-form v-model="pinModal" :pinned="pinnedResources" :maximized="smallScreen" @done="pin"/>
+    <resource-pin-form v-model="pinResourceModal" :pinned="pinnedResources" :maximized="smallScreen" @done="pin"/>
 
+    <widget-pin-form v-model="pinWidgetModal" :maximized="smallScreen" @done="pin"/>
 
     <modal v-model="widgetEdit.modal" title="Edit" icon="edit" :valid-btn-disable="widgetEdit.error" @valid="widgetEditDone">
 
@@ -95,6 +100,7 @@ import VueGridLayout from 'vue-grid-layout'
 import Widget from 'ething-quasar-core/src/components/Widget'
 import { debounce, extend } from 'quasar'
 import ResourcePinForm from '../components/ResourcePinForm'
+import WidgetPinForm from '../components/WidgetPinForm'
 
 var GridLayout = VueGridLayout.GridLayout
 var GridItem = VueGridLayout.GridItem
@@ -108,7 +114,8 @@ export default {
     GridLayout,
     GridItem,
     Widget,
-    ResourcePinForm
+    ResourcePinForm,
+    WidgetPinForm
   },
 
   data () {
@@ -122,7 +129,8 @@ export default {
           minWidth: 680 // in px, below this threshold, switch to small screen layout (ie, no grid)
         },
         idCnt: 1,
-        pinModal: false,
+        pinResourceModal: false,
+        pinWidgetModal: false,
         editing: false,
         smallScreen: false,
 
@@ -144,13 +152,13 @@ export default {
       return this.editing
     },
     pinnedResources () {
-      return this.layout.map(l => l.options.resource).filter(r => !!r)
+      return this.layout.map(l => l.item.options.resource).filter(r => !!r)
     }
   },
 
   methods: {
 
-    getItem (index) {
+    getLayoutItem (index) {
       for (var i in this.layout) {
         if (this.layout[i].i === index) {
           return this.layout[i]
@@ -160,11 +168,11 @@ export default {
 
     checkWidgetsContentOverflow () {
       for (let i in this.layout) {
-        let item = this.layout[i]
-        let component = this.$refs['widget_' + item.i][0]
+        let layoutItem = this.layout[i]
+        let component = this.$refs['widget_' + layoutItem.i][0]
         if (component) {
           setTimeout(() => {
-            this.$set(item, 'hasContentOverflow', component.hasContentOverflow())
+            this.$set(layoutItem, 'hasContentOverflow', component.hasContentOverflow())
           }, 200)
         }
       }
@@ -179,7 +187,7 @@ export default {
 
       if (component) {
         setTimeout(() => {
-          this.$set(this.getItem(i), 'hasContentOverflow', component.hasContentOverflow())
+          this.$set(this.getLayoutItem(i), 'hasContentOverflow', component.hasContentOverflow())
         }, 200)
       }
 
@@ -246,27 +254,68 @@ export default {
     },
 
     normalizeLayoutItem (item) {
-      return Object.assign({
-        i: String(this.idCnt++),
+
+      var widgetClass = null;
+
+      if (typeof item.widgetId !== 'undefined') {
+        widgetClass = this.$ethingUI.get(item.options.resource).widgets[item.widgetId]
+        if (typeof widgetClass === 'string') {
+          widgetClass = this.$ethingUI.findWidget(widgetClass)
+        }
+      } else {
+        widgetClass = this.$ethingUI.findWidget(item.widgetType)
+      }
+
+      var component = Vue.extend(widgetClass)
+
+      var metadata = component.options.metadata
+
+      var minWidth = 1
+      var minHeight = 1
+      if (metadata.minWidth) {
+        var widthUnit = Math.floor(this.grid.minWidth / this.grid.columnNb)
+        minWidth = Math.max(Math.min(Math.round(metadata.minWidth / widthUnit), this.grid.columnNb), 1)
+      }
+      if (metadata.minHeight) {
+        minHeight = Math.max(Math.round(metadata.minHeight / this.grid.rowHeight), 1)
+      }
+
+      if (!item.w || item.w<minWidth) item.w = minWidth
+      if (!item.h || item.h<minHeight) item.h = minHeight
+
+      if (!item.x) item.x = 0
+      if (!item.y) item.y = 0
+      if (!item.options) item.options = {}
+
+      var layoutItem = {
         key: 0,
-        x: 0,
-        y: 0,
-        w: 1,
-        h: 1,
         hasContentOverflow: false,
-        options: {}
-      }, item)
+        component: component,
+        cls: widgetClass,
+        item: item,
+        metadata,
+        x: item.x,
+        y: item.y,
+        w: item.w,
+        h: item.h,
+        minW: minWidth,
+        minH: minHeight,
+        i: String(this.idCnt++)
+      }
+
+      return layoutItem
     },
 
     save: debounce( function(){
       this.file( file => {
         var config = {}
-        config.widgets = this.layout.map( item => {
-          var w = Object.assign({}, item)
-          delete w.i
-          delete w.key
-          delete w.hasContentOverflow
-          return w
+        config.widgets = this.layout.map(layoutItem => {
+          return Object.assign(layoutItem.item, {
+            x: layoutItem.x,
+            y: layoutItem.y,
+            w: layoutItem.w,
+            h: layoutItem.h
+          })
         })
         file.write( JSON.stringify(config, null, 4) )
       })
@@ -278,48 +327,23 @@ export default {
 
     pin (info) {
 
-      var widgetClass = info.widgetClass
-      if (!widgetClass) return
-      var meta = widgetClass.meta || {}
-      var minWidthUnit = 1
-      var minHeightUnit = 1
-
-      // map pixel to unit
-      if (meta.minWidth) {
-        var widthUnit = Math.floor(this.grid.minWidth / this.grid.columnNb)
-        minWidthUnit = Math.max(Math.min(Math.round(meta.minWidth / widthUnit), this.grid.columnNb), 1)
-      }
-      if (meta.minHeight) {
-        minHeightUnit = Math.max(Math.round(meta.minHeight / this.grid.rowHeight), 1)
-      }
-
-      this.addWidget({
-        w: minWidthUnit,
-        h: minHeightUnit,
-        type: info.widget.type,
-        options: Object.assign({
-          resource: info.resource.id()
-        }, info.options, info.widget.options)
-      })
+      this.addWidget(info)
 
       this.save()
 
-      this.pinModal = false
+      this.pinResourceModal = false
     },
 
-    isEditable (item) {
-      var widgetCls = this.$ethingUI.widget.find(item.type)
-      return widgetCls && widgetCls.meta && widgetCls.meta.options && Object.keys(widgetCls.meta.options).length
+    isEditable (layoutItem) {
+      return Object.keys(layoutItem.metadata.options || {}).length>0
     },
 
-    editItem (item) {
-      var widgetCls = this.$ethingUI.widget.find(item.type)
-      if (!widgetCls) return
-      var schema = Object.assign({type: 'object'}, widgetCls.meta.options)
+    editItem (layoutItem) {
+      var schema = Object.assign({type: 'object'}, layoutItem.metadata.options)
 
-      this.widgetEdit.item = item
+      this.widgetEdit.layoutItem = layoutItem
       this.widgetEdit.schema = schema
-      this.widgetEdit.model = extend(true, {}, item.options)
+      this.widgetEdit.model = extend(true, {}, layoutItem.item.options)
       this.widgetEdit.error = false
       this.widgetEdit.modal = true
 
@@ -328,7 +352,7 @@ export default {
     widgetEditDone () {
       if (!this.widgetEdit.error) {
 
-        Object.assign(this.widgetEdit.item.options, this.widgetEdit.model)
+        Object.assign(this.widgetEdit.layoutItem.item.options, this.widgetEdit.model)
 
         this.widgetEdit.item.key++
 
@@ -338,8 +362,8 @@ export default {
       }
     },
 
-    removeItem (item) {
-      var index = this.layout.indexOf(item)
+    removeItem (layoutItem) {
+      var index = this.layout.indexOf(layoutItem)
       if (index !== -1) {
         this.layout.splice(index, 1)
         this.save()

@@ -11,13 +11,13 @@
               @click.native="select(r)"
               style="height: 100%" flat square
               class="cursor-pointer col-xs-12 col-sm-6"
-              :color="$ethingUI.meta.get(r).color"
+              :color="$ethingUI.get(r).color"
               text-color="white"
             >
               <q-card-title>
                 <div class="ellipsis">{{ r.basename() }}</div>
                 <div v-if="$ething.arbo.get(r.createdBy())" class="ellipsis" slot="subtitle">{{ $ething.arbo.get(r.createdBy()).basename() }}</div>
-                <q-icon slot="right" :name="$ethingUI.meta.get(r).icon" color="white"/>
+                <q-icon slot="right" :name="$ethingUI.get(r).icon" color="white"/>
               </q-card-title>
             </q-card>
           </div>
@@ -48,9 +48,9 @@
         />
       </div>
 
-      <div v-if="widgetClassMetaOptions" class="q-my-md">
+      <div v-if="widgetMetaOptions" class="q-my-md">
         <div class="q-title q-my-md">Options</div>
-        <form-schema :schema="widgetClassMetaOptions" v-model="options" @error="optionsError = $event"/>
+        <form-schema :schema="widgetMetaOptions" v-model="options" @error="optionsError = $event"/>
       </div>
 
     </div>
@@ -59,14 +59,12 @@
 </template>
 
 <script>
-import ResourceQItem from 'ething-quasar-core/src/components/ResourceQItem'
+
+import Vue from 'vue'
+
 
 export default {
   name: 'ResourcePinForm',
-
-  components: {
-    ResourceQItem
-  },
 
   props: ['pinned', 'value'],
 
@@ -84,43 +82,55 @@ export default {
 
     widgets () {
       if (!this.resource) return
-      return this.$ethingUI.meta.get(this.resource).widgets
+      var widgets = this.$ethingUI.get(this.resource).widgets || {}
+      var widgetsMap = {}
+      Object.keys(widgets).map(k => {
+        var widget = widgets[k]
+        if (typeof widget === 'string') {
+          widget = this.$ethingUI.findWidget(widget)
+        }
+        var component = Vue.extend(widget)
+        widgetsMap[k] = {
+          component,
+          metadata: component.options.metadata
+        }
+      })
+      return widgetsMap
     },
 
     widgetNames () {
       var widgets = this.widgets || {}
       return Object.keys(widgets).map(k => {
-        var w = widgets[k]
+        var metadata = widgets[k].metadata
         return {
-          label: w.label,
+          label: metadata.label,
           value: k
         }
       })
     },
 
-    widget () {
-      return this.widgets[this.widgetId]
-    },
-
-    widgetClass () {
-      return this.$ethingUI.widget.find(this.widget.type)
-    },
-
-    widgetClassMeta () {
-      return this.widgetClass ? this.widgetClass.meta : {}
-    },
-
-    widgetClassMetaOptions () {
-      return this.widgetClassMeta.options ? Object.assign({type: 'object'},this.widgetClassMeta.options) : null
+    widgetMetaOptions () {
+      var metadata = this.widgets[this.widgetId].metadata
+      if (metadata.options && metadata.options.properties && Object.keys(metadata.options.properties).length>0) {
+        if (metadata.options.properties.resource) {
+          // remove the resource property
+          var copy = extend(true, { type: 'object' }, metadata.options)
+          delete copy.properties['resource']
+          if (Object.keys(copy.properties).length>0) {
+            return copy
+          }
+        } else {
+          return Object.assign({ type: 'object' }, metadata.options)
+        }
+      }
     }
-
 
   },
 
   methods: {
 
     list () {
-      return this.$store.getters['ething/filter']((r) => Object.keys(this.$ethingUI.meta.get(r).widgets).length)
+      return this.$store.getters['ething/filter']((r) => Object.keys(this.$ethingUI.get(r).widgets).length)
     },
 
     select (resource) {
@@ -130,7 +140,7 @@ export default {
       this.optionsError = false
       this.widgetId = Object.keys(this.widgets)[0] // default
 
-      if (Object.keys(this.widgets).length === 1 && !this.widgetClassMetaOptions) {
+      if (Object.keys(this.widgets).length === 1 && !this.widgetMetaOptions) {
         this.done()
       }
     },
@@ -143,11 +153,10 @@ export default {
     done () {
       if (this.resource && this.widgetId) {
         this.$emit('done', {
-          resource: this.resource,
-          widget: this.widget,
           widgetId: this.widgetId,
-          widgetClass: this.widgetClass,
-          options: this.options
+          options: Object.assign({
+            resource: this.resource.id()
+          }, this.options)
         })
 
         this.resetList()

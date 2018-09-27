@@ -9,21 +9,21 @@
     <q-btn-dropdown color="primary" label="Create" icon="add" flat >
       <q-list link>
         <q-item v-close-overlay @click.native="create('File')">
-          <q-item-side :icon="$ethingUI.meta.get('resources/File').icon" :color="$ethingUI.meta.get('resources/File').color" />
+          <q-item-side :icon="$ethingUI.get('resources/File').icon" :color="$ethingUI.get('resources/File').color" />
           <q-item-main>
             <q-item-tile label>File</q-item-tile>
           </q-item-main>
         </q-item>
 
         <q-item v-close-overlay @click.native="create('Table')">
-          <q-item-side :icon="$ethingUI.meta.get('resources/Table').icon" :color="$ethingUI.meta.get('resources/Table').color" />
+          <q-item-side :icon="$ethingUI.get('resources/Table').icon" :color="$ethingUI.get('resources/Table').color" />
           <q-item-main>
             <q-item-tile label>Table</q-item-tile>
           </q-item-main>
         </q-item>
 
         <q-item v-close-overlay @click.native="$router.push('/chart')">
-          <q-item-side icon="mdi-chart-line" :color="$ethingUI.meta.get('resources/File').color" />
+          <q-item-side icon="mdi-chart-line" :color="$ethingUI.get('resources/File').color" />
           <q-item-main>
             <q-item-tile label>Chart</q-item-tile>
           </q-item-main>

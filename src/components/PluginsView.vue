@@ -33,12 +33,12 @@ export default {
 
       var plugins = []
 
-      for (var name in this.$ethingUI.meta.plugins) {
+      for (var name in this.$ethingUI.plugins) {
         plugins.push(Object.assign({
           name,
           loaded: false,
           loading: false
-        }, this.$ethingUI.meta.plugins[name]))
+        }, this.$ethingUI.plugins[name]))
       }
 
       return {

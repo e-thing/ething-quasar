@@ -8,7 +8,7 @@
       <q-list no-border>
         <q-collapsible indent v-for="rule in rules" :key="rule.id()" popup >
           <template slot="header">
-            <q-item-side :icon="$ethingUI.meta.get(rule).icon" inverted :color="color(rule)" />
+            <q-item-side :icon="$ethingUI.get(rule).icon" inverted :color="color(rule)" />
             <q-item-main>
               <q-item-tile label>{{ rule.basename() }}</q-item-tile>
               <q-item-tile sublabel>{{ $ethingUI.utils.dateToString(rule.modifiedDate()) }}</q-item-tile>
@@ -169,7 +169,7 @@ export default {
 
     color (rule) {
       if (rule.enabled()) {
-        return this.$ethingUI.meta.get(rule).color
+        return this.$ethingUI.get(rule).color
       } else {
         return 'faded'
       }
@@ -202,7 +202,7 @@ export default {
 
     listAttr (item, type) {
       var attrs = []
-      var schema = this.$ethingUI.meta.get(item.type)
+      var schema = this.$ethingUI.get(item.type)
 
       for(var k in item) {
         if (k!=='type') {

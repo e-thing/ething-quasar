@@ -1,5 +1,5 @@
-import core from 'ething-quasar-core'
+import EThingUI from 'ething-quasar-core'
 
 export default ({ app, router, Vue, store }) => {
-  Vue.use(core)
+  Vue.use(EThingUI)
 }

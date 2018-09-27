@@ -2,7 +2,7 @@
   <q-page padding>
 
     <div class="q-my-md q-display-1 q-display-1-opacity">
-      <q-icon :name="$ethingUI.meta.get(resource).icon" />
+      <q-icon :name="$ethingUI.get(resource).icon" />
       {{ resource.basename() }}
     </div>
 
