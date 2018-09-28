@@ -17,7 +17,7 @@
       </p>
       <p class="text-faded">No widgets</p>
       <q-btn icon="mdi-pin" label="pin resource" color="secondary" @click="pinResourceModal = true"/>
-      <q-btn icon="mdi-pin" label="pin widget" color="secondary" @click="pinWidgetModal = true"/>
+      <q-btn icon="mdi-pin" label="pin widget" color="secondary" @click="pinWidgetModal = true" class="q-ml-sm"/>
     </div>
 
     <div v-else>
