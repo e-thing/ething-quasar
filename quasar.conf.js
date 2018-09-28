@@ -36,12 +36,12 @@ module.exports = function (ctx) {
       // useNotifier: false,
       vueCompiler: true,
       extendWebpack (cfg) {
-        cfg.module.rules.push({
+        /*cfg.module.rules.push({
           enforce: 'pre',
           test: /\.(js|vue)$/,
           loader: 'eslint-loader',
           exclude: /(node_modules|quasar)/
-        })
+        })*/
       }
     },
     devServer: {

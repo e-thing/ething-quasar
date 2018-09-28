@@ -58,8 +58,6 @@
 
 <script>
 
-import FileSaver from 'file-saver'
-
 export default {
     name: 'BackupView',
 
@@ -85,7 +83,7 @@ export default {
           dataType: 'json'
         }).then((data) => {
 
-          FileSaver.saveAs(data, 'ething_data.json')
+          this.$ethingUI.utils.saveAs(data, 'ething_data.json')
 
         }).catch(err => {
           console.error(err)

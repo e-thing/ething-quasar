@@ -16,7 +16,7 @@
     >
 
       <template slot="top-left" slot-scope="props">
-        <div class="q-title q-title-opacity">{{ resource.basename() }} <small v-if="createdBy" class="cursor-pointer text-faded" @click="$ui.open(createdBy)"> - {{ createdBy.basename() }}</small></div>
+        <div class="q-title q-title-opacity">{{ resource.basename() }} <small v-if="createdBy" class="cursor-pointer text-faded" @click="$ethingUI.open(createdBy)"> - {{ createdBy.basename() }}</small></div>
       </template>
 
       <template slot="top-right" slot-scope="props">
@@ -31,7 +31,7 @@
           flat round dense
           icon="mdi-chart-line"
           color="faded"
-          @click="$ui.open(resource, 'chart')"
+          @click="$ethingUI.open(resource, 'chart')"
           :disable="isEmpty"
         />
         <q-btn

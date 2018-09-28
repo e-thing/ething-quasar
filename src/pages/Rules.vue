@@ -52,7 +52,7 @@
                 <template v-if="attr.type === 'resources'">
                   <template v-for="(r, j) in resolve(attr.value)">
                     <span v-if="j > 0">, </span>
-                    <span class="cursor-pointer" @click.stop="$ui.open(r)">{{ r.basename() }}</span>
+                    <span class="cursor-pointer" @click.stop="$ethingUI.open(r)">{{ r.basename() }}</span>
                   </template>
                 </template>
                 <template v-else>{{ attr.label }}</template>
@@ -72,7 +72,7 @@
                 <template v-if="attr.type === 'resources'">
                   <template v-for="(r, j) in resolve(attr.value)">
                     <span v-if="j > 0">, </span>
-                    <span class="cursor-pointer" @click.stop="$ui.open(r)">{{ r.basename() }}</span>
+                    <span class="cursor-pointer" @click.stop="$ethingUI.open(r)">{{ r.basename() }}</span>
                   </template>
                 </template>
                 <template v-else>{{ attr.label }}</template>
@@ -92,7 +92,7 @@
                 <template v-if="attr.type === 'resources'">
                   <template v-for="(r, j) in resolve(attr.value)">
                     <span v-if="j > 0">, </span>
-                    <span class="cursor-pointer" @click.stop="$ui.open(r)">{{ r.basename() }}</span>
+                    <span class="cursor-pointer" @click.stop="$ethingUI.open(r)">{{ r.basename() }}</span>
                   </template>
                 </template>
                 <template v-else>{{ attr.label }}</template>

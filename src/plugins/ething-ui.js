@@ -74,13 +74,6 @@ export default ({ app, router, Vue, store }) => {
       return dynamicServerUrl && !LocalStorage.get.item('ething.server.url')
     },
 
-    open (resource, more) {
-      var route = EThingUI.route(resource, more)
-      if (route) {
-        router.app.$router.push(route)
-      }
-    },
-
   })
 
   app.data = app.data || {}

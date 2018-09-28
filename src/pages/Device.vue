@@ -17,10 +17,12 @@
       <q-btn class="float-right" flat label="settings" icon="settings" @click="$router.push('/resource/' + resource.id())"/>
     </div>
 
-    <q-breadcrumbs v-if="createdBys.length" class="q-py-md">
-      <q-breadcrumbs-el v-for="(item, index) in createdBys" :key="index" :label="item.basename()" :to="$ethingUI.route(item)" />
-      <q-breadcrumbs-el label="" />
-    </q-breadcrumbs>
+    <div v-if="createdBys.length" class="q-py-md">
+      <template v-for="(item, index) in createdBys">
+        <span v-if="index>0"> - </span>
+        <span class="createdby-item" @click="$ethingUI.open(item)">{{ item.basename() }}</span>
+      </template>
+    </div>
 
     <!-- widget -->
     <!-- <resource-widget :resource="resource" no-header no-footer inline/> -->
@@ -204,6 +206,7 @@ export default {
 </script>
 
 <style lang="stylus">
+@import '~variables'
 
 .attributes
   .key.detailled, .value.detailled
@@ -211,5 +214,11 @@ export default {
   &.detailled
     .key.detailled, .value.detailled
       display block
+
+.createdby-item
+  color $faded
+  cursor pointer
+  &:hover
+    color $primary
 
 </style>

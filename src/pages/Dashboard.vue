@@ -236,7 +236,7 @@ export default {
             }
 
           var layout = config.widgets || []
-          layout = layout.map(this.normalizeLayoutItem)
+          layout = layout.map(this.normalizeLayoutItem).filter(l => !!l)
 
           this.layout = layout
 
@@ -254,56 +254,68 @@ export default {
     },
 
     normalizeLayoutItem (item) {
+      try {
+        var widgetClass = null;
 
-      var widgetClass = null;
-
-      if (typeof item.widgetId !== 'undefined') {
-        widgetClass = this.$ethingUI.get(item.options.resource).widgets[item.widgetId]
-        if (typeof widgetClass === 'string') {
-          widgetClass = this.$ethingUI.findWidget(widgetClass)
+        if (typeof item.widgetId !== 'undefined') {
+          widgetClass = this.$ethingUI.get(item.options.resource).widgets[item.widgetId]
+          if (typeof widgetClass === 'string') {
+            var widgetClassName = widgetClass
+            widgetClass = this.$ethingUI.findWidget(widgetClassName)
+            if (!widgetClass) {
+              console.error('unknown widget type: ' + widgetClassName)
+              return
+            }
+          }
+        } else {
+          widgetClass = this.$ethingUI.findWidget(item.widgetType)
+          if (!widgetClass) {
+            console.error('unknown widget type: ' + item.widgetType)
+            return
+          }
         }
-      } else {
-        widgetClass = this.$ethingUI.findWidget(item.widgetType)
+
+        var component = Vue.extend(widgetClass)
+
+        var metadata = component.options.metadata
+
+        var minWidth = 1
+        var minHeight = 1
+        if (metadata.minWidth) {
+          var widthUnit = Math.floor(this.grid.minWidth / this.grid.columnNb)
+          minWidth = Math.max(Math.min(Math.round(metadata.minWidth / widthUnit), this.grid.columnNb), 1)
+        }
+        if (metadata.minHeight) {
+          minHeight = Math.max(Math.round(metadata.minHeight / this.grid.rowHeight), 1)
+        }
+
+        if (!item.w || item.w<minWidth) item.w = minWidth
+        if (!item.h || item.h<minHeight) item.h = minHeight
+
+        if (!item.x) item.x = 0
+        if (!item.y) item.y = 0
+        if (!item.options) item.options = {}
+
+        var layoutItem = {
+          key: 0,
+          hasContentOverflow: false,
+          component: component,
+          cls: widgetClass,
+          item: item,
+          metadata,
+          x: item.x,
+          y: item.y,
+          w: item.w,
+          h: item.h,
+          minW: minWidth,
+          minH: minHeight,
+          i: String(this.idCnt++)
+        }
+
+        return layoutItem
+      } catch(err) {
+        console.error(err)
       }
-
-      var component = Vue.extend(widgetClass)
-
-      var metadata = component.options.metadata
-
-      var minWidth = 1
-      var minHeight = 1
-      if (metadata.minWidth) {
-        var widthUnit = Math.floor(this.grid.minWidth / this.grid.columnNb)
-        minWidth = Math.max(Math.min(Math.round(metadata.minWidth / widthUnit), this.grid.columnNb), 1)
-      }
-      if (metadata.minHeight) {
-        minHeight = Math.max(Math.round(metadata.minHeight / this.grid.rowHeight), 1)
-      }
-
-      if (!item.w || item.w<minWidth) item.w = minWidth
-      if (!item.h || item.h<minHeight) item.h = minHeight
-
-      if (!item.x) item.x = 0
-      if (!item.y) item.y = 0
-      if (!item.options) item.options = {}
-
-      var layoutItem = {
-        key: 0,
-        hasContentOverflow: false,
-        component: component,
-        cls: widgetClass,
-        item: item,
-        metadata,
-        x: item.x,
-        y: item.y,
-        w: item.w,
-        h: item.h,
-        minW: minWidth,
-        minH: minHeight,
-        i: String(this.idCnt++)
-      }
-
-      return layoutItem
     },
 
     save: debounce( function(){
@@ -322,7 +334,9 @@ export default {
     }, 500),
 
     addWidget (attr) {
-      this.layout.push(this.normalizeLayoutItem(attr))
+      var l  = this.normalizeLayoutItem(attr)
+      if (l)
+        this.layout.push(l)
     },
 
     pin (info) {
@@ -354,7 +368,7 @@ export default {
 
         Object.assign(this.widgetEdit.layoutItem.item.options, this.widgetEdit.model)
 
-        this.widgetEdit.item.key++
+        this.widgetEdit.layoutItem.key++
 
         this.widgetEdit.modal = false
 

@@ -24,19 +24,6 @@
 import Vue from 'vue'
 
 
-function is_resource_widget (widget) {
-  // return true if it inherits of WResource
-  if (widget.name === 'WResource') return true
-  if (widget.mixins) {
-    for (var i in widget.mixins) {
-      if (is_resource_widget(widget.mixins[i])) {
-        return true
-      }
-    }
-  }
-  return false
-}
-
 function list_mixins (widget) {
   var mixins = [widget.name]
   if (widget.mixins) {
@@ -44,7 +31,10 @@ function list_mixins (widget) {
       mixins = mixins.concat(list_mixins(widget.mixins[i]))
     }
   }
-  return mixins.filter((value, index, self) => {
+  if (widget.extends) {
+    mixins.push(widget.extends.name)
+  }
+  return mixins.filter((value, index, self) => { // uniq
       return self.indexOf(value) === index;
   })
 }
@@ -63,7 +53,7 @@ export default {
   props: ['value'],
 
   data () {
-
+    
     var widgets = filter_no_resource_widget_only(this.$ethingUI.widgets).map(w => {
       var component = Vue.extend(w)
       return {
