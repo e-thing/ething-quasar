@@ -84,7 +84,7 @@ export default ({ app, router, Vue, store }) => {
 
     reset () {
       app.data.state = 'begin'
-      SSE.stop()
+      EThingUI.SSE.stop()
       LocalStorage.remove('ething.auth.iat')
       if (this.authRefreshTimer) {
         clearInterval(this.authRefreshTimer)
