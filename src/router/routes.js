@@ -44,13 +44,6 @@ export default [
         }
       },
       {
-        path: 'script/:id',
-        component: () => import('pages/Script'),
-        meta: {
-          back: true
-        }
-      },
-      {
         path: 'image/:id',
         component: () => import('pages/Image'),
         meta: {

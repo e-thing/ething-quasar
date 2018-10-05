@@ -1,5 +1,7 @@
 // Configuration for your app
 var pjson = require('./package.json')
+const webpack = require('webpack')
+const path = require('path')
 
 module.exports = function (ctx) {
 
@@ -36,12 +38,18 @@ module.exports = function (ctx) {
       // useNotifier: false,
       vueCompiler: true,
       extendWebpack (cfg) {
+
         /*cfg.module.rules.push({
           enforce: 'pre',
           test: /\.(js|vue)$/,
           loader: 'eslint-loader',
           exclude: /(node_modules|quasar)/
         })*/
+
+        cfg.plugins.push(new webpack.DllReferencePlugin({
+            context: path.join(__dirname, './node_modules/ething-quasar-dll'),
+            manifest: require("./node_modules/ething-quasar-dll/dist/vendor-manifest.json")
+        }))
       }
     },
     devServer: {
