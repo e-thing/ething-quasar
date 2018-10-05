@@ -108,7 +108,6 @@ export default {
         this.loading = true
 
         this.$ething.settings.get().then((settings) => {
-          console.log(settings)
 
           for (var name in this.plugins) {
             if (typeof settings[name] == 'undefined') {
@@ -124,8 +123,6 @@ export default {
       onSave () {
 
         var settings = this.settings
-
-        console.log(settings)
 
         this.saving = true
         this.saveError = false

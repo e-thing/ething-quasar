@@ -9,20 +9,34 @@
       <div v-if="apikeys.length > 0">
 
         <div class="item row items-center gutter-x-sm">
-          <div class="date col-xs-5 col-sm-4 col-md-3 text-secondary ellipsis">
+          <div class="name col-xs-2 col-sm-2 col-md-2 text-secondary ellipsis">
+            name
+          </div>
+          <div class="date col-xs-0 col-sm-0 col-md-2 text-secondary ellipsis">
             date
           </div>
-          <div class="key col text-secondary">
+          <div class="key col col-sm-5 col-md-5 col-lg-5 text-secondary">
             value
+          </div>
+          <div class="scope col gt-xs text-secondary">
+            scope
           </div>
         </div>
 
-        <div class="item row items-center gutter-x-sm" v-for="apikey in apikeys" :key="apikey.id">
-          <div class="date col-xs-5 col-sm-4 col-md-3 text-faded ellipsis">
+        <div class="item row items-center gutter-x-sm q-mt-md" v-for="apikey in apikeys" :key="apikey.id">
+          <div class="date col-xs-2 col-sm-2 col-md-2 text-faded ellipsis">
+            {{ apikey.name }}
+          </div>
+          <div class="date col-xs-0 col-sm-0 col-md-2 text-faded ellipsis">
             {{ $ethingUI.utils.dateToString(apikey.modifiedDate) }}
           </div>
-          <div class="key col">
+          <div class="key col col-sm-5 col-md-5 col-lg-5">
             {{ apikey.value }}
+          </div>
+          <div class="scope col gt-xs text-faded ellipsis">
+            <div v-for="scope in splitScopes(apikey.scope)">
+              {{ scope }}
+            </div>
           </div>
           <div class="controls col-auto">
             <q-btn icon="settings" round flat dense color="faded" @click="edit(apikey)"/>
@@ -37,7 +51,7 @@
 
     <modal v-model="modal" :title="editing ? 'Edit API key' : 'Create a new API key'" icon="mdi-key" :valid-btn-label="editing ? 'Edit' : 'Create'" cancel-btn-label="Cancel" :valid-btn-disable="error || addLoading" @valid="add">
 
-      <form-schema :schema="schema" v-model="model" @error="error = $event"/>
+      <form-schema :key="formKey" :schema="schema" v-model="model" @error="error = $event"/>
 
       <q-alert
           v-if="serverError"
@@ -62,6 +76,7 @@ export default {
         return {
           loading: true,
           apikeys: [],
+          formKey: 0,
           schema: {
             type: 'object',
             additionalProperties: false,
@@ -110,6 +125,7 @@ export default {
         this.error = false
         this.model = {}
         this.editing = false
+        this.formKey++
       },
 
       add () {
@@ -118,8 +134,6 @@ export default {
 
         this.addLoading = true
         this.serverError = false
-
-        console.log(apikey)
 
         EThing.request({
           method: this.editing ? 'PATCH' : 'POST',
@@ -130,7 +144,19 @@ export default {
 
           var apikeys = this.apikeys || []
 
-          apikeys.push(apikey)
+          var replaced = false
+          for (var i in apikeys) {
+            if (apikeys[i].id == apikey.id) {
+              apikeys[i] = apikey
+              replaced = true
+              break
+            }
+          }
+
+          if (!replaced) {
+            apikeys.push(apikey)
+          }
+
           this.apikeys = apikeys
 
           this.modal = false
@@ -171,6 +197,10 @@ export default {
           console.error(err)
         })
       },
+
+      splitScopes (scopes) {
+        return scopes.split(' ')
+      }
 
     },
 

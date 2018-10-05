@@ -355,21 +355,7 @@ export default {
       },
       deep: true
     }
-
-    /*columns: function (col, oldCol) {
-      console.log('columns',col, oldCol)
-      // calculate the new keys
-      var newKeys = []
-      col.forEach(c => {
-        if (!oldCol.find(oc => oc.name === c.name)){
-          newKeys.push(c.name)
-        }
-      })
-
-      if (newKeys.length) {
-        this.visibleColumns = this.visibleColumns.concat(newKeys)
-      }
-    }*/
+    
   },
 
   methods: {

@@ -16,7 +16,7 @@ UI.kioskMode = getParameterByName('kiosk') === '1'
 export default ({ app, router, Vue, store }) => {
 
   EThing.on('Notified', function(evt) {
-    console.log(evt)
+    console.log('[app] notification received', evt)
     Notify.create({
       type: 'info',
       message: evt.data.message,
@@ -150,7 +150,7 @@ export default ({ app, router, Vue, store }) => {
     }
   })
 
-  console.log('ething configuring ...')
+  console.log('[app] ething configuring ...')
 
   EThing.axios.defaults.withCredentials = true
 
@@ -175,12 +175,12 @@ export default ({ app, router, Vue, store }) => {
 
     if (app.data.state === 'begin' && to.name !== 'login') {
 
-      console.log('begin...')
+      console.log('[app] begin...')
 
       // check if there is a stored session
 
       if (UI.needAuth()) {
-        console.warn('no serverUrl found ! need to create a new session');
+        console.warn('[app] no serverUrl found ! need to create a new session');
 
         next({
           name: 'login',
@@ -197,7 +197,7 @@ export default ({ app, router, Vue, store }) => {
 
       app.data.state = 'initializing'
 
-      console.log('initializing...');
+      console.log('[app] initializing...');
 
       var appInstance = app.router.app
       window.app = appInstance
@@ -207,7 +207,7 @@ export default ({ app, router, Vue, store }) => {
       var metaDfr = EThingUI.loadMeta()
 
       var arboDfr = EThing.arbo.load(null, true).then( () => {
-        console.log('ething arbo loaded !')
+        console.log('[app] ething arbo loaded !')
         store.commit('ething/update')
       })
 
@@ -216,10 +216,11 @@ export default ({ app, router, Vue, store }) => {
         // everything went ok !
         app.data.state = 'ok'
 
-        console.log('ething loaded !')
+        console.log('[app] ething loaded !')
 
         var sseReconnectFlag = false
         var sseNotification = null
+        var sseNotificationType = null
 
         EThingUI.SSE.on('connected', function(){
 
@@ -230,7 +231,7 @@ export default ({ app, router, Vue, store }) => {
           if (sseReconnectFlag) {
             // reload the resource !
             EThing.arbo.load(null, true).then( () => {
-              console.log('ething arbo reloaded !')
+              console.log('[app] ething arbo reloaded !')
               store.commit('ething/update')
             })
 
@@ -239,32 +240,36 @@ export default ({ app, router, Vue, store }) => {
     					color: 'positive',
     				  message: 'Reconnected to server !',
     					icon: 'thumb_up',
-    					position: 'top-right',
+    					position: 'bottom-right',
     					onDismiss () {
     						sseNotification = null
     					}
     				})
+            sseNotificationType = 'connected'
           }
         })
 
         EThingUI.SSE.on('disconnected', function(){
           sseReconnectFlag = true
 
-          if (sseNotification) {
-    				sseNotification()
-    			}
+          if (sseNotificationType !== 'disconnected') {
+            if (sseNotification) {
+      				sseNotification()
+      			}
 
-          sseNotification = Notify.create({
-  					type: 'negative',
-  					color: 'negative',
-  				  message: 'Lost connection to server !',
-  					icon: 'report_problem',
-  					position: 'top-right',
-  					timeout: 0,
-  					onDismiss () {
-  						sseNotification = null
-  					}
-  				})
+            sseNotification = Notify.create({
+    					type: 'negative',
+    					color: 'negative',
+    				  message: 'Lost connection to server !',
+    					icon: 'report_problem',
+    					position: 'bottom-right',
+    					timeout: 0,
+    					onDismiss () {
+    						sseNotification = null
+    					}
+    				})
+            sseNotificationType = 'disconnected'
+          }
         })
 
         EThingUI.SSE.start()

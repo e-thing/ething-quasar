@@ -105,7 +105,7 @@ export default {
         if (this.contentDate) {
           if (currentContentDate > this.contentDate && currentContentDate.getTime() != this.warnedContentDate) {
             this.warnedContentDate = currentContentDate.getTime()
-            console.log('the content has been updated !')
+            // console.log('the content has been updated !')
             if (this.dirty) {
               // Warn the user
               if (this.contentModifiedNotification) {
@@ -164,7 +164,7 @@ export default {
     },
 
     setLangage (langage) {
-      console.log('setLangage = ' + langage)
+      // console.log('setLangage = ' + langage)
       if (/^[^\/]+\/[^\/]+$/.test(langage)) {
         // mime
         for(var l in this.langages) {

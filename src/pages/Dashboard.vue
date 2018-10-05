@@ -17,7 +17,7 @@
       </p>
       <p class="text-faded">No widgets</p>
       <q-btn icon="mdi-pin" label="pin resource" color="secondary" @click="pinResourceModal = true"/>
-      <q-btn icon="mdi-pin" label="pin widget" color="secondary" @click="pinWidgetModal = true"/>
+      <q-btn icon="mdi-pin" label="pin widget" color="secondary" @click="pinWidgetModal = true" class="q-ml-md"/>
     </div>
 
     <div v-else>
@@ -263,14 +263,14 @@ export default {
             var widgetClassName = widgetClass
             widgetClass = this.$ethingUI.findWidget(widgetClassName)
             if (!widgetClass) {
-              console.error('unknown widget type: ' + widgetClassName)
+              console.error('[dashboard] unknown widget type: ' + widgetClassName)
               return
             }
           }
         } else {
           widgetClass = this.$ethingUI.findWidget(item.widgetType)
           if (!widgetClass) {
-            console.error('unknown widget type: ' + item.widgetType)
+            console.error('[dashboard] unknown widget type: ' + item.widgetType)
             return
           }
         }

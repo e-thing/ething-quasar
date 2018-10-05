@@ -147,7 +147,6 @@ export default {
 
         if (files && files.length) {
           var file = files[0]
-          console.log(file)
 
           this.importFileReadLoading = true
 
