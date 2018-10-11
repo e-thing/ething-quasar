@@ -2,6 +2,7 @@
 var pjson = require('./package.json')
 const webpack = require('webpack')
 const path = require('path')
+const CopyWebpackPlugin = require('copy-webpack-plugin')
 
 module.exports = function (ctx) {
 
@@ -46,8 +47,10 @@ module.exports = function (ctx) {
           exclude: /(node_modules|quasar)/
         })*/
 
+        cfg.plugins.push(new CopyWebpackPlugin([path.resolve(__dirname, './node_modules/ething-quasar-dll/dist/vendor.js')]))
+
         cfg.plugins.push(new webpack.DllReferencePlugin({
-            context: path.join(__dirname, './node_modules/ething-quasar-dll'),
+            context: path.join(__dirname, '.'),
             manifest: require("./node_modules/ething-quasar-dll/dist/vendor-manifest.json")
         }))
       }
