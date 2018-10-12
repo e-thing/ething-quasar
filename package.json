@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "axios": "^0.18.0",
-    "ething-js": "^0.1.10",
+    "ething-js": "^0.1.12",
     "ething-quasar-core": "e-thing/ething-quasar-core#master",
     "ething-quasar-dll": "e-thing/ething-quasar-dll#master",
     "qs": "^6.5.2",

@@ -103,17 +103,19 @@ export default ({ app, router, Vue, store }) => {
     },
 
     logout () {
-      return EThing.axios.request({
+      dfr = EThing.axios.request({
         method: 'get',
         url: EThing.config.serverUrl + '/auth/logout',
-      }).finally(() => {
-        this.disconnect()
       })
+
+      this.disconnect()
+
+      return dfr
     },
 
     login (serverUrl, username, password) {
 
-      return EThing.axios.request({
+      return EThing.axios.request({ 
         method: 'post',
         url: serverUrl + '/auth/password',
         headers: { 'content-type': 'application/x-www-form-urlencoded' },
