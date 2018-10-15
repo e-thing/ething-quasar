@@ -44,9 +44,6 @@
           <dt>Platform</dt>
           <dd>{{ $ethingUI.info.platform.name }}</dd>
 
-          <dt>NodeJS</dt>
-          <dd>version: {{ $ethingUI.info.nodejs.version }}</dd>
-
         </dl>
 
       </q-tab-pane>
