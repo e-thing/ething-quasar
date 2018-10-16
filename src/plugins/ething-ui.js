@@ -103,7 +103,7 @@ export default ({ app, router, Vue, store }) => {
     },
 
     logout () {
-      dfr = EThing.axios.request({
+      var dfr = EThing.axios.request({
         method: 'get',
         url: EThing.config.serverUrl + '/auth/logout',
       })
@@ -115,7 +115,7 @@ export default ({ app, router, Vue, store }) => {
 
     login (serverUrl, username, password) {
 
-      return EThing.axios.request({ 
+      return EThing.axios.request({
         method: 'post',
         url: serverUrl + '/auth/password',
         headers: { 'content-type': 'application/x-www-form-urlencoded' },
@@ -208,12 +208,14 @@ export default ({ app, router, Vue, store }) => {
 
       var metaDfr = EThingUI.loadMeta()
 
+      var settingsDfr = EThingUI.loadSettings()
+
       var arboDfr = EThing.arbo.load(null, true).then( () => {
         console.log('[app] ething arbo loaded !')
         store.commit('ething/update')
       })
 
-      Promise.all([arboDfr, metaDfr]).then( () => {
+      Promise.all([arboDfr, metaDfr, settingsDfr]).then( () => {
 
         // everything went ok !
         app.data.state = 'ok'

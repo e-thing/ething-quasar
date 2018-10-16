@@ -1,7 +1,7 @@
 {
   "name": "ething-quasar",
-  "version": "1.0.0",
-  "description": "A Quasar Framework app",
+  "version": "0.1.0",
+  "description": "EThing app based on the quasar framework",
   "productName": "EThing App",
   "cordovaId": "org.cordova.quasar.app",
   "author": "Adrien Mezerette <a.mezerette@gmail.com>",
@@ -24,7 +24,7 @@
     "electron": "1.8.3",
     "electron-debug": "1.5.0",
     "electron-devtools-installer": "2.2.1",
-    "electron-packager": "11.1.0",
+    "electron-packager": "^12.2.0",
     "eslint": "^4.18.2",
     "eslint-config-standard": "^11.0.0",
     "eslint-friendly-formatter": "^3.0.0",

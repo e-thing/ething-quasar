@@ -10,7 +10,6 @@ module.exports = function (ctx) {
     // app plugins (/src/plugins)
     plugins: [
       'i18n',
-      'axios',
       'ething-ui',
       'ething-quasar-core'
     ],
@@ -51,7 +50,7 @@ module.exports = function (ctx) {
 
         cfg.plugins.push(new webpack.DllReferencePlugin({
             context: path.join(__dirname, '.'),
-            manifest: require("./node_modules/ething-quasar-dll/dist/vendor-manifest.json")
+            manifest: path.join(__dirname, "./node_modules/ething-quasar-dll/dist/vendor-manifest.json")
         }))
       }
     },
