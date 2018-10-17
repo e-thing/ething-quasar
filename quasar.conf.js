@@ -11,7 +11,8 @@ module.exports = function (ctx) {
     plugins: [
       'i18n',
       'ething-ui',
-      'ething-quasar-core'
+      'ething-quasar-core',
+      'virtualKeyboard'
     ],
     css: [
       'app.styl'

@@ -85,6 +85,7 @@
       <keep-alive v-else include="PageDashboard,PageDevices,PageData">
         <router-view/>
       </keep-alive>
+      <v-keyboard v-if="vKeyboardEnabled"/>
     </q-page-container>
   </q-layout>
 </template>
@@ -104,6 +105,9 @@ export default {
     },
     refreshEnabled () {
       return this.$q.platform.has.touch && (!this.$q.platform.is.desktop || this.$ui.kioskMode)
+    },
+    vKeyboardEnabled () {
+      return this.$ui.virtualKeyboardEnabled
     }
   },
   methods: {

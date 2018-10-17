@@ -11,7 +11,8 @@ export var UI = {
 
 var getParameterByName = EThingUI.utils.getParameterByName
 
-UI.kioskMode = getParameterByName('kiosk') === '1'
+UI.kioskMode = process.env.KIOSK || getParameterByName('kiosk') === '1'
+UI.virtualKeyboardEnabled = process.env.VIRTUALKEYBOARD || getParameterByName('virtualkeyboard') === '1'
 
 export default ({ app, router, Vue, store }) => {
 
