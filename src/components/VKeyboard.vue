@@ -26,8 +26,6 @@ var keyboard = null;
 var focusHandler = function(event) {
   if (!keyboard) return // no keyboard installed !
 
-  console.log('install vkeyboard')
-
   var nodetype = event.target.nodeName.toLowerCase();
   if(nodetype == 'input' || nodetype == 'textarea') {
 
