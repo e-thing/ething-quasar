@@ -5,24 +5,68 @@
       <div class="q-title q-my-md">Select the resource to pin</div>
       <div v-if="resources.length">
 
-        <div class="row gutter-xs">
-          <div class="resource" :class="resources.length>1 ? ('col-xs-12 col-sm-6 col-md-4 col-lg-3 ' + (pinned.find(id => id === r.id()) ? 'pinned' : '')) : 'col-xs-12'" v-for="r in resources" :key="r.id()">
+        <div v-if="resource">
+
+          <div
+            class="resource col-xs-12"
+          >
             <q-card
-              @click.native="select(r)"
               style="height: 100%" flat square
               class="cursor-pointer col-xs-12 col-sm-6"
-              :color="$ethingUI.get(r).color"
+              :color="$ethingUI.get(resource).color"
               text-color="white"
             >
               <q-card-title>
-                <div class="ellipsis">{{ r.basename() }}</div>
-                <div v-if="$ething.arbo.get(r.createdBy())" class="ellipsis" slot="subtitle">{{ $ething.arbo.get(r.createdBy()).basename() }}</div>
-                <q-icon slot="right" :name="$ethingUI.get(r).icon" color="white"/>
+                <div class="ellipsis">{{ resource.basename() }}</div>
+                <div v-if="$ething.arbo.get(resource.createdBy())" class="ellipsis" slot="subtitle">{{ $ething.arbo.get(resource.createdBy()).basename() }}</div>
+                <q-icon slot="right" :name="$ethingUI.get(resource).icon" color="white"/>
               </q-card-title>
             </q-card>
           </div>
+
+          <q-btn flat color="faded" label="change" icon="replay" @click="resetList"/>
         </div>
-        <q-btn v-if="resource" flat color="faded" label="change" icon="replay" @click="resetList"/>
+
+        <div v-else>
+          <div>
+            <q-btn
+              v-for="(filterFn, label) in filters"
+              :key="label"
+              flat
+              :color="currentFilter == label ? 'primary' : 'faded'"
+              :label="label"
+              @click="filter(label)"
+            />
+          </div>
+
+
+          <div class="row gutter-xs q-my-sm" v-if="filteredResources.length">
+            <div
+              class="resource"
+              :class="'col-xs-12 col-sm-6 col-md-4 col-lg-3 ' + (pinned.find(id => id === r.id()) ? 'pinned' : '')"
+              v-for="r in filteredResources"
+              :key="r.id()"
+            >
+              <q-card
+                @click.native="select(r)"
+                style="height: 100%" flat square
+                class="cursor-pointer col-xs-12 col-sm-6"
+                :color="$ethingUI.get(r).color"
+                text-color="white"
+              >
+                <q-card-title>
+                  <div class="ellipsis">{{ r.basename() }}</div>
+                  <div v-if="$ething.arbo.get(r.createdBy())" class="ellipsis" slot="subtitle">{{ $ething.arbo.get(r.createdBy()).basename() }}</div>
+                  <q-icon slot="right" :name="$ethingUI.get(r).icon" color="white"/>
+                </q-card-title>
+              </q-card>
+            </div>
+          </div>
+          <div v-else class="q-my-sm q-mx-md text-faded">
+            No resources found !
+          </div>
+        </div>
+
       </div>
 
       <q-alert v-else
@@ -71,10 +115,27 @@ export default {
   data () {
       return {
         resource: null,
-        resources: this.list(),
         widgetId: null,
         optionsError: false,
-        options: {}
+        options: {},
+        filters: {
+          'devices': (r) => r instanceof this.$ething.Device,
+          'tables': (r) => r instanceof this.$ething.Table,
+          'files': (r) => r instanceof this.$ething.File,
+          'other': (r) => {
+            var found = false
+            for(var k in this.filters) {
+              if (k!=='other') {
+                if (this.filters[k](r)) {
+                  found = true
+                  break
+                }
+              }
+            }
+            return !found
+          },
+        },
+        currentFilter: 'devices'
       }
   },
 
@@ -123,19 +184,22 @@ export default {
           return Object.assign({ type: 'object' }, metadata.options)
         }
       }
+    },
+
+    resources () {
+      return this.$store.getters['ething/filter']((r) => Object.keys(this.$ethingUI.get(r).widgets).length)
+    },
+
+    filteredResources () {
+      return this.resources.filter(this.filters[this.currentFilter])
     }
 
   },
 
   methods: {
 
-    list () {
-      return this.$store.getters['ething/filter']((r) => Object.keys(this.$ethingUI.get(r).widgets).length)
-    },
-
     select (resource) {
       this.resource = resource
-      this.resources = [resource]
       this.options = {}
       this.optionsError = false
       this.widgetId = Object.keys(this.widgets)[0] // default
@@ -147,7 +211,6 @@ export default {
 
     resetList () {
       this.resource = null
-      this.resources = this.list()
     },
 
     done () {
@@ -162,6 +225,13 @@ export default {
         this.resetList()
 
         this.$refs.modal.hide()
+      }
+    },
+
+    filter (filterName) {
+      if (this.currentFilter !== filterName) {
+        this.currentFilter = filterName
+        this.resetList()
       }
     }
 

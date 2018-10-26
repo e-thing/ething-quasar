@@ -31,6 +31,14 @@
             </q-item-main>
           </q-item>
 
+          <q-item multiline v-if="rule.attr('execution_error')">
+            <q-item-main inset>
+              <q-alert type="negative">
+                {{ rule.attr('execution_error') }}
+              </q-alert>
+            </q-item-main>
+          </q-item>
+
           <q-item multiline>
             <q-item-side icon="list" />
             <q-item-main>
@@ -147,7 +155,11 @@ export default {
   methods: {
     execute (rule) {
       this.loading = true
-      rule.execute().finally(() => {
+      rule.execute().then(res => {
+
+      }).catch(err => {
+        console.error(err)
+      }).finally(() => {
         this.loading = false
       })
     },
@@ -162,14 +174,18 @@ export default {
         cancel: 'Cancel'
       }).then((data) => {
         rule.remove().then( () => {
-          this.$q.notify(name + ' removed !')
+          this.$q.notify('"' + name + '" removed !')
         })
       })
     },
 
     color (rule) {
       if (rule.enabled()) {
-        return this.$ethingUI.get(rule).color
+        if (rule.attr('execution_error')) {
+          return 'negative'
+        } else {
+          return this.$ethingUI.get(rule).color
+        }
       } else {
         return 'faded'
       }
