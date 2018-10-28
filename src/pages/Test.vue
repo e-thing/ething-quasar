@@ -1,7 +1,12 @@
 <template>
   <q-page padding>
 
-    <input type="text" placeholder="Text input" />
+    <!--<input type="text" placeholder="Text input" />-->
+    <q-btn @click="toto=!toto" label="tt" />
+
+    <modal v-model="toto" title="Scheduler" icon="schedule">
+      toto
+    </modal>
 
   </q-page>
 </template>
@@ -14,7 +19,7 @@ export default {
   data () {
 
     return {
-
+      toto: true
     }
 
   },

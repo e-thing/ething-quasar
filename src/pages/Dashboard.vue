@@ -31,12 +31,13 @@
 
       <div v-if="smallScreen && !$q.platform.is.desktop && !$q.platform.is.electron && !$q.platform.is.chromeExt" class="smallScreenContainer">
         <div v-for="(layoutItem) in layout" :key="layoutItem.i" :style="{height: (layoutItem.h * grid.rowHeight) + 'px'}" class="bg-white">
-          <div v-show="editing" class="absolute-center">
-            <q-btn-group flat >
+          <div v-show="editing" class="absolute fit widget-edit-layer">
+            <q-btn-group flat class="absolute-center">
+              <q-btn v-if="isEditable(layoutItem)" flat icon="settings" color="faded" @click="editItem(layoutItem)"/>
               <q-btn flat icon="delete" color="negative" @click="removeItem(layoutItem)"/>
             </q-btn-group>
           </div>
-          <widget v-show="!editing" class="fit" :widgetClass="layoutItem.component" :widgetOptions="layoutItem.item.options" />
+          <widget :ref="'widget_' + layoutItem.i" :key="layoutItem.key" class="absolute fit" :widgetClass="layoutItem.component" :widgetOptions="layoutItem.item.options" />
         </div>
       </div>
       <grid-layout v-else
