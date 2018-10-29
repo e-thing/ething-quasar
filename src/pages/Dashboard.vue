@@ -21,7 +21,6 @@
     </div>
 
     <div v-else>
-      <q-window-resize-observable @resize="onResize" />
 
       <q-btn-group flat >
         <q-btn flat icon="mdi-pin" label="pin resource" color="faded" @click="pinResourceModal = true"/>
@@ -30,7 +29,7 @@
       </q-btn-group>
 
       <div v-if="smallScreen && !$q.platform.is.desktop && !$q.platform.is.electron && !$q.platform.is.chromeExt" class="smallScreenContainer">
-        <div v-for="(layoutItem) in layout" :key="layoutItem.i" :style="{height: (layoutItem.h * grid.rowHeight) + 'px'}" class="bg-white">
+        <div v-for="(layoutItem) in layout" :key="layoutItem.i" :style="{height: (layoutItem.h * grid.rowHeight + (layoutItem.h-1) * grid.margin) + 'px'}" class="bg-white">
           <div v-show="editing" class="absolute fit widget-edit-layer">
             <q-btn-group flat class="absolute-center">
               <q-btn v-if="isEditable(layoutItem)" flat icon="settings" color="faded" @click="editItem(layoutItem)"/>
@@ -48,7 +47,7 @@
         :is-resizable="resizable"
         :is-mirrored="true"
         :vertical-compact="true"
-        :margin="[10, 10]"
+        :margin="[grid.margin, grid.margin]"
         :use-css-transforms="true"
       >
           <grid-item v-for="(layoutItem) in layout" :key="layoutItem.i"
@@ -83,7 +82,7 @@
 
     <widget-pin-form v-model="pinWidgetModal" :maximized="smallScreen" @done="pin"/>
 
-    <modal v-model="widgetEdit.modal" title="Edit" icon="edit" :valid-btn-disable="widgetEdit.error" @valid="widgetEditDone">
+    <modal :maximized="smallScreen" v-model="widgetEdit.modal" title="Edit" icon="edit" :valid-btn-disable="widgetEdit.error" @valid="widgetEditDone">
 
       <div class="q-title q-my-md">Options</div>
       <form-schema :schema="widgetEdit.schema" v-model="widgetEdit.model" @error="widgetEdit.error = $event"/>
@@ -121,19 +120,27 @@ export default {
 
   data () {
 
+    var windowHeight = window.innerHeight;
+    var windowWidth = window.innerWidth;
+
+    var minWidth = 680; // in px, below this threshold, switch to small screen layout (ie, no grid)
+
+    var smallScreen = windowWidth < minWidth
+
     return {
         loading: false,
         layout: [],
         grid: {
           columnNb: 6,
           rowHeight: 60, // in px
-          minWidth: 680 // in px, below this threshold, switch to small screen layout (ie, no grid)
+          minWidth: minWidth,
+          margin: 10
         },
         idCnt: 1,
         pinResourceModal: false,
         pinWidgetModal: false,
         editing: false,
-        smallScreen: false,
+        smallScreen,
 
         widgetEdit: {
           modal: false,
@@ -259,7 +266,8 @@ export default {
         var widgetClass = null;
 
         if (typeof item.widgetId !== 'undefined') {
-          widgetClass = this.$ethingUI.get(item.options.resource).widgets[item.widgetId]
+          var resource = this.$ething.arbo.get(item.options.resource)
+          widgetClass = this.$ethingUI.get(resource).widgets[item.widgetId]
           if (typeof widgetClass === 'string') {
             var widgetClassName = widgetClass
             widgetClass = this.$ethingUI.findWidget(widgetClassName)
@@ -315,7 +323,7 @@ export default {
 
         return layoutItem
       } catch(err) {
-        console.error(err)
+        console.error('unable to load a widget item:', item, err)
       }
     },
 
@@ -384,15 +392,6 @@ export default {
         this.save()
       }
     },
-
-    onResize (size) {
-      // {
-      //   width: 1200 // width of viewport (in px)
-      //   height: 920 // height of viewport (in px)
-      // }
-
-      this.smallScreen = size.width < this.grid.minWidth
-    }
 
   },
 

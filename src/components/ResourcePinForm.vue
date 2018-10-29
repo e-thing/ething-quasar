@@ -33,9 +33,11 @@
               v-for="(filterFn, label) in filters"
               :key="label"
               flat
+              dense
               :color="currentFilter == label ? 'primary' : 'faded'"
               :label="label"
               @click="filter(label)"
+              class="q-mr-xs"
             />
           </div>
 

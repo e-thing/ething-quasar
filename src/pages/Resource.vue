@@ -1,14 +1,9 @@
 <template>
   <q-page padding>
 
-    <div class="q-my-md q-display-1 q-display-1-opacity">
-      <q-icon :name="$ethingUI.get(resource).icon" />
-      {{ resource.basename() }}
-    </div>
-
-    <div class="q-my-md q-subheading text-faded">
-      <q-icon name="settings" />
-      Settings
+    <div class="q-my-md q-display-1 text-primary">
+      <q-icon :name="$ethingUI.get(resource).icon" class="q-mr-sm"/>
+      <small class="text-faded">settings:</small> {{ resource.basename() }}
     </div>
 
     <resource-editor :resource="resource" @done="onDone" @canceled="onCancel"/>

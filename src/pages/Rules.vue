@@ -6,27 +6,35 @@
       <q-btn flat label="Emit custom event" icon="wifi_tethering" color="secondary" @click="emitCustomEvent"/>
 
       <q-list no-border>
-        <q-collapsible indent v-for="rule in rules" :key="rule.id()" popup >
+        <q-collapsible v-for="rule in rules" :key="rule.id()" popup >
           <template slot="header">
             <q-item-side :icon="$ethingUI.get(rule).icon" inverted :color="color(rule)" />
             <q-item-main>
               <q-item-tile label>{{ rule.basename() }}</q-item-tile>
               <q-item-tile sublabel>{{ $ethingUI.utils.dateToString(rule.modifiedDate()) }}</q-item-tile>
             </q-item-main>
-            <q-item-side right>
+            <q-item-side right class="gt-sm">
               <q-btn rounded icon="play arrow" :loading="loading" label="execute" flat dense @click.stop="execute(rule)"/>
             </q-item-side>
-            <q-item-side right>
+            <q-item-side right class="gt-sm">
               <q-btn icon="settings" round flat dense @click.stop="$router.push('/resource/' + rule.id())"/>
             </q-item-side>
-            <q-item-side right>
+            <q-item-side right class="gt-sm">
               <q-btn icon="delete" round flat dense @click.stop="remove(rule)"/>
             </q-item-side>
 
           </template>
 
+          <q-item multiline class="lt-md">
+            <q-item-main class="text-primary" inset>
+              <q-btn class="q-mr-sm" rounded icon="play arrow" :loading="loading" label="execute" @click.stop="execute(rule)"/>
+              <q-btn class="q-mr-sm" icon="settings" round @click.stop="$router.push('/resource/' + rule.id())"/>
+              <q-btn icon="delete" round @click.stop="remove(rule)"/>
+            </q-item-main>
+          </q-item>
+
           <q-item multiline v-if="rule.description()">
-            <q-item-main class="text-faded">
+            <q-item-main class="text-faded" inset>
               {{ rule.description() }}
             </q-item-main>
           </q-item>

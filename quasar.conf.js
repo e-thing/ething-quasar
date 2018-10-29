@@ -130,6 +130,7 @@ module.exports = function (ctx) {
       ],
       // Quasar plugins
       plugins: [
+        'Screen',
         'Notify',
         'Dialog',
         'LocalStorage',

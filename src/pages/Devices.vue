@@ -4,16 +4,16 @@
     <div class="row justify-between">
 
       <div>
-        <q-btn label="All" flat rounded :color="category==='' ? 'primary' : 'faded'" @click="category = ''"/>
-        <q-btn label="Sensor" flat rounded :color="category==='sensor' ? 'primary' : 'faded'" @click="category = 'sensor'"/>
-        <q-btn label="Switch/Light" flat rounded :color="category==='switch' ? 'primary' : 'faded'" @click="category = 'switch'"/>
-        <q-btn label="Camera" flat rounded :color="category==='camera' ? 'primary' : 'faded'" @click="category = 'camera'"/>
+        <q-btn dense class="q-mr-xs" label="All" flat :color="category==='' ? 'primary' : 'faded'" @click="category = ''"/>
+        <q-btn dense class="q-mr-xs" label="Sensor" flat :color="category==='sensor' ? 'primary' : 'faded'" @click="category = 'sensor'"/>
+        <q-btn dense class="q-mr-xs" label="Switch/Light" flat :color="category==='switch' ? 'primary' : 'faded'" @click="category = 'switch'"/>
+        <q-btn dense label="Camera" flat :color="category==='camera' ? 'primary' : 'faded'" @click="category = 'camera'"/>
       </div>
 
       <div class="row">
         <!--<q-search v-model="filter" hide-underline no-parent-field clearable/>-->
 
-        <q-btn-dropdown color="primary" label="Create" icon="add" flat >
+        <q-btn-dropdown dense color="primary" label="Create" icon="add" flat >
           <q-list link>
             <template v-for="cat in categories">
               <q-list-header inset>{{ cat.name }}</q-list-header>
