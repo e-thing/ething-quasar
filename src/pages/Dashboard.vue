@@ -443,14 +443,11 @@ export default {
 
 <style>
 .vue-resizable-handle {
-  width: 40px;
-  height: 40px;
-  transition: all 0.5s;
-  transform-origin: right bottom;
-  z-index: 5;
-}
-
-.vue-resizable-handle:hover {
-  transform: scale(3);
+  height: 0 !important;
+  width: 0 !important;
+  border-bottom: 40px solid #777777;
+  border-left: 40px solid transparent;
+  padding: 0 !important;
+  z-index: 5 !important;
 }
 </style>

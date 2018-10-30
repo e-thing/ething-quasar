@@ -29,8 +29,10 @@
       </template>
     </div>
 
-    <!-- widget -->
-    <!-- <resource-widget :resource="resource" no-header no-footer inline/> -->
+
+    <!-- component -->
+    <device-component :device="resource"/>
+
 
     <!-- attributes -->
     <q-card  v-if="attributes.length>0" class="q-my-md attributes" :class="{detailled: showDetailledAttributes}">
@@ -110,7 +112,7 @@
 import DeviceApi from 'ething-quasar-core/src/components/DeviceApi'
 import ResourceQItem from 'ething-quasar-core/src/components/ResourceQItem'
 import ResourceBatteryChip from 'ething-quasar-core/src/components/ResourceBatteryChip'
-import ResourceWidget from 'ething-quasar-core/src/components/ResourceWidget'
+import DeviceComponent from '../components/DeviceComponent'
 
 export default {
   name: 'PageDevice',
@@ -119,7 +121,7 @@ export default {
     DeviceApi,
     ResourceQItem,
     ResourceBatteryChip,
-    ResourceWidget
+    DeviceComponent
   },
 
   data () {
