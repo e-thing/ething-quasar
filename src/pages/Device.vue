@@ -47,8 +47,8 @@
       <q-card-main>
         <div class="row">
           <template v-for="attr in attributes">
-            <div class="col-xs-12 col-sm-2 key text-secondary" :class="{detailled: attr.detailled}">{{ attr.name }}</div>
-            <div class="col-xs-12 col-sm-10 value" :class="{detailled: attr.detailled}">{{ attr.value }}</div>
+            <div class="col-xs-12 col-sm-2 key text-secondary ellipsis" :class="{detailled: attr.detailled}">{{ attr.name }}</div>
+            <div class="col-xs-12 col-sm-10 value ellipsis" :class="{detailled: attr.detailled}">{{ attr.value }}</div>
           </template>
         </div>
       </q-card-main>
