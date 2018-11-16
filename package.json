@@ -12,8 +12,8 @@
   },
   "dependencies": {
     "ething-js": "^0.1.13",
-    "ething-quasar-core": "e-thing/ething-quasar-core#master",
-    "ething-quasar-dll": "e-thing/ething-quasar-dll#master",
+    "ething-quasar-core": "github:e-thing/ething-quasar-core#master",
+    "ething-quasar-dll": "github:e-thing/ething-quasar-dll#master",
     "qs": "^6.5.2",
     "vue-grid-layout": "^2.2.0",
     "vue-i18n": "^7.8.1",

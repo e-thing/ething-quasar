@@ -5,6 +5,9 @@ import qs from 'qs'
 
 const AUTH_REFRESH_INTERVAL = 3600 * 1000
 
+const ENABLE_SSE = 0
+const ENABLE_SOCKETIO = 1
+
 export var UI = {
   VERSION: process.env.VERSION
 }
@@ -85,7 +88,8 @@ export default ({ app, router, Vue, store }) => {
 
     reset () {
       app.data.state = 'begin'
-      EThingUI.SSE.stop()
+      if (ENABLE_SSE) EThingUI.SSE.stop()
+      else if (ENABLE_SOCKETIO) EThingUI.eventsSocket.close()
       LocalStorage.remove('ething.auth.iat')
       if (this.authRefreshTimer) {
         clearInterval(this.authRefreshTimer)
@@ -223,61 +227,65 @@ export default ({ app, router, Vue, store }) => {
 
         console.log('[app] ething loaded !')
 
-        var sseReconnectFlag = false
-        var sseNotification = null
-        var sseNotificationType = null
+        if (ENABLE_SSE) {
+          var sseReconnectFlag = false
+          var sseNotification = null
+          var sseNotificationType = null
 
-        EThingUI.SSE.on('connected', function(){
+          EThingUI.SSE.on('connected', function(){
 
-          if (sseNotification) {
-    				sseNotification()
-    			}
-
-          if (sseReconnectFlag) {
-            // reload the resource !
-            EThing.arbo.load(null, true).then( () => {
-              console.log('[app] ething arbo reloaded !')
-              store.commit('ething/update')
-            })
-
-            sseNotification = Notify.create({
-    					type: 'positive',
-    					color: 'positive',
-    				  message: 'Reconnected to server !',
-    					icon: 'thumb_up',
-    					position: 'bottom-right',
-    					onDismiss () {
-    						sseNotification = null
-    					}
-    				})
-            sseNotificationType = 'connected'
-          }
-        })
-
-        EThingUI.SSE.on('disconnected', function(){
-          sseReconnectFlag = true
-
-          if (sseNotificationType !== 'disconnected') {
             if (sseNotification) {
       				sseNotification()
       			}
 
-            sseNotification = Notify.create({
-    					type: 'negative',
-    					color: 'negative',
-    				  message: 'Lost connection to server !',
-    					icon: 'report_problem',
-    					position: 'bottom-right',
-    					timeout: 0,
-    					onDismiss () {
-    						sseNotification = null
-    					}
-    				})
-            sseNotificationType = 'disconnected'
-          }
-        })
+            if (sseReconnectFlag) {
+              // reload the resource !
+              EThing.arbo.load(null, true).then( () => {
+                console.log('[app] ething arbo reloaded !')
+                store.commit('ething/update')
+              })
 
-        EThingUI.SSE.start()
+              sseNotification = Notify.create({
+      					type: 'positive',
+      					color: 'positive',
+      				  message: 'Reconnected to server !',
+      					icon: 'thumb_up',
+      					position: 'bottom-right',
+      					onDismiss () {
+      						sseNotification = null
+      					}
+      				})
+              sseNotificationType = 'connected'
+            }
+          })
+
+          EThingUI.SSE.on('disconnected', function(){
+            sseReconnectFlag = true
+
+            if (sseNotificationType !== 'disconnected') {
+              if (sseNotification) {
+        				sseNotification()
+        			}
+
+              sseNotification = Notify.create({
+      					type: 'negative',
+      					color: 'negative',
+      				  message: 'Lost connection to server !',
+      					icon: 'report_problem',
+      					position: 'bottom-right',
+      					timeout: 0,
+      					onDismiss () {
+      						sseNotification = null
+      					}
+      				})
+              sseNotificationType = 'disconnected'
+            }
+          })
+
+          EThingUI.SSE.start()
+        } else if (ENABLE_SOCKETIO) {
+          EThingUI.eventsSocket.open()
+        }
 
         var iat = LocalStorage.get.item('ething.auth.iat')
 

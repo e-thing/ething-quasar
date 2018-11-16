@@ -31,7 +31,9 @@
 
 
     <!-- component -->
-    <device-component :device="resource"/>
+    <div class="q-my-md">
+      <device-component :device="resource"/>
+    </div>
 
 
     <!-- attributes -->
@@ -112,7 +114,7 @@
 import DeviceApi from 'ething-quasar-core/src/components/DeviceApi'
 import ResourceQItem from 'ething-quasar-core/src/components/ResourceQItem'
 import ResourceBatteryChip from 'ething-quasar-core/src/components/ResourceBatteryChip'
-import DeviceComponent from '../components/DeviceComponent'
+import DeviceComponent from 'ething-quasar-core/src/components/DeviceComponent'
 
 export default {
   name: 'PageDevice',

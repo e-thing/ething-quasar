@@ -5,4 +5,8 @@ export default ({ app, router, Vue, store }) => {
     router,
     store
   })
+
+  // for debugging
+  //require('../../../ething/ething/plugins/SSH/js/src')
+
 }
