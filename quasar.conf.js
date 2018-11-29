@@ -135,6 +135,7 @@ module.exports = function (ctx) {
         'Dialog',
         'LocalStorage',
         'ActionSheet',
+        'Loading'
       ]
     },
     // animations: 'all' --- includes all animations

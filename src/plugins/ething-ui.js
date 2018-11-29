@@ -281,14 +281,14 @@ export default ({ app, router, Vue, store }) => {
           }
         }
 
-        if (ENABLE_SSE) {
-          EThingUI.SSE.on('connected', sseConnectHandler)
-          EThingUI.SSE.on('disconnected', sseDisconnectHandler)
-          EThingUI.SSE.start()
-        } else if (ENABLE_SOCKETIO) {
+        if (ENABLE_SOCKETIO) {
           EThingUI.eventsSocket.on('connect', sseConnectHandler);
           EThingUI.eventsSocket.on('disconnect', sseDisconnectHandler);
           EThingUI.eventsSocket.open()
+        } else if (ENABLE_SSE) {
+          EThingUI.SSE.on('connected', sseConnectHandler)
+          EThingUI.SSE.on('disconnected', sseDisconnectHandler)
+          EThingUI.SSE.start()
         }
 
         var iat = LocalStorage.get.item('ething.auth.iat')

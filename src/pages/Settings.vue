@@ -29,27 +29,8 @@
       <q-tab-pane name="processes">
         <processes-view />
       </q-tab-pane>
-
       <q-tab-pane name="about">
-
-        <dl class="horizontal">
-          <dt>UI</dt>
-          <dd>version: {{ $ui.VERSION }}</dd>
-
-          <dt>Server</dt>
-          <dd>version: {{ $ethingUI.info.VERSION }}</dd>
-
-          <dt>JS api</dt>
-          <dd>version: {{ $ething.VERSION }}</dd>
-
-          <dt>Python</dt>
-          <dd>version: {{ $ethingUI.info.python.version }} type: {{ $ethingUI.info.python.type }}</dd>
-
-          <dt>Platform</dt>
-          <dd>{{ $ethingUI.info.platform.name }}</dd>
-
-        </dl>
-
+        <about-view />
       </q-tab-pane>
 
     </q-tabs>
@@ -63,7 +44,7 @@ import ApikeyView from '../components/ApikeyView'
 import BackupView from '../components/BackupView'
 import PluginsView from '../components/PluginsView'
 import ProcessesView from '../components/ProcessesView'
-
+import AboutView from '../components/AboutView'
 
 export default {
   name: 'PageSettings',
@@ -74,7 +55,8 @@ export default {
     ApikeyView,
     BackupView,
     PluginsView,
-    ProcessesView
+    ProcessesView,
+    AboutView
   },
 
 }

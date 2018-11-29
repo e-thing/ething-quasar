@@ -11,7 +11,7 @@
     "test": "echo \"No test specified\" && exit 0"
   },
   "dependencies": {
-    "ething-js": "^0.1.13",
+    "ething-js": "^0.1.14",
     "ething-quasar-core": "github:e-thing/ething-quasar-core#master",
     "ething-quasar-dll": "github:e-thing/ething-quasar-dll#master",
     "qs": "^6.5.2",
