@@ -134,6 +134,7 @@ module.exports = function (ctx) {
         'Notify',
         'Dialog',
         'LocalStorage',
+        'SessionStorage',
         'ActionSheet',
         'Loading'
       ]

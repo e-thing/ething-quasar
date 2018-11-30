@@ -8,6 +8,7 @@ const AUTH_REFRESH_INTERVAL = 3600 * 1000
 const ENABLE_SSE = 0
 const ENABLE_SOCKETIO = 1
 
+
 export var UI = {
   VERSION: process.env.VERSION
 }
