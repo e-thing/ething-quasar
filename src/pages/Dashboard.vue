@@ -267,7 +267,11 @@ export default {
 
         if (typeof item.widgetId !== 'undefined') {
           var resource = this.$ething.arbo.get(item.options.resource)
-          widgetClass = this.$ethingUI.get(resource).widgets[item.widgetId]
+          var resourceMeta = this.$ethingUI.get(resource)
+          widgetClass = resourceMeta.widgets[item.widgetId]
+          if (!widgetClass) {
+            throw Error('widget "' + item.widgetId + '" not found for the resource ' + resource.id())
+          }
           if (typeof widgetClass === 'string') {
             var widgetClassName = widgetClass
             widgetClass = this.$ethingUI.findWidget(widgetClassName)

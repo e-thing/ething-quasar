@@ -32,7 +32,7 @@
       </q-card-main>
       <q-card-separator />
       <q-card-actions>
-        <q-btn flat :loading="importLoading" @click="confirm(do_import)">Import</q-btn>
+        <q-btn flat :loading="importLoading" @click="confirm_import(do_import)">Import</q-btn>
       </q-card-actions>
     </q-card>
 
@@ -47,7 +47,7 @@
       </q-card-main>
       <q-card-separator />
       <q-card-actions>
-        <q-btn flat :loading="clearLoading" @click="confirm(do_clear)">Clear</q-btn>
+        <q-btn flat :loading="clearLoading" @click="confirm_clear(do_clear)">Clear</q-btn>
       </q-card-actions>
     </q-card>
 
@@ -93,11 +93,25 @@ export default {
 
       },
 
-      confirm (done) {
+      confirm_clear (done) {
         this.$q.dialog({
           title: 'Are you sure ?',
           color: 'primary',
-          message: 'All your data will be lost. Are you sure you want to proceed ?',
+          message: 'All your data will be lost. The server will automatically restart. Are you sure you want to proceed ?',
+          ok: 'OK',
+          cancel: 'Cancel'
+        }).then(() => {
+          done()
+        }).catch(() => {
+
+        })
+      },
+
+      confirm_import (done) {
+        this.$q.dialog({
+          title: 'Are you sure ?',
+          color: 'primary',
+          message: 'Are you sure you want to proceed ?',
           ok: 'OK',
           cancel: 'Cancel'
         }).then(() => {
@@ -115,7 +129,7 @@ export default {
           EThing.request({
             method: 'POST',
             url: 'utils/import',
-            data: this.importFile
+            data: this.importFile.content
           }).then((data) => {
 
           }).catch(err => {
@@ -137,6 +151,15 @@ export default {
           console.error(err)
         }).finally(() => {
           this.clearLoading = false
+
+          this.$q.dialog({
+            title: 'Please wait',
+            message: 'The server is restarting. Please wait.'
+          }).then(() => {
+            
+          }).catch(() => {
+
+          })
         })
       },
 
@@ -152,11 +175,28 @@ export default {
 
           let fileReader = new FileReader()
           fileReader.onloadend = (e) => {
-            const content = fileReader.result
-            console.log(content)
             this.importFileReadLoading = false
+
+            const content = fileReader.result
+            var json_content = null
+
+            try {
+              json_content = JSON.parse(content)
+            } catch (e) {
+              this.$q.dialog({
+                title: 'error',
+                message: 'Not a json file.'
+              }).then(() => {
+
+              }).catch(() => {
+
+              })
+            }
+
+            console.log(json_content)
+
             this.importFile = {
-              content
+              content: json_content
             }
           }
           fileReader.readAsText(file)

@@ -1,39 +1,39 @@
 <template>
+  <div class="layout">
+    <div v-if="loading===false">
 
-  <div v-if="loading===false">
+      <div class="q-mt-xl">
 
-    <div class="q-mt-xl">
+        <div class="q-title q-title-opacity">General</div>
 
-      <div class="q-title q-title-opacity">General</div>
+        <form-schema :schema="$ethingUI.config" v-model="settings" @error="error = $event" class="q-my-md"/>
 
-      <form-schema :schema="$ethingUI.config" v-model="settings" @error="error = $event" class="q-my-md"/>
+      </div>
+
+      <div v-for="(plugin, name) in plugins" :key="name" v-if="typeof plugin.schema === 'object'" class="q-mt-xl">
+
+        <div class="q-title q-title-opacity">{{ name }}</div>
+
+        <form-schema :schema="plugin.schema" v-model="settings[name]" @error="plugin.error = $event" class="q-my-md"/>
+
+      </div>
+
+      <q-alert
+          v-if="saveError"
+          type="negative"
+          class="q-mt-xl"
+      >
+        {{ String(saveError) }}
+      </q-alert>
+
+      <div class="q-mt-xl">
+          <q-btn :disable="globalError" :loading="saving" color="secondary" icon="done" label="save changes" @click="onSave"/>
+      </div>
 
     </div>
 
-    <div v-for="(plugin, name) in plugins" :key="name" v-if="typeof plugin.schema === 'object'" class="q-mt-xl">
-
-      <div class="q-title q-title-opacity">{{ name }}</div>
-
-      <form-schema :schema="plugin.schema" v-model="settings[name]" @error="plugin.error = $event" class="q-my-md"/>
-
-    </div>
-
-    <q-alert
-        v-if="saveError"
-        type="negative"
-        class="q-mt-xl"
-    >
-      {{ String(saveError) }}
-    </q-alert>
-
-    <div class="q-mt-xl">
-        <q-btn :disable="globalError" :loading="saving" color="secondary" icon="done" label="save changes" @click="onSave"/>
-    </div>
-
+    <div v-else class="absolute-center text-faded">loading ...</div>
   </div>
-
-  <div v-else class="absolute-center text-faded">loading ...</div>
-
 </template>
 
 <script>
@@ -150,5 +150,11 @@ export default {
 .q-title
   border-bottom 1px solid $grey-3
   padding-bottom $space-y-base
+
+.layout
+
+  @media screen and (min-width: 600px)
+    max-width: 600px;
+    margin: 0 auto;
 
 </style>
