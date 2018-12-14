@@ -18,6 +18,21 @@
         <q-btn class="gt-xs" flat label="Data" @click="$router.push('/data')" />
         <q-btn class="gt-xs" flat label="Rules" @click="$router.push('/rules')" />
 
+        <!--<q-btn-dropdown label="Data" flat content-style="color: #fff;background: #027be3;">
+          <q-list link>
+            <q-item v-close-overlay @click.native="$router.push('/data/tables')">
+              <q-item-main>
+                <q-item-tile label>Tables</q-item-tile>
+              </q-item-main>
+            </q-item>
+            <q-item v-close-overlay @click.native="$router.push('/data/files')">
+              <q-item-main>
+                <q-item-tile label>Files</q-item-tile>
+              </q-item-main>
+            </q-item>
+          </q-list>
+        </q-btn-dropdown>-->
+
         <q-toolbar-title class="gt-xs"/>
 
         <q-btn v-if="refreshEnabled" class="gt-xs" flat dense icon="refresh" aria-label="refresh" @click="refresh"/>
@@ -112,7 +127,17 @@ export default {
   },
   methods: {
     logout () {
-      this.$ui.logout()
+      this.$q.dialog({
+        title: 'Logout ?',
+        color: 'primary',
+        message: 'Are you sure you want to logout ?',
+        ok: 'Logout',
+        cancel: 'Cancel'
+      }).then(() => {
+        this.$ui.logout()
+      }).catch(() => {
+
+      })
     },
     reload () {
       this.$root.state = 'begin'

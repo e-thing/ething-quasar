@@ -43,6 +43,12 @@
         />
         <q-btn
           flat round dense
+          icon="mdi-filter"
+          :color="filter ? 'secondary' : 'faded'"
+          @click="showFilter"
+        />
+        <q-btn
+          flat round dense
           icon="add"
           color="faded"
           @click="showAddRow"
@@ -196,6 +202,12 @@
 
     </modal>
 
+    <modal v-model="filterModal" title="Filter" icon="mdi-filter" valid-btn-label="Filter" @valid="validFilter">
+
+      <q-input v-model="filterModel" />
+
+    </modal>
+
   </q-page>
 </template>
 
@@ -219,7 +231,6 @@ export default {
         rowsNumber: 0 // specifying this determines pagination is server-side
       },
       serverData: [],
-      filter: '',
       visibleColumns: ['date'],
       edit: false,
       selected: [],
@@ -236,7 +247,10 @@ export default {
             value: t
           }
         })
-      }
+      },
+      filter: '',
+      filterModal: false,
+      filterModel: ''
     }
   },
 
@@ -267,7 +281,7 @@ export default {
         }
       }
 
-      this.serverPagination.rowsNumber = r.length()
+      if (!this.filter) this.serverPagination.rowsNumber = r.length()
       this.visibleColumns = ['date'].concat(r.keys())
 
       return r
@@ -335,6 +349,10 @@ export default {
       }
     },
 
+    filter: function (val, oldVal) {
+      this.serverPagination.rowsNumber = this.resource.length()
+    },
+
     'add.data': {
       handler: function (values, oldValues) {
         values.forEach( item => {
@@ -355,11 +373,11 @@ export default {
       },
       deep: true
     }
-    
+
   },
 
   methods: {
-    request ({ pagination, filter }) {
+    request ({ pagination, filter }, done, err) {
       if (!this.resource) return
 
       // we set QTable to "loading" state
@@ -367,33 +385,52 @@ export default {
 
       this.contentModifiedDate = this.resource.contentModifiedDate()
 
+      console.log(pagination)
+
+      var rowsPerPage = pagination.rowsPerPage
+      var page = pagination.page
+
       // we do the server data fetch, based on pagination and filter received
       this.resource.select({
         sort: (pagination.descending ? '-' : '+') + pagination.sortBy,
         start: (pagination.page - 1) * pagination.rowsPerPage,
-        length: pagination.rowsPerPage
+        length: pagination.rowsPerPage,
+        query: filter || this.filter
       }).then(data => {
+
+        if (data.length < rowsPerPage) {
+          // end of data
+          var rowsNumber = (page - 1) * rowsPerPage + data.length
+          pagination.rowsNumber = rowsNumber
+        }
+
         // updating pagination to reflect in the UI
         this.serverPagination = pagination
 
         // then we update the rows with the fetched ones
         this.serverData = data
 
-        // finally we tell QTable to exit the "loading" state
-        this.loading = false
-      }).catch(err => {
+        if (done) done()
+      }).catch(e => {
         // there's an error... do SOMETHING
+
+        this.$q.dialog({
+          title: 'Error',
+          message: 'an error occurs: ' + String(e),
+          color: 'negative'
+        })
+
+        if (err) err(e)
       }).finally( () => {
         this.loading = false
       })
 
     },
 
-    reloadData () {
+    reloadData (done, err) {
       this.request({
-        pagination: this.serverPagination,
-        filter: this.filter
-      })
+        pagination: this.serverPagination
+      }, done, err)
     },
 
     removeSelection () {
@@ -413,6 +450,18 @@ export default {
 
       this.modalStatistics = true
 
+    },
+
+    showFilter () {
+      this.filterModal = true
+    },
+
+    validFilter () {
+      this.filter = this.filterModel.trim()
+      this.filterModal = false
+      this.reloadData(null, (err) => {
+        this.filter = '' // remove invalid filter
+      })
     },
 
     computeStats () {

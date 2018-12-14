@@ -1,5 +1,5 @@
 <template>
-  <q-page class="q-mb-xl">
+  <q-page class="q-mb-xl layout">
 
     <div class="row justify-between">
     <q-breadcrumbs class="q-pa-md">
@@ -148,5 +148,11 @@ export default {
 }
 </script>
 
-<style>
+<style scoped lang="stylus">
+.layout
+
+  @media screen and (min-width: 980px)
+    max-width: 80%;
+    margin: 0 auto;
+
 </style>
