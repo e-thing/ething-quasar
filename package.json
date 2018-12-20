@@ -14,6 +14,7 @@
     "ething-js": "^0.1.14",
     "ething-quasar-core": "github:e-thing/ething-quasar-core#master",
     "ething-quasar-dll": "github:e-thing/ething-quasar-dll#master",
+    "jsplumb": "^2.8.6",
     "qs": "^6.5.2",
     "vue-grid-layout": "^2.2.0",
     "vue-i18n": "^7.8.1",
