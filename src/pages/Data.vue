@@ -22,6 +22,13 @@
           </q-item-main>
         </q-item>
 
+        <q-item v-close-overlay @click.native="create('Flow')">
+          <q-item-side :icon="$ethingUI.get('resources/Flow').icon" :color="$ethingUI.get('resources/Flow').color" />
+          <q-item-main>
+            <q-item-tile label>Flow</q-item-tile>
+          </q-item-main>
+        </q-item>
+
         <q-item v-close-overlay @click.native="$router.push('/chart')">
           <q-item-side icon="mdi-chart-line" :color="$ethingUI.get('resources/File').color" />
           <q-item-main>
@@ -55,6 +62,12 @@
           <q-item-separator inset v-if="folders.length || files.length"/>
           <q-list-header inset>Table</q-list-header>
           <resource-q-item v-for="table in tables" :key="table.id()" :resource="table" />
+        </div>
+
+        <div v-if="flows.length">
+          <q-item-separator inset v-if="folders.length || files.length || tables.length"/>
+          <q-list-header inset>Flow</q-list-header>
+          <resource-q-item v-for="flow in flows" :key="flow.id()" :resource="flow" />
         </div>
 
       </q-list>
@@ -105,6 +118,9 @@ export default {
     },
     tables () {
       return this.resources.filter( (r) => r instanceof this.$ething.Table )
+    },
+    flows () {
+      return this.resources.filter( (r) => r instanceof this.$ething.Flow )
     },
     pathItems () {
       var pathItems = (this.path).split('/')

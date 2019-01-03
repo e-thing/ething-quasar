@@ -26,6 +26,13 @@ export default [
         }
       },
       {
+        path: 'flow/:id',
+        component: () => import('pages/Flow'),
+        meta: {
+          back: true
+        }
+      },
+      {
         path: 'chart/:id',
         component: () => import('pages/Chart'),
         meta: {

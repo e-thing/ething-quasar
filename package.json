@@ -16,6 +16,7 @@
     "ething-quasar-dll": "github:e-thing/ething-quasar-dll#master",
     "jsplumb": "^2.8.6",
     "qs": "^6.5.2",
+    "vue-drag-drop": "^1.1.4",
     "vue-grid-layout": "^2.2.0",
     "vue-i18n": "^7.8.1",
     "vue-touch-keyboard": "^0.3.0"
