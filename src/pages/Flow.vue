@@ -1,28 +1,54 @@
 <template>
   <q-page>
 
-    <div class="topMenu">
-      <q-btn label="deploy" flat :color="dirty?'primary':'faded'" @click="deploy" />
-    </div>
-
     <div class="leftMenu">
-      <div v-for="node in meta.nodes" :key="node.type">
-        <drag :transfer-data="{node}">
-          <q-btn flat :icon="node.icon || 'mdi-puzzle'" align="left" :style="{color: node.color}" :label="node.type" @click="addNodeClick(node.type)" class="full-width"/>
-        </drag>
-      </div>
+      <q-list separator no-border>
+        <flow-recursive-menu-node :node="menuRoot" @click="addNodeClick"/>
+      </q-list>
     </div>
 
-    <div class="main">
+    <div class="main" :style="dbg.enabled ? {} : {right: 0}">
+      <div class="topMenu">
+        <q-btn label="deploy" flat :color="dirty?'primary':'faded'" @click="deploy" />
+        <q-btn label="debug" flat :color="dbg.enabled?'primary':'faded'" @click="toggle_debug" />
+      </div>
+
       <drop @drop="handleDrop">
         <div ref="flowchart" class="flowchart jtk-surface jtk-surface-nopan">
-            <div ref="node" class="node" :class="node.type" :style="{'border-color': node.color}" v-for="node in nodes" :key="node.id" :data-id="node.id">
-              <strong>{{ nodeTitle(node) }}</strong>
-              <q-btn flat dense icon="edit" size="sm" color="faded"  @click="editNode(node)" />
-              <q-btn flat dense icon="delete" size="sm" color="faded"  @click="removeNode(node)" />
+            <div ref="node" class="node" :style="{'border-color': node.color}" v-for="node in nodes" :key="node.id" :data-id="node.id">
+              <q-icon v-if="node.cls.icon" :name="node.cls.icon" class="icon" />
+              <div class="content">
+                <strong class="ellipsis">{{ nodeTitle(node) }}</strong>
+                <q-btn flat dense icon="edit" size="sm" color="faded"  @click="editNode(node)" />
+                <q-btn flat dense icon="delete" size="sm" color="faded"  @click="removeNode(node)" />
+              </div>
             </div>
         </div>
       </drop>
+    </div>
+
+    <div class="rightMenu" v-if="dbg.enabled">
+
+      <div class="text-right q-pa-sm">
+        <q-btn icon="delete" flat color="faded" @click="dbg.items = []" />
+      </div>
+
+      <div>
+        <div class="dbg-item q-pa-sm" v-for="(item, index) in dbg.items" :key="index" @mouseover="setDbgActiveNode(item.node, true)" @mouseout="setDbgActiveNode(item.node, false)">
+          <div class="dbg-item-header q-caption">
+            <span class="dbg-item-header-date text-faded">
+              {{ $ethingUI.utils.dateToString(item.ts * 1000) }}
+            </span>
+            <span v-if="item.node" class="dbg-item-header-node text-purple">
+              [{{ nodeIdToName(item.node) }}]
+            </span>
+          </div>
+          <div class="dbg-item-data">
+            {{ item.data }}
+          </div>
+        </div>
+      </div>
+
     </div>
 
     <modal v-model="edit.show" :title="(edit.node?'Edit':'Add')+' '+edit.type" icon="add" :valid-btn-disable="edit.error" valid-btn-label="Add" @valid="onEditDone">
@@ -39,6 +65,56 @@ import { jsPlumb } from 'jsplumb'
 import 'jsplumb/css/jsplumbtoolkit-defaults.css'
 
 import { Drag, Drop } from 'vue-drag-drop'
+import FlowRecursiveMenuNode from '../components/FlowRecursiveMenuNode'
+
+import EThingUI from 'ething-quasar-core'
+import EThing from 'ething-js'
+
+
+var flowSocket = EThingUI.io(EThing.config.serverUrl + '/flow', {
+  autoConnect: false
+});
+
+flowSocket.on('connect', () => {
+  console.log('[socketio:Flow] connected')
+});
+
+flowSocket.on('disconnect', () => {
+  console.log('[socketio:Flow] disconnected')
+});
+
+const SOCKET_RELEASE_DELAY = 10000;
+
+function lock_socket (sock) {
+  sock._socket_ref_counter = sock._socket_ref_counter || 0
+
+  sock._socket_ref_counter += 1
+
+  if (sock._socket_ref_counter===1) {
+    if (typeof sock._socket_close_timer !== 'undefined' && sock._socket_close_timer!==null) {
+      clearTimeout(sock._socket_close_timer)
+      sock._socket_close_timer = null;
+    } else {
+      sock.open()
+    }
+  }
+
+}
+
+function release_socket (sock) {
+  sock._socket_ref_counter = sock._socket_ref_counter || 0
+
+  if (sock._socket_ref_counter>0) {
+    sock._socket_ref_counter -= 1
+
+    if (sock._socket_ref_counter===0) {
+      sock._socket_close_timer = setTimeout(() => {
+        sock._socket_close_timer = null
+        sock.close()
+      }, SOCKET_RELEASE_DELAY)
+    }
+  }
+}
 
 
 var basicType = {
@@ -115,7 +191,7 @@ export default {
   name: 'PageFlow',
 
   components: {
-    Drag, Drop
+    Drag, Drop, FlowRecursiveMenuNode
   },
 
   data () {
@@ -134,7 +210,13 @@ export default {
         extra: null
       },
       meta: {},
-      dirty: false
+      dirty: false,
+      menuRoot: [],
+      dbg: {
+        enabled: false,
+        items: [],
+        opened: false
+      }
     }
 
   },
@@ -176,14 +258,46 @@ export default {
       }
     },
 
-    demo () {
-      this.addNodesToFlow([
-        {id:'1', type:'event', model:{type:'events/CustomEvent', name:'toto'}, x:250, y:300},
-        {id:'2', type:'action', model:{type:'actions/Wait', duration:1000}, x:550, y:300}
-      ], () => {
-        this.instance.connect({uuids: ['1.outputs.default', '2.inputs.default'], editable: true});
+    toggle_debug () {
+      this.dbg.enabled = !this.dbg.enabled;
+      this.dbg.enabled ? this.start_debug() : this.stop_debug();
+    },
+
+    start_debug () {
+      if (this.dbg.opened) return
+
+      this.dbg.opened = true
+
+      lock_socket(flowSocket)
+
+      flowSocket.on('dbg_data', this.debug_data_handler);
+
+      flowSocket.emit('dbg_open', {
+          flow_id: this.resource.id()
+      })
+    },
+
+    stop_debug () {
+      if (!this.dbg.opened) return
+
+      this.dbg.opened = false
+
+      flowSocket.emit('dbg_close', {
+          flow_id: this.resource.id()
       })
 
+      flowSocket.off('dbg_data', this.debug_data_handler);
+
+      release_socket(flowSocket)
+    },
+
+    debug_data_handler (data) {
+      // {flow_id: "owBdc-U", data: "debug Tick", ts: 1546608540.8292224, node: "1460686"}
+      data.data = JSON.parse(data.data)
+
+      console.log('[socketio:Flow] data:', data)
+
+      this.dbg.items.push(data)
     },
 
     addNodesToFlow (nodes, done) {
@@ -223,6 +337,9 @@ export default {
         return
       }
 
+      if (typeof node.name === 'undefined')
+        node.name = type
+
       if (typeof node.color === 'undefined')
         node.color = cls.color
 
@@ -235,6 +352,8 @@ export default {
         node.y = 0
       if (typeof node.y === 'number')
         node.y = node.y+'px'
+
+      node.cls = cls
 
       this.nodes.push(node)
 
@@ -267,38 +386,6 @@ export default {
               });
             })
           }
-          /*
-          if (node.type == 'event') {
-            this.instance.addEndpoint(el, sourceEndpoint, {
-                anchor: "RightMiddle",
-                uuid: node.id + ".outputs.default"
-            });
-          }
-          else if (node.type == 'condition') {
-            this.instance.addEndpoint(el, sourceEndpoint, {
-                anchor: "RightMiddle",
-                uuid: node.id + ".outputs.default"
-            });
-            this.instance.addEndpoint(el, sourceEndpoint, {
-                anchor: "BottomCenter",
-                uuid: node.id + ".outputs.fail"
-            });
-            this.instance.addEndpoint(el, targetEndpoint, {
-                anchor: "LeftMiddle",
-                uuid: node.id + ".inputs.default"
-            });
-          }
-          else if (node.type == 'action') {
-            this.instance.addEndpoint(el, sourceEndpoint, {
-                anchor: "RightMiddle",
-                uuid: node.id + ".outputs.default"
-            });
-            this.instance.addEndpoint(el, targetEndpoint, {
-                anchor: "LeftMiddle",
-                uuid: node.id + ".inputs.default"
-            });
-          }
-          */
 
           this.instance.draggable(el, {
             grid: [20, 20],
@@ -333,9 +420,26 @@ export default {
 
     },
 
+    nodeIdToName (nodeId) {
+      var node = this.getNode(nodeId)
+      return node && node.name ? node.name : nodeId
+    },
+
     removeNode (node) {
       this.removeNodeToFlow(node)
       this.dirty = true
+    },
+
+    setDbgActiveNode (node, active) {
+      if (typeof node === 'object')
+        node = node.id
+
+      var el = this.getNodeElement(node)
+      if (el) {
+        el.classList.toggle("active", active );
+      }
+
+      return
     },
 
     getId () {
@@ -361,6 +465,14 @@ export default {
       }
     },
 
+    getNode (nodeId) {
+      for(var i in this.nodes) {
+        if (this.nodes[i].id === nodeId) {
+          return this.nodes[i]
+        }
+      }
+    },
+
     addNodeClick (type, extra) {
       if (typeof type === 'object')
         type = type.type
@@ -370,24 +482,52 @@ export default {
 
       if (!cls) return
 
-      this.edit.node = null
-      this.edit.type = type
-      this.edit.schema = cls.schema
-      this.edit.model = undefined
-      this.edit.error = false
-      this.edit.key++
-      this.edit.show = true
+      this._initEditObj(cls)
       this.edit.extra = extra
+
     },
 
     editNode (node) {
       var type = node.type
       var cls = this.getNodeCls(type)
 
+      this._initEditObj(cls)
+
       this.edit.node = node
-      this.edit.type = type
-      this.edit.schema = cls.schema
-      this.edit.model = node.model
+      if (node.name) this.edit.model.appearance.name = node.name
+      if (node.color) this.edit.model.appearance.color = node.color
+      this.edit.model.properties = node.model
+    },
+
+    _initEditObj (cls) {
+      this.edit.node = null
+      this.edit.type = cls.type
+      this.edit.schema = {
+        type: 'object',
+        properties: {
+          appearance: {
+            type: 'object',
+            properties: {
+              name: {
+                type: 'string',
+                minLength: 1
+              },
+              color: {
+                type: 'string',
+                format: 'color'
+              }
+            },
+            required: ['name', 'color']
+          },
+          properties: cls.schema
+        }
+      }
+      this.edit.model = {
+        appearance: {
+          name: cls.type,
+          color: cls.color
+        }
+      }
       this.edit.error = false
       this.edit.key++
       this.edit.show = true
@@ -396,19 +536,25 @@ export default {
 
     onEditDone () {
       this.edit.show = false
+      var appearance = this.edit.model.appearance
+      var model = this.edit.model.properties || {}
       if (this.edit.node) {
-        this.edit.node.model = this.edit.model
+        this.edit.node.model = model
+        this.edit.node.name = appearance.name
+        this.edit.node.color = appearance.color
       } else {
         this.addNodeToFlow(Object.assign({
           type: this.edit.type,
-          model: this.edit.model
+          model,
+          name: appearance.name,
+          color: appearance.color
         }, this.edit.extra || {}))
       }
       this.dirty = true
     },
 
     nodeTitle (node) {
-      return node.type
+      return node.name || node.type
     },
 
     exportFlow () {
@@ -420,7 +566,9 @@ export default {
           y: node.el.style.top,
           id: node.id,
           type: node.type,
-          model: node.model
+          model: node.model,
+          name: node.name,
+          color: node.color
         }
       })
 
@@ -444,6 +592,8 @@ export default {
 
     importFlow (flowData, done) {
       if (!this.instance) return
+
+      console.log(flowData)
 
       this.addNodesToFlow(flowData.nodes, () => {
         flowData.connections.forEach(connectionData => {
@@ -470,6 +620,55 @@ export default {
     loadFlowMeta (done, fail) {
       return this.$ething.request('/flows/meta').then(meta => {
         this.meta = meta
+
+        // recursive order by categories
+        var root = {
+          categories: [],
+          nodes: []
+        }
+
+        function findCat (path, create) {
+          var ptr = root
+          for (var i in path) {
+            var pathItem = path[i]
+            if (!pathItem) break
+            var found = false
+            for (var j in ptr.categories) {
+              var cat = ptr.categories[j]
+              if (cat.name === pathItem) {
+                ptr = cat
+                found = true
+                break
+              }
+            }
+            if (!found) {
+              if (create) {
+                var item = {
+                  name: pathItem,
+                  categories: [],
+                  nodes: []
+                }
+                ptr.categories.push(item)
+                ptr = item
+              } else {
+                return false
+              }
+            }
+          }
+          return ptr
+        }
+
+        meta.nodes.forEach( node => {
+          var category = node.category || ''
+          var categoriesPath = category.split(/[\.,;\/]/)
+
+          var cat = findCat(categoriesPath, true)
+          cat.nodes.push(node)
+
+        })
+
+        this.menuRoot = root
+
         if (done) done(meta)
       }).catch(err => {
         if (fail) fail(err)
@@ -535,9 +734,11 @@ export default {
 
     });
 
-    //jsPlumb.fire("jsPlumbDemoLoaded", instance);
 
+  },
 
+  beforeDestroy () {
+    this.stop_debug()
   }
 }
 </script>
@@ -548,8 +749,21 @@ export default {
     left: 0px;
     top: 0px;
     bottom: 0px;
-    width: 250px;
+    width: 300px;
     border-right: 1px #d9d9d9 solid;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .rightMenu {
+    position: absolute;
+    right: 0px;
+    top: 0px;
+    bottom: 0px;
+    width: 300px;
+    border-left: 1px #d9d9d9 solid;
+    overflow-y: auto;
+    overflow-x: auto;
   }
 
   .topMenu {
@@ -562,10 +776,10 @@ export default {
 
   .main {
     position: absolute;
-    left: 250px;
+    left: 300px;
     top: 0px;
     bottom: 0px;
-    right: 0px;
+    right: 300px;
   }
 
   .flowchart {
@@ -575,9 +789,24 @@ export default {
     bottom: 0px;
     right: 0px;
   }
+
+  .dbg-item:first-child {
+    border-top: 1px #d9d9d9 solid;
+  }
+
+  .dbg-item {
+    border-bottom: 1px #d9d9d9 solid;
+  }
+
 </style>
 
 <style>
+
+.leftMenu button .q-btn-inner > div {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
 
 .flowchart {
     /*height: 550px;
@@ -593,27 +822,50 @@ export default {
     -o-box-shadow: 2px 2px 19px #aaa;
     -webkit-box-shadow: 2px 2px 19px #aaa;
     -moz-box-shadow: 2px 2px 19px #aaa;
-    -moz-border-radius: 0.5em;
-    border-radius: 0.5em;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
     opacity: 0.8;
-    width: 160px;
-    height: 60px;
+    width: 200px;
+    height: 48px;
     display: flex;
-    justify-content: center;
+    /*justify-content: center;
     align-items: center;
     cursor: pointer;
-    text-align: center;
+    text-align: center;*/
     z-index: 20;
     position: absolute;
     background-color: #eeeeef;
     color: black;
     font-family: helvetica, sans-serif;
-    padding: 0.5em;
-    font-size: 0.9em;
+    /*padding: 0.5em;*/
+    /*font-size: 0.9em;*/
     -webkit-transition: -webkit-box-shadow 0.15s ease-in;
     -moz-transition: -moz-box-shadow 0.15s ease-in;
     -o-transition: -o-box-shadow 0.15s ease-in;
     transition: box-shadow 0.15s ease-in;
+}
+
+.flowchart .node > .icon {
+  font-size: 24px;
+  width: 50px;
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
+  background-color: #c1c1c1;
+}
+
+.flowchart .node > .content {
+  width: auto;
+  min-width: 0;
+  max-width: 100%;
+  -webkit-box-flex: 10000;
+  -ms-flex: 10000 1 0%;
+  flex: 10000 1 0%;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  text-align: center;
+  display: flex;
+  font-size: 0.9em;
 }
 
 .flowchart .node:hover {
@@ -622,6 +874,13 @@ export default {
     -webkit-box-shadow: 2px 2px 19px #444;
     -moz-box-shadow: 2px 2px 19px #444;
     opacity: 0.6;
+}
+
+.flowchart .node.active {
+    box-shadow: 2px 2px 19px #444;
+    -o-box-shadow: 2px 2px 19px #444;
+    -webkit-box-shadow: 2px 2px 19px #444;
+    -moz-box-shadow: 2px 2px 19px #444;
 }
 
 .flowchart .jtk-connector {
