@@ -117,15 +117,6 @@ function release_socket (sock) {
 }
 
 
-var basicType = {
-    connector: "StateMachine",
-    paintStyle: { stroke: "red", strokeWidth: 4 },
-    hoverPaintStyle: { stroke: "blue" },
-    overlays: [
-        "Arrow"
-    ]
-};
-
 // this is the paint style for the connecting lines..
 var connectorPaintStyle = {
         strokeWidth: 2,
@@ -156,19 +147,16 @@ var connectorPaintStyle = {
         },
         maxConnections: -1,
         isSource: true,
-        connector: [ "Flowchart", { stub: [40, 60], gap: 10, cornerRadius: 5, alwaysRespectStubs: true } ],
+        connector: [ "Flowchart", {
+          stub: [40, 60],
+          gap: 55,
+          cornerRadius: 5,
+          alwaysRespectStubs: true
+        } ],
         connectorStyle: connectorPaintStyle,
         hoverPaintStyle: endpointHoverStyle,
         connectorHoverStyle: connectorHoverStyle,
-        dragOptions: {},
-        overlays: [
-            [ "Label", {
-                location: [0.5, 1.5],
-                label: "Drag",
-                cssClass: "endpointSourceLabel",
-                visible:false
-            } ]
-        ]
+        dragOptions: {}
     },
 // the definition of target endpoints (will appear when the user drags a connection)
     targetEndpoint = {
@@ -177,12 +165,9 @@ var connectorPaintStyle = {
         hoverPaintStyle: endpointHoverStyle,
         maxConnections: -1,
         dropOptions: { hoverClass: "hover", activeClass: "active" },
-        isTarget: true,
-        overlays: [
-            [ "Label", { location: [0.5, -0.5], label: "Drop", cssClass: "endpointTargetLabel", visible:false } ]
-        ]
+        isTarget: true
     },
-    init = function (connection) {
+    init = function (c) {
         //connection.getOverlay("label").setLabel(connection.source.getAttribute('data-id') + "-" + connection.target.getAttribute('data-id'));
     };
 
@@ -372,7 +357,15 @@ export default {
             cls.inputs.forEach((input, index) => {
               this.instance.addEndpoint(el, targetEndpoint, {
                   anchor: "ContinuousLeft",
-                  uuid: node.id + ".inputs." + input
+                  uuid: node.id + ".inputs." + input,
+                  overlays: [
+                      [ "Label", {
+                        location: [-2.2, 0.5],
+                        label: input,
+                        cssClass: "endpointInputLabel",
+                        visible: true
+                      } ]
+                  ]
               });
             })
           }
@@ -382,7 +375,15 @@ export default {
             cls.outputs.forEach((output, index) => {
               this.instance.addEndpoint(el, sourceEndpoint, {
                   anchor: "ContinuousRight",
-                  uuid: node.id + ".outputs." + output
+                  uuid: node.id + ".outputs." + output,
+                  overlays: [
+                      [ "Label", {
+                        location: [3.0, 0.5],
+                        label: output,
+                        cssClass: "endpointOutputLabel",
+                        visible: true
+                      } ]
+                  ]
               });
             })
           }
@@ -707,8 +708,6 @@ export default {
         Container: this.$refs.flowchart
     });
 
-    instance.registerConnectionType("basic", basicType);
-
     // suspend drawing and initialise.
     instance.batch(() => {
 
@@ -887,9 +886,24 @@ export default {
     z-index: 4;
 }
 
-.flowchart .jtk-endpoint, .endpointTargetLabel, .endpointSourceLabel {
+.flowchart .jtk-endpoint, .endpointInputLabel, .endpointOutputLabel {
     z-index: 21;
     cursor: pointer;
+}
+
+.endpointInputLabel, .endpointOutputLabel {
+    font-size: 12px;
+    width: 50px;
+    background-color: white;
+    opacity: 0.5;
+}
+
+.endpointInputLabel {
+    text-align: right;
+}
+
+.endpointOutputLabel {
+    text-align: left;
 }
 
 .flowchart .aLabel {
@@ -922,7 +936,7 @@ path, .jtk-endpoint {
 }
 
 .jtk-overlay {
-    background-color:transparent;
+    /*background-color:transparent;*/
 }
 
 </style>
