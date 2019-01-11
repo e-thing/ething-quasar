@@ -239,11 +239,16 @@ export default ({ app, router, Vue, store }) => {
           }
 
           if (sseReconnectFlag) {
+
+            setTimeout( () => {
+              router.go()
+            }, 1000)
+
             // reload the resource !
-            EThing.arbo.load(null, true).then( () => {
+            /*EThing.arbo.load(null, true).then( () => {
               console.log('[app] ething arbo reloaded !')
               store.commit('ething/update')
-            })
+            })*/
 
             sseNotification = Notify.create({
               type: 'positive',

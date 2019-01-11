@@ -88,9 +88,9 @@ export default [
         component: () => import('pages/Settings')
       },
       {
-        path: 'rules',
-        name: 'rules',
-        component: () => import('pages/Rules')
+        path: 'flows',
+        name: 'flows',
+        component: () => import('pages/Flows')
       },
       {
         path: 'test',

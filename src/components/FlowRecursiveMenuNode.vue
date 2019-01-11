@@ -37,7 +37,7 @@
       <q-item :style="{color: node.color}" style="cursor: pointer;" class="q-px-sm" @click.native="$emit('click', node)">
         <q-item-side :icon="node.icon || 'mdi-puzzle'" :style="{color: node.color}" />
         <q-item-main>
-          <q-item-tile label class="ellipsis">{{ node.type }}</q-item-tile>
+          <q-item-tile label class="ellipsis">{{ node.label }}</q-item-tile>
         </q-item-main>
       </q-item>
     </drag>

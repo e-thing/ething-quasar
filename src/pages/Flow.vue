@@ -8,19 +8,30 @@
     </div>
 
     <div class="main" :style="dbg.enabled ? {} : {right: 0}">
-      <div class="topMenu">
+      <div class="top-left-menu">
+        <span class="text-faded">{{ resource.name() }}</span>
+      </div>
+
+      <div class="top-right-menu">
         <q-btn label="deploy" flat :color="dirty?'primary':'faded'" @click="deploy" />
         <q-btn label="debug" flat :color="dbg.enabled?'primary':'faded'" @click="toggle_debug" />
       </div>
 
       <drop @drop="handleDrop">
         <div ref="flowchart" class="flowchart jtk-surface jtk-surface-nopan">
-            <div ref="node" class="node" :style="{'border-color': node.color}" v-for="node in nodes" :key="node.id" :data-id="node.id">
+            <div ref="node" class="node" :style="{'border-color': node.color}" v-for="node in nodes" :key="node.id" :data-id="node.id" @mouseover="nodeHoverHandler(node, true)" @mouseout="nodeHoverHandler(node, false)">
               <q-icon v-if="node.cls.icon" :name="node.cls.icon" class="icon" />
               <div class="content">
                 <strong class="ellipsis">{{ nodeTitle(node) }}</strong>
-                <q-btn flat dense icon="edit" size="sm" color="faded"  @click="editNode(node)" />
-                <q-btn flat dense icon="delete" size="sm" color="faded"  @click="removeNode(node)" />
+              </div>
+              <div class="node-btns">
+                <q-btn flat dense icon="edit" size="sm" color="faded"  @click="editNode(node)" class="node-btn"/>
+                <q-btn flat dense icon="delete" size="sm" color="faded"  @click="removeNode(node)" class="node-btn"/>
+              </div>
+              <div class="node-dbg text-no-wrap q-caption" v-if="node.dbg.show">
+                <div v-for="(value, key) in node.dbg.data" :key="key">
+                  {{ key }}: {{ value }}
+                </div>
               </div>
             </div>
         </div>
@@ -30,10 +41,10 @@
     <div class="rightMenu" v-if="dbg.enabled">
 
       <div class="text-right q-pa-sm">
-        <q-btn icon="delete" flat color="faded" @click="dbg.items = []" />
+        <q-btn v-if="dbg.items.length>0" icon="delete" flat color="faded" @click="dbg.items = []" />
       </div>
 
-      <div>
+      <div v-if="dbg.items.length>0">
         <div class="dbg-item q-pa-sm" v-for="(item, index) in dbg.items" :key="index" @mouseover="setDbgActiveNode(item.node, true)" @mouseout="setDbgActiveNode(item.node, false)">
           <div class="dbg-item-header q-caption">
             <span class="dbg-item-header-date text-faded">
@@ -44,9 +55,18 @@
             </span>
           </div>
           <div class="dbg-item-data">
-            {{ item.data }}
+            <div v-if="item.exception" class="text-negative">
+              {{ item.data.type }}: {{ item.data.message }}
+              <pre class="dbg-item-data-exc-traceback">{{ item.data.traceback }}</pre>
+            </div>
+            <div v-else>
+              {{ item.data }}
+            </div>
           </div>
         </div>
+      </div>
+      <div v-else class="text-faded text-center q-caption">
+        debug console
       </div>
 
     </div>
@@ -60,7 +80,6 @@
 
 <script>
 
-//var jsPlumb = require("jsplumb")
 import { jsPlumb } from 'jsplumb'
 import 'jsplumb/css/jsplumbtoolkit-defaults.css'
 
@@ -223,6 +242,12 @@ export default {
 
   methods: {
 
+    nodeHoverHandler (node, hover) {
+      node.dbg = Object.assign(node.dbg, {
+        show: hover && this.dbg.enabled
+      })
+    },
+
     handleDrop (data, event) {
       var node = data.node
       this.addNodeClick(node.type, {
@@ -256,6 +281,7 @@ export default {
       lock_socket(flowSocket)
 
       flowSocket.on('dbg_data', this.debug_data_handler);
+      flowSocket.on('dbg_info', this.debug_info_handler);
 
       flowSocket.emit('dbg_open', {
           flow_id: this.resource.id()
@@ -267,11 +293,14 @@ export default {
 
       this.dbg.opened = false
 
-      flowSocket.emit('dbg_close', {
-          flow_id: this.resource.id()
-      })
+      if (this.resource) {
+        flowSocket.emit('dbg_close', {
+            flow_id: this.resource.id()
+        })
+      }
 
       flowSocket.off('dbg_data', this.debug_data_handler);
+      flowSocket.off('dbg_info', this.debug_info_handler);
 
       release_socket(flowSocket)
     },
@@ -283,6 +312,18 @@ export default {
       console.log('[socketio:Flow] data:', data)
 
       this.dbg.items.push(data)
+    },
+
+    debug_info_handler (data) {
+      data.data = JSON.parse(data.data)
+
+      console.log('[socketio:Flow] info:', data)
+
+      var node = this.getNode(data.node)
+
+      node.dbg = Object.assign(node.dbg, {
+        data: data.data
+      })
     },
 
     addNodesToFlow (nodes, done) {
@@ -323,7 +364,7 @@ export default {
       }
 
       if (typeof node.name === 'undefined')
-        node.name = type
+        node.name = cls.label
 
       if (typeof node.color === 'undefined')
         node.color = cls.color
@@ -339,6 +380,11 @@ export default {
         node.y = node.y+'px'
 
       node.cls = cls
+
+      this.$set(node, 'dbg', {
+        show: false,
+        data: {}
+      })
 
       this.nodes.push(node)
 
@@ -495,18 +541,19 @@ export default {
       this._initEditObj(cls)
 
       this.edit.node = node
-      if (node.name) this.edit.model.appearance.name = node.name
-      if (node.color) this.edit.model.appearance.color = node.color
+      if (node.name) this.edit.model.node.name = node.name
+      if (node.color) this.edit.model.node.color = node.color
       this.edit.model.properties = node.model
     },
 
     _initEditObj (cls) {
       this.edit.node = null
       this.edit.type = cls.type
+
       this.edit.schema = {
         type: 'object',
         properties: {
-          appearance: {
+          node: {
             type: 'object',
             properties: {
               name: {
@@ -519,13 +566,29 @@ export default {
               }
             },
             required: ['name', 'color']
-          },
-          properties: cls.schema
+          }
         }
       }
+
+      if (cls.schema) {
+        var resolvedSchema = Object.assign({}, this.$ethingUI.form.resolve(cls.schema)) // be sure to make a copy
+
+        var description = resolvedSchema.description
+        delete resolvedSchema.description
+
+        if (description) {
+          this.edit.schema.description = description
+        }
+
+        if (resolvedSchema && resolvedSchema.properties && Object.keys(resolvedSchema).length > 0) {
+          resolvedSchema.label = 'properties'
+          this.edit.schema.properties.properties = resolvedSchema
+        }
+      }
+
       this.edit.model = {
-        appearance: {
-          name: cls.type,
+        node: {
+          name: cls.label,
           color: cls.color
         }
       }
@@ -537,18 +600,18 @@ export default {
 
     onEditDone () {
       this.edit.show = false
-      var appearance = this.edit.model.appearance
+      var node = this.edit.model.node
       var model = this.edit.model.properties || {}
       if (this.edit.node) {
         this.edit.node.model = model
-        this.edit.node.name = appearance.name
-        this.edit.node.color = appearance.color
+        this.edit.node.name = node.name
+        this.edit.node.color = node.color
       } else {
         this.addNodeToFlow(Object.assign({
           type: this.edit.type,
           model,
-          name: appearance.name,
-          color: appearance.color
+          name: node.name,
+          color: node.color
         }, this.edit.extra || {}))
       }
       this.dirty = true
@@ -593,8 +656,6 @@ export default {
 
     importFlow (flowData, done) {
       if (!this.instance) return
-
-      console.log(flowData)
 
       this.addNodesToFlow(flowData.nodes, () => {
         flowData.connections.forEach(connectionData => {
@@ -660,8 +721,25 @@ export default {
         }
 
         meta.nodes.forEach( node => {
-          var category = node.category || ''
-          var categoriesPath = category.split(/[\.,;\/]/)
+          var type = node.type
+          var categoriesPath = node.type.split('/')
+          var name = categoriesPath.pop()
+
+          node.label = name
+
+          // get metadata
+          if (this.$ethingUI.isDefined(type)) {
+            // retrieve the metadata from the definition
+            var meta = this.$ethingUI.get(type)
+            node.color = meta.color
+            node.label = meta.label
+            node.icon = meta.icon
+          }
+
+          // make user friendly labels
+          if (/^[a-zA-Z]+$/.test(node.label)) {
+            node.label = node.label.replace(/([a-z])([A-Z])/g, '$1 $2')
+          }
 
           var cat = findCat(categoriesPath, true)
           cat.nodes.push(node)
@@ -765,7 +843,15 @@ export default {
     overflow-x: auto;
   }
 
-  .topMenu {
+  .top-left-menu {
+    display: inline-block;
+    position: absolute;
+    top: 18px;
+    left: 25px;
+    z-index: 10;
+  }
+
+  .top-right-menu {
     display: inline-block;
     position: absolute;
     top: 10px;
@@ -875,11 +961,28 @@ export default {
     opacity: 0.6;
 }
 
+.flowchart .node > .node-btns {
+  display: none;
+  position: absolute;
+  right: 0px;
+  top: 0px;
+}
+
+.flowchart .node:hover > .node-btns {
+  display: block;
+}
+
 .flowchart .node.active {
-    box-shadow: 2px 2px 19px #444;
-    -o-box-shadow: 2px 2px 19px #444;
-    -webkit-box-shadow: 2px 2px 19px #444;
-    -moz-box-shadow: 2px 2px 19px #444;
+    box-shadow: 2px 2px 19px #ffb427;
+    -o-box-shadow: 2px 2px 19px #ffb427;
+    -webkit-box-shadow: 2px 2px 19px #ffb427;
+    -moz-box-shadow: 2px 2px 19px #ffb427;
+}
+
+.flowchart .node > .node-dbg {
+  position: absolute;
+  left: 0px;
+  top: 56px;
 }
 
 .flowchart .jtk-connector {
