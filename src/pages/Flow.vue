@@ -2,8 +2,19 @@
   <q-page>
 
     <div class="leftMenu">
+
+      <div class="node-filter q-px-md q-py-sm">
+        <resource-select
+          :display-value="resourceFilterDisplayValue"
+          v-model="resourceFilter"
+          clearable
+          hide-underline
+          stack-label="Resource Filter"
+        />
+      </div>
+
       <q-list separator no-border>
-        <flow-recursive-menu-node :node="menuRoot" @click="addNodeClick"/>
+        <flow-recursive-menu-node :root="$ethingUI.definitions.nodes" ns="nodes" :filter="nodeFilter" @click="addNodeClick"/>
       </q-list>
     </div>
 
@@ -20,7 +31,7 @@
       <drop @drop="handleDrop">
         <div ref="flowchart" class="flowchart jtk-surface jtk-surface-nopan">
             <div ref="node" class="node" :style="{'border-color': node.color}" v-for="node in nodes" :key="node.id" :data-id="node.id" @mouseover="nodeHoverHandler(node, true)" @mouseout="nodeHoverHandler(node, false)">
-              <q-icon v-if="node.cls.icon" :name="node.cls.icon" class="icon" />
+              <q-icon v-if="node._cls.icon" :name="node._cls.icon" class="icon" />
               <div class="content">
                 <strong class="ellipsis">{{ nodeTitle(node) }}</strong>
               </div>
@@ -28,8 +39,11 @@
                 <q-btn flat dense icon="edit" size="sm" color="faded"  @click="editNode(node)" class="node-btn"/>
                 <q-btn flat dense icon="delete" size="sm" color="faded"  @click="removeNode(node)" class="node-btn"/>
               </div>
-              <div class="node-dbg text-no-wrap q-caption" v-if="node.dbg.show">
-                <div v-for="(value, key) in node.dbg.data" :key="key">
+              <div class="node-dbg text-no-wrap q-caption" v-if="node._dbg.show">
+                <div>
+                  id: {{ node.id }}
+                </div>
+                <div v-for="(value, key) in node._dbg.data" :key="key">
                   {{ key }}: {{ value }}
                 </div>
               </div>
@@ -88,6 +102,8 @@ import FlowRecursiveMenuNode from '../components/FlowRecursiveMenuNode'
 
 import EThingUI from 'ething-quasar-core'
 import EThing from 'ething-js'
+
+import ResourceSelect from 'ething-quasar-core/src/components/ResourceSelect'
 
 
 var flowSocket = EThingUI.io(EThing.config.serverUrl + '/flow', {
@@ -195,7 +211,7 @@ export default {
   name: 'PageFlow',
 
   components: {
-    Drag, Drop, FlowRecursiveMenuNode
+    Drag, Drop, FlowRecursiveMenuNode, ResourceSelect
   },
 
   data () {
@@ -215,14 +231,20 @@ export default {
       },
       meta: {},
       dirty: false,
-      menuRoot: [],
       dbg: {
         enabled: false,
         items: [],
         opened: false
-      }
+      },
+      resourceFilter: null
     }
 
+  },
+
+  watch: {
+    resourceFilter (val, old) {
+      console.log(val)
+    }
   },
 
   computed: {
@@ -238,19 +260,42 @@ export default {
       return r
     },
 
+    resourceFilterDisplayValue () {
+      return this.resourceFilter===null ? 'none' : this.resourceFilter.basename()
+    },
+
   },
 
   methods: {
+    nodeFilter (node) {
+      if (this.resourceFilter) {
+        if (this.$ethingUI.isSubclass(node, 'nodes/ResourceNode')) {
+
+          var must_throw = node.properties.resource.must_throw
+
+          if (must_throw) {
+            var signals = this.$ethingUI.get(this.resourceFilter).signals
+            for (var i in signals) {
+              if (this.$ethingUI.isSubclass(signals[i], must_throw)) return true
+            }
+          } else {
+            return true
+          }
+
+        }
+        return false
+      }
+      return true
+    },
 
     nodeHoverHandler (node, hover) {
-      node.dbg = Object.assign(node.dbg, {
+      node._dbg = Object.assign(node._dbg, {
         show: hover && this.dbg.enabled
       })
     },
 
     handleDrop (data, event) {
-      var node = data.node
-      this.addNodeClick(node.type, {
+      this.addNodeClick(data.type, {
         x: event.offsetX - 80,
         y: event.offsetY - 30
       })
@@ -261,9 +306,11 @@ export default {
       if (flow) {
         this.resource.set({
           flow
-        }, () => {
+        }).then(() => {
           this.dirty = false
           this.resource.deploy()
+        }).catch((err) => {
+          console.error(err);
         })
       }
     },
@@ -321,7 +368,7 @@ export default {
 
       var node = this.getNode(data.node)
 
-      node.dbg = Object.assign(node.dbg, {
+      node._dbg = Object.assign(node._dbg, {
         data: data.data
       })
     },
@@ -367,21 +414,17 @@ export default {
         node.name = cls.label
 
       if (typeof node.color === 'undefined')
-        node.color = cls.color
+        node.color = this.$ethingUI.utils.colorNameToHex(cls.color) // color may be color names, parse into hex format
 
       if (typeof node.x === 'undefined')
         node.x = 0
-      if (typeof node.x === 'number')
-        node.x = node.x+'px'
 
       if (typeof node.y === 'undefined')
         node.y = 0
-      if (typeof node.y === 'number')
-        node.y = node.y+'px'
 
-      node.cls = cls
+      node._cls = cls
 
-      this.$set(node, 'dbg', {
+      this.$set(node, '_dbg', {
         show: false,
         data: {}
       })
@@ -391,10 +434,10 @@ export default {
       this.$nextTick(() => {
         var el = this.getNodeElement(node.id)
 
-        node.el = el
+        node._el = el
 
-        el.style.left = node.x
-        el.style.top = node.y
+        el.style.left = node.x+'px'
+        el.style.top = node.y+'px'
 
         this.instance.batch(() => {
 
@@ -504,12 +547,7 @@ export default {
     },
 
     getNodeCls (type) {
-      for (var i in this.meta.nodes) {
-        var _cls = this.meta.nodes[i]
-        if (_cls.type === type) {
-          return _cls
-        }
-      }
+      return this.$ethingUI.get(type)
     },
 
     getNode (nodeId) {
@@ -521,76 +559,42 @@ export default {
     },
 
     addNodeClick (type, extra) {
-      if (typeof type === 'object')
-        type = type.type
-
-      // serach meta info
-      var cls = this.getNodeCls(type)
-
-      if (!cls) return
-
-      this._initEditObj(cls)
+      this._initEditObj(type)
       this.edit.extra = extra
-
     },
 
     editNode (node) {
       var type = node.type
-      var cls = this.getNodeCls(type)
 
-      this._initEditObj(cls)
+      this._initEditObj(type)
 
       this.edit.node = node
-      if (node.name) this.edit.model.node.name = node.name
-      if (node.color) this.edit.model.node.color = node.color
-      this.edit.model.properties = node.model
+      this.edit.model = Object.assign(this.edit.model, this.cleanNode(node))
     },
 
-    _initEditObj (cls) {
+    _initEditObj (type) {
+      var cls = this.getNodeCls(type)
+
       this.edit.node = null
-      this.edit.type = cls.type
+      this.edit.type = type
+
+      // remove x and y properties from the schema
+
+      var schemaProps = Object.assign({}, cls.properties)
+      delete schemaProps.x
+      delete schemaProps.y
+      var schemaRequired = (cls.required || []).filter(n => ['x', 'y'].indexOf(n)===-1)
 
       this.edit.schema = {
         type: 'object',
-        properties: {
-          node: {
-            type: 'object',
-            properties: {
-              name: {
-                type: 'string',
-                minLength: 1
-              },
-              color: {
-                type: 'string',
-                format: 'color'
-              }
-            },
-            required: ['name', 'color']
-          }
-        }
-      }
-
-      if (cls.schema) {
-        var resolvedSchema = Object.assign({}, this.$ethingUI.form.resolve(cls.schema)) // be sure to make a copy
-
-        var description = resolvedSchema.description
-        delete resolvedSchema.description
-
-        if (description) {
-          this.edit.schema.description = description
-        }
-
-        if (resolvedSchema && resolvedSchema.properties && Object.keys(resolvedSchema).length > 0) {
-          resolvedSchema.label = 'properties'
-          this.edit.schema.properties.properties = resolvedSchema
-        }
+        properties: schemaProps,
+        required: schemaRequired,
+        description: cls.description
       }
 
       this.edit.model = {
-        node: {
-          name: cls.label,
-          color: cls.color
-        }
+        name: cls.label,
+        color: this.$ethingUI.utils.colorNameToHex(cls.color) // color may be color names, parse into hex format
       }
       this.edit.error = false
       this.edit.key++
@@ -600,19 +604,13 @@ export default {
 
     onEditDone () {
       this.edit.show = false
-      var node = this.edit.model.node
-      var model = this.edit.model.properties || {}
+      var model = Object.assign({}, this.edit.model, this.edit.extra || {})
       if (this.edit.node) {
-        this.edit.node.model = model
-        this.edit.node.name = node.name
-        this.edit.node.color = node.color
+        Object.assign(this.edit.node, model)
       } else {
         this.addNodeToFlow(Object.assign({
-          type: this.edit.type,
-          model,
-          name: node.name,
-          color: node.color
-        }, this.edit.extra || {}))
+          type: this.edit.type
+        }, model))
       }
       this.dirty = true
     },
@@ -621,20 +619,26 @@ export default {
       return node.name || node.type
     },
 
+    cleanNode (node) {
+      // copy
+      var copy = Object.assign({}, node)
+
+      // remove privates
+      delete copy._dbg
+      delete copy._cls
+      delete copy._el
+
+      // update x && y
+      copy.x = parseInt(node._el.style.left)
+      copy.y = parseInt(node._el.style.top)
+
+      return copy
+    },
+
     exportFlow () {
       if (!this.instance) return
 
-      var nodes = this.nodes.map(node => {
-        return {
-          x: node.el.style.left,
-          y: node.el.style.top,
-          id: node.id,
-          type: node.type,
-          model: node.model,
-          name: node.name,
-          color: node.color
-        }
-      })
+      var nodes = this.nodes.map(this.cleanNode)
 
       var connections = this.instance.getConnections().map(c => {
         var endpoints = c.endpoints
@@ -679,80 +683,6 @@ export default {
       })
     },
 
-    loadFlowMeta (done, fail) {
-      return this.$ething.request('/flows/meta').then(meta => {
-        this.meta = meta
-
-        // recursive order by categories
-        var root = {
-          categories: [],
-          nodes: []
-        }
-
-        function findCat (path, create) {
-          var ptr = root
-          for (var i in path) {
-            var pathItem = path[i]
-            if (!pathItem) break
-            var found = false
-            for (var j in ptr.categories) {
-              var cat = ptr.categories[j]
-              if (cat.name === pathItem) {
-                ptr = cat
-                found = true
-                break
-              }
-            }
-            if (!found) {
-              if (create) {
-                var item = {
-                  name: pathItem,
-                  categories: [],
-                  nodes: []
-                }
-                ptr.categories.push(item)
-                ptr = item
-              } else {
-                return false
-              }
-            }
-          }
-          return ptr
-        }
-
-        meta.nodes.forEach( node => {
-          var type = node.type
-          var categoriesPath = node.type.split('/')
-          var name = categoriesPath.pop()
-
-          node.label = name
-
-          // get metadata
-          if (this.$ethingUI.isDefined(type)) {
-            // retrieve the metadata from the definition
-            var meta = this.$ethingUI.get(type)
-            node.color = meta.color
-            node.label = meta.label
-            node.icon = meta.icon
-          }
-
-          // make user friendly labels
-          if (/^[a-zA-Z]+$/.test(node.label)) {
-            node.label = node.label.replace(/([a-z])([A-Z])/g, '$1 $2')
-          }
-
-          var cat = findCat(categoriesPath, true)
-          cat.nodes.push(node)
-
-        })
-
-        this.menuRoot = root
-
-        if (done) done(meta)
-      }).catch(err => {
-        if (fail) fail(err)
-      })
-    }
   },
 
   mounted () {
@@ -805,9 +735,7 @@ export default {
             }
         });
 
-        this.loadFlowMeta(() => {
-          this.load()
-        })
+        this.load()
 
     });
 
@@ -827,7 +755,7 @@ export default {
     top: 0px;
     bottom: 0px;
     width: 300px;
-    border-right: 1px #d9d9d9 solid;
+    border-right: 4px #d9d9d9 solid;
     overflow-y: auto;
     overflow-x: hidden;
   }
@@ -838,7 +766,7 @@ export default {
     top: 0px;
     bottom: 0px;
     width: 300px;
-    border-left: 1px #d9d9d9 solid;
+    border-left: 4px #d9d9d9 solid;
     overflow-y: auto;
     overflow-x: auto;
   }
@@ -881,6 +809,10 @@ export default {
 
   .dbg-item {
     border-bottom: 1px #d9d9d9 solid;
+  }
+
+  .node-filter {
+    border-bottom: 4px #d9d9d9 solid;
   }
 
 </style>
