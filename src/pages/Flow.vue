@@ -104,6 +104,7 @@ import EThingUI from 'ething-quasar-core'
 import EThing from 'ething-js'
 
 import ResourceSelect from 'ething-quasar-core/src/components/ResourceSelect'
+import FormSchemaEthingResource from 'ething-quasar-core/src/plugins/formSchema/FormSchemaEthingResource'
 
 
 var flowSocket = EThingUI.io(EThing.config.serverUrl + '/flow', {
@@ -241,12 +242,6 @@ export default {
 
   },
 
-  watch: {
-    resourceFilter (val, old) {
-      console.log(val)
-    }
-  },
-
   computed: {
     resource () {
       var id = this.$route.params.id
@@ -270,18 +265,7 @@ export default {
     nodeFilter (node) {
       if (this.resourceFilter) {
         if (this.$ethingUI.isSubclass(node, 'nodes/ResourceNode')) {
-
-          var must_throw = node.properties.resource.must_throw
-
-          if (must_throw) {
-            var signals = this.$ethingUI.get(this.resourceFilter).signals
-            for (var i in signals) {
-              if (this.$ethingUI.isSubclass(signals[i], must_throw)) return true
-            }
-          } else {
-            return true
-          }
-
+          return FormSchemaEthingResource.methods.filter.call(this, this.resourceFilter, node.properties.resource)
         }
         return false
       }
@@ -559,8 +543,14 @@ export default {
     },
 
     addNodeClick (type, extra) {
+      var cls = this.getNodeCls(type)
       this._initEditObj(type)
       this.edit.extra = extra
+      if (this.resourceFilter && this.$ethingUI.isSubclass(cls, 'nodes/ResourceNode')) {
+        Object.assign(this.edit.model, {
+          resource: this.resourceFilter.id()
+        })
+      }
     },
 
     editNode (node) {
