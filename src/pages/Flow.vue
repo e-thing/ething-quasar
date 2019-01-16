@@ -30,10 +30,14 @@
 
       <drop @drop="handleDrop">
         <div ref="flowchart" class="flowchart jtk-surface jtk-surface-nopan">
-            <div ref="node" class="node" :style="{'border-color': node.color}" v-for="node in nodes" :key="node.id" :data-id="node.id" @mouseover="nodeHoverHandler(node, true)" @mouseout="nodeHoverHandler(node, false)">
+            <div ref="node" class="node"
+                  v-for="node in nodes" :key="node.id" :data-id="node.id"
+                  @mouseover="nodeHoverHandler(node, true)" @mouseout="nodeHoverHandler(node, false)"
+                  :style="computeNodeStyle(node)"
+            >
               <q-icon v-if="node._cls.icon" :name="node._cls.icon" class="icon" />
               <div class="content">
-                <strong class="ellipsis">{{ nodeTitle(node) }}</strong>
+                <flow-node :nodeClass="node._component" :node="node" @inject="inject" />
               </div>
               <div class="node-btns">
                 <q-btn flat dense icon="edit" size="sm" color="faded"  @click="editNode(node)" class="node-btn"/>
@@ -99,6 +103,8 @@ import 'jsplumb/css/jsplumbtoolkit-defaults.css'
 
 import { Drag, Drop } from 'vue-drag-drop'
 import FlowRecursiveMenuNode from '../components/FlowRecursiveMenuNode'
+import FlowNode from '../components/FlowNode'
+import FlowNodes from '../components/FlowNodes'
 
 import EThingUI from 'ething-quasar-core'
 import EThing from 'ething-js'
@@ -212,7 +218,7 @@ export default {
   name: 'PageFlow',
 
   components: {
-    Drag, Drop, FlowRecursiveMenuNode, ResourceSelect
+    Drag, Drop, FlowRecursiveMenuNode, FlowNode, ResourceSelect
   },
 
   data () {
@@ -261,7 +267,55 @@ export default {
 
   },
 
+  watch: {
+    resource: {
+      handler (r) {
+        console.log(r)
+        console.log(r.data())
+
+        var data = r.data()
+
+        for(var k in data) {
+          var value = data[k]
+
+          // find the corresponding node
+          for (var i in this.nodes) {
+            var n = this.nodes[i]
+            if (n.name === k && this.$ethingUI.isSubclass(n._cls, 'nodes/outputs/Output')) {
+              n._data = JSON.parse(value)
+              break
+            }
+          }
+        }
+      },
+      immediate: true
+    }
+  },
+
   methods: {
+
+    inject (evt) {
+      console.log('inject: ', evt)
+      var node = evt.node
+      var data = evt.data
+
+      this.$ething.request({
+        url: 'flows/'+this.resource.id()+'/inject/' + node.id,
+        method: 'POST',
+        contentType: "application/json; charset=utf-8",
+        data: data
+      })
+    },
+
+    computeNodeStyle (node) {
+      var style = {
+        'border-color': node.color,
+        'width': node._meta.width + 'px',
+        'height': node._meta.height + 'px',
+      }
+      return style
+    },
+
     nodeFilter (node) {
       if (this.resourceFilter) {
         if (this.$ethingUI.isSubclass(node, 'nodes/ResourceNode')) {
@@ -280,8 +334,8 @@ export default {
 
     handleDrop (data, event) {
       this.addNodeClick(data.type, {
-        x: event.offsetX - 80,
-        y: event.offsetY - 30
+        x: event.offsetX,
+        y: event.offsetY
       })
     },
 
@@ -408,10 +462,20 @@ export default {
 
       node._cls = cls
 
+      // node component & metadata
+      var nodeComponent = cls.node || 'Base'
+      if (typeof nodeComponent === 'string') {
+        nodeComponent = FlowNodes[nodeComponent]
+      }
+      node._component = Vue.extend(nodeComponent)
+      node._meta = node._component.options.metadata
+
       this.$set(node, '_dbg', {
         show: false,
         data: {}
       })
+
+      this.$set(node, '_data', null)
 
       this.nodes.push(node)
 
@@ -605,10 +669,6 @@ export default {
       this.dirty = true
     },
 
-    nodeTitle (node) {
-      return node.name || node.type
-    },
-
     cleanNode (node) {
       // copy
       var copy = Object.assign({}, node)
@@ -617,6 +677,9 @@ export default {
       delete copy._dbg
       delete copy._cls
       delete copy._el
+      delete copy._meta
+      delete copy._component
+      delete copy._data
 
       // update x && y
       copy.x = parseInt(node._el.style.left)
@@ -832,8 +895,6 @@ export default {
     -moz-border-radius: 5px;
     border-radius: 5px;
     opacity: 0.8;
-    width: 200px;
-    height: 48px;
     display: flex;
     /*justify-content: center;
     align-items: center;
