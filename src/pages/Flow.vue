@@ -37,7 +37,7 @@
             >
               <q-icon v-if="node._cls.icon" :name="node._cls.icon" class="icon" />
               <div class="content">
-                <flow-node :nodeClass="node._component" :node="node" @inject="inject" />
+                <flow-node :flow="resource" :node="node" class="full-width"/>
               </div>
               <div class="node-btns">
                 <q-btn flat dense icon="edit" size="sm" color="faded"  @click="editNode(node)" class="node-btn"/>
@@ -103,8 +103,8 @@ import 'jsplumb/css/jsplumbtoolkit-defaults.css'
 
 import { Drag, Drop } from 'vue-drag-drop'
 import FlowRecursiveMenuNode from '../components/FlowRecursiveMenuNode'
-import FlowNode from '../components/FlowNode'
-import FlowNodes from '../components/FlowNodes'
+import FlowNode from 'ething-quasar-core/src/components/FlowNode'
+import FlowNodes from 'ething-quasar-core/src/components/FlowNodes'
 
 import EThingUI from 'ething-quasar-core'
 import EThing from 'ething-js'
@@ -267,45 +267,7 @@ export default {
 
   },
 
-  watch: {
-    resource: {
-      handler (r) {
-        console.log(r)
-        console.log(r.data())
-
-        var data = r.data()
-
-        for(var k in data) {
-          var value = data[k]
-
-          // find the corresponding node
-          for (var i in this.nodes) {
-            var n = this.nodes[i]
-            if (n.name === k && this.$ethingUI.isSubclass(n._cls, 'nodes/outputs/Output')) {
-              n._data = JSON.parse(value)
-              break
-            }
-          }
-        }
-      },
-      immediate: true
-    }
-  },
-
   methods: {
-
-    inject (evt) {
-      console.log('inject: ', evt)
-      var node = evt.node
-      var data = evt.data
-
-      this.$ething.request({
-        url: 'flows/'+this.resource.id()+'/inject/' + node.id,
-        method: 'POST',
-        contentType: "application/json; charset=utf-8",
-        data: data
-      })
-    },
 
     computeNodeStyle (node) {
       var style = {
@@ -467,15 +429,14 @@ export default {
       if (typeof nodeComponent === 'string') {
         nodeComponent = FlowNodes[nodeComponent]
       }
-      node._component = Vue.extend(nodeComponent)
-      node._meta = node._component.options.metadata
+      nodeComponent = Vue.extend(nodeComponent)
+      var metadata = nodeComponent.options.metadata
+      node._meta = typeof metadata === 'function' ? metadata.call(this) : metadata
 
       this.$set(node, '_dbg', {
         show: false,
         data: {}
       })
-
-      this.$set(node, '_data', null)
 
       this.nodes.push(node)
 
@@ -678,8 +639,6 @@ export default {
       delete copy._cls
       delete copy._el
       delete copy._meta
-      delete copy._component
-      delete copy._data
 
       // update x && y
       copy.x = parseInt(node._el.style.left)

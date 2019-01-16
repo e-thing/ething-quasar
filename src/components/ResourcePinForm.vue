@@ -96,7 +96,7 @@
 
       <div v-if="widgetMetaOptions" class="q-my-md">
         <div class="q-title q-my-md">Options</div>
-        <form-schema :schema="widgetMetaOptions" v-model="options" @error="optionsError = $event"/>
+        <form-schema :key="widgetId" :schema="widgetMetaOptions" v-model="options" @error="optionsError = $event"/>
       </div>
 
     </div>
@@ -150,12 +150,15 @@ export default {
       Object.keys(widgets).map(k => {
         var widget = widgets[k]
         if (typeof widget === 'string') {
-          widget = this.$ethingUI.findWidget(widget)
+          var widgetClsName = widget
+          widget = this.$ethingUI.findWidget(widgetClsName)
+          if (!widget) throw 'unknown widget type: ' + widgetClsName
         }
         var component = Vue.extend(widget)
+        var metadata = component.options.metadata
         widgetsMap[k] = {
           component,
-          metadata: component.options.metadata
+          'metadata': typeof metadata === 'function' ? metadata.call(this, this.resource) : metadata
         }
       })
       return widgetsMap

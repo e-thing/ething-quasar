@@ -53,12 +53,13 @@ export default {
   props: ['value'],
 
   data () {
-    
+
     var widgets = filter_no_resource_widget_only(this.$ethingUI.widgets).map(w => {
       var component = Vue.extend(w)
+      var metadata = component.options.metadata
       return {
         name: w.name,
-        metadata: component.options.metadata
+        'metadata': typeof metadata === 'function' ? metadata.call(this, this.resource) : metadata
       }
     })
 

@@ -102,6 +102,7 @@ import { debounce, extend } from 'quasar'
 import ResourcePinForm from '../components/ResourcePinForm'
 import WidgetPinForm from '../components/WidgetPinForm'
 
+
 var GridLayout = VueGridLayout.GridLayout
 var GridItem = VueGridLayout.GridItem
 
@@ -264,13 +265,15 @@ export default {
     normalizeLayoutItem (item) {
       try {
         var widgetClass = null;
+        var resource = null
 
         if (typeof item.widgetId !== 'undefined') {
-          var resource = this.$ething.arbo.get(item.options.resource)
+          resource = this.$ething.arbo.get(item.options.resource)
           var resourceMeta = this.$ethingUI.get(resource)
           widgetClass = resourceMeta.widgets[item.widgetId]
           if (!widgetClass) {
-            throw Error('widget "' + item.widgetId + '" not found for the resource ' + resource.id())
+            console.error('[dashboard] widget "' + item.widgetId + '" not found for the resource ' + resource.id())
+            return
           }
           if (typeof widgetClass === 'string') {
             var widgetClassName = widgetClass
@@ -291,6 +294,9 @@ export default {
         var component = Vue.extend(widgetClass)
 
         var metadata = component.options.metadata
+        if (typeof metadata === 'function') {
+          metadata = metadata.call(this, resource)
+        }
 
         var minWidth = 1
         var minHeight = 1
