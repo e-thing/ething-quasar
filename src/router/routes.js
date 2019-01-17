@@ -66,6 +66,7 @@ export default [
       },
       {
         path: 'create/:type',
+        name: 'create',
         component: () => import('pages/Create'),
         meta: {
           back: true

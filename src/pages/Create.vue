@@ -30,7 +30,7 @@ export default {
 
   computed: {
     type () {
-      return 'resources/' + this.$route.params.type
+      return this.$route.params.type
     },
 
     defaultLabel () {
@@ -55,7 +55,7 @@ export default {
 
   mounted () {
     var meta = this.$ethingUI.get(this.type)
-    if (meta.inheritances.length === 0) {
+    if (meta._inheritances.length === 0) {
       this.$router.replace('/404')
     }
   }

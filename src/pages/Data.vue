@@ -8,14 +8,14 @@
 
     <q-btn-dropdown color="primary" label="Create" icon="add" flat >
       <q-list link>
-        <q-item v-close-overlay @click.native="create('File')">
+        <q-item v-close-overlay @click.native="create('resources/File')">
           <q-item-side :icon="$ethingUI.get('resources/File').icon" :color="$ethingUI.get('resources/File').color" />
           <q-item-main>
             <q-item-tile label>File</q-item-tile>
           </q-item-main>
         </q-item>
 
-        <q-item v-close-overlay @click.native="create('Table')">
+        <q-item v-close-overlay @click.native="create('resources/Table')">
           <q-item-side :icon="$ethingUI.get('resources/Table').icon" :color="$ethingUI.get('resources/Table').color" />
           <q-item-main>
             <q-item-tile label>Table</q-item-tile>
@@ -142,7 +142,12 @@ export default {
     },
 
     create (type) {
-      this.$router.push('/create/'+type)
+      this.$router.push({
+        name: 'create',
+        params: {
+          type
+        }
+      })
     },
   }
 }

@@ -46,7 +46,12 @@ export default {
   methods: {
 
     create () {
-      this.$router.push('/create/Flow')
+      this.$router.push({
+        name: 'create',
+        params: {
+          type: 'resources/Flow'
+        }
+      })
     },
   }
 }

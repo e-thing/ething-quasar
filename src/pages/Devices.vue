@@ -17,7 +17,7 @@
           <q-list link>
             <template v-for="cat in categories">
               <q-list-header inset>{{ cat.name }}</q-list-header>
-              <q-item v-close-overlay v-for="type in cat.types" :key="type.type" @click.native="create(type.name)">
+              <q-item v-close-overlay v-for="type in cat.types" :key="type.type" @click.native="create(type.type)">
                 <q-item-side :icon="$ethingUI.get(type.type).icon" :color="$ethingUI.get(type.type).color" />
                 <q-item-main>
                   <q-item-tile label>{{ type.label }}</q-item-tile>
@@ -64,26 +64,25 @@ export default {
 
     var categories = {}
 
-    var resourcesDefinitions = this.$ethingUI.definitions.resources
-    Object.keys(resourcesDefinitions).forEach(name => {
-      var meta = resourcesDefinitions[name]
-      if (meta.inheritances.indexOf('resources/Device') !== -1 && !meta.virtual && !meta.disableCreation) {
+    this.$ethingUI.iterate('resources', (resourceClsName) => {
+      if (this.$ethingUI.isSubclass(resourceClsName, 'resources/Device')) {
+        var resourceCls = this.$ethingUI.get(resourceClsName)
+        if (!resourceCls.virtual && !resourceCls.disableCreation) {
+          var path = resourceCls.path || []
+          var label = resourceCls.label || resourceClsName.split('/').pop()
+          var category = path.length>0 ? path[0] : 'other'
 
-        var path = meta.path || []
-        var label = meta.label || name
-        var category = path.length>0 ? path[0] : 'other'
-
-        if (!categories[category]) {
-          categories[category] = {
-            types: []
+          if (!categories[category]) {
+            categories[category] = {
+              types: []
+            }
           }
-        }
 
-        categories[category].types.push({
-          label,
-          name,
-          type: 'resources/' + name
-        })
+          categories[category].types.push({
+            label,
+            type: resourceClsName
+          })
+        }
       }
     })
 
@@ -198,7 +197,12 @@ export default {
   methods: {
 
     create (type) {
-      this.$router.push('/create/'+type)
+      this.$router.push({
+        name: 'create',
+        params: {
+          type
+        }
+      })
     },
 
     applyFilter (devices) {
