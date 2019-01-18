@@ -54,8 +54,7 @@ export default {
   },
 
   mounted () {
-    var meta = this.$ethingUI.get(this.type)
-    if (meta._inheritances.length === 0) {
+    if (!this.$ethingUI.isDefined(this.type)) {
       this.$router.replace('/404')
     }
   }

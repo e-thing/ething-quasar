@@ -12,32 +12,13 @@
 
       <flow-recursive-menu-node :root="c" :ns="join(ns, name)" :filter="filter" @click="$emit('click', $event)"/>
 
-      <!--
-      <div v-for="node in cat.nodes" :key="node.type">
-        <drag :transfer-data="{node}">
-          <q-btn flat :icon="node.icon || 'mdi-puzzle'" align="left" :style="{color: node.color}" :label="node.type" no-wrap @click="addNodeClick(node.type)" class="full-width"/>
-        </drag>
-      </div>
-      -->
-
-      <!--
-      <drag :transfer-data="{node}" v-for="node in cat.nodes" :key="node.type">
-        <q-item :style="{color: node.color}" style="cursor: pointer;" class="q-px-none" @click.native="addNodeClick(node.type)">
-          <q-item-side :icon="node.icon || 'mdi-puzzle'" :style="{color: node.color}" />
-          <q-item-main>
-            <q-item-tile label class="ellipsis">{{ node.type }}</q-item-tile>
-          </q-item-main>
-        </q-item>
-      </drag>
-      -->
-
     </q-collapsible>
 
     <drag :transfer-data="{name, node, type: join(ns, name)}" v-for="(node, name) in tree.nodes" :key="name">
       <q-item :style="{color: node.color}" style="cursor: pointer;" class="q-px-md" @click.native="click(node, name)">
         <q-item-side :icon="node.icon || 'mdi-puzzle'" :style="{color: node.color}" />
         <q-item-main>
-          <q-item-tile label class="ellipsis">{{ formatLabel(node.label) }}</q-item-tile>
+          <q-item-tile label class="ellipsis">{{ node.label }}</q-item-tile>
         </q-item-main>
       </q-item>
     </drag>
@@ -72,7 +53,7 @@ export default {
           var item = r[name]
           if (item.type === 'class' && !item.virtual) {
             if (!this.filter || this.filter(item)) {
-              n[name] = item
+              n[name] = this.$ethingUI.get(item)
             }
           }
           else if (typeof item.type === 'undefined') {
@@ -121,6 +102,9 @@ export default {
         // make user friendly labels
         if (/^[a-zA-Z]+$/.test(name)) {
           name = name.replace(/([a-z])([A-Z])/g, '$1 $2')
+        }
+        if (/^[a-zA-Z_]+$/.test(name)) {
+          name = name.replace('_', ' ')
         }
         return name
       }

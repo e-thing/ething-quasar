@@ -1,110 +1,105 @@
 <template>
-  <q-page padding>
+  <q-page class="bg-grey-2">
 
-    <div class="q-my-md q-display-1 q-display-1-opacity">
-      <q-icon :name="$ethingUI.get(resource).icon" class="vertical-middle"/>
-      <span class="vertical-middle">
-        {{ resource.basename() }}
-      </span>
-
-      <q-btn class="float-right" flat :dense="$q.screen.lt.sm" label="settings" icon="settings" @click="$router.push('/resource/' + resource.id())"/>
-
-    </div>
-
-    <div>
-      <q-chip small square detail icon="access time" v-if="resource.lastSeenDate()" class="q-mr-sm">
-        {{ $ethingUI.utils.dateToString(resource.lastSeenDate()) }}
-      </q-chip>
-      <resource-battery-chip :resource="resource" class="vertical-middle q-mr-sm" square/>
-      <q-chip small square detail icon="location_on" v-if="resource.location()" class="q-mr-sm">
-        {{ resource.location() }}
-      </q-chip>
-
-    </div>
-
-    <div v-if="createdBys.length" class="q-py-md">
-      <template v-for="(item, index) in createdBys">
-        <span v-if="index>0"> - </span>
-        <span class="createdby-item" @click="$ethingUI.open(item)">{{ item.basename() }}</span>
-      </template>
-    </div>
-
-
-    <!-- component -->
-    <div class="q-my-md">
-      <device-component :device="resource"/>
-    </div>
-
-
-    <!-- attributes -->
-    <q-card  v-if="attributes.length>0" class="q-my-md attributes" :class="{detailled: showDetailledAttributes}">
-      <q-card-title class="bg-primary text-white">
-        <q-icon name="mdi-format-list-bulleted" class="vertical-middle"/>
+    <div class="bg-white q-py-lg q-px-lg" style="border-bottom: 5px solid #eee">
+      <div class="q-my-md q-display-1 q-display-1-opacity">
+        <q-icon :name="$ethingUI.get(resource).icon" class="vertical-middle"/>
         <span class="vertical-middle">
-          Attributes
+          {{ resource.basename() }}
         </span>
-        <q-btn class="float-right" flat rounded size="small" :label="showDetailledAttributes ? 'less' : 'more'" :icon="showDetailledAttributes ? 'expand_less' : 'expand_more'" style="line-height: initial" @click="showDetailledAttributes = !showDetailledAttributes"/>
-      </q-card-title>
-      <q-card-separator />
-      <q-card-main>
-        <div class="row">
-          <template v-for="attr in attributes">
-            <div class="col-xs-12 col-sm-2 key text-secondary ellipsis" :class="{detailled: attr.detailled}">{{ attr.name }}</div>
-            <div class="col-xs-12 col-sm-10 value ellipsis" :class="{detailled: attr.detailled}">{{ attr.value }}</div>
-          </template>
+
+        <q-btn class="float-right" flat :dense="$q.screen.lt.sm" label="settings" icon="settings" @click="$router.push('/resource/' + resource.id())"/>
+
+      </div>
+
+      <div>
+        <q-chip small square detail icon="access time" v-if="resource.lastSeenDate()" class="q-mr-sm">
+          {{ $ethingUI.utils.dateToString(resource.lastSeenDate()) }}
+        </q-chip>
+        <resource-battery-chip :resource="resource" class="vertical-middle q-mr-sm" square/>
+        <q-chip small square detail icon="location_on" v-if="resource.location()" class="q-mr-sm">
+          {{ resource.location() }}
+        </q-chip>
+
+      </div>
+
+      <div v-if="createdBys.length" class="q-py-md">
+        <template v-for="(item, index) in createdBys">
+          <span v-if="index>0"> - </span>
+          <span class="createdby-item" @click="$ethingUI.open(item)">{{ item.basename() }}</span>
+        </template>
+      </div>
+    </div>
+
+    <div class="q-px-lg q-pb-md">
+
+      <!-- components -->
+      <div class="bloc" v-for="type in $ethingUI.get(resource)._mro" :key="type" v-if="$ethingUI.get(type).mainComponent">
+        <div class="bloc-title">
+          <q-icon :name="$ethingUI.get(type).icon" />
+          <span>{{ $ethingUI.get(type).label }}</span>
         </div>
-      </q-card-main>
-    </q-card>
+        <device-component class="bloc-content" :device="resource" :component="$ethingUI.get(type).mainComponent" :componentAttr="$ethingUI.get(type).mainComponentAttributes"/>
+      </div>
 
-    <!-- data -->
-    <q-card  v-if="data" class="q-my-md" >
-      <q-card-title class="bg-primary text-white">
-        <q-icon name="mdi-format-list-bulleted" class="vertical-middle"/>
-        <span class="vertical-middle">
-          Data
-        </span>
-      </q-card-title>
-      <q-card-separator />
-      <q-card-main>
-        <div class="row">
-          <template v-for="(value, key) in data">
-            <div class="col-xs-12 col-sm-2 key text-secondary">{{ key }}</div>
-            <div class="col-xs-12 col-sm-10 value">{{ value }}</div>
-          </template>
+      <!-- attributes -->
+      <div class="bloc attributes" v-if="attributes.length>0" :class="{detailled: showDetailledAttributes}">
+        <div class="bloc-title">
+          <q-icon name="mdi-format-list-bulleted" />
+          <span>Attributes</span>
+          <q-btn class="float-right" flat rounded size="small" :label="showDetailledAttributes ? 'less' : 'more'" :icon="showDetailledAttributes ? 'expand_less' : 'expand_more'" style="line-height: initial" @click="showDetailledAttributes = !showDetailledAttributes"/>
         </div>
-      </q-card-main>
-    </q-card>
+        <div class="bloc-content">
+          <div class="row">
+            <template v-for="attr in attributes">
+              <div class="col-xs-12 col-sm-2 key text-secondary ellipsis" :class="{detailled: attr.detailled}">{{ attr.name }}</div>
+              <div class="col-xs-12 col-sm-10 value ellipsis" :class="{detailled: attr.detailled}">{{ attr.value }}</div>
+            </template>
+          </div>
+        </div>
+      </div>
 
-    <!-- resource -->
-    <q-card  v-if="children.length" class="q-my-md">
-      <q-card-title class="bg-primary text-white">
-        <q-icon name="mdi-database" class="vertical-middle"/>
-        <span class="vertical-middle">
-          Resources
-        </span>
-      </q-card-title>
-      <q-card-separator />
-      <q-card-main>
-        <q-list no-border>
-          <resource-q-item v-for="child in children" :key="child.id()" :resource="child" />
-        </q-list>
-      </q-card-main>
-    </q-card>
+      <!-- data -->
+      <div class="bloc" v-if="data">
+        <div class="bloc-title">
+          <q-icon name="mdi-format-list-bulleted" />
+          <span>Data</span>
+        </div>
+        <div class="bloc-content">
+          <div class="row">
+            <template v-for="(value, key) in data">
+              <div class="col-xs-12 col-sm-2 key text-secondary">{{ key }}</div>
+              <div class="col-xs-12 col-sm-10 value">{{ value }}</div>
+            </template>
+          </div>
+        </div>
+      </div>
 
-    <!-- api -->
-    <q-card  v-if="Object.keys($ethingUI.get(resource).methods).length" class="q-my-md">
-      <q-card-title class="bg-primary text-white">
-        <q-icon name="mdi-database" class="vertical-middle"/>
-        <span class="vertical-middle">
-          API
-        </span>
-      </q-card-title>
-      <q-card-separator />
-      <q-card-main>
-        <device-api :device="resource" />
-      </q-card-main>
-    </q-card>
+      <!-- resource -->
+      <div class="bloc" v-if="children.length">
+        <div class="bloc-title">
+          <q-icon name="mdi-database" />
+          <span>Resources</span>
+        </div>
+        <div class="bloc-content bloc-content-no-padding">
+          <q-list no-border>
+            <resource-q-item v-for="child in children" :key="child.id()" :resource="child" />
+          </q-list>
+        </div>
+      </div>
 
+      <!-- api -->
+      <div class="bloc" v-if="Object.keys($ethingUI.get(resource).methods).length">
+        <div class="bloc-title">
+          <q-icon name="mdi-database" />
+          <span>API</span>
+        </div>
+        <div class="bloc-content bloc-content-no-padding">
+          <device-api :device="resource" />
+        </div>
+      </div>
+
+    </div>
 
   </q-page>
 </template>
@@ -229,5 +224,25 @@ export default {
   cursor pointer
   &:hover
     color $primary
+
+.bloc
+  background-color white
+  margin-top $flex-gutter-sm
+
+  .bloc-title
+    background-color $primary
+    color white
+    border-bottom 5px solid $secondary
+    padding ($space-base / 4) $space-base
+    line-height: 2rem
+    span
+      vertical-align middle
+      margin-left $space-base
+
+    /*color $faded
+    border-bottom 1px solid $secondary*/
+  .bloc-content
+    &:not(.bloc-content-no-padding)
+      padding $space-base
 
 </style>
