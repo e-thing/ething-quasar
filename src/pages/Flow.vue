@@ -78,7 +78,7 @@
               <pre class="dbg-item-data-exc-traceback">{{ item.data.traceback }}</pre>
             </div>
             <div v-else>
-              {{ item.data }}
+              <json-formatter :value="item.data" :options="{}" />
             </div>
           </div>
         </div>
@@ -112,6 +112,7 @@ import EThing from 'ething-js'
 import ResourceSelect from 'ething-quasar-core/src/components/ResourceSelect'
 import FormSchemaEthingResource from 'ething-quasar-core/src/plugins/formSchema/FormSchemaEthingResource'
 
+import JsonFormatter from '../components/JsonFormatter'
 
 var flowSocket = EThingUI.io(EThing.config.serverUrl + '/flow', {
   autoConnect: false
@@ -218,7 +219,7 @@ export default {
   name: 'PageFlow',
 
   components: {
-    Drag, Drop, FlowRecursiveMenuNode, FlowNode, ResourceSelect
+    Drag, Drop, FlowRecursiveMenuNode, FlowNode, ResourceSelect, JsonFormatter
   },
 
   data () {

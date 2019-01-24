@@ -1,5 +1,5 @@
 <template>
-  <div ref="content">
+  <div ref="content" />
 </template>
 
 <script>
@@ -8,7 +8,7 @@ import JSONFormatter from 'json-formatter-js'
 export default {
     name: 'JsonFormatter',
 
-    props: ['value'],
+    props: ['value', 'options'],
 
     data () {
         return {
@@ -17,19 +17,26 @@ export default {
     },
 
     watch: {
-      value: {
-        handler (val) {
-          const formatter = new JSONFormatter(val);
-          var el = this.$refs.content
-          while (el.firstChild) {
-              el.removeChild(el.firstChild);
-          }
-          el.appendChild(formatter.render());
-        },
-        immediate: true
+      value (val) {
+        this.draw()
       }
-
     },
+
+    methods: {
+      draw () {
+        var el = this.$refs.content
+        if (!el) return
+        const formatter = new JSONFormatter(this.value, 1, this.options || {});
+        while (el.firstChild) {
+            el.removeChild(el.firstChild);
+        }
+        el.appendChild(formatter.render());
+      }
+    },
+
+    mounted () {
+      this.draw()
+    }
 
 }
 </script>

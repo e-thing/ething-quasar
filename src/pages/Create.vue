@@ -12,7 +12,20 @@
 
     <div class="q-my-md q-title q-title-opacity" v-if="pathItems.length==1">{{ pathItems[0] }}</div>
 
-    <resource-editor :resource="type" @done="onDone" @canceled="onCancel"/>
+    <resource-editor ref="form" :resource="type" @error="formError=$event"/>
+
+    <q-alert
+        v-if="error"
+        type="negative"
+        class="q-mb-xl"
+    >
+      {{ String(error) }}
+    </q-alert>
+
+    <div>
+        <q-btn :loading="loading" :disable="formError" color="primary" icon="done" label="valid" @click="handler"/>
+        <q-btn color="negative" class="q-ml-sm" icon="clear" label="cancel" flat @click="onCancel"/>
+    </div>
 
   </q-page>
 </template>
@@ -26,6 +39,14 @@ export default {
 
   components: {
     ResourceEditor
+  },
+
+  data () {
+    return {
+      loading: false,
+      error: false,
+      formError: false
+    }
   },
 
   computed: {
@@ -50,6 +71,15 @@ export default {
     onCancel () {
       this.$router.go(-1)
     },
+
+    handler () {
+      this.loading = true
+      this.$refs.form.submit().then(this.onDone).catch(reason => {
+        this.error = reason || 'error'
+      }).finally(() => {
+        this.loading = false
+      })
+    }
 
   },
 
