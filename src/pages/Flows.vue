@@ -38,7 +38,7 @@ export default {
   computed: {
 
     flows () {
-      return this.$store.getters['ething/filter']( (r) => r instanceof this.$ething.Flow )
+      return this.$ething.arbo.find( (r) => r instanceof this.$ething.Flow )
     }
 
   },

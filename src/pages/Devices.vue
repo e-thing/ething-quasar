@@ -110,7 +110,7 @@ export default {
 
   computed: {
     devices () {
-      return this.$store.getters['ething/filter'](r => {
+      return this.$ething.arbo.find(r => {
         return r instanceof this.$ething.Device
       })
     },
@@ -121,7 +121,7 @@ export default {
       var self = this
 
       function getChildren(resource){
-    		return self.$store.getters['ething/filter'](function(r){
+    		return self.$ething.arbo.find(function(r){
     			return r.createdBy() === resource.id() && (r instanceof EThing.Device)
     		});
     	}

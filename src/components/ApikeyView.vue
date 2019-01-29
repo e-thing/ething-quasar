@@ -88,7 +88,7 @@ export default {
               },
               scope: {
                 type: 'string',
-                format: 'scope',
+                '$component': 'scope',
                 default: ''
               }
             }

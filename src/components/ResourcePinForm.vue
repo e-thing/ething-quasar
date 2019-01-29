@@ -192,7 +192,7 @@ export default {
     },
 
     resources () {
-      return this.$store.getters['ething/filter']((r) => Object.keys(this.$ethingUI.get(r).widgets).length)
+      return this.$ething.arbo.find((r) => Object.keys(this.$ethingUI.get(r).widgets).length)
     },
 
     filteredResources () {

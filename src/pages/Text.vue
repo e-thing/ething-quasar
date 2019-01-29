@@ -86,7 +86,7 @@ export default {
   computed: {
     resource () {
       var id = this.$route.params.id
-      var r = this.$store.getters['ething/get'](id)
+      var r = this.$ething.arbo.get(id)
       if (id && id.length) {
         if (!r) {
           this.$router.replace('/404')

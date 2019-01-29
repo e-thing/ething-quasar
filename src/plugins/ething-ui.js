@@ -218,7 +218,7 @@ export default ({ app, router, Vue, store }) => {
 
       var arboDfr = EThing.arbo.load(null, true).then( () => {
         console.log('[app] ething arbo loaded !')
-        store.commit('ething/update')
+        //store.commit('ething/update')
       })
 
       Promise.all([arboDfr, metaDfr, settingsDfr]).then( () => {

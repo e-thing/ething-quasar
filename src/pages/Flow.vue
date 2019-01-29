@@ -101,6 +101,8 @@
 import { jsPlumb } from 'jsplumb'
 import 'jsplumb/css/jsplumbtoolkit-defaults.css'
 
+import { extend } from 'quasar'
+
 import { Drag, Drop } from 'vue-drag-drop'
 import FlowRecursiveMenuNode from '../components/FlowRecursiveMenuNode'
 import FlowNode from 'ething-quasar-core/src/components/FlowNode'
@@ -110,7 +112,7 @@ import EThingUI from 'ething-quasar-core'
 import EThing from 'ething-js'
 
 import ResourceSelect from 'ething-quasar-core/src/components/ResourceSelect'
-import FormSchemaEthingResource from 'ething-quasar-core/src/plugins/formSchema/FormSchemaEthingResource'
+import FormSchemaEthingResource from 'ething-quasar-core/src/plugins/formSchema/extra/EthingResource'
 
 import JsonFormatter from '../components/JsonFormatter'
 
@@ -252,7 +254,7 @@ export default {
   computed: {
     resource () {
       var id = this.$route.params.id
-      var r = this.$store.getters['ething/get'](id)
+      var r = this.$ething.arbo.get(id)
       if (id && id.length) {
         if (!r) {
           this.$router.replace('/404')
@@ -674,6 +676,9 @@ export default {
     importFlow (flowData, done) {
       if (!this.instance) return
 
+      // make a deep copy to avoid to pollute the incoming data
+      flowData = extend(true, {}, flowData)
+
       this.addNodesToFlow(flowData.nodes, () => {
         flowData.connections.forEach(connectionData => {
           var src = connectionData.src
@@ -690,6 +695,7 @@ export default {
     load (done) {
       var flow = this.resource.attr('flow');
 
+      // make a deep copy to avoid to pollute the flow instance
       this.importFlow(flow, () => {
         this.dirty = false
         if(done) done()

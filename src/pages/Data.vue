@@ -88,7 +88,9 @@ export default {
       return this.$route.params.path || ''
     },
     resources () {
-      return this.$store.getters['ething/glob'](this.path)
+      var path = this.path
+      var globRe = new RegExp('^' + (path ? (path + '/') : '') + '[^/]+$')
+      return this.$ething.arbo.find(r => globRe.test(r.name()))
     },
     folders () {
       var path = this.path
@@ -96,7 +98,7 @@ export default {
         path += '/'
       var globReS = new RegExp('^' + path)
       var globRe = new RegExp('^' + path + '[^/]+/')
-      return this.$store.getters['ething/filter'](r => (r instanceof this.$ething.File || r instanceof this.$ething.Table) && globRe.test(r.name()))
+      return this.$ething.arbo.find(r => (r instanceof this.$ething.File || r instanceof this.$ething.Table) && globRe.test(r.name()))
         .map(r => r.dirname().replace(globReS, '').replace(/\/.*$/, ''))
         .filter((value, index, self) => self.indexOf(value) === index)
     },

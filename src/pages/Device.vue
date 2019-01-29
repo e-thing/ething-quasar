@@ -130,7 +130,7 @@ export default {
   computed: {
     resource () {
       var id = this.$route.params.id
-      var r = this.$store.getters['ething/get'](id)
+      var r = this.$ething.arbo.get(id)
       if (id && id.length) {
         if (!r || !r.isTypeof('resources/Device')) {
           this.$router.replace('/404')
@@ -140,7 +140,7 @@ export default {
     },
 
     children () {
-      return this.$store.getters['ething/filter'](r => {
+      return this.$ething.arbo.find(r => {
         return r.createdBy() === this.resource.id()
       })
     },
