@@ -5,9 +5,6 @@ import qs from 'qs'
 
 const AUTH_REFRESH_INTERVAL = 3600 * 1000
 
-const ENABLE_SSE = 0
-const ENABLE_SOCKETIO = 1
-
 
 export var UI = {
   VERSION: process.env.VERSION
@@ -19,23 +16,6 @@ UI.kioskMode = process.env.KIOSK || getParameterByName('kiosk') === '1'
 UI.virtualKeyboardEnabled = process.env.VIRTUALKEYBOARD || getParameterByName('virtualkeyboard') === '1'
 
 export default ({ app, router, Vue, store }) => {
-
-  EThing.on('Notified', function(evt) {
-    console.log('[app] notification received', evt)
-    Notify.create({
-      type: 'info',
-      message: evt.data.message,
-      detail: evt.data.subject,
-      position: 'bottom-right',
-      timeout: 15000,
-      actions: [
-        {
-          label: 'Close',
-          handler: () => {}
-        }
-      ],
-    })
-  })
 
   var serverUrl = null, dynamicServerUrl = false
 
@@ -85,12 +65,30 @@ export default ({ app, router, Vue, store }) => {
   app.data.state = 'begin'
   app.data.error = false
 
+
+  EThingUI.notifSocket.on('notification', function(evt) {
+    console.log('[app] notification received', evt)
+    Notify.create({
+      type: 'info',
+      message: evt.msg,
+      detail: evt.subject,
+      position: 'bottom-right',
+      timeout: 15000,
+      actions: [
+        {
+          label: 'Close',
+          handler: () => {}
+        }
+      ],
+    })
+  })
+
+
   Object.assign(UI, {
 
     reset () {
       app.data.state = 'begin'
-      if (ENABLE_SSE) EThingUI.SSE.stop()
-      else if (ENABLE_SOCKETIO) EThingUI.eventsSocket.close()
+      EThingUI.eventsSocket.close()
       LocalStorage.remove('ething.auth.iat')
       if (this.authRefreshTimer) {
         clearInterval(this.authRefreshTimer)
@@ -287,15 +285,10 @@ export default ({ app, router, Vue, store }) => {
           }
         }
 
-        if (ENABLE_SOCKETIO) {
-          EThingUI.eventsSocket.on('connect', sseConnectHandler);
-          EThingUI.eventsSocket.on('disconnect', sseDisconnectHandler);
-          EThingUI.eventsSocket.open()
-        } else if (ENABLE_SSE) {
-          EThingUI.SSE.on('connected', sseConnectHandler)
-          EThingUI.SSE.on('disconnected', sseDisconnectHandler)
-          EThingUI.SSE.start()
-        }
+        EThingUI.on('ui.server.connected', sseConnectHandler);
+        EThingUI.on('ui.server.disconnected', sseDisconnectHandler);
+
+        EThingUI.eventsSocket.open()
 
         var iat = LocalStorage.get.item('ething.auth.iat')
 

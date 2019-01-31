@@ -3,14 +3,8 @@
 
     <div class="q-my-md q-display-1 q-display-1-opacity">
       <q-icon :name="$ethingUI.get(type).icon" />
-      {{ $ethingUI.get(type).label || defaultLabel }}
+      {{ $ethingUI.get(type).title || defaultLabel }}
     </div>
-
-    <q-breadcrumbs class="q-pb-md" v-if="pathItems.length>1">
-      <q-breadcrumbs-el v-for="(item, index) in pathItems" :key="index" :label="item" />
-    </q-breadcrumbs>
-
-    <div class="q-my-md q-title q-title-opacity" v-if="pathItems.length==1">{{ pathItems[0] }}</div>
 
     <resource-editor ref="form" :resource="type" @error="formError=$event"/>
 
@@ -56,10 +50,6 @@ export default {
 
     defaultLabel () {
       return this.type.split('/').pop()
-    },
-
-    pathItems () {
-      return (this.$ethingUI.get(this.type).path || [])
     }
   },
 

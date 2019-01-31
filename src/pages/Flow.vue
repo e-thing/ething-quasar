@@ -14,7 +14,7 @@
       </div>
 
       <q-list separator no-border>
-        <flow-recursive-menu-node :root="$ethingUI.definitions.nodes" ns="nodes" :filter="nodeFilter" @click="addNodeClick"/>
+        <flow-recursive-menu-node :root="menu" :filter="nodeFilter" @click="addNodeClick"/>
       </q-list>
     </div>
 
@@ -246,7 +246,8 @@ export default {
         items: [],
         opened: false
       },
-      resourceFilter: null
+      resourceFilter: null,
+      menu: this.buildMenu()
     }
 
   },
@@ -298,7 +299,7 @@ export default {
     },
 
     handleDrop (data, event) {
-      this.addNodeClick(data.type, {
+      this.addNodeClick(data.node, {
         x: event.offsetX,
         y: event.offsetY
       })
@@ -414,7 +415,7 @@ export default {
       }
 
       if (typeof node.name === 'undefined')
-        node.name = cls.label
+        node.name = cls.title
 
       if (typeof node.color === 'undefined')
         node.color = this.$ethingUI.utils.colorNameToHex(cls.color) // color may be color names, parse into hex format
@@ -571,7 +572,13 @@ export default {
     },
 
     addNodeClick (type, extra) {
-      var cls = this.getNodeCls(type)
+      var cls;
+      if (typeof type === 'string') {
+        cls = this.getNodeCls(type)
+      } else {
+        cls = type
+        type = cls._type
+      }
       this._initEditObj(type)
       this.edit.extra = extra
       if (this.resourceFilter && this.$ethingUI.isSubclass(cls, 'nodes/ResourceNode')) {
@@ -611,7 +618,7 @@ export default {
       }
 
       this.edit.model = {
-        name: cls.label,
+        name: cls.title,
         color: this.$ethingUI.utils.colorNameToHex(cls.color) // color may be color names, parse into hex format
       }
       this.edit.error = false
@@ -701,6 +708,38 @@ export default {
         if(done) done()
       })
     },
+
+    buildMenu () {
+      var new_item = () => {
+        return {
+          nodes: [],
+          children: {}
+        }
+      }
+
+      var root = new_item()
+
+      var find = (path) => {
+        path = path ? path.split('.') : []
+        var p = root
+        path.forEach(i => {
+          if (typeof p.children[i] === 'undefined') {
+            p.children[i] = new_item()
+          }
+          p = p.children[i]
+        })
+        return p
+      }
+
+      this.$ethingUI.iterate('nodes', type => {
+        var d = this.$ethingUI.get(type)
+        if (d.virtual) return
+        var n = find(d.category)
+        n.nodes.push(d)
+      })
+
+      return root
+    }
 
   },
 

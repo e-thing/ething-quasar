@@ -68,9 +68,9 @@ export default {
       if (this.$ethingUI.isSubclass(resourceClsName, 'resources/Device')) {
         var resourceCls = this.$ethingUI.get(resourceClsName)
         if (!resourceCls.virtual && !resourceCls.disableCreation) {
-          var path = resourceCls.path || []
-          var label = resourceCls.label || resourceClsName.split('/').pop()
-          var category = path.length>0 ? path[0] : 'other'
+          var path = (resourceCls.category || 'other').split('.')
+          var label = resourceCls.title || resourceClsName.split('/').pop()
+          var category = path[0]
 
           if (!categories[category]) {
             categories[category] = {

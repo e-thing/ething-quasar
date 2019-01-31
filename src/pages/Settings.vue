@@ -7,6 +7,7 @@
       <q-tab slot="title" label="api key" name="apikey" icon="mdi-key" />
       <q-tab slot="title" label="plugins" name="plugins" icon="mdi-puzzle" />
       <q-tab slot="title" label="processes" name="processes" icon="mdi-cogs" />
+      <q-tab slot="title" label="clients" name="clients" icon="mdi-lan-connect" />
       <q-tab slot="title" label="about" name="about" icon="info" />
 
       <!-- Targets -->
@@ -25,6 +26,9 @@
       <q-tab-pane name="processes">
         <processes-view />
       </q-tab-pane>
+      <q-tab-pane name="clients">
+        <clients-view />
+      </q-tab-pane>
       <q-tab-pane name="about">
         <about-view />
       </q-tab-pane>
@@ -39,6 +43,7 @@ import LogView from '../components/LogView'
 import ApikeyView from '../components/ApikeyView'
 import PluginsView from '../components/PluginsView'
 import ProcessesView from '../components/ProcessesView'
+import ClientsView from '../components/ClientsView'
 import AboutView from '../components/AboutView'
 
 export default {
@@ -50,6 +55,7 @@ export default {
     ApikeyView,
     PluginsView,
     ProcessesView,
+    ClientsView,
     AboutView
   },
 

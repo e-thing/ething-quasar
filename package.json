@@ -11,10 +11,11 @@
     "test": "echo \"No test specified\" && exit 0"
   },
   "dependencies": {
-    "ething-js": "^0.1.15",
+    "ething-js": "^0.1.16",
     "ething-quasar-core": "github:e-thing/ething-quasar-core#master",
     "ething-quasar-dll": "github:e-thing/ething-quasar-dll#master",
     "json-formatter-js": "^2.2.1",
+    "jsplumb": "^2.9.0",
     "qs": "^6.5.2",
     "vue-drag-drop": "^1.1.4",
     "vue-grid-layout": "^2.2.0",

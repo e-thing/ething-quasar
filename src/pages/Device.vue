@@ -37,7 +37,7 @@
       <div class="bloc" v-for="type in $ethingUI.get(resource)._mro" :key="type" v-if="$ethingUI.get(type).mainComponent">
         <div class="bloc-title">
           <q-icon :name="$ethingUI.get(type).icon" />
-          <span>{{ $ethingUI.get(type).label }}</span>
+          <span>{{ $ethingUI.get(type).title }}</span>
         </div>
         <device-component class="bloc-content" :device="resource" :component="$ethingUI.get(type).mainComponent" :componentAttr="$ethingUI.get(type).mainComponentAttributes"/>
       </div>

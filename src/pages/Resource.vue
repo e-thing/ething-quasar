@@ -6,7 +6,12 @@
       <small class="text-faded">settings:</small> {{ resource.basename() }}
     </div>
 
-    <resource-editor :resource="resource" @done="onDone" @canceled="onCancel"/>
+    <resource-editor ref="form" :resource="resource" @error="formError=$event"/>
+
+    <div>
+        <q-btn :loading="loading" :disable="formError" color="primary" icon="done" label="valid" @click="handler"/>
+        <q-btn color="negative" class="q-ml-sm" icon="clear" label="cancel" flat @click="onCancel"/>
+    </div>
 
   </q-page>
 </template>
@@ -20,6 +25,14 @@ export default {
 
   components: {
     ResourceEditor
+  },
+
+  data () {
+    return {
+      loading: false,
+      error: false,
+      formError: false
+    }
   },
 
   computed: {
@@ -36,13 +49,21 @@ export default {
   },
 
   methods: {
-    onDone (resource) {
-      //this.$router.push({ path: '/data', params: { path: resource.dirname() }})
+    onDone () {
       this.$router.go(-1)
     },
 
     onCancel () {
       this.$router.go(-1)
+    },
+
+    handler () {
+      this.loading = true
+      this.$refs.form.submit().then(this.onDone).catch(reason => {
+        this.error = reason || 'error'
+      }).finally(() => {
+        this.loading = false
+      })
     }
   }
 

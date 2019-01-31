@@ -1,6 +1,6 @@
 <template>
   <div>
-    <q-collapsible v-for="(c, name) in tree.children" :key="name" v-if="notEmpty(c)">
+    <q-collapsible v-for="(c, name) in root.children" :key="name" v-if="notEmpty(c)">
       <template slot="header">
         <q-item-main :label="formatLabel(name)" />
         <q-item-side right>
@@ -10,15 +10,15 @@
         </q-item-side>
       </template>
 
-      <flow-recursive-menu-node :root="c" :ns="join(ns, name)" :filter="filter" @click="$emit('click', $event)"/>
+      <flow-recursive-menu-node :root="c" :filter="filter" @click="$emit('click', $event)"/>
 
     </q-collapsible>
 
-    <drag :transfer-data="{name, node, type: join(ns, name)}" v-for="(node, name) in tree.nodes" :key="name">
-      <q-item :style="{color: node.color}" style="cursor: pointer;" class="q-px-md" @click.native="click(node, name)">
+    <drag :transfer-data="{node}" v-for="(node, index) in root.nodes" :key="index" v-if="filter(node)">
+      <q-item :style="{color: node.color}" style="cursor: pointer;" class="q-px-md" @click.native="click(node)">
         <q-item-side :icon="node.icon || 'mdi-puzzle'" :style="{color: node.color}" />
         <q-item-main>
-          <q-item-tile label class="ellipsis">{{ node.label }}</q-item-tile>
+          <q-item-tile label class="ellipsis">{{ node.title }}</q-item-tile>
         </q-item-main>
       </q-item>
     </drag>
@@ -35,68 +35,30 @@ export default {
       Drag
     },
 
-    props: ['root', 'ns', 'filter'],
-
-    computed: {
-
-      tree () {
-        return this.parse(this.root)
-      }
-    },
+    props: ['root', 'filter'],
 
     methods: {
-      parse (r) {
-        var n = {}
-        var c = {}
 
-        for (var name in r) {
-          var item = r[name]
-          if (item.type === 'class' && !item.virtual) {
-            if (!this.filter || this.filter(item)) {
-              n[name] = this.$ethingUI.get(item)
-            }
-          }
-          else if (typeof item.type === 'undefined') {
-            c[name] = item
-          }
-        }
+      getLength (i) {
+        var l = i.nodes.length
 
-        return {
-          nodes: n,
-          children: c
-        }
-      },
-      getLength (r) {
-
-        var res = this.parse(r)
-        var l = Object.keys(res.nodes).length
-
-        Object.keys(res.children).forEach(cn => {
-          l += this.getLength(res.children[cn])
+        Object.keys(i.children).forEach(cn => {
+          l += this.getLength(i.children[cn])
         })
 
         return l
       },
-      notEmpty (r) {
-        var res = this.parse(r)
+      notEmpty (i) {
+        if(i.nodes.length) return true
 
-        if(Object.keys(res.nodes).length) return true
-
-        Object.keys(res.children).forEach(cn => {
-          if (this.notEmpty(res.children[cn])) return true
+        Object.keys(i.children).forEach(cn => {
+          if (this.notEmpty(i.children[cn])) return true
         })
 
         return false
       },
-      click (node, name) {
-        this.$emit('click', this.join(this.ns, name))
-      },
-      join (ns, name) {
-        var fullName = name
-        if (ns) {
-          fullName = ns + '/' + fullName
-        }
-        return fullName
+      click (node) {
+        this.$emit('click', node)
       },
       formatLabel (name) {
         // make user friendly labels
@@ -113,7 +75,3 @@ export default {
 
 }
 </script>
-
-<style scoped>
-
-</style>

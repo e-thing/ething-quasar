@@ -26,87 +26,23 @@ export default {
 
     return {
       schema: {
-  "type": "object",
-  "properties": {
-    "output": {
-      "$inline": true,
-      "oneOf": [
-        {
-          "type": "object",
-          "properties": {
-            "type": {
-              "label": "complete message object",
-              "const": "fullmsg"
-            }
-          },
-          "required": [
-            "type"
-          ],
-          "additionalProperties": false
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
         },
-        {
-          "type": "object",
-          "properties": {
-            "type": {
-              "label": "msg.",
-              "const": "msg"
-            },
-            "value": {
-              "type": "string",
-              "minLength": 1
-            }
-          },
-          "required": [
-            "type",
-            "value"
-          ],
-          "additionalProperties": false
+        "type": {
+          "type": "string",
+          '$component': "textarea",
+          "minLength": 1
         }
+      },
+      "required": [
+        "name"
       ],
-      "description": "Select the message property to display.",
-      "default": {
-        "type": "msg",
-        "value": "payload"
-      }
+      "description": "print some debug information"
     },
-    /*"print_debug_window": {
-      "type": "boolean",
-      "description": "print the debug information in the debug window",
-      "label": "print to debug window",
-      "default": true
-    },
-    "print_log": {
-      "type": "boolean",
-      "description": "print the debug information in the log",
-      "label": "print to log",
-      "default": false
-    },
-    "id": {
-      "type": "string",
-      "minLength": 1,
-      '$readOnly': true
-    },
-    "type": {
-      "type": "string",
-      "minLength": 1,
-      '$readOnly': true
-    },
-    "color": {
-      "type": "string",
-      "pattern": "^#[0-9a-fA-F]{6}$",
-      '$component': "color",
-      "default": "#eeeeee"
-    },*/
-    "name": {
-      "type": "string",
-      "minLength": 1
-    }
-  },
-  "required": [
-    "name"
-  ],
-  "description": "print some debug information"
-},
 model: {
   "name": "Debug Node",
   /*"output": {
@@ -133,7 +69,7 @@ model: {
             description: 'foo bar',
             default: 'def1',
             minLength: 2,
-            dependencies: {
+            '$dependencies': {
               'prop1': function (val, self, dep) {
                 this.c_value = val
               }

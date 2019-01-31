@@ -76,7 +76,7 @@ export default {
     widgetNames () {
       return this.widgets.map((w, index) => {
         return {
-          label: w.metadata.label,
+          label: w.metadata.title,
           value: index
         }
       })
