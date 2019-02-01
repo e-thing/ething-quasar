@@ -14,7 +14,19 @@
       </div>
 
       <q-list separator no-border>
-        <flow-recursive-menu-node :root="menu" :filter="nodeFilter" @click="addNodeClick"/>
+        <flow-recursive-menu-node :root="menu" :filter="nodeFilter" @click="addNodeClick">
+          <div slot-scope="{node}" class="node node-menu" :style="{'background-color': node.color}">
+            <div class="endpoint" v-if="node.inputs"></div>
+            <q-icon v-if="node.icon" :name="node.icon" class="icon" />
+            <div class="content">
+              <strong class="ellipsis full-width" >{{ node.title }}</strong>
+            </div>
+            <q-tooltip v-if="node.description" anchor="center right" self="center left" :offset='[40, 0]' :delay="1000">
+              {{ node.description }}
+            </q-tooltip>
+            <div class="endpoint" v-if="node.outputs"></div>
+          </div>
+        </flow-recursive-menu-node>
       </q-list>
     </div>
 
@@ -873,105 +885,123 @@ export default {
     border-bottom: 4px #d9d9d9 solid;
   }
 
+  .endpoint {
+    width: 14px;
+    height: 14px;
+    border-radius: 7px;
+    background-color: rgb(122, 176, 44);
+    display: block;
+    position: absolute;
+    top: 50%;
+
+  }
+
+  .endpoint:first-child {
+    left: 0px;
+    transform: translate(-50%, -50%);
+  }
+
+  .endpoint:last-child {
+    right: 0px;
+    transform: translate(50%, -50%);
+  }
+
+  .node {
+      border: 1px solid #346789;
+      box-shadow: 2px 2px 19px #aaa;
+      -o-box-shadow: 2px 2px 19px #aaa;
+      -webkit-box-shadow: 2px 2px 19px #aaa;
+      -moz-box-shadow: 2px 2px 19px #aaa;
+      -moz-border-radius: 5px;
+      border-radius: 5px;
+      opacity: 0.8;
+      display: flex;
+      position: relative;
+      background-color: #eeeeef;
+      color: black;
+      font-family: helvetica, sans-serif;
+  }
+
+  .node.node-menu {
+    width: 100%;
+    height: 42px;
+  }
+
+  .node > .icon {
+    font-size: 24px;
+    width: 50px;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    background-color: rgba(0, 0, 0, 0.15);
+  }
+
+  .node > .content {
+    width: auto;
+    min-width: 0;
+    max-width: 100%;
+    -webkit-box-flex: 10000;
+    -ms-flex: 10000 1 0%;
+    flex: 10000 1 0%;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    text-align: center;
+    display: flex;
+    font-size: 0.9em;
+  }
+
+  .flowchart {
+      /*height: 550px;
+      max-height: 700px;
+      border: 1px solid #CCC;
+      background-color: white;
+      display: flex;*/
+  }
+
+  .flowchart .node {
+      z-index: 20;
+      position: absolute;
+      -webkit-transition: -webkit-box-shadow 0.15s ease-in;
+      -moz-transition: -moz-box-shadow 0.15s ease-in;
+      -o-transition: -o-box-shadow 0.15s ease-in;
+      transition: box-shadow 0.15s ease-in;
+  }
+
+  .flowchart .node:hover {
+      box-shadow: 2px 2px 19px #444;
+      -o-box-shadow: 2px 2px 19px #444;
+      -webkit-box-shadow: 2px 2px 19px #444;
+      -moz-box-shadow: 2px 2px 19px #444;
+      opacity: 0.6;
+  }
+
+  .flowchart .node > .node-btns {
+    display: none;
+    position: absolute;
+    right: 0px;
+    top: 0px;
+  }
+
+  .flowchart .node:hover > .node-btns {
+    display: block;
+  }
+
+  .flowchart .node.active {
+      box-shadow: 2px 2px 19px #ffb427;
+      -o-box-shadow: 2px 2px 19px #ffb427;
+      -webkit-box-shadow: 2px 2px 19px #ffb427;
+      -moz-box-shadow: 2px 2px 19px #ffb427;
+  }
+
+  .flowchart .node > .node-dbg {
+    position: absolute;
+    left: 0px;
+    top: 56px;
+  }
+
 </style>
 
 <style>
-
-.leftMenu button .q-btn-inner > div {
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow: hidden;
-}
-
-.flowchart {
-    /*height: 550px;
-    max-height: 700px;
-    border: 1px solid #CCC;
-    background-color: white;
-    display: flex;*/
-}
-
-.flowchart .node {
-    border: 1px solid #346789;
-    box-shadow: 2px 2px 19px #aaa;
-    -o-box-shadow: 2px 2px 19px #aaa;
-    -webkit-box-shadow: 2px 2px 19px #aaa;
-    -moz-box-shadow: 2px 2px 19px #aaa;
-    -moz-border-radius: 5px;
-    border-radius: 5px;
-    opacity: 0.8;
-    display: flex;
-    /*justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    text-align: center;*/
-    z-index: 20;
-    position: absolute;
-    background-color: #eeeeef;
-    color: black;
-    font-family: helvetica, sans-serif;
-    /*padding: 0.5em;*/
-    /*font-size: 0.9em;*/
-    -webkit-transition: -webkit-box-shadow 0.15s ease-in;
-    -moz-transition: -moz-box-shadow 0.15s ease-in;
-    -o-transition: -o-box-shadow 0.15s ease-in;
-    transition: box-shadow 0.15s ease-in;
-}
-
-.flowchart .node > .icon {
-  font-size: 24px;
-  width: 50px;
-  border-top-left-radius: 5px;
-  border-bottom-left-radius: 5px;
-  background-color: #c1c1c1;
-}
-
-.flowchart .node > .content {
-  width: auto;
-  min-width: 0;
-  max-width: 100%;
-  -webkit-box-flex: 10000;
-  -ms-flex: 10000 1 0%;
-  flex: 10000 1 0%;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-  text-align: center;
-  display: flex;
-  font-size: 0.9em;
-}
-
-.flowchart .node:hover {
-    box-shadow: 2px 2px 19px #444;
-    -o-box-shadow: 2px 2px 19px #444;
-    -webkit-box-shadow: 2px 2px 19px #444;
-    -moz-box-shadow: 2px 2px 19px #444;
-    opacity: 0.6;
-}
-
-.flowchart .node > .node-btns {
-  display: none;
-  position: absolute;
-  right: 0px;
-  top: 0px;
-}
-
-.flowchart .node:hover > .node-btns {
-  display: block;
-}
-
-.flowchart .node.active {
-    box-shadow: 2px 2px 19px #ffb427;
-    -o-box-shadow: 2px 2px 19px #ffb427;
-    -webkit-box-shadow: 2px 2px 19px #ffb427;
-    -moz-box-shadow: 2px 2px 19px #ffb427;
-}
-
-.flowchart .node > .node-dbg {
-  position: absolute;
-  left: 0px;
-  top: 56px;
-}
 
 .flowchart .jtk-connector {
     z-index: 4;
@@ -982,18 +1012,18 @@ export default {
     cursor: pointer;
 }
 
-.endpointInputLabel, .endpointOutputLabel {
+.flowchart .endpointInputLabel, .flowchart .endpointOutputLabel {
     font-size: 12px;
     width: 50px;
     background-color: white;
     opacity: 0.5;
 }
 
-.endpointInputLabel {
+.flowchart .endpointInputLabel {
     text-align: right;
 }
 
-.endpointOutputLabel {
+.flowchart .endpointOutputLabel {
     text-align: left;
 }
 
@@ -1022,7 +1052,7 @@ export default {
     outline: 4px solid pink !important;
 }
 
-path, .jtk-endpoint {
+.flowchart path, .jtk-endpoint {
     cursor: pointer;
 }
 
