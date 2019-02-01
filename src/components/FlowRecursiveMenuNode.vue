@@ -16,9 +16,15 @@
 
     <drag :transfer-data="{node}" v-for="(node, index) in root.nodes" :key="index" v-if="filter(node)">
       <q-item :style="{color: node.color}" style="cursor: pointer;" class="q-px-md" @click.native="click(node)">
-        <q-item-side :icon="node.icon || 'mdi-puzzle'" :style="{color: node.color}" />
         <q-item-main>
-          <q-item-tile label class="ellipsis">{{ node.title }}</q-item-tile>
+          <div class="node">
+            <div class="endpoint" v-if="node.inputs"></div>
+            <q-icon class="icon" :name="node.icon || 'mdi-puzzle'" />
+            <div class="content">
+               {{ node.title }}
+            </div>
+            <div class="endpoint" v-if="node.outputs"></div>
+          </div>
         </q-item-main>
       </q-item>
     </drag>
@@ -75,3 +81,76 @@ export default {
 
 }
 </script>
+
+<style scoped>
+
+.endpoint {
+  width: 14px;
+  height: 14px;
+  border-radius: 7px;
+  background-color: rgb(122, 176, 44);
+  /*border: 1px solid gray;*/
+  display: block;
+  position: absolute;
+  top: 50%;
+
+}
+
+.endpoint:first-child {
+  left: 0px;
+  transform: translate(-50%, -50%);
+}
+
+.endpoint:last-child {
+  right: 0px;
+  transform: translate(50%, -50%);
+}
+
+.node {
+    width: 100%;
+    height: 42px;
+    border: 1px solid #346789;
+    box-shadow: 2px 2px 19px #aaa;
+    -o-box-shadow: 2px 2px 19px #aaa;
+    -webkit-box-shadow: 2px 2px 19px #aaa;
+    -moz-box-shadow: 2px 2px 19px #aaa;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    opacity: 0.8;
+    display: flex;
+    /*justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    text-align: center;*/
+    z-index: 20;
+    position: relative;
+    background-color: #eeeeef;
+    color: black;
+    font-family: helvetica, sans-serif;
+    /*padding: 0.5em;*/
+    /*font-size: 0.9em;*/
+}
+
+.node > .icon {
+  font-size: 24px;
+  width: 50px;
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
+  background-color: #c1c1c1;
+}
+
+.node > .content {
+  width: auto;
+  min-width: 0;
+  max-width: 100%;
+  -webkit-box-flex: 10000;
+  -ms-flex: 10000 1 0%;
+  flex: 10000 1 0%;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  text-align: center;
+  display: flex;
+  font-size: 0.9em;
+}
+</style>
