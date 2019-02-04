@@ -102,7 +102,7 @@
     </div>
 
     <modal v-model="edit.show" :title="(edit.node?'Edit':'Add')+' '+edit.type" icon="add" :valid-btn-disable="edit.error" valid-btn-label="Add" @valid="onEditDone">
-      <form-schema :key="edit.key" :schema="edit.schema" v-model="edit.model" @error="edit.error = $event"/>
+      <form-schema :key="edit.key" :schema="edit.schema" v-model="edit.model" :context="edit.context" @error="edit.error = $event"/>
     </modal>
 
   </q-page>
@@ -249,7 +249,8 @@ export default {
         node: null,
         schema: {},
         key: 0,
-        extra: null
+        extra: null,
+        context: {}
       },
       meta: {},
       dirty: false,
@@ -637,6 +638,9 @@ export default {
       this.edit.key++
       this.edit.show = true
       this.edit.extra = null
+      Object.assign(this.edit.context, {
+        'flow': this.resource
+      })
     },
 
     onEditDone () {
