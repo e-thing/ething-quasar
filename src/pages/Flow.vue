@@ -321,9 +321,7 @@ export default {
     deploy () {
       var flow = this.exportFlow()
       if (flow) {
-        this.resource.set({
-          flow
-        }).then(() => {
+        this.resource.set(flow).then(() => {
           this.dirty = false
           this.resource.deploy()
         }).catch((err) => {
@@ -716,9 +714,11 @@ export default {
     },
 
     load (done) {
-      var flow = this.resource.attr('flow');
+      var flow = {
+        nodes: this.resource.attr('nodes'),
+        connections: this.resource.attr('connections'),
+      }
 
-      // make a deep copy to avoid to pollute the flow instance
       this.importFlow(flow, () => {
         this.dirty = false
         if(done) done()
