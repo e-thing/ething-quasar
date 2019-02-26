@@ -169,7 +169,7 @@ export default {
       return Object.keys(widgets).map(k => {
         var metadata = widgets[k].metadata
         return {
-          label: metadata.title,
+          label: metadata.label,
           value: k
         }
       })

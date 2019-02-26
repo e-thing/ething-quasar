@@ -49,7 +49,7 @@
             >
               <q-icon v-if="node._cls.icon" :name="node._cls.icon" class="icon" />
               <div class="content">
-                <flow-node :flow="resource" :node="node" class="full-width"/>
+                <flow-node :flow="resource" :node="node" class="full-width ellipsis"/>
               </div>
               <div class="node-btns">
                 <q-btn flat dense icon="edit" size="sm" color="faded"  @click="editNode(node)" class="node-btn"/>

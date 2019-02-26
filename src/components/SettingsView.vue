@@ -6,7 +6,7 @@
 
         <div class="q-title q-title-opacity">General</div>
 
-        <form-schema :schema="$ethingUI.config" v-model="settings" @error="error = $event" class="q-my-md"/>
+        <form-schema :schema="$ethingUI.get('Config')" v-model="settings['global']" @error="error = $event" class="q-my-md"/>
 
       </div>
 
@@ -48,7 +48,7 @@ export default {
         for (var pluginName in this.$ethingUI.plugins) {
           var plugin = this.$ethingUI.plugins[pluginName]
 
-          if (plugin.schema) {
+          if (plugin.schema && Object.keys(plugin.schema.properties).length) {
             plugins[pluginName] = {
               error: false,
               schema: plugin.schema
