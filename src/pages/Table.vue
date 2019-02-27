@@ -204,7 +204,32 @@
 
     <modal v-model="filterModal" title="Filter" icon="mdi-filter" valid-btn-label="Filter" @valid="validFilter">
 
-      <q-input v-model="filterModel" />
+      <p>
+        Enter an ObjectPath expression to filter the data.
+        See <a href="http://objectpath.org" target="_blank">ObjectPath website</a> for more details.
+      </p>
+
+      <p>
+        <q-input v-model="filterModel" placeholder="$.temperature > 20 ..." />
+      </p>
+
+      <p>
+          <h6>Examples</h6>
+
+          <p class="caption">Comparison operators</p>
+          <pre>$.temperature is 20</pre>
+          <pre>$.temperature is not 20</pre>
+          <pre>$.temperature > 20</pre>
+
+          <p class="caption">Boolean logic operators</p>
+          <pre>$.temperature > 10 and $.temperature < 20</pre>
+          <pre>$.state is 'foo' or $.state is 'bar'</pre>
+
+          <p class="caption">Membership</p>
+          <pre>$.state in ['foo', 'bar']</pre>
+          <pre>$.state not in ['foo', 'bar']</pre>
+
+      </p>
 
     </modal>
 
@@ -384,8 +409,6 @@ export default {
       this.loading = true
 
       this.contentModifiedDate = this.resource.contentModifiedDate()
-
-      console.log(pagination)
 
       var rowsPerPage = pagination.rowsPerPage
       var page = pagination.page
