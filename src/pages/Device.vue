@@ -172,7 +172,7 @@ export default {
       var props = this.$ethingUI.get(this.resource).properties
       var attributes = []
       var skippedFields = ['name', 'data', 'description']
-      var detailledFields = ['id', 'modifiedDate', 'createdBy', 'type', 'extends', 'public', 'createdDate', 'methods', 'battery', 'location', 'interfaces', 'connected', 'lastSeenDate']
+      var detailledFields = ['id', 'modifiedDate', 'createdBy', 'type', 'extends', 'public', 'createdDate', 'methods', 'battery', 'location', 'interfaces', 'connected', 'lastSeenDate', 'error']
       for(let name in props) {
         if (skippedFields.indexOf(name) !== -1) continue
 
