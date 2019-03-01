@@ -10,7 +10,7 @@ export default {
     }
   },
 
-  mainComponent: 'pressure.label',
+  mainComponent: 'lightLevel.label',
 
   widgets: {
     'lightLevel.label': {

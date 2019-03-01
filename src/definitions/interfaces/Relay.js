@@ -10,6 +10,8 @@ export default {
     }
   },
 
+  mainComponent: 'switch',
+
   widgets: {
     'switch': {
       extends: WSwitch,

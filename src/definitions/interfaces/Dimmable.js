@@ -10,6 +10,8 @@ export default {
     }
   },
 
+  mainComponent: 'dimmer',
+
   widgets: {
     'dimmer': {
       extends: WDimmable,

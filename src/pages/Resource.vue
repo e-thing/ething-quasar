@@ -1,12 +1,20 @@
 <template>
   <q-page padding>
 
-    <div class="q-my-md q-display-1 text-primary">
+    <div class="q-my-md q-mb-xl q-display-1 text-primary">
       <q-icon :name="$ethingUI.get(resource).icon" class="q-mr-sm"/>
       <small class="text-faded">settings:</small> {{ resource.basename() }}
     </div>
 
     <resource-editor ref="form" :resource="resource" @error="formError=$event"/>
+
+    <q-alert
+        v-if="error"
+        type="negative"
+        class="q-mb-xl"
+    >
+      {{ String(error) }}
+    </q-alert>
 
     <div>
         <q-btn :loading="loading" :disable="formError" color="primary" icon="done" label="valid" @click="handler"/>

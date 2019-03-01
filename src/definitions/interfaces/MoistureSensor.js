@@ -11,6 +11,8 @@ export default {
     }
   },
 
+  mainComponent: 'moisture.label',
+
   widgets: {
     'moisture.label': {
       extends: WDeviceLabel,

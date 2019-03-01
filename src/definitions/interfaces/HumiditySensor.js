@@ -11,6 +11,8 @@ export default {
     }
   },
 
+  mainComponent: 'humidity.knob',
+
   widgets: {
     'humidity.label': {
       extends: WDeviceLabel,

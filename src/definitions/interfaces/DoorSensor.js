@@ -10,6 +10,8 @@ export default {
     }
   },
 
+  mainComponent: 'state',
+
   widgets: {
     'state': {
       extends: WDeviceMultiLabel,

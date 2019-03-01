@@ -34,7 +34,7 @@
     <div class="q-px-lg q-pb-md">
 
       <!-- components -->
-      <div class="bloc" v-for="type in $ethingUI.get(resource)._mro" :key="type" v-if="$ethingUI.get(type).mainComponent">
+      <div class="bloc" v-for="type in $ethingUI.get(resource)._dep" :key="type" v-if="$ethingUI.get(type).mainComponent">
         <div class="bloc-title">
           <q-icon :name="$ethingUI.get(type).icon" />
           <span>{{ $ethingUI.get(type).title }}</span>

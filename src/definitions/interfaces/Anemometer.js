@@ -10,6 +10,8 @@ export default {
     }
   },
 
+  mainComponent: 'wind',
+
   widgets: {
     'wind': {
       extends: WDeviceMultiLabel,

@@ -11,6 +11,8 @@ export default {
     }
   },
 
+  mainComponent: 'dimmer.knob',
+
   widgets: {
     'dimmer.label': {
       extends: WDeviceLabel,

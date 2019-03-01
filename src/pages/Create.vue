@@ -1,7 +1,7 @@
 <template>
   <q-page padding>
 
-    <div class="q-my-md q-display-1 q-display-1-opacity">
+    <div class="q-my-md q-mb-xl q-display-1 q-display-1-opacity">
       <q-icon :name="$ethingUI.get(type).icon" />
       {{ $ethingUI.get(type).title || defaultLabel }}
     </div>
