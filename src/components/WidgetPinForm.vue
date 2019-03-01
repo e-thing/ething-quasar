@@ -75,8 +75,12 @@ export default {
 
     widgetNames () {
       return this.widgets.map((w, index) => {
+        var label = w.metadata.label
+        if (w.metadata.description) {
+          label += ' ('+w.metadata.description+')'
+        }
         return {
-          label: w.metadata.label,
+          label,
           value: index
         }
       })

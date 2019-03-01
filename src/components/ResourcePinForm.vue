@@ -168,8 +168,12 @@ export default {
       var widgets = this.widgets || {}
       return Object.keys(widgets).map(k => {
         var metadata = widgets[k].metadata
+        var label = metadata.label
+        if (metadata.description) {
+          label += ' ('+metadata.description+')'
+        }
         return {
-          label: metadata.label,
+          label,
           value: k
         }
       })

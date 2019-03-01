@@ -1,6 +1,7 @@
 import EThing from 'ething-js'
 import { LocalStorage, Notify } from 'quasar'
 import EThingUI from 'ething-quasar-core'
+import localDefinitions from '../definitions'
 import qs from 'qs'
 
 const AUTH_REFRESH_INTERVAL = 3600 * 1000
@@ -210,7 +211,7 @@ export default ({ app, router, Vue, store }) => {
       window.quasar = appInstance.$q
       window.Vue = Vue
 
-      var metaDfr = EThingUI.loadMeta()
+      var metaDfr = EThingUI.loadMeta(localDefinitions)
 
       var settingsDfr = EThingUI.loadSettings()
 

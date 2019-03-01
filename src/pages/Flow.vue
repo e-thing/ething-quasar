@@ -14,7 +14,7 @@
       </div>
 
       <q-list separator no-border>
-        <flow-recursive-menu-node :root="menu" :filter="nodeFilter" @click="addNodeClick">
+        <flow-recursive-menu-node :root="menu" @click="addNodeClick">
           <div slot-scope="{node}" class="node node-menu" :style="{'background-color': node.color}">
             <div class="endpoint" v-if="node.inputs"></div>
             <q-icon v-if="node.icon" :name="node.icon" class="icon" />
@@ -124,7 +124,7 @@ import EThingUI from 'ething-quasar-core'
 import EThing from 'ething-js'
 
 import ResourceSelect from 'ething-quasar-core/src/components/ResourceSelect'
-import FormSchemaEthingResource from 'ething-quasar-core/src/plugins/formSchema/extra/EthingResource'
+import FormSchemaEthingResource from 'ething-quasar-core/src/formSchema/extra/EthingResource'
 
 import JsonFormatter from '../components/JsonFormatter'
 
@@ -260,7 +260,6 @@ export default {
         opened: false
       },
       resourceFilter: null,
-      menu: this.buildMenu()
     }
 
   },
@@ -281,6 +280,41 @@ export default {
     resourceFilterDisplayValue () {
       return this.resourceFilter===null ? 'none' : this.resourceFilter.basename()
     },
+
+    menu () {
+
+      var new_item = () => {
+        return {
+          nodes: [],
+          children: {}
+        }
+      }
+
+      var root = new_item()
+
+      var find = (path) => {
+        path = path ? path.split('.') : []
+        var p = root
+        path.forEach(i => {
+          if (typeof p.children[i] === 'undefined') {
+            p.children[i] = new_item()
+          }
+          p = p.children[i]
+        })
+        return p
+      }
+
+      this.$ethingUI.iterate('nodes', type => {
+        var d = this.$ethingUI.get(type)
+        if (d.virtual) return
+        if (!this.nodeFilter(d)) return
+        var n = find(d.category)
+        n.nodes.push(d)
+      })
+
+      return root
+
+    }
 
   },
 
@@ -724,38 +758,6 @@ export default {
         if(done) done()
       })
     },
-
-    buildMenu () {
-      var new_item = () => {
-        return {
-          nodes: [],
-          children: {}
-        }
-      }
-
-      var root = new_item()
-
-      var find = (path) => {
-        path = path ? path.split('.') : []
-        var p = root
-        path.forEach(i => {
-          if (typeof p.children[i] === 'undefined') {
-            p.children[i] = new_item()
-          }
-          p = p.children[i]
-        })
-        return p
-      }
-
-      this.$ethingUI.iterate('nodes', type => {
-        var d = this.$ethingUI.get(type)
-        if (d.virtual) return
-        var n = find(d.category)
-        n.nodes.push(d)
-      })
-
-      return root
-    }
 
   },
 

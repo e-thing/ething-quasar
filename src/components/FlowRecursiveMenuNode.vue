@@ -10,13 +10,13 @@
         </q-item-side>
       </template>
 
-      <flow-recursive-menu-node :root="c" :filter="filter" @click="$emit('click', $event)">
+      <flow-recursive-menu-node :root="c" @click="$emit('click', $event)">
         <template v-for="slot in Object.keys($scopedSlots)" :slot="slot" slot-scope="node"><slot :name="slot" v-bind="node"/></template>
       </flow-recursive-menu-node>
 
     </q-collapsible>
 
-    <drag :transfer-data="{node}" v-for="(node, index) in root.nodes" :key="index" v-if="filter(node)">
+    <drag :transfer-data="{node}" v-for="(node, index) in root.nodes" :key="index">
       <q-item :style="{color: node.color}" style="cursor: pointer;" class="q-px-md" @click.native="$emit('click', node)">
         <q-item-main>
           <slot :node="node" />
@@ -36,7 +36,7 @@ export default {
       Drag
     },
 
-    props: ['root', 'filter'],
+    props: ['root'],
 
     methods: {
 
