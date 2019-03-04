@@ -1,5 +1,5 @@
 <template>
-  <q-page class="bg-grey-2">
+  <q-page class="">
 
     <div class="bg-white q-py-lg q-px-lg" style="border-bottom: 5px solid #eee">
       <div class="q-my-md q-display-1 q-display-1-opacity">
@@ -31,10 +31,15 @@
       </div>
     </div>
 
-    <div class="q-px-lg q-pb-md">
+    <div class="page page-width-md">
+
+      <!-- error -->
+      <div class="page-block" v-if="resource.attr('error')">
+        <q-alert type="negative">{{ resource.attr('error') }}</q-alert>
+      </div>
 
       <!-- components -->
-      <div class="bloc" v-for="type in $ethingUI.get(resource)._dep" :key="type" v-if="$ethingUI.get(type).mainComponent">
+      <div class="page-block" v-for="type in $ethingUI.get(resource)._dep" :key="type" v-if="$ethingUI.get(type).mainComponent">
         <div class="bloc-title">
           <q-icon :name="$ethingUI.get(type).icon" />
           <span>{{ $ethingUI.get(type).title }}</span>
@@ -43,7 +48,7 @@
       </div>
 
       <!-- attributes -->
-      <div class="bloc attributes" v-if="attributes.length>0" :class="{detailled: showDetailledAttributes}">
+      <div class="page-block attributes" v-if="attributes.length>0" :class="{detailled: showDetailledAttributes}">
         <div class="bloc-title">
           <q-icon name="mdi-format-list-bulleted" />
           <span>Attributes</span>
@@ -60,7 +65,7 @@
       </div>
 
       <!-- data -->
-      <div class="bloc" v-if="data">
+      <div class="page-block" v-if="data">
         <div class="bloc-title">
           <q-icon name="mdi-format-list-bulleted" />
           <span>Data</span>
@@ -76,7 +81,7 @@
       </div>
 
       <!-- resource -->
-      <div class="bloc" v-if="children.length">
+      <div class="page-block" v-if="children.length">
         <div class="bloc-title">
           <q-icon name="mdi-database" />
           <span>Resources</span>
@@ -89,7 +94,7 @@
       </div>
 
       <!-- api -->
-      <div class="bloc" v-if="Object.keys($ethingUI.get(resource).methods).length">
+      <div class="page-block" v-if="Object.keys($ethingUI.get(resource).methods).length">
         <div class="bloc-title">
           <q-icon name="mdi-database" />
           <span>API</span>
@@ -225,24 +230,20 @@ export default {
   &:hover
     color $primary
 
-.bloc
-  background-color white
-  margin-top $flex-gutter-sm
+.bloc-title
+  background-color $primary
+  color white
+  border-bottom 5px solid #eee
+  padding ($space-base / 4) $space-base
+  line-height: 2rem
+  span
+    vertical-align middle
+    margin-left $space-base
 
-  .bloc-title
-    background-color $primary
-    color white
-    border-bottom 5px solid $secondary
-    padding ($space-base / 4) $space-base
-    line-height: 2rem
-    span
-      vertical-align middle
-      margin-left $space-base
-
-    /*color $faded
-    border-bottom 1px solid $secondary*/
-  .bloc-content
-    &:not(.bloc-content-no-padding)
-      padding $space-base
+  /*color $faded
+  border-bottom 1px solid $secondary*/
+.bloc-content
+  &:not(.bloc-content-no-padding)
+    padding $space-base
 
 </style>

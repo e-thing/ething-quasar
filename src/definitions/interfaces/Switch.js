@@ -22,10 +22,10 @@ export default {
               attr: 'state',
               map: [{
                 key: true,
-                value: 'opened'
+                value: 'On'
               },{
                 key: false,
-                value: 'closed'
+                value: 'Off'
               }]
             }]
           }

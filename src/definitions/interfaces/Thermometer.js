@@ -12,6 +12,11 @@ export default {
   },
 
   mainComponent: 'temperature.knob',
+  /*mainComponentAttributes: {
+    noHeader: true,
+    noFooter: true,
+  },*/
+
 
   widgets: {
     'temperature.label': {

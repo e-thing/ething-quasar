@@ -1,12 +1,11 @@
 <template>
-  <q-page class="q-mb-xl layout">
+  <q-page class="page page-width-md">
 
-    <div class="row justify-between">
-
+    <div class="row justify-between page-block">
       <q-btn color="primary" label="Create" icon="add" flat @click="create" />
     </div>
 
-    <div v-if="flows.length">
+    <div v-if="flows.length" class="page-block">
       <q-list link no-border>
         <resource-q-item v-for="flow in flows" :key="flow.id()" :resource="flow" />
       </q-list>
@@ -56,12 +55,3 @@ export default {
   }
 }
 </script>
-
-<style scoped lang="stylus">
-.layout
-
-  @media screen and (min-width: 980px)
-    max-width: 80%;
-    margin: 0 auto;
-
-</style>

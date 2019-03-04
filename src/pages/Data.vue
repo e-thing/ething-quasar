@@ -1,38 +1,38 @@
 <template>
-  <q-page class="q-mb-xl layout">
+  <q-page class="page page-width-md">
 
-    <div class="row justify-between">
-    <q-breadcrumbs class="q-pa-md">
-      <q-breadcrumbs-el v-for="(item, index) in pathItems" :key="index" :label="item.label" :icon="item.icon" :to="item.link" />
-    </q-breadcrumbs>
+    <div class="row justify-between page-block">
+      <q-breadcrumbs class="q-pa-md">
+        <q-breadcrumbs-el v-for="(item, index) in pathItems" :key="index" :label="item.label" :icon="item.icon" :to="item.link" />
+      </q-breadcrumbs>
 
-    <q-btn-dropdown color="primary" label="Create" icon="add" flat >
-      <q-list link>
-        <q-item v-close-overlay @click.native="create('resources/File')">
-          <q-item-side :icon="$ethingUI.get('resources/File').icon" :color="$ethingUI.get('resources/File').color" />
-          <q-item-main>
-            <q-item-tile label>File</q-item-tile>
-          </q-item-main>
-        </q-item>
+      <q-btn-dropdown color="primary" label="Create" icon="add" flat >
+        <q-list link>
+          <q-item v-close-overlay @click.native="create('resources/File')">
+            <q-item-side :icon="$ethingUI.get('resources/File').icon" :color="$ethingUI.get('resources/File').color" />
+            <q-item-main>
+              <q-item-tile label>File</q-item-tile>
+            </q-item-main>
+          </q-item>
 
-        <q-item v-close-overlay @click.native="create('resources/Table')">
-          <q-item-side :icon="$ethingUI.get('resources/Table').icon" :color="$ethingUI.get('resources/Table').color" />
-          <q-item-main>
-            <q-item-tile label>Table</q-item-tile>
-          </q-item-main>
-        </q-item>
+          <q-item v-close-overlay @click.native="create('resources/Table')">
+            <q-item-side :icon="$ethingUI.get('resources/Table').icon" :color="$ethingUI.get('resources/Table').color" />
+            <q-item-main>
+              <q-item-tile label>Table</q-item-tile>
+            </q-item-main>
+          </q-item>
 
-        <q-item v-close-overlay @click.native="$router.push('/chart')">
-          <q-item-side icon="mdi-chart-line" :color="$ethingUI.get('resources/File').color" />
-          <q-item-main>
-            <q-item-tile label>Chart</q-item-tile>
-          </q-item-main>
-        </q-item>
-      </q-list>
-    </q-btn-dropdown>
+          <q-item v-close-overlay @click.native="$router.push('/chart')">
+            <q-item-side icon="mdi-chart-line" :color="$ethingUI.get('resources/File').color" />
+            <q-item-main>
+              <q-item-tile label>Chart</q-item-tile>
+            </q-item-main>
+          </q-item>
+        </q-list>
+      </q-btn-dropdown>
     </div>
 
-    <div v-if="resources.length">
+    <div v-if="resources.length" class="page-block">
       <q-list link no-border>
 
         <div v-if="folders.length">
@@ -90,7 +90,7 @@ export default {
     resources () {
       var path = this.path
       var globRe = new RegExp('^' + (path ? (path + '/') : '') + '[^/]+$')
-      return this.$ething.arbo.find(r => globRe.test(r.name()))
+      return this.$ething.arbo.find(r => globRe.test(r.name()) && !/^\./.test(r.basename()))
     },
     folders () {
       var path = this.path
@@ -154,12 +154,3 @@ export default {
   }
 }
 </script>
-
-<style scoped lang="stylus">
-.layout
-
-  @media screen and (min-width: 980px)
-    max-width: 80%;
-    margin: 0 auto;
-
-</style>

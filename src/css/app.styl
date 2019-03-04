@@ -1,4 +1,50 @@
 // app global css
+@import '~variables'
+
+.page
+
+  background-color: $grey-2
+  overflow: auto
+  margin: auto
+
+  .page-block
+    background-color white
+    margin-top $flex-gutter-md
+
+  .page-block:last-child
+    margin-bottom: $flex-gutter-md
+
+  .page-block-transparent
+    background-color inherit
+
+  .page-block-padding
+    padding: $space-base
+
+  &.page-width-sm, &.page-width-md, &.page-width-lg
+    & .page-block
+      margin-left: $space-base
+      margin-right: $space-base
+      @media (min-width: $breakpoint-xs)
+        width: 90%
+        margin-left: auto
+        margin-right: auto
+
+  &.page-width-sm
+    & .page-block
+      max-width: 600px
+
+  &.page-width-md
+    & .page-block
+      max-width: 1024px
+
+  &.page-width-lg
+    & .page-block
+      max-width: 1439px
+
+
+
+
+
 
 .markdown
 

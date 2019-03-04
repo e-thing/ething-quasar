@@ -1,6 +1,6 @@
 <template>
-  <q-page>
-    <q-tabs two-lines no-pane-border color="secondary">
+  <q-page class="page">
+    <q-tabs two-lines no-pane-border color="secondary" >
       <!-- Tabs - notice slot="title" -->
       <q-tab default slot="title" label="settings" name="settings" icon="settings" />
       <q-tab slot="title" label="log" name="log" icon="message" />
@@ -11,25 +11,25 @@
       <q-tab slot="title" label="about" name="about" icon="info" />
 
       <!-- Targets -->
-      <q-tab-pane name="settings">
+      <q-tab-pane name="settings" class="pane">
         <settings-view />
       </q-tab-pane>
-      <q-tab-pane name="log">
+      <q-tab-pane name="log" class="pane">
         <log-view />
       </q-tab-pane>
-      <q-tab-pane name="apikey">
+      <q-tab-pane name="apikey" class="pane">
         <apikey-view />
       </q-tab-pane>
-      <q-tab-pane name="plugins">
+      <q-tab-pane name="plugins" class="pane">
         <plugins-view />
       </q-tab-pane>
-      <q-tab-pane name="processes">
+      <q-tab-pane name="processes" class="pane">
         <processes-view />
       </q-tab-pane>
-      <q-tab-pane name="clients">
+      <q-tab-pane name="clients" class="pane">
         <clients-view />
       </q-tab-pane>
-      <q-tab-pane name="about">
+      <q-tab-pane name="about" class="pane">
         <about-view />
       </q-tab-pane>
 
@@ -61,3 +61,9 @@ export default {
 
 }
 </script>
+
+<style scoped>
+  .pane {
+    padding: 0px;
+  }
+</style>

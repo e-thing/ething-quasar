@@ -1,12 +1,12 @@
 <template>
-  <div>
+  <div class="page page-width-lg">
     <div v-if="loading===false">
 
-      <div class="q-my-md">
+      <div class="page-block page-block-transparent">
         <q-btn icon="add" label="new API key" rounded color="secondary" @click="create()"/>
       </div>
 
-      <div v-if="apikeys.length > 0">
+      <div v-if="apikeys.length > 0" class="page-block page-block-padding">
 
         <div class="item row items-center gutter-x-sm">
           <div class="name col-xs-2 col-sm-2 col-md-2 text-secondary ellipsis">

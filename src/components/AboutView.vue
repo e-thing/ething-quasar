@@ -1,10 +1,8 @@
 <template>
 
-  <div class="layout">
+  <div class="page page-width-sm">
 
-    <h4>Information</h4>
-
-    <dl>
+    <dl class="page page-block page-block-padding">
       <dt>UI</dt>
       <dd>version: {{ $ui.VERSION }}</dd>
 
@@ -22,9 +20,8 @@
 
     </dl>
 
-    <div>
+    <div class="page page-block page-block-transparent">
       <q-btn label="restart" @click="restart" color="primary"/>
-
     </div>
 
   </div>
@@ -93,12 +90,3 @@ export default {
     }
 }
 </script>
-
-<style scoped lang="stylus">
-.layout
-
-  @media screen and (min-width: 600px)
-    max-width: 600px;
-    margin: 0 auto;
-
-</style>

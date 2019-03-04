@@ -1,24 +1,26 @@
 <template>
-  <q-page padding>
+  <q-page class="page page-width-md">
 
-    <div class="q-my-md q-mb-xl q-display-1 q-display-1-opacity">
-      <q-icon :name="$ethingUI.get(type).icon" />
-      {{ $ethingUI.get(type).title || defaultLabel }}
-    </div>
+    <div class="page-block q-pa-xl">
+      <div class="q-my-md q-mb-xl q-display-1 q-display-1-opacity">
+        <q-icon :name="$ethingUI.get(type).icon" />
+        {{ $ethingUI.get(type).title || defaultLabel }}
+      </div>
 
-    <resource-editor ref="form" :resource="type" @error="formError=$event"/>
+      <resource-editor ref="form" :resource="type" @error="formError=$event"/>
 
-    <q-alert
-        v-if="error"
-        type="negative"
-        class="q-mb-xl"
-    >
-      {{ String(error) }}
-    </q-alert>
+      <q-alert
+          v-if="error"
+          type="negative"
+          class="q-mb-xl"
+      >
+        {{ String(error) }}
+      </q-alert>
 
-    <div>
-        <q-btn :loading="loading" :disable="formError" color="primary" icon="done" label="valid" @click="handler"/>
-        <q-btn color="negative" class="q-ml-sm" icon="clear" label="cancel" flat @click="onCancel"/>
+      <div>
+          <q-btn :loading="loading" :disable="formError" color="primary" icon="done" label="valid" @click="handler"/>
+          <q-btn color="negative" class="q-ml-sm" icon="clear" label="cancel" flat @click="onCancel"/>
+      </div>
     </div>
 
   </q-page>
@@ -81,6 +83,3 @@ export default {
 
 }
 </script>
-
-<style>
-</style>

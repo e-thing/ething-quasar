@@ -14,7 +14,7 @@
       </div>
 
       <q-list separator no-border>
-        <flow-recursive-menu-node :root="menu" @click="addNodeClick">
+        <flow-recursive-menu-node :root="menu" @click="addNodeClick" :opened="resourceFilter!==null" :key="resourceFilter && resourceFilter.id()">
           <div slot-scope="{node}" class="node node-menu" :style="{'background-color': node.color}">
             <div class="endpoint" v-if="node.inputs"></div>
             <q-icon v-if="node.icon" :name="node.icon" class="icon" />

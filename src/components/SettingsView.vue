@@ -1,8 +1,8 @@
 <template>
-  <div class="layout">
+  <div class="page page-width-sm">
     <div v-if="loading===false">
 
-      <div class="q-mt-xl">
+      <div class="page-block page-block-padding">
 
         <div class="q-title q-title-opacity">General</div>
 
@@ -10,7 +10,7 @@
 
       </div>
 
-      <div v-for="(plugin, name) in plugins" :key="name" v-if="typeof plugin.schema === 'object'" class="q-mt-xl">
+      <div v-for="(plugin, name) in plugins" :key="name" v-if="typeof plugin.schema === 'object'" class="page-block page-block-padding">
 
         <div class="q-title q-title-opacity">{{ name }}</div>
 
@@ -21,12 +21,12 @@
       <q-alert
           v-if="saveError"
           type="negative"
-          class="q-mt-xl"
+          class="page-block"
       >
         {{ String(saveError) }}
       </q-alert>
 
-      <div class="q-mt-xl">
+      <div class="page-block page-block-transparent">
           <q-btn :disable="globalError" :loading="saving" color="secondary" icon="done" label="save changes" @click="onSave"/>
       </div>
 
@@ -151,10 +151,5 @@ export default {
   border-bottom 1px solid $grey-3
   padding-bottom $space-y-base
 
-.layout
-
-  @media screen and (min-width: 600px)
-    max-width: 600px;
-    margin: 0 auto;
 
 </style>

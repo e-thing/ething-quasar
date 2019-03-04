@@ -9,12 +9,12 @@ export default {
       enum: [],
       '$dependencies': {
         'ExecuteDevice.device': function (id, self, node) {
-          var r = self.$ething.arbo.get(id)
-          var methods = []
+          var r = this.$ething.arbo.get(id)
+          var methods = {}
           if (r) {
-            methods = r.methods()
+            methods = this.$ethingUI.get(r).methods
           }
-          self.$set(self.c_schema, 'enum', methods)
+          self.$set(self.c_schema, 'enum', Object.keys(methods))
         }
       }
     },
@@ -25,7 +25,7 @@ export default {
           if (r && methodName) {
             var methods = this.$ethingUI.get(r).methods
             var method = methods[methodName]
-            if (method && method.arguments.length>0) {
+            if (method && Object.keys(method.arguments).length>0) {
               var schema = {
                 additionalProperties: false,
                 properties: method.arguments,

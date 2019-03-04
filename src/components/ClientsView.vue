@@ -1,10 +1,10 @@
 <template>
-  <div>
+  <div class="page page-width-sm">
     <div v-if="loading===false">
 
       <div v-if="clients.length > 0">
 
-        <q-card v-for="client in clients" :key="client.id">
+        <q-card v-for="client in clients" :key="client.id" class="page-block">
           <q-card-title>
             {{ client.ip}}
             <small v-if="isCurrent(client)" class="text-faded">(current)</small>

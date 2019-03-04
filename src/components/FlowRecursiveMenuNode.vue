@@ -1,6 +1,6 @@
 <template>
   <div>
-    <q-collapsible v-for="(c, name) in root.children" :key="name" v-if="notEmpty(c)">
+    <q-collapsible v-for="(c, name) in root.children" :key="name" v-if="notEmpty(c)" :opened="opened">
       <template slot="header">
         <q-item-main :label="formatLabel(name)" />
         <q-item-side right>
@@ -36,7 +36,7 @@ export default {
       Drag
     },
 
-    props: ['root'],
+    props: ['root', 'opened'],
 
     methods: {
 
