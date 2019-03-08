@@ -5,6 +5,7 @@ import EThing from 'ething-js'
 import * as formSchemaCore from '../plugins/formSchema/core'
 import { extend } from 'quasar'
 import { linearize } from 'c3-linearization'
+import {injectScript} from '../utils'
 
 
 function getFromPath (obj, path, delimiter, createIfNotFound) {
@@ -210,24 +211,81 @@ function normalize (obj) {
 
   if (obj['type'] === 'class') {
 
+    // list all information about a registered class (Resources, flow nodes, signals, ...).
+    // some of these attributes are read only, others can be customized.
     obj = extend(true, {
+      /**
+      * COMMON
+      **/
+
+      // the color associated to this class
       color: 'grey',
+      // the icon representing the class
       icon: 'mdi-help',
+      // the name of the class. Default to the class name in human readable format (eg: FooBar => Foo Bar, Foo_Bar => Foo Bar)
       title: '',
-      category: null,
+      // description of the class
       description: '',
+      // list of required properties
       required: [],
+      // json schema of the properties
       properties: {},
-      methods: {},
-      signals: [],
+      // READ-ONLY: is this class is abstract  ?
       virtual: false,
-      widgets: {},
-      disableCreation: false,
+      // a function(function) => {} that returns some specific definition attributes according to the instance
+      /*
+      {
+        color: 'green',
+        dynamic (resource) {
+          if (resource.size==0) {
+            return {
+              color: 'red'
+            }
+          }
+        }
+      }
+      */
       dynamic: null,
-      data: null,
+
+      /**
+      * SPECIFIC
+      **/
+      // [string] only for devices and flow nodes. The category (eg: 'foo.bar': foo is the category, bar is the subcategory ).
+      category: '',
+
+      /**
+      * RESOURCE
+      **/
+      // READ-ONLY: list the signals this resource can emit
+      signals: [],
+      // a map of widget binded to this resource
+      widgets: {},
+      // set to true, if you don't want to allow the user to create a new resource through the interface.
+      disableCreation: false,
+      // a function(actionName) => <Vue route> that is called when the user try to open this resource.
       open: null,
+
+      /**
+      * DEVICE
+      **/
+      // READ-ONLY: list the available methods
+      methods: {},
+      // device only: a function(resource) => {} that return some device infomation to show on the devices page
+      /*
+      {
+        data (resource) {
+          return {
+            'temperature': resource.attr('temperature') + '°C'
+          }
+        },
+      }
+      */
+      data: null,
+      // a Vue component or a widget id (key from the widgets map). This componant is displayed on the device page.
       mainComponent: null,
-      mainComponentAttributes: null
+      // options to pass to the main componant
+      mainComponentAttributes: null,
+
     }, obj)
 
     for (let k in obj.properties) {
@@ -358,31 +416,6 @@ function get (definitions, type) {
 }
 
 
-function getScript(source, callback) {
-    var script = document.createElement('script');
-    var prior = document.getElementsByTagName('script')[0];
-    script.async = 1;
-
-    script.onload = script.onreadystatechange = function( _, isAbort ) {
-        if(isAbort || !script.readyState || /loaded|complete/.test(script.readyState) ) {
-            script.onload = script.onreadystatechange = script.onerror = null;
-            script = undefined;
-
-            if(!isAbort) { if(callback) callback(); }
-        }
-    };
-
-    script.onerror = function(evt) {
-        script.onload = script.onreadystatechange = script.onerror = null;
-        script = undefined;
-
-        if(callback) callback(true);
-    }
-
-    script.src = source;
-    prior.parentNode.insertBefore(script, prior);
-}
-
 function importMeta (self, meta, done) {
 
   self.scopes = meta.scopes || {}
@@ -396,7 +429,7 @@ function importMeta (self, meta, done) {
     let plugin = plugins[name]
     if (plugin.js_index) {
       pluginPromises.push(new Promise(function(resolve, reject) {
-        getScript(EThing.config.serverUrl + '/api/plugin/' + name + '/index.js', (error) => {
+        injectScript(EThing.config.serverUrl + '/api/plugin/' + name + '/index.js', (error) => {
             if (error) {
                 console.error('[meta] plugin ' + name + ' fail loading')
                 reject()

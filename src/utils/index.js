@@ -3,12 +3,12 @@ import EThing from 'ething-js'
 import FileSaver from 'file-saver'
 import VisibilityObserver from './VisibilityObserver'
 import {createModal} from './modal'
+import {injectScript} from './script'
 
 
 export {VisibilityObserver}
-
 export {createModal}
-
+export {injectScript}
 
 /**
  * Get the raw type string of a value e.g. [object Object]
