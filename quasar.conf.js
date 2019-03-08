@@ -10,7 +10,6 @@ module.exports = function (ctx) {
     // app plugins (/src/plugins)
     plugins: [
       'i18n',
-      'ething-quasar-core',
       'ething-ui',
       'virtualKeyboard'
     ],
@@ -46,13 +45,6 @@ module.exports = function (ctx) {
           loader: 'eslint-loader',
           exclude: /(node_modules|quasar)/
         })*/
-
-        cfg.plugins.push(new CopyWebpackPlugin([path.resolve(__dirname, './node_modules/ething-quasar-dll/dist/vendor.js')]))
-
-        cfg.plugins.push(new webpack.DllReferencePlugin({
-            context: path.join(__dirname, '.'),
-            manifest: path.join(__dirname, "./node_modules/ething-quasar-dll/dist/vendor-manifest.json")
-        }))
       }
     },
     devServer: {

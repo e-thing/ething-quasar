@@ -97,7 +97,7 @@
 import Vue from 'vue'
 import EThing from 'ething-js'
 import VueGridLayout from 'vue-grid-layout'
-import Widget from 'ething-quasar-core/src/components/Widget'
+import Widget from '../components/Widget'
 import { debounce, extend } from 'quasar'
 import ResourcePinForm from '../components/ResourcePinForm'
 import WidgetPinForm from '../components/WidgetPinForm'

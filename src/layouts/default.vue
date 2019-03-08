@@ -37,7 +37,7 @@
 
         <q-btn v-if="refreshEnabled" class="gt-xs" flat dense icon="refresh" aria-label="refresh" @click="refresh"/>
         <q-btn class="gt-xs" flat dense icon="settings" aria-label="settings" @click="$router.push('/settings')"/>
-        <q-btn v-if="!$ui.autoLogin" class="gt-xs" flat dense icon="exit to app" aria-label="logout" @click="logout" />
+        <q-btn v-if="!$ethingUI.autoLogin" class="gt-xs" flat dense icon="exit to app" aria-label="logout" @click="logout" />
 
       </q-toolbar>
 
@@ -76,7 +76,7 @@
           <q-item-side icon="settings" />
           <q-item-main label="Settings" />
         </q-item>
-        <q-item v-if="!$ui.autoLogin" @click.native="logout">
+        <q-item v-if="!$ethingUI.autoLogin" @click.native="logout">
           <q-item-side icon="exit to app" />
           <q-item-main label="Logout" />
         </q-item>
@@ -116,13 +116,13 @@ export default {
   },
   computed: {
     back () {
-      return this.$route.meta.back && (this.$q.platform.within.iframe || this.$q.platform.is.electron || this.$ui.kioskMode)
+      return this.$route.meta.back && (this.$q.platform.within.iframe || this.$q.platform.is.electron || this.$ethingUI.kioskMode)
     },
     refreshEnabled () {
-      return this.$q.platform.has.touch && (!this.$q.platform.is.desktop || this.$ui.kioskMode)
+      return this.$q.platform.has.touch && (!this.$q.platform.is.desktop || this.$ethingUI.kioskMode)
     },
     vKeyboardEnabled () {
-      return this.$ui.virtualKeyboardEnabled
+      return this.$ethingUI.virtualKeyboardEnabled
     }
   },
   methods: {
@@ -134,7 +134,7 @@ export default {
         ok: 'Logout',
         cancel: 'Cancel'
       }).then(() => {
-        this.$ui.logout()
+        this.$ethingUI.logout()
       }).catch(() => {
 
       })

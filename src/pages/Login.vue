@@ -4,7 +4,7 @@
 
     <div class="q-pb-md">
       <q-field
-        v-if="$ui.dynamicServerUrl"
+        v-if="$ethingUI.dynamicServerUrl"
         :error="$v.server.$error"
         error-label="required"
       >
@@ -66,7 +66,7 @@ export default {
 
     return {
       loading: false,
-      server: this.$ui.getServerUrl() || defaultServerUrl,
+      server: this.$ethingUI.getServerUrl() || defaultServerUrl,
       form: {
         login: '',
         password: ''
@@ -82,7 +82,7 @@ export default {
       }
     }
 
-    if (this.$ui.dynamicServerUrl) {
+    if (this.$ethingUI.dynamicServerUrl) {
       v.server = {
         required
       }
@@ -102,7 +102,7 @@ export default {
       this.loading = true
       var server = this.server.trim().replace(/\/+$/, '')
 
-      this.$ui.login(server, this.form.login, this.form.password).catch(error => {
+      this.$ethingUI.login(server, this.form.login, this.form.password).catch(error => {
 
         if (error.response) {
           // The request was made and the server responded with a status code

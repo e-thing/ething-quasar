@@ -74,7 +74,7 @@
 </template>
 
 <script>
-import ResourceQItem from 'ething-quasar-core/src/components/ResourceQItem'
+import ResourceQItem from '../components/ResourceQItem'
 
 export default {
   name: 'PageData',

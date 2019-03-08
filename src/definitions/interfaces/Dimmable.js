@@ -1,4 +1,4 @@
-import WDimmable from 'ething-quasar-core/src/components/widgets/WDimmable'
+import WDimmable from '../../components/widgets/WDimmable'
 
 export default {
 

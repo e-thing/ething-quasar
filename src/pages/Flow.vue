@@ -117,14 +117,14 @@ import { extend } from 'quasar'
 
 import { Drag, Drop } from 'vue-drag-drop'
 import FlowRecursiveMenuNode from '../components/FlowRecursiveMenuNode'
-import FlowNode from 'ething-quasar-core/src/components/FlowNode'
-import FlowNodes from 'ething-quasar-core/src/components/FlowNodes'
+import FlowNode from '../components/FlowNode'
+import FlowNodes from '../components/FlowNodes'
 
-import EThingUI from 'ething-quasar-core'
+import EThingUI from '../plugins/ething-ui'
 import EThing from 'ething-js'
 
-import ResourceSelect from 'ething-quasar-core/src/components/ResourceSelect'
-import FormSchemaEthingResource from 'ething-quasar-core/src/formSchema/extra/EthingResource'
+import ResourceSelect from '../components/ResourceSelect'
+import FormSchemaEthingResource from '../plugins/formSchema/extra/EthingResource'
 
 import JsonFormatter from '../components/JsonFormatter'
 

@@ -111,10 +111,10 @@
 
 <script>
 
-import DeviceApi from 'ething-quasar-core/src/components/DeviceApi'
-import ResourceQItem from 'ething-quasar-core/src/components/ResourceQItem'
-import ResourceBatteryChip from 'ething-quasar-core/src/components/ResourceBatteryChip'
-import DeviceComponent from 'ething-quasar-core/src/components/DeviceComponent'
+import DeviceApi from '../components/DeviceApi'
+import ResourceQItem from '../components/ResourceQItem'
+import ResourceBatteryChip from '../components/ResourceBatteryChip'
+import DeviceComponent from '../components/DeviceComponent'
 
 export default {
   name: 'PageDevice',

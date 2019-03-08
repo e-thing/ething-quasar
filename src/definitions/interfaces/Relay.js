@@ -1,4 +1,4 @@
-import WSwitch from 'ething-quasar-core/src/components/widgets/WSwitch'
+import WSwitch from '../../components/widgets/WSwitch'
 
 export default {
 

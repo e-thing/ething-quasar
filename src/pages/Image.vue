@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import ImageViewer from 'ething-quasar-core/src/components/ImageViewer'
+import ImageViewer from '../components/ImageViewer'
 
 export default {
   name: 'PageImage',

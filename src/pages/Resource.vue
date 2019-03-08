@@ -27,7 +27,7 @@
 
 <script>
 
-import ResourceEditor from 'ething-quasar-core/src/components/ResourceEditor'
+import ResourceEditor from '../components/ResourceEditor'
 
 export default {
   name: 'PageResource',

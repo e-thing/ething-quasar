@@ -1,4 +1,4 @@
-import WDeviceLabel from 'ething-quasar-core/src/components/widgets/WDeviceLabel'
+import WDeviceLabel from '../../components/widgets/WDeviceLabel'
 
 export default {
 

@@ -50,7 +50,7 @@
 
 <script>
 import EThing from 'ething-js'
-import ResourceQItem from 'ething-quasar-core/src/components/ResourceQItem'
+import ResourceQItem from '../components/ResourceQItem'
 
 
 export default {

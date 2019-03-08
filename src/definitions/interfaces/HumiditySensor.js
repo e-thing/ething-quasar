@@ -1,5 +1,5 @@
-import WDeviceLabel from 'ething-quasar-core/src/components/widgets/WDeviceLabel'
-import WDeviceKnob from 'ething-quasar-core/src/components/widgets/WDeviceKnob'
+import WDeviceLabel from '../../components/widgets/WDeviceLabel'
+import WDeviceKnob from '../../components/widgets/WDeviceKnob'
 
 export default {
 

@@ -1,22 +1,41 @@
 import EThing from 'ething-js'
 import { LocalStorage, Notify } from 'quasar'
-import EThingUI from 'ething-quasar-core'
 import localDefinitions from '../definitions'
 import qs from 'qs'
+import * as utils from './utils.js'
+import * as components from '../components'
+import Core from './core.js'
+
+
 
 const AUTH_REFRESH_INTERVAL = 3600 * 1000
 
 
-export var UI = {
-  VERSION: process.env.VERSION
+var EThingUI = {
+  VERSION: process.env.VERSION,
+  utils,
+  components
 }
 
-var getParameterByName = EThingUI.utils.getParameterByName
 
-UI.kioskMode = process.env.KIOSK || getParameterByName('kiosk') === '1'
-UI.virtualKeyboardEnabled = process.env.VIRTUALKEYBOARD || getParameterByName('virtualkeyboard') === '1'
+var getParameterByName = utils.getParameterByName
 
-export default ({ app, router, Vue, store }) => {
+EThingUI.kioskMode = process.env.KIOSK || getParameterByName('kiosk') === '1'
+EThingUI.virtualKeyboardEnabled = process.env.VIRTUALKEYBOARD || getParameterByName('virtualkeyboard') === '1'
+
+
+
+
+
+
+EThingUI.install = ({ app, router, Vue, store }) => {
+
+  if (EThingUI.__installed) { return }
+  EThingUI.__installed = true
+
+
+  Core.install(EThingUI, Vue, router, store)
+
 
   var serverUrl = null, dynamicServerUrl = false
 
@@ -39,12 +58,27 @@ export default ({ app, router, Vue, store }) => {
   }
 
   if (!dynamicServerUrl) {
-    UI.autoLogin = /\/\/localhost/.test(EThing.config.serverUrl)
+    EThingUI.autoLogin = /\/\/localhost/.test(EThing.config.serverUrl)
   }
 
-  Vue.prototype.$ui = window.UI = UI
+  // make it globally available
+  Vue.prototype.$ethingUI = EThingUI
+  if (window) {
+    // make it global to be accessible by the plugins !
+    window.EThingUI = EThingUI
+  }
 
-  Object.assign(UI, {
+
+  // register the components globally
+  components && Object.keys(components).forEach(key => {
+    const c = components[key]
+    if (c.name !== undefined) {
+      Vue.component(c.name, c)
+    }
+  })
+
+
+  Object.assign(EThingUI, {
     dynamicServerUrl,
 
     getServerUrl () {
@@ -85,7 +119,7 @@ export default ({ app, router, Vue, store }) => {
   })
 
 
-  Object.assign(UI, {
+  Object.assign(EThingUI, {
 
     reset () {
       app.data.state = 'begin'
@@ -170,7 +204,7 @@ export default ({ app, router, Vue, store }) => {
 
       if(status == 401 || status == 403){
         // reset the session
-        UI.disconnect()
+        EThingUI.disconnect()
       }
     }
     return Promise.reject(error);
@@ -186,7 +220,7 @@ export default ({ app, router, Vue, store }) => {
 
       // check if there is a stored session
 
-      if (UI.needAuth()) {
+      if (EThingUI.needAuth()) {
         console.warn('[app] no serverUrl found ! need to create a new session');
 
         next({
@@ -294,11 +328,11 @@ export default ({ app, router, Vue, store }) => {
         var iat = LocalStorage.get.item('ething.auth.iat')
 
         if (iat && Date.now() - iat > AUTH_REFRESH_INTERVAL) {
-          UI.authRefresh()
+          EThingUI.authRefresh()
         }
 
-        UI.authRefreshTimer = setInterval(() => {
-          UI.authRefresh()
+        EThingUI.authRefreshTimer = setInterval(() => {
+          EThingUI.authRefresh()
         }, AUTH_REFRESH_INTERVAL)
 
       }).catch( err => {
@@ -314,3 +348,5 @@ export default ({ app, router, Vue, store }) => {
 
   })
 }
+
+export default EThingUI
