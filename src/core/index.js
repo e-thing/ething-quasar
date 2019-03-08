@@ -2,10 +2,21 @@ import EThing from 'ething-js'
 import { LocalStorage, Notify } from 'quasar'
 import localDefinitions from '../definitions'
 import qs from 'qs'
-import * as utils from './utils.js'
+import * as utils from '../utils'
 import * as components from '../components'
-import Core from './core.js'
+import * as form from '../plugins/formSchema/core'
+import promiseFinally from 'promise.prototype.finally'
 
+import meta from './meta.js'
+import socketio from './socketio.js'
+import widget from './widget.js'
+import event from './event.js'
+import settings from './settings.js'
+import storage from './storage.js'
+
+
+// necessary for older browsers
+promiseFinally.shim()
 
 
 const AUTH_REFRESH_INTERVAL = 3600 * 1000
@@ -14,7 +25,9 @@ const AUTH_REFRESH_INTERVAL = 3600 * 1000
 var EThingUI = {
   VERSION: process.env.VERSION,
   utils,
-  components
+  components,
+  EThing,
+  form
 }
 
 
@@ -25,16 +38,66 @@ EThingUI.virtualKeyboardEnabled = process.env.VIRTUALKEYBOARD || getParameterByN
 
 
 
-
-
-
 EThingUI.install = ({ app, router, Vue, store }) => {
 
   if (EThingUI.__installed) { return }
   EThingUI.__installed = true
 
+  // install error handler
+  Vue.config.errorHandler = function (err, vm, info)  {
+    let handler=null, current = vm
+    if (vm) {
+      if (vm.$options.errorHandler) {
+        handler = vm.$options.errorHandler
+      } else {
+        while (current.$parent) {
+          current = current.$parent
+          if (handler = current.$options.errorHandler) break
+        }
+      }
+    }
+    if (handler) handler.call(current, err, vm, info)
+    else console.error(err)
+  }
 
-  Core.install(EThingUI, Vue, router, store)
+  Object.assign(EThingUI, {
+
+      router,
+      store,
+
+      getVueInstance () {
+        return this.router.app
+      },
+
+      /*
+      return the url for opening a resource
+      */
+      route (resource, more) {
+        return this.get(resource).open(more)
+      },
+
+      open (resource, more) {
+        var route = EThingUI.route(resource, more)
+        if (route) {
+          router.push(route)
+        }
+      }
+  });
+
+  // install sub modules
+  var pp = [
+    meta,
+    socketio,
+    widget,
+    event,
+    settings,
+    storage
+  ]
+
+  pp.forEach(p => {
+    var f = typeof p === 'function' ? p : p.install
+    f({ EThingUI, Vue, router, store })
+  })
 
 
   var serverUrl = null, dynamicServerUrl = false

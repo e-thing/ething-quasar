@@ -11,6 +11,8 @@
 
 <script>
 import EThing from 'ething-js'
+import {createModal} from '../utils'
+
 
 export default {
     name: 'ResourceSelect',
@@ -137,7 +139,7 @@ export default {
 
     methods: {
       openCreateModal () {
-        this.$ethingUI.createModal({
+        createModal({
           types: this.computedCreateTypes
         })
       }

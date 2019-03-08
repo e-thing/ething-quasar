@@ -2,9 +2,12 @@ import { date, format } from 'quasar'
 import EThing from 'ething-js'
 import FileSaver from 'file-saver'
 import VisibilityObserver from './VisibilityObserver'
+import {createModal} from './modal'
 
 
 export {VisibilityObserver}
+
+export {createModal}
 
 
 /**

@@ -10,8 +10,12 @@ module.exports = function (ctx) {
     // app plugins (/src/plugins)
     plugins: [
       'i18n',
-      'ething-ui',
-      'virtualKeyboard'
+      'core',
+      'vuelidate',
+      'virtualKeyboard',
+      'highlightjs',
+      'ething-js',
+      'formSchema'
     ],
     css: [
       'app.styl'

@@ -2,7 +2,7 @@
 this module is responsible of downloading metadata from the ething server.
 */
 import EThing from 'ething-js'
-import * as formSchemaCore from './formSchema/core'
+import * as formSchemaCore from '../plugins/formSchema/core'
 import { extend } from 'quasar'
 import { linearize } from 'c3-linearization'
 
@@ -550,11 +550,11 @@ export default {
           done = localDefinitions
           localDefinitions = null
         }
-        
+
         if (localDefinitions) {
-          Object.assign(this.definitions, localDefinitions) // todo: replace by an iterative mergeClass 
+          Object.assign(this.definitions, localDefinitions) // todo: replace by an iterative mergeClass
         }
-        
+
         var self = this
         return new Promise(function(resolve, reject) {
           EThing.request({

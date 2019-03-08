@@ -49,8 +49,6 @@ vueHighlightJS.install = function install(Vue) {
   });
 };
 
-export default {
-  install ({ Vue }) {
+export default ({ Vue }) => {
     Vue.use(vueHighlightJS)
-  }
 }

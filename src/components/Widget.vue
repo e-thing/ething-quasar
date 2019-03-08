@@ -12,7 +12,7 @@
 </template>
 
 <script>
-import { widgets } from '../plugins/widget'
+import { widgets } from '../core/widget'
 
 
 export default {

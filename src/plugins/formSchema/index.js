@@ -17,14 +17,10 @@ for(var name in ExtraComponents) {
 }
 
 
-export default {
-  install ({ EThingUI, Vue }) {
-
-    EThingUI.form = core
+export default ({ Vue }) => {
 
     Vue.component('FormSchema', FormSchema)
 
     Vue.config.optionMergeStrategies.validations = Vue.config.optionMergeStrategies.data
 
-  }
 }

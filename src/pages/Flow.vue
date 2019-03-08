@@ -120,7 +120,7 @@ import FlowRecursiveMenuNode from '../components/FlowRecursiveMenuNode'
 import FlowNode from '../components/FlowNode'
 import FlowNodes from '../components/FlowNodes'
 
-import EThingUI from '../plugins/ething-ui'
+import EThingUI from '../core'
 import EThing from 'ething-js'
 
 import ResourceSelect from '../components/ResourceSelect'
