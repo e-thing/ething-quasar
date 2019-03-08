@@ -6,7 +6,7 @@
       <div class="q-title q-title-opacity q-mb-md">Installed</div>
 
       <div v-if="installedPlugins.length > 0">
-        <q-card class="q-ma-sm" color="secondary" v-for="plugin in installedPlugins" :key="plugin.name">
+        <q-card class="q-my-sm" color="secondary" v-for="plugin in installedPlugins" :key="plugin.name">
           <q-card-title>
             {{ plugin.name }}
             <span v-if="plugin.package.version" slot="subtitle">version: {{ plugin.package.version }}</span>
@@ -26,7 +26,7 @@
     <div v-if="localPlugins.length > 0" class="page-block page-block-padding">
       <div class="q-title q-title-opacity q-mb-md">Local</div>
 
-      <q-card class="q-ma-sm" color="secondary" v-for="plugin in localPlugins" :key="plugin.name">
+      <q-card class="q-my-sm" color="secondary" v-for="plugin in localPlugins" :key="plugin.name">
         <q-card-title>
           {{ plugin.name }}
           <span v-if="plugin.version" slot="subtitle">version: {{ plugin.version }}</span>
