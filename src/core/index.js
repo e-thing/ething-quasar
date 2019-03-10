@@ -13,6 +13,7 @@ import widget from './widget.js'
 import event from './event.js'
 import settings from './settings.js'
 import storage from './storage.js'
+import component from './component.js'
 
 
 // necessary for older browsers
@@ -91,7 +92,8 @@ EThingUI.install = ({ app, router, Vue, store }) => {
     widget,
     event,
     settings,
-    storage
+    storage,
+    component,
   ]
 
   pp.forEach(p => {
