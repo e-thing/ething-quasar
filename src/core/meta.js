@@ -6,6 +6,106 @@ import * as formSchemaCore from '../plugins/formSchema/core'
 import { extend } from 'quasar'
 import { linearize } from 'c3-linearization'
 import {injectScript} from '../utils'
+import * from './merging'
+
+
+// list all information about a registered class (Resources, flow nodes, signals, ...).
+// some of these attributes are read only, others can be customized.
+var defaults = {
+  /**
+  * COMMON
+  **/
+
+  // the color associated to this class
+  color: 'grey',
+  // the icon representing the class
+  icon: 'mdi-help',
+  // the name of the class. Default to the class name in human readable format (eg: FooBar => Foo Bar, Foo_Bar => Foo Bar)
+  title: '',
+  // description of the class
+  description: '',
+  // list of required properties
+  required: [],
+  // json schema of the properties
+  properties: {},
+  // READ-ONLY: is this class is abstract  ?
+  virtual: false,
+  // a function(function) => {} that returns some specific definition attributes according to the instance
+  /*
+  {
+    color: 'green',
+    dynamic (resource) {
+      if (resource.size==0) {
+        return {
+          color: 'red'
+        }
+      }
+    }
+  }
+  */
+  dynamic: null,
+
+  /**
+  * SPECIFIC
+  **/
+  // [string] only for devices and flow nodes. The category (eg: 'foo.bar': foo is the category, bar is the subcategory ).
+  category: '',
+
+  /**
+  * RESOURCE
+  **/
+  // READ-ONLY: list the signals this resource can emit
+  signals: [],
+  // a map of resource widgets
+  widgets: {},
+  // set to true, if you don't want to allow the user to create a new resource through the interface.
+  disableCreation: false,
+  // a function(resource, actionName) => <Vue route> that is called when the user try to open this resource.
+  open: null,
+
+  /**
+  * DEVICE
+  **/
+  // READ-ONLY: list the available methods
+  methods: {},
+  // device only: a function(resource) => {} that return some device infomation to show on the devices page
+  /*
+  {
+    data (resource) {
+      return {
+        'temperature': resource.attr('temperature') + '°C'
+      }
+    },
+  }
+  */
+  data: null,
+  // a map of resource components (these componants are displayed on the device page)
+  // a component can either be a Vue component or a widget id (key from the widgets map).
+  // if you need to pass some options/attributes to a component, wrap it into an object: {component: ..., options: {...}}
+  components: {},
+
+}
+
+
+var mergeStrategies = {
+  required: arrayUniqueMerge,
+  properties: mapMerge,
+  virtual: noMerge,
+  dynamic: functionMerge,
+
+  signals: arrayUniqueMerge,
+  widgets: mapMerge,
+  disableCreation: noMerge,
+
+  methods: mapMerge,
+  data: functionMerge,
+  components: mapMerge,
+
+  // remove from merging:
+  _mro: false,
+  _bases: false,
+  _type: false,
+}
 
 
 function getFromPath (obj, path, delimiter, createIfNotFound) {
@@ -107,186 +207,25 @@ function compile(mro, definitions) {
   var compiled = {}
   if (!mro) return compiled
   var mro_ = mro.slice().reverse()
-  var last = mro_.pop()
 
   mro_.forEach( path => {
-    mergeClass(compiled, getFromPath(definitions, path))
+    mergeClass(compiled, getFromPath(definitions, path) || {})
   })
 
-  // do not inherit the following
-  delete compiled.virtual
-  delete compiled.mainComponent
-  delete compiled.mainComponentAttributes
-  delete compiled._mro
-  delete compiled._bases
+  compiled._dep = mro
 
-  mergeClass(compiled, getFromPath(definitions, last))
   return compiled
 }
 
-function mergeFunction (a, b) {
-  // concat the data function into an array
-  var aDataFn = a
-  var bDataFn = b
-  var mergedDataFn = []
-  if (aDataFn) {
-    if (Array.isArray(aDataFn)) {
-      mergedDataFn = mergedDataFn.concat(aDataFn)
-    } else {
-      mergedDataFn.push(aDataFn)
-    }
-  }
-  if (bDataFn) {
-    if (Array.isArray(bDataFn)) {
-      mergedDataFn = mergedDataFn.concat(bDataFn)
-    } else {
-      mergedDataFn.push(bDataFn)
-    }
-  }
-  return mergedDataFn
-}
-
-function mergeClass(a, b) {
-
-  if (!b) return a
-
-  // empty Object
-  if (Object.keys(b).length === 0 && b.constructor === Object) return a
-
-  var aPropKeys = Object.keys(a.properties || {})
-  var bPropKeys = Object.keys(b.properties || {})
-  var mergedPropKeys = bPropKeys
-  aPropKeys.forEach(k => {
-    if (mergedPropKeys.indexOf(k) === -1) {
-      mergedPropKeys.push(k)
-    }
-  })
-
-  // append required of b in a
-  var mergedRequired = [].concat(a.required || []);
-  (b.required || []).forEach(p => {
-    if (mergedRequired.indexOf(p) === -1) {
-      mergedRequired.push(p)
-    }
-  })
-
-  // append signals of b in a
-  var mergedSignals = [].concat(a.signals || []);
-  (b.signals || []).forEach(p => {
-    if (mergedSignals.indexOf(p) === -1) {
-      mergedSignals.push(p)
-    }
-  })
-
-  var mergedDataFn = mergeFunction(a.data, b.data)
-  var mergedDynamicFn = mergeFunction(a.dynamic, b.dynamic)
-
-  var merged = extend(true, a, b)
-
-  // reorder properties and remove any invalid anyOf :
-  var orderedProperties = {}
-  mergedPropKeys.forEach(k => {
-    if(k in merged.properties) {
-      var prop = merged.properties[k]
-      if (prop.anyOf && prop.type) {
-        delete prop['anyOf']
-      }
-      orderedProperties[k] = prop
-    }
-  })
-  merged.properties = orderedProperties
-
-  merged.required = mergedRequired
-
-  merged.signals = mergedSignals
-
-  merged.data = mergedDataFn
-
-  merged.dynamic = mergedDynamicFn
-
-  return merged
+function mergeclass (parent, child) {
+  return merge(parent, child, mergeStrategies, defaultMerge)
 }
 
 function normalize (obj) {
 
   if (obj['type'] === 'class') {
 
-    // list all information about a registered class (Resources, flow nodes, signals, ...).
-    // some of these attributes are read only, others can be customized.
-    obj = extend(true, {
-      /**
-      * COMMON
-      **/
-
-      // the color associated to this class
-      color: 'grey',
-      // the icon representing the class
-      icon: 'mdi-help',
-      // the name of the class. Default to the class name in human readable format (eg: FooBar => Foo Bar, Foo_Bar => Foo Bar)
-      title: '',
-      // description of the class
-      description: '',
-      // list of required properties
-      required: [],
-      // json schema of the properties
-      properties: {},
-      // READ-ONLY: is this class is abstract  ?
-      virtual: false,
-      // a function(function) => {} that returns some specific definition attributes according to the instance
-      /*
-      {
-        color: 'green',
-        dynamic (resource) {
-          if (resource.size==0) {
-            return {
-              color: 'red'
-            }
-          }
-        }
-      }
-      */
-      dynamic: null,
-
-      /**
-      * SPECIFIC
-      **/
-      // [string] only for devices and flow nodes. The category (eg: 'foo.bar': foo is the category, bar is the subcategory ).
-      category: '',
-
-      /**
-      * RESOURCE
-      **/
-      // READ-ONLY: list the signals this resource can emit
-      signals: [],
-      // a map of widget binded to this resource
-      widgets: {},
-      // set to true, if you don't want to allow the user to create a new resource through the interface.
-      disableCreation: false,
-      // a function(actionName) => <Vue route> that is called when the user try to open this resource.
-      open: null,
-
-      /**
-      * DEVICE
-      **/
-      // READ-ONLY: list the available methods
-      methods: {},
-      // device only: a function(resource) => {} that return some device infomation to show on the devices page
-      /*
-      {
-        data (resource) {
-          return {
-            'temperature': resource.attr('temperature') + '°C'
-          }
-        },
-      }
-      */
-      data: null,
-      // a Vue component or a widget id (key from the widgets map). This componant is displayed on the device page.
-      mainComponent: null,
-      // options to pass to the main componant
-      mainComponentAttributes: null,
-
-    }, obj)
+    obj = extend(true, {}, defaults, obj)
 
     for (let k in obj.properties) {
       let p = obj.properties[k]
@@ -296,19 +235,6 @@ function normalize (obj) {
       if (!p.getFormatted) {
         p.getFormatted = p.get
       }
-    }
-
-    var rawData = obj.data
-    obj.data = function (resource) {
-      var compiled = {}
-      if (rawData) {
-        var arrayFn = typeof rawData === 'function' ? [rawData] : rawData
-        rawData.forEach(dataFn => {
-          var res = dataFn.call(this, resource)
-          if (res) Object.assign(compiled, res)
-        })
-      }
-      return compiled
     }
 
     if (typeof obj.open !== 'function') {
@@ -339,6 +265,8 @@ function bind (m, resource) {
     return originalOpenFn.call(this, resource, more)
   }
 
+  m._resource = resource
+
   return m
 }
 
@@ -346,7 +274,7 @@ var cached_meta_types = {}
 
 
 function get (definitions, type) {
-  var resource = null, id = null, deps = [], m = {};
+  var resource = null, id = null, m = {};
 
   if (type instanceof EThing.Resource) {
     resource = type
@@ -373,8 +301,7 @@ function get (definitions, type) {
 
   // compile
   if (resource) {
-    deps = resource.attr('extends')
-    m = compile(deps, definitions)
+    m = compile(resource.attr('extends'), definitions)
 
     // dynamic
     if (m.dynamic) {
@@ -387,17 +314,10 @@ function get (definitions, type) {
       })
     }
 
-    delete m._mro
-    delete m._type
-    m._resource = id
-
   } else {
     m = getFromPath(definitions, type) || {}
-    deps = m._mro || []
-    m = compile(deps, definitions)
+    m = compile(m._mro || [], definitions)
   }
-
-  m._dep = deps
 
   // normalize
   m = normalize(m)
@@ -503,6 +423,8 @@ function normType (something) {
     return something.type()
   } else if(typeof something === 'object' && something!== null && something._type) {
     return something._type
+  } else if(typeof something === 'object' && something!== null && something._resource) {
+    return something._resource.type()
   } else {
     throw Error('invalid type: "'+something+'"')
   }
@@ -609,5 +531,11 @@ export default {
       },
 
     })
+
+    // access the metadata from the resource instance.
+    EThing.Resource.prototype.meta = function () {
+      return EThingUI.get(this)
+    }
+    
   }
 }
