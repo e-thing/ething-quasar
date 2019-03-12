@@ -1,5 +1,5 @@
-import {isPlainObject} from '../utils'
 import { extend } from 'quasar'
+import {isPlainObject, isDefined, isEmptyObject, isVueComponent} from '.'
 
 
 export function merge(parent, child, strategies, defaultStrategy, extra) {
@@ -96,25 +96,12 @@ export function arrayMerge (parent, child, extra, unique) {
 
 export var arrayUniqueMerge = (p, c, e) => arrayMerge(p, c, e, true)
 
-function isDefined (obj) {
-  return typeof obj !== 'undefined'
-}
-
-function isEmptyObject (obj) {
-  return isPlainObject(obj) && Object.keys(obj).length==0
-}
 
 export function vueComponentMerge (parent, child, extra) {
   if (!parent) return child
   if (!child || isEmptyObject(child)) return parent
 
-  if (
-    isDefined(child.mixins) ||
-    isDefined(child.extends) ||
-    isDefined(child.el) ||
-    isDefined(child.render) ||
-    isDefined(child.template)
-  ) {
+  if (isVueComponent(child)) {
     return child
   }
 

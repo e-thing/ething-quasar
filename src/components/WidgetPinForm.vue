@@ -6,7 +6,7 @@
         <q-option-group
           color="secondary"
           type="radio"
-          v-model="selectedWidgetIndex"
+          v-model="selectedWidgetId"
           :options="widgetNames"
         />
       </div>
@@ -31,7 +31,7 @@ export default {
   data () {
 
     return {
-      selectedWidgetIndex: null,
+      selectedWidgetId: null,
       optionsError: false,
       options: {}
     }
@@ -56,8 +56,8 @@ export default {
     },
 
     selectedWidget () {
-      if (this.selectedWidgetIndex !== null) {
-        return this.$ethingUI.widgets[this.selectedWidgetIndex]
+      if (this.selectedWidgetId !== null) {
+        return this.$ethingUI.widgets[this.selectedWidgetId]
       }
     },
 
@@ -76,7 +76,7 @@ export default {
     done () {
       if (this.selectedWidget) {
         this.$emit('done', {
-          widgetType: this.selectedWidget.name,
+          widgetType: this.selectedWidgetId,
           options: this.options
         })
 

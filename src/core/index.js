@@ -38,6 +38,22 @@ EThingUI.kioskMode = process.env.KIOSK || getParameterByName('kiosk') === '1'
 EThingUI.virtualKeyboardEnabled = process.env.VIRTUALKEYBOARD || getParameterByName('virtualkeyboard') === '1'
 
 
+function registerComponents (Vue, components) {
+  // register the components globally
+  Object.keys(components).forEach(key => {
+    const c = components[key]
+    if (utils.isVueComponent(c)) {
+      if (c.name !== undefined) {
+        Vue.component(c.name, c)
+      }
+    }
+    else if (utils.isPlainObject(c)) {
+      // sub module
+      registerComponents (Vue, c)
+    }
+  })
+}
+
 
 EThingUI.install = ({ app, router, Vue, store }) => {
 
@@ -136,12 +152,7 @@ EThingUI.install = ({ app, router, Vue, store }) => {
 
 
   // register the components globally
-  components && Object.keys(components).forEach(key => {
-    const c = components[key]
-    if (c.name !== undefined) {
-      Vue.component(c.name, c)
-    }
-  })
+  components && registerComponents(Vue, components)
 
 
   Object.assign(EThingUI, {

@@ -137,3 +137,21 @@ export function saveAs (data, filename) {
 
   return FileSaver.saveAs(data, filename || 'data')
 }
+
+export function isDefined (obj) {
+  return typeof obj !== 'undefined'
+}
+
+export function isEmptyObject (obj) {
+  return isPlainObject(obj) && Object.keys(obj).length==0
+}
+
+export function isVueComponent (obj) {
+  return isDefined(obj.mixins) ||
+    isDefined(obj.extends) ||
+    isDefined(obj.el) ||
+    isDefined(obj.render) ||
+    isDefined(obj.template) ||
+    isDefined(obj.beforeCreate) ||
+    isDefined(obj.beforeDestroy)
+}

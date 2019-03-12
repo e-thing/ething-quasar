@@ -39,7 +39,7 @@ export var dashboardWidgetSchemaDefaults = {
 }
 
 // find a widget by its name
-export function findWidget (name) {
+export function findWidget (id) {
   if (widgets.hasOwnProperty(id)) {
     return widgets[id]
   }

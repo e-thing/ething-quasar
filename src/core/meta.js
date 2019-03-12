@@ -143,7 +143,6 @@ var mergeStrategies = {
       return merged
     })
   },
-  disableCreation: noMerge,
 
   methods: mapMerge,
   data: mapMerge,
@@ -259,10 +258,10 @@ function reshape(node) {
         // the name of a component globally registered
         var component = Vue.component(widget.component)
         if (component) {
-          node.widget[id] = component
+          node.widgets[id] = component
         } else {
           console.error('unknown component ' + widget.component)
-          node.widget[id] = {}
+          node.widgets[id] = {}
         }
       }
       if (typeof widget.in === 'string') {
