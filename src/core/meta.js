@@ -1,12 +1,14 @@
 /*
-this module is responsible of downloading metadata from the ething server.
+this module is responsible of downloading definitions from the ething server.
 */
 import EThing from 'ething-js'
+import Vue from 'vue'
 import * as formSchemaCore from '../plugins/formSchema/core'
 import { extend } from 'quasar'
 import { linearize } from 'c3-linearization'
-import {injectScript} from '../utils'
-import * from './merging'
+import {widgetDefaults} from './widget'
+import {merge,defaultMerge,arrayUniqueMerge,noMerge,mapMerge,vueComponentMerge} from '../utils/merging'
+import localDefinitions from '../definitions'
 
 
 // list all information about a registered class (Resources, flow nodes, signals, ...).
@@ -24,7 +26,7 @@ var defaults = {
   title: '',
   // description of the class
   description: '',
-  // list of required properties
+  // READ-ONLY: list of required properties
   required: [],
   // json schema of the properties
   properties: {},
@@ -57,6 +59,26 @@ var defaults = {
   // READ-ONLY: list the signals this resource can emit
   signals: [],
   // a map of resource widgets
+  // widgets are used to display a resource data/attributes...
+  // widgets are displayed in the dashboard (any resources) and/or in the device page (only for device).
+  /*
+    {
+      in: ['dashboard', 'devicePage'], // where this widget is displayed
+      component: <VueComponent>,
+      icon: '...',
+      attributes: {}, // attributes to pass to the component (may be overwritten by the model generated from the schema)
+      minWidth: 45, // px
+      minHeight: 45, // px
+      zIndex: 0, // specify the order
+
+      // specific to 'devicePage'
+      title: '...',
+
+      // specific to 'dashboard'
+      schema: {},
+
+    }
+  */
   widgets: {},
   // set to true, if you don't want to allow the user to create a new resource through the interface.
   disableCreation: false,
@@ -78,11 +100,13 @@ var defaults = {
     },
   }
   */
-  data: null,
-  // a map of resource components (these componants are displayed on the device page)
-  // a component can either be a Vue component or a widget id (key from the widgets map).
-  // if you need to pass some options/attributes to a component, wrap it into an object: {component: ..., options: {...}}
-  components: {},
+  data: {},
+
+  /**
+  * FLOW NODE
+  **/
+  // the flow node Vue component
+  node: null,
 
 }
 
@@ -91,26 +115,48 @@ var mergeStrategies = {
   required: arrayUniqueMerge,
   properties: mapMerge,
   virtual: noMerge,
-  dynamic: functionMerge,
+  dynamic: false, // remove from merging
 
   signals: arrayUniqueMerge,
-  widgets: mapMerge,
+  widgets (parent, child, node) {
+    return mapMerge (parent, child, node, (p, c, n) => {
+      if (!p) {
+        if (!c.title) {
+          c.title = node.title
+        }
+        if (!c.icon) {
+          c.icon = node.icon
+        }
+        return c
+      }
+      if (!c) return p
+
+      var keys = Object.keys(p).concat(Object.keys(c)).filter((v, i, a) => a.indexOf(v) === i);
+      var merged = {}
+      keys.forEach(k => {
+        if (k==='component') {
+          merged[k] = vueComponentMerge(p[k], c[k])
+        } else {
+          merged[k] = defaultMerge(p[k], c[k])
+        }
+      })
+      return merged
+    })
+  },
   disableCreation: noMerge,
 
   methods: mapMerge,
-  data: functionMerge,
-  components: mapMerge,
+  data: mapMerge,
 
-  // remove from merging:
-  _mro: false,
-  _bases: false,
-  _type: false,
 }
 
 
-function getFromPath (obj, path, delimiter, createIfNotFound) {
+var instanceAttributes = ['widgets', 'data']
 
-  var parts = path.split(delimiter || '/')
+
+function getFromPath (obj, path, createIfNotFound) {
+
+  var parts = path ? path.split('/') : []
   var p = obj
 
   for (var i in parts) {
@@ -121,14 +167,13 @@ function getFromPath (obj, path, delimiter, createIfNotFound) {
           if (createIfNotFound) {
             p[key] = {}
           } else {
-              console.warn('definition of '+path+' not found')
+            throw 'definition of '+path+' not found'
           }
       }
 
       p = p[key]
     } else {
-        console.warn('definition of '+path+' not found')
-      return
+      throw 'definition of '+path+' not found'
     }
   }
 
@@ -167,13 +212,13 @@ function walkThrough (obj, ref, fn, path) {
   return obj
 }
 
-function reshape(node) {
+function resolveAllOf (node) {
   if (typeof node['allOf'] !== 'undefined') {
     var allOf = node['allOf']
 
-    var _bases = []
+    var _bases = node._bases || []
 
-    var reshapedNode = {}
+    var resolvedNode = {}
 
     for (let i in allOf) {
       let dep = allOf[i]
@@ -181,9 +226,9 @@ function reshape(node) {
 
       if (typeof dep['$ref'] === 'string') {
         name = dep['$ref'].substr(2)
-        _bases.push(name)
+        if (_bases.indexOf(name)===-1) _bases.push(name)
       } else {
-        mergeClass(reshapedNode, dep)
+        mergeClass(resolvedNode, dep)
       }
 
     }
@@ -191,83 +236,130 @@ function reshape(node) {
     var copy = extend(true, {}, node)
     delete copy.allOf
 
-    mergeClass(reshapedNode, copy)
+    mergeClass(resolvedNode, copy)
 
-    reshapedNode._bases = _bases
+    resolvedNode._bases = _bases
 
-    return reshapedNode
-  } else {
-    node._bases = node._bases || []
+    if (typeof resolvedNode['type'] === 'undefined') {
+      resolvedNode['type'] = 'class'
+    }
+
+    node = resolvedNode
   }
 
   return node
 }
 
-function compile(mro, definitions) {
+function reshape(node) {
+
+  if (typeof node['widgets'] !== 'undefined') {
+    for (var id in node.widgets) {
+      var widget = node.widgets[id]
+      if (typeof widget.component === 'string') {
+        // the name of a component globally registered
+        var component = Vue.component(widget.component)
+        if (component) {
+          node.widget[id] = component
+        } else {
+          console.error('unknown component ' + widget.component)
+          node.widget[id] = {}
+        }
+      }
+      if (typeof widget.in === 'string') {
+        widget.in = [widget.in]
+      }
+    }
+  }
+
+  return node
+}
+
+function compile(mro, definitions, resource) {
   var compiled = {}
   if (!mro) return compiled
   var mro_ = mro.slice().reverse()
 
   mro_.forEach( path => {
-    mergeClass(compiled, getFromPath(definitions, path) || {})
+
+    var child = getFromPath(definitions, path)
+
+    // deep copy first
+    child = extend(true, {}, child)
+
+    if (resource) {
+
+      if (child.dynamic) {
+        var dyn_m = child.dynamic.call(child, resource)
+        if (dyn_m) {
+          extend(true, child, dyn_m)
+        }
+      }
+
+      instanceAttributes.forEach(attr => {
+        if (typeof child[attr] === 'function') {
+          child[attr] = child[attr].call(child, resource)
+        }
+      })
+    }
+
+    // reshape before merging
+    child = reshape(child)
+
+    // merge
+    mergeClass(compiled, child)
   })
 
+  // remove from compiled:
+  delete compiled._mro
+  delete compiled._bases
+
+  // add some compile info
   compiled._dep = mro
 
   return compiled
 }
 
-function mergeclass (parent, child) {
-  return merge(parent, child, mergeStrategies, defaultMerge)
+function mergeClass (parent, child) {
+  return merge(parent, child, mergeStrategies, defaultMerge, child)
 }
 
-function normalize (obj) {
+function normalize (obj, resource) {
 
-  if (obj['type'] === 'class') {
+  obj = extend(true, {}, defaults, obj)
 
-    obj = extend(true, {}, defaults, obj)
+  for (let k in obj.properties) {
+    let p = obj.properties[k]
+    if (!p.get) {
+      p.get = r => r[k] ? r[k]() : r.attr(k)
+    }
+    if (!p.getFormatted) {
+      p.getFormatted = p.get
+    }
+  }
 
-    for (let k in obj.properties) {
-      let p = obj.properties[k]
-      if (!p.get) {
-        p.get = r => r[k] ? r[k]() : r.attr(k)
-      }
-      if (!p.getFormatted) {
-        p.getFormatted = p.get
-      }
+  if (typeof obj.open !== 'function') {
+    var originalOpen = obj.open
+    obj.open = function () {
+      return originalOpen
+    }
+  }
+
+  for (var id in obj.widgets) {
+    obj.widgets[id] = Object.assign({}, widgetDefaults, obj.widgets[id])
+  }
+
+  delete obj.dynamic
+
+  if (resource) {
+    var originalOpenFn = obj.open
+    obj.open = function (more) {
+      return originalOpenFn.call(this, resource, more)
     }
 
-    if (typeof obj.open !== 'function') {
-      var originalOpen = obj.open
-      obj.open = function () {
-        return originalOpen
-      }
-    }
-
-    delete obj.dynamic
-
+    obj._resource = resource
   }
 
   return obj
-}
-
-function bind (m, resource) {
-  /*
-  bind a metadata object to a resource
-  */
-  var originalDataFn = m.data
-  m.data = function () {
-    return originalDataFn.call(this, resource)
-  }
-
-  var originalOpenFn = m.open
-  m.open = function (more) {
-    return originalOpenFn.call(this, resource, more)
-  }
-
-  m._resource = resource
-
-  return m
 }
 
 var cached_meta_types = {}
@@ -301,29 +393,14 @@ function get (definitions, type) {
 
   // compile
   if (resource) {
-    m = compile(resource.attr('extends'), definitions)
-
-    // dynamic
-    if (m.dynamic) {
-      m = extend(true, {}, m); // deep copy first !
-      (Array.isArray(m.dynamic) ? m.dynamic : [m.dynamic]).forEach(dynamicFn => {
-        var dyn_m = dynamicFn.call(m, resource)
-        if (dyn_m) {
-          mergeClass(m, dyn_m)
-        }
-      })
-    }
-
+    m = compile(resource.attr('extends'), definitions, resource)
   } else {
-    m = getFromPath(definitions, type) || {}
+    m = getFromPath(definitions, type)
     m = compile(m._mro || [], definitions)
   }
 
   // normalize
-  m = normalize(m)
-  if (resource) {
-    m = bind(m, resource)
-  }
+  m = normalize(m, resource)
 
   // store it in cache
   if (resource) {
@@ -336,51 +413,27 @@ function get (definitions, type) {
 }
 
 
-function importMeta (self, meta, done) {
+function importDefinitions (self, definitions) {
 
-  self.scopes = meta.scopes || {}
-  self.info = meta.info || {}
+  var computeMro = false
 
-  // load plugins index.js file
-  var plugins = meta.plugins || {}
-
-  var pluginPromises = []
-  for (let name in plugins) {
-    let plugin = plugins[name]
-    if (plugin.js_index) {
-      pluginPromises.push(new Promise(function(resolve, reject) {
-        injectScript(EThing.config.serverUrl + '/api/plugin/' + name + '/index.js', (error) => {
-            if (error) {
-                console.error('[meta] plugin ' + name + ' fail loading')
-                reject()
-            } else {
-                console.log('[meta] plugin ' + name + ' loaded')
-                resolve()
-            }
-        })
-      }))
+  // resolve
+  walkThrough(definitions, (node, _, stop, path) => {
+    if (typeof node['allOf'] !== 'undefined') {
+      computeMro = true
+      node = resolveAllOf(node)
     }
-  }
+    if (node['type'] === 'class') {
+      node._type = path
+      stop()
+    }
+    return node
+  })
 
-  self.plugins = plugins
-
-  Promise.all(pluginPromises).finally(() => {
-
-    var serverDefinitions = meta.definitions
-
-    // reshape
-    walkThrough(serverDefinitions, (node, _, stop, path) => {
-      if (node['type'] === 'class' || typeof node['allOf'] !== 'undefined') {
-        node = reshape(node)
-        node._type = path
-        stop()
-      }
-      return node
-    })
-
-    // compute MRO
+  // compute MRO
+  if (computeMro) {
     var flat_deps = {}
-    walkThrough(serverDefinitions, (node, _, stop, path) => {
+    walkThrough(definitions, (node, _, stop, path) => {
       if (node['type'] === 'class') {
         flat_deps[path] = node._bases || []
         stop()
@@ -389,28 +442,28 @@ function importMeta (self, meta, done) {
     })
     var mros = linearize(flat_deps, { reverse: true, python: true })
     for (var path in mros) {
-      var node = getFromPath(serverDefinitions, path)
+      var node = getFromPath(definitions, path)
       node._mro = mros[path]
     }
+  }
 
-    // merge with locals
-    walkThrough(serverDefinitions, self.definitions, (node, local, stop, path) => {
-      if (node['type'] === 'class') {
-        node = mergeClass(node, local)
-        stop()
+  // merge with locals
+  walkThrough(definitions, localDefinitions, (node, local, stop, path) => {
+    if (node['type'] === 'class') {
+      var ns = path.split('/')
+      var clsName = ns.pop()
+      ns = ns.join('/')
+
+      var parent = getFromPath(self.definitions, ns, true)
+      parent[clsName] = node
+
+      if (local) {
+        node = self.extend(path, local)
       }
-      return node
-    })
 
-    self.definitions = serverDefinitions
-
-    formSchemaCore.addDefinitionsHandler(ref => {
-      return self.get(ref.replace(/^#\//, ''))
-    })
-
-    if (done)
-      done(self)
-
+      stop()
+    }
+    return node
   })
 
 }
@@ -434,9 +487,6 @@ function normType (something) {
 export default {
   install ({ EThingUI }) {
     Object.assign(EThingUI, {
-
-      // contains some information about the server
-      info: {},
 
       mergeClass,
 
@@ -464,7 +514,12 @@ export default {
       },
 
       isDefined: function (type) {
-        return !!getFromPath(this.definitions, normType(type))
+        try {
+          getFromPath(this.definitions, normType(type))
+          return true
+        } catch(e) {
+          return false
+        }
       },
 
       // returns metadata of any type or resource
@@ -477,14 +532,14 @@ export default {
         base = normType(base)
         if (type === base) return true
         var m = this.get(type)
-        return m && m._mro && m._mro.indexOf(base) !== -1
+        return m && m._dep && m._dep.indexOf(base) !== -1
       },
 
-      // extend the metadata of a given type
+      // extend the definition of a given type
       extend: function (type, definition) {
         type = normType(type)
-        var obj = getFromPath(this.definitions, type, /[\.\/]/, true)
-        mergeClass(obj, definition)
+        var obj = getFromPath(this.definitions, type)
+        extend(true, obj, definition)
         // remove from cache any dependencies
         Object.keys(cached_meta_types).forEach(key => {
           var n = cached_meta_types[key]
@@ -492,41 +547,19 @@ export default {
             delete cached_meta_types[key]
           }
         })
+        return obj
       },
 
-      // store informations about loaded plugins
-      plugins: {},
+      loadMeta () {
+        return EThing.request({
+          url: 'utils/definitions',
+          dataType: 'json',
+        }).then( (meta) => {
 
-      // list the available scopes (used in api key)
-      scopes: {},
+          importDefinitions(this, meta)
 
-      loadMeta (localDefinitions, done) {
-        if (typeof done == 'undefined' && typeof localDefinitions == 'function') {
-          done = localDefinitions
-          localDefinitions = null
-        }
+          console.log('[meta] ething meta loaded !')
 
-        if (localDefinitions) {
-          Object.assign(this.definitions, localDefinitions) // todo: replace by an iterative mergeClass
-        }
-
-        var self = this
-        return new Promise(function(resolve, reject) {
-          EThing.request({
-            url: 'utils/definitions',
-            dataType: 'json',
-          }).then( (meta) => {
-            console.log('[meta] ething meta loaded !')
-            importMeta(self, meta, () => {
-              if (done) {
-                done()
-              }
-
-              resolve()
-            })
-          }).catch(err => {
-            reject(err)
-          })
         })
       },
 
@@ -536,6 +569,6 @@ export default {
     EThing.Resource.prototype.meta = function () {
       return EThingUI.get(this)
     }
-    
+
   }
 }

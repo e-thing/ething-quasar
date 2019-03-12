@@ -11,49 +11,38 @@ export default {
     }
   },
 
-  mainComponent: 'temperature.knob',
-  /*mainComponentAttributes: {
-    noHeader: true,
-    noFooter: true,
-  },*/
-
-
   widgets: {
     'temperature.label': {
-      extends: WDeviceLabel,
-      props: {
-        attr: {
-          default: 'temperature'
-        },
-        unit: {
-          default: '°C'
-        }
+      in: ['dashboard'],
+      component: WDeviceLabel,
+      attributes: {
+        attr: 'temperature',
+        unit: '°C'
       },
-      metadata: {
-        label: 'temperature (label)',
+      schema: {
+        title: 'temperature (label)',
         description: 'show the temperature'
-      }
+      },
+      minWidth: 100,
+      minHeight: 100,
+      title: 'temperature',
+      icon: 'mdi-thermometer'
     },
     'temperature.knob': {
-      extends: WDeviceKnob,
-      props: {
-        attr: {
-          default: 'temperature'
-        },
-        unit: {
-          default: '°C'
-        },
-        min: {
-          default: -20
-        },
-        max: {
-          default: 50
-        }
+      in: ['dashboard', 'devicePage'],
+      component: WDeviceKnob,
+      attributes: {
+        attr: 'temperature',
+        unit: '°C',
+        min: -20,
+        max: 50
       },
-      metadata:{
-        label: 'temperature (knob)',
+      schema:{
+        title: 'temperature (knob)',
         description: 'show the temperature'
-      }
+      },
+      minWidth: 160,
+      minHeight: 180,
     }
   }
 

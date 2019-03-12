@@ -34,11 +34,6 @@ export default {
         FlowNode
     },
 
-    metadata: {
-        label: 'Flow widget',
-        description: 'interact with flow',
-    },
-
     computed: {
 
         parsedFlow () {

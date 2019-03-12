@@ -4,9 +4,9 @@ export default {
   icon: 'lightbulb outline',
 
   widgets: {
-    'switch': {
+    'relay.switch': {
       // inherits Switch
-      metadata: {
+      schema: {
         description: 'toggle the light'
       }
     }

@@ -175,14 +175,5 @@ export default {
       this.update()
     },
 
-    metadata: {
-      label: 'multilabel',
-      minWidth: 100,
-      minHeight: 60
-    }
-
-
-
-
 }
 </script>

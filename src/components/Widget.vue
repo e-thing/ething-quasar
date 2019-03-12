@@ -6,7 +6,7 @@
         </div>
     </div>
     <div class="widget-content-layer" :class="inline ? '' : 'fit'">
-      <component ref="inner" :is="widgetClass" v-bind="widgetOptions" @error="error=$event"/>
+      <component ref="inner" :is="component" v-bind="$attrs" @error="error=$event"/>
     </div>
   </div>
 </template>
@@ -20,9 +20,12 @@ export default {
 
     components: widgets,
 
+    inheritAttrs: false,
+
     props: {
-      widgetClass: {},
-      widgetOptions: {},
+      component: {},
+      minWidth: Number,
+      minHeight: Number,
       inline: Boolean
     },
     data() {
@@ -40,15 +43,14 @@ export default {
           style['background-color'] = widgetInstance.bgColor || '#FFFFFF'
           style['color'] = widgetInstance.color || '#027be3'
 
-          var metadata = this.metadata
-          if (metadata.minWidth) {
-            style.minWidth = metadata.minWidth + 'px'
+          if (this.minWidth) {
+            style.minWidth = this.minWidth + 'px'
             if (this.inline) {
               style.width = style.minWidth
             }
           }
-          if (metadata.minHeight) {
-            style.minHeight = metadata.minHeight + 'px'
+          if (this.minHeight) {
+            style.minHeight = this.minHeight + 'px'
             style.height = this.inline ? style.minHeight : '1px'
           }
         }
@@ -58,21 +60,6 @@ export default {
       hasError () {
         return !!this.error
       },
-      resource () {
-        var resource = null
-        if (this.widgetOptions && this.widgetOptions.resource) {
-          resource = this.$ething.arbo.get(this.widgetOptions.resource)
-        }
-        return resource
-      },
-
-      metadata () {
-        var metadata = this.widgetInstance.constructor.options.metadata
-        if (typeof metadata === 'function') {
-          metadata = metadata.call(this, this.resource)
-        }
-        return metadata
-      }
     },
 
     mounted () {
@@ -109,8 +96,11 @@ export default {
     & > div
       max-width: 100%
 
-  & > .widget-content-layer.fit > *
-    width: 100%
-    height: 100%
+  & > .widget-content-layer
+    position: relative;
+    
+    &.fit > *
+      width: 100%
+      height: 100%
 
 </style>

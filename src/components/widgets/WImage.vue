@@ -7,19 +7,13 @@ import ImageViewer from '../ImageViewer'
 import WResource from './WResource'
 
 export default {
-    name: 'WCamera',
+    name: 'WImage',
 
     components: {
       ImageViewer
     },
 
     mixins: [WResource],
-
-    metadata: {
-      label: 'image',
-      minWidth: 320,
-      minHeight: 280
-    }
 
 }
 </script>

@@ -26,15 +26,7 @@ export default {
 
     props: {
       unit: String,
-    },
-
-    metadata: {
-      label: 'label',
-      minWidth: 100,
-      minHeight: 60
     }
-
-
 
 
 }

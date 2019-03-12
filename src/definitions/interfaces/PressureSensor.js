@@ -10,23 +10,20 @@ export default {
     }
   },
 
-  mainComponent: 'pressure.label',
-
   widgets: {
     'pressure.label': {
-      extends: WDeviceLabel,
-      props: {
-        attr: {
-          default: 'pressure'
-        },
-        unit: {
-          default: 'Pa'
-        }
+      in: ['dashboard', 'devicePage'],
+      component: WDeviceLabel,
+      attributes: {
+        attr: 'pressure',
+        unit: 'Pa'
       },
-      metadata: {
-        label: 'pressure (label)',
-        description: 'show the pressure (in Pa)',
-      }
+      schema: {
+        title: 'pressure (label)',
+        description: 'show the pressure (in Pa)'
+      },
+      minWidth: 100,
+      minHeight: 100
     }
   }
 

@@ -11,44 +11,36 @@ export default {
     }
   },
 
-  mainComponent: 'humidity.knob',
-
   widgets: {
     'humidity.label': {
-      extends: WDeviceLabel,
-      props: {
-        attr: {
-          default: 'humidity'
-        },
-        unit: {
-          default: '%'
-        }
+      in: ['dashboard'],
+      component: WDeviceLabel,
+      attributes: {
+        attr: 'humidity',
+        unit: '%'
       },
-      metadata: {
-        label: 'humidity (label)',
+      schema: {
+        title: 'humidity (label)',
         description: 'show the humidity level (in %)'
-      }
+      },
+      minWidth: 100,
+      minHeight: 100
     },
     'humidity.knob': {
-      extends: WDeviceKnob,
-      props: {
-        attr: {
-          default: 'humidity'
-        },
-        unit: {
-          default: '%'
-        },
-        min: {
-          default: 0
-        },
-        max: {
-          default: 100
-        }
+      in: ['dashboard', 'devicePage'],
+      component: WDeviceKnob,
+      attributes: {
+        attr: 'humidity',
+        unit: '%',
+        min: 0,
+        max: 100
       },
-      metadata: {
-        label: 'humidity (knob)',
+      schema:{
+        title: 'humidity (knob)',
         description: 'show the humidity level (in %)'
-      }
+      },
+      minWidth: 160,
+      minHeight: 180,
     },
   }
 

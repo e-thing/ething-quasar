@@ -7,7 +7,7 @@ import ImageViewer from '../ImageViewer'
 import WResource from './WResource'
 
 export default {
-    name: 'WImage',
+    name: 'WCamera',
 
     components: {
       ImageViewer
@@ -43,22 +43,6 @@ export default {
     },
 
     mixins: [WResource],
-
-    metadata: {
-      label: 'camera',
-      description: 'show the last image',
-      minWidth: 320,
-      minHeight: 280,
-      options: {
-        properties: {
-          refreshInterval: {
-            description: 'set the refresh interval in seconds',
-            type: 'number',
-            default: 30
-          }
-        }
-      }
-    }
 
 }
 </script>

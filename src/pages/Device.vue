@@ -39,12 +39,12 @@
       </div>
 
       <!-- components -->
-      <div class="page-block" v-for="type in $ethingUI.get(resource)._dep" :key="type" v-if="$ethingUI.get(type).mainComponent">
-        <div class="bloc-title">
-          <q-icon :name="$ethingUI.get(type).icon" />
-          <span>{{ $ethingUI.get(type).title }}</span>
+      <div class="page-block" v-for="(widget, id) in widgets" :key="id" v-if="widgets">
+        <div class="bloc-title" v-if="widget.title">
+          <q-icon :name="widget.icon" v-if="widget.icon"/>
+          <span>{{ widget.title }}</span>
         </div>
-        <device-component class="bloc-content" :device="resource" :component="$ethingUI.get(type).mainComponent" :componentAttr="$ethingUI.get(type).mainComponentAttributes"/>
+        <widget class="bloc-content" :resource="resource" :component="widget.component" v-bind="widget.attributes" :minHeight="widget.minHeight" :minWidth="widget.minWidth"/>
       </div>
 
       <!-- attributes -->
@@ -114,7 +114,7 @@
 import DeviceApi from '../components/DeviceApi'
 import ResourceQItem from '../components/ResourceQItem'
 import ResourceBatteryChip from '../components/ResourceBatteryChip'
-import DeviceComponent from '../components/DeviceComponent'
+import Widget from '../components/Widget'
 
 export default {
   name: 'PageDevice',
@@ -123,7 +123,7 @@ export default {
     DeviceApi,
     ResourceQItem,
     ResourceBatteryChip,
-    DeviceComponent
+    Widget
   },
 
   data () {
@@ -205,6 +205,18 @@ export default {
       }
 
       return createdBys.reverse()
+    },
+
+    widgets () {
+      var w = {}
+      var widgets = this.$ethingUI.get(this.resource).widgets
+      for(var id in widgets) {
+        var widget = widgets[id]
+        if (widget.in.indexOf('devicePage') !== -1) {
+          w[id] = widget
+        }
+      }
+      return w || null
     }
 
   },

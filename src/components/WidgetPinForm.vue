@@ -11,41 +11,17 @@
         />
       </div>
 
-      <div v-if="selectedWidgetMetaOptions" class="q-my-md">
+      <div v-if="selectedWidgetOptions" class="q-my-md">
         <div class="q-title q-my-md">Options</div>
-        <form-schema :schema="selectedWidgetMetaOptions" v-model="options" @error="optionsError = $event"/>
+        <form-schema :schema="selectedWidgetOptions" v-model="options" @error="optionsError = $event"/>
       </div>
 
   </modal>
 </template>
 
 <script>
-
-import Vue from 'vue'
-
-
-function list_mixins (widget) {
-  var mixins = [widget.name]
-  if (widget.mixins) {
-    for (var i in widget.mixins) {
-      mixins = mixins.concat(list_mixins(widget.mixins[i]))
-    }
-  }
-  if (widget.extends) {
-    mixins.push(widget.extends.name)
-  }
-  return mixins.filter((value, index, self) => { // uniq
-      return self.indexOf(value) === index;
-  })
-}
-
-function filter_no_resource_widget_only (widgets) {
-  return Object.keys(widgets).map(k => widgets[k]).filter(w => {
-    var mixins = list_mixins(w)
-    return w.name !== 'WWidget' && mixins.indexOf('WWidget') !== -1 && mixins.indexOf('WResource') === -1
-  })
-}
-
+import {extend as extendSchema} from '../utils/schema'
+import {dashboardWidgetSchemaDefaults} from '../core/widget'
 
 export default {
   name: 'WidgetPinForm',
@@ -54,18 +30,8 @@ export default {
 
   data () {
 
-    var widgets = filter_no_resource_widget_only(this.$ethingUI.widgets).map(w => {
-      var component = Vue.extend(w)
-      var metadata = component.options.metadata
-      return {
-        name: w.name,
-        'metadata': typeof metadata === 'function' ? metadata.call(this, this.resource) : metadata
-      }
-    })
-
     return {
       selectedWidgetIndex: null,
-      widgets,
       optionsError: false,
       options: {}
     }
@@ -74,34 +40,30 @@ export default {
   computed: {
 
     widgetNames () {
-      return this.widgets.map((w, index) => {
-        var label = w.metadata.label
-        if (w.metadata.description) {
-          label += ' ('+w.metadata.description+')'
+      var n = []
+      for (var id in this.$ethingUI.widgets) {
+        var w = this.$ethingUI.widgets[id]
+        var label = w.schema.title || w.schema.label
+        if (w.schema.description) {
+          label += ' ('+w.schema.description+')'
         }
-        return {
+        n.push({
           label,
-          value: index
-        }
-      })
+          value: id
+        })
+      }
+      return n
     },
 
     selectedWidget () {
       if (this.selectedWidgetIndex !== null) {
-        return this.widgets[this.selectedWidgetIndex]
+        return this.$ethingUI.widgets[this.selectedWidgetIndex]
       }
     },
 
-    selectedWidgetMeta () {
-      return this.selectedWidget ? this.selectedWidget.meta : {}
-    },
-
-    selectedWidgetMetaOptions () {
+    selectedWidgetOptions () {
       if (this.selectedWidget) {
-        var metadata = this.selectedWidget.metadata
-        if (metadata.options && metadata.options.properties && Object.keys(metadata.options.properties).length>0) {
-          return Object.assign({ type: 'object' }, metadata.options)
-        }
+        return extendSchema({}, dashboardWidgetSchemaDefaults, this.selectedWidget.schema)
       }
     }
 

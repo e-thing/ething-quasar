@@ -26,12 +26,5 @@ export default {
       }
     },
 
-    metadata: {
-      label: 'WGenericSensor',
-      minWidth: 50,
-      minHeight: 50
-    }
-
-
 }
 </script>

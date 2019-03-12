@@ -33,13 +33,6 @@ export default {
       }
     },
 
-    metadata: {
-      label: 'switch',
-      minWidth: 60,
-      minHeight: 60
-    }
-
-
 }
 </script>
 

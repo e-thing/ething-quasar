@@ -11,44 +11,36 @@ export default {
     }
   },
 
-  mainComponent: 'moisture.label',
-
   widgets: {
     'moisture.label': {
-      extends: WDeviceLabel,
-      props: {
-        attr: {
-          default: 'moisture'
-        },
-        unit: {
-          default: '%'
-        }
+      in: ['dashboard'],
+      component: WDeviceLabel,
+      attributes: {
+        attr: 'moisture',
+        unit: '%'
       },
-      metadata: {
-        label: 'moisture (label)',
+      schema: {
+        title: 'moisture (label)',
         description: 'show the moisture level (in %)',
-      }
+      },
+      minWidth: 100,
+      minHeight: 100
     },
     'moisture.knob': {
-      extends: WDeviceKnob,
-      props: {
-        attr: {
-          default: 'moisture'
-        },
-        unit: {
-          default: '%'
-        },
-        min: {
-          default: 0
-        },
-        max: {
-          default: 100
-        }
+      in: ['dashboard', 'devicePage'],
+      component: WDeviceKnob,
+      attributes: {
+        attr: 'moisture',
+        unit: '%',
+        min: 0,
+        max: 100
       },
-      metadata: {
-        label: 'moisture (knob)',
+      schema:{
+        title: 'moisture (knob)',
         description: 'show the moisture level (in %)',
-      }
+      },
+      minWidth: 160,
+      minHeight: 180
     },
   }
 

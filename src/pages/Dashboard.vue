@@ -36,7 +36,10 @@
               <q-btn flat icon="delete" color="negative" @click="removeItem(layoutItem)"/>
             </q-btn-group>
           </div>
-          <widget :ref="'widget_' + layoutItem.i" :key="layoutItem.key" class="absolute fit" :widgetClass="layoutItem.component" :widgetOptions="layoutItem.item.options" />
+          <widget :ref="'widget_' + layoutItem.i" :key="layoutItem.key" class="absolute fit"
+            :component="layoutItem.widget.component"
+            :min-height="layoutItem.widget.minHeight"
+            v-bind="extend(layoutItem.widget.attributes, layoutItem.item.options)" />
         </div>
       </div>
       <grid-layout v-else
@@ -45,7 +48,6 @@
         :row-height="grid.rowHeight"
         :is-draggable="draggable"
         :is-resizable="resizable"
-        :is-mirrored="true"
         :vertical-compact="true"
         :margin="[grid.margin, grid.margin]"
         :use-css-transforms="true"
@@ -73,7 +75,9 @@
                   This widget needs to be resized
                 </div>
               </div>
-              <widget :ref="'widget_' + layoutItem.i" :key="layoutItem.key" class="absolute fit" :widgetClass="layoutItem.component" :widgetOptions="layoutItem.item.options" />
+              <widget :ref="'widget_' + layoutItem.i" :key="layoutItem.key" class="absolute fit"
+                :component="layoutItem.widget.component"
+                v-bind="extend(layoutItem.widget.attributes, layoutItem.item.options)" />
           </grid-item>
       </grid-layout>
     </div>
@@ -101,6 +105,7 @@ import Widget from '../components/Widget'
 import { debounce, extend } from 'quasar'
 import ResourcePinForm from '../components/ResourcePinForm'
 import WidgetPinForm from '../components/WidgetPinForm'
+import {dashboardWidgetSchemaDefaults} from '../core/widget'
 
 
 var GridLayout = VueGridLayout.GridLayout
@@ -166,6 +171,10 @@ export default {
   },
 
   methods: {
+
+    extend (parent, child) {
+      return extend(true, {}, parent || {}, child || {})
+    },
 
     getLayoutItem (index) {
       for (var i in this.layout) {
@@ -264,48 +273,32 @@ export default {
 
     normalizeLayoutItem (item) {
       try {
-        var widgetClass = null;
-        var resource = null
+        var widget = null;
 
         if (typeof item.widgetId !== 'undefined') {
-          resource = this.$ething.arbo.get(item.options.resource)
+          var resource = this.$ething.arbo.get(item.options.resource)
           var resourceMeta = this.$ethingUI.get(resource)
-          widgetClass = resourceMeta.widgets[item.widgetId]
-          if (!widgetClass) {
+          widget = resourceMeta.widgets[item.widgetId]
+          if (!widget) {
             console.error('[dashboard] widget "' + item.widgetId + '" not found for the resource ' + resource.id())
             return
           }
-          if (typeof widgetClass === 'string') {
-            var widgetClassName = widgetClass
-            widgetClass = this.$ethingUI.findWidget(widgetClassName)
-            if (!widgetClass) {
-              console.error('[dashboard] unknown widget type: ' + widgetClassName)
-              return
-            }
-          }
         } else {
-          widgetClass = this.$ethingUI.findWidget(item.widgetType)
-          if (!widgetClass) {
+          widget = this.$ethingUI.findWidget(item.widgetType)
+          if (!widget) {
             console.error('[dashboard] unknown widget type: ' + item.widgetType)
             return
           }
         }
 
-        var component = Vue.extend(widgetClass)
-
-        var metadata = component.options.metadata
-        if (typeof metadata === 'function') {
-          metadata = metadata.call(this, resource)
-        }
-
         var minWidth = 1
         var minHeight = 1
-        if (metadata.minWidth) {
+        if (widget.minWidth) {
           var widthUnit = Math.floor(this.grid.minWidth / this.grid.columnNb)
-          minWidth = Math.max(Math.min(Math.round(metadata.minWidth / widthUnit), this.grid.columnNb), 1)
+          minWidth = Math.max(Math.min(Math.round(widget.minWidth / widthUnit), this.grid.columnNb), 1)
         }
-        if (metadata.minHeight) {
-          minHeight = Math.max(Math.round(metadata.minHeight / this.grid.rowHeight), 1)
+        if (widget.minHeight) {
+          minHeight = Math.max(Math.round(widget.minHeight / this.grid.rowHeight), 1)
         }
 
         if (!item.w || item.w<minWidth) item.w = minWidth
@@ -318,10 +311,8 @@ export default {
         var layoutItem = {
           key: 0,
           hasContentOverflow: false,
-          component: component,
-          cls: widgetClass,
+          widget,
           item: item,
-          metadata,
           x: item.x,
           y: item.y,
           w: item.w,
@@ -368,11 +359,11 @@ export default {
     },
 
     isEditable (layoutItem) {
-      return Object.keys(layoutItem.metadata.options || {}).length>0
+      return true
     },
 
     editItem (layoutItem) {
-      var schema = Object.assign({type: 'object'}, layoutItem.metadata.options)
+      var schema = Object.assign({}, dashboardWidgetSchemaDefaults, layoutItem.widget.schema)
 
       this.widgetEdit.layoutItem = layoutItem
       this.widgetEdit.schema = schema

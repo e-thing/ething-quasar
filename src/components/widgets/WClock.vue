@@ -13,6 +13,7 @@
 
 <script>
 import WWidget from './WWidget'
+import {registerWidget} from '../../core/widget'
 
 const weekdays = [
     'Sunday', 'Monday', 'Tuesday', 'Wednesday',
@@ -25,7 +26,7 @@ function pad(n, width, z) {
   return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
 }
 
-export default {
+var component = {
     name: 'WClock',
 
     mixins: [WWidget],
@@ -67,11 +68,17 @@ export default {
       }
     },
 
-    metadata: {
-      label: 'clock'
-    }
-
 }
+
+registerWidget('clock', {
+  component,
+  schema: {
+    title: 'clock',
+    description: 'Display the time'
+  }
+})
+
+export default component
 </script>
 
 <style scoped>

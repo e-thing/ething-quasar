@@ -94,9 +94,9 @@
         />
       </div>
 
-      <div v-if="widgetMetaOptions" class="q-my-md">
+      <div v-if="widgetOptions" class="q-my-md">
         <div class="q-title q-my-md">Options</div>
-        <form-schema :key="widgetId" :schema="widgetMetaOptions" v-model="options" @error="optionsError = $event"/>
+        <form-schema :key="widgetId" :schema="widgetOptions" v-model="options" @error="optionsError = $event"/>
       </div>
 
     </div>
@@ -107,7 +107,8 @@
 <script>
 
 import Vue from 'vue'
-
+import {extend as extendSchema} from '../utils/schema'
+import {dashboardWidgetSchemaDefaults} from '../core/widget'
 
 export default {
   name: 'ResourcePinForm',
@@ -149,17 +150,8 @@ export default {
       var widgetsMap = {}
       Object.keys(widgets).map(k => {
         var widget = widgets[k]
-        if (typeof widget === 'string') {
-          var widgetClsName = widget
-          widget = this.$ethingUI.findWidget(widgetClsName)
-          if (!widget) throw 'unknown widget type: ' + widgetClsName
-        }
-        var component = Vue.extend(widget)
-        var metadata = component.options.metadata
-        widgetsMap[k] = {
-          component,
-          'metadata': typeof metadata === 'function' ? metadata.call(this, this.resource) : metadata
-        }
+        if (widget.in.indexOf('dashboard') === -1) return
+        widgetsMap[k] = widget
       })
       return widgetsMap
     },
@@ -167,10 +159,10 @@ export default {
     widgetNames () {
       var widgets = this.widgets || {}
       return Object.keys(widgets).map(k => {
-        var metadata = widgets[k].metadata
-        var label = metadata.label
-        if (metadata.description) {
-          label += ' ('+metadata.description+')'
+        var schema = widgets[k].schema
+        var label = schema.title || schema.label
+        if (schema.description) {
+          label += ' ('+schema.description+')'
         }
         return {
           label,
@@ -179,20 +171,8 @@ export default {
       })
     },
 
-    widgetMetaOptions () {
-      var metadata = this.widgets[this.widgetId].metadata
-      if (metadata.options && metadata.options.properties && Object.keys(metadata.options.properties).length>0) {
-        if (metadata.options.properties.resource) {
-          // remove the resource property
-          var copy = extend(true, { type: 'object' }, metadata.options)
-          delete copy.properties['resource']
-          if (Object.keys(copy.properties).length>0) {
-            return copy
-          }
-        } else {
-          return Object.assign({ type: 'object' }, metadata.options)
-        }
-      }
+    widgetOptions () {
+      return extendSchema({}, dashboardWidgetSchemaDefaults, this.widgets[this.widgetId].schema)
     },
 
     resources () {
@@ -213,7 +193,7 @@ export default {
       this.optionsError = false
       this.widgetId = Object.keys(this.widgets)[0] // default
 
-      if (Object.keys(this.widgets).length === 1 && !this.widgetMetaOptions) {
+      if (Object.keys(this.widgets).length === 1 && !this.widgetOptions) {
         this.done()
       }
     },

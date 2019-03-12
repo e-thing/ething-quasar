@@ -10,22 +10,20 @@ export default {
     }
   },
 
-  mainComponent: 'switch',
-
   widgets: {
-    'switch': {
-      extends: WSwitch,
-      props: {
-        attr: {
-          default: 'state',
-        },
-        fn_setter: {
-          default: 'setState',
-        }
+    'relay.switch': {
+      in: ['dashboard', 'devicePage'],
+      component: WSwitch,
+      attributes: {
+        attr: 'state',
+        fn_setter: 'setState'
       },
-      metadata: {
+      schema:{
+        title: 'switch',
         description: 'toggle the device'
-      }
+      },
+      minWidth: 60,
+      minHeight: 60
     }
   }
 

@@ -97,7 +97,7 @@ export default {
     showConnected () {
       return this.resource instanceof this.$ething.Device
     },
-    
+
     showError () {
       return this.resource instanceof this.$ething.Device && this.resource.attr('error')
     },
@@ -131,7 +131,7 @@ export default {
     },
 
     data () {
-      return this.meta.data()
+      return this.meta.data || {}
     }
 
   },

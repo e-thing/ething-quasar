@@ -37,16 +37,7 @@ export default {
         type: Number,
         default: 100
       },
-    },
-
-    metadata: {
-      label: 'knob',
-      minWidth: 160,
-      minHeight: 160
     }
-    
-
-
 
 }
 </script>

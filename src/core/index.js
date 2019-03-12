@@ -1,6 +1,5 @@
 import EThing from 'ething-js'
 import { LocalStorage, Notify } from 'quasar'
-import localDefinitions from '../definitions'
 import qs from 'qs'
 import * as utils from '../utils'
 import * as components from '../components'
@@ -13,7 +12,8 @@ import widget from './widget.js'
 import event from './event.js'
 import settings from './settings.js'
 import storage from './storage.js'
-import component from './component.js'
+import info from './info.js'
+import plugins from './plugins.js'
 
 
 // necessary for older browsers
@@ -93,7 +93,8 @@ EThingUI.install = ({ app, router, Vue, store }) => {
     event,
     settings,
     storage,
-    component,
+    info,
+    plugins
   ]
 
   pp.forEach(p => {
@@ -310,7 +311,9 @@ EThingUI.install = ({ app, router, Vue, store }) => {
       window.quasar = appInstance.$q
       window.Vue = Vue
 
-      var metaDfr = EThingUI.loadMeta(localDefinitions)
+      var infoDfr = EThingUI.loadInfo()
+
+      var metaDfr = EThingUI.loadMeta()
 
       var settingsDfr = EThingUI.loadSettings()
 
@@ -319,7 +322,9 @@ EThingUI.install = ({ app, router, Vue, store }) => {
         //store.commit('ething/update')
       })
 
-      Promise.all([arboDfr, metaDfr, settingsDfr]).then( () => {
+      Promise.all([infoDfr, arboDfr, metaDfr, settingsDfr]).then(() => {
+        return EThingUI.loadPlugins()
+      }).then(() => {
 
         // everything went ok !
         app.data.state = 'ok'

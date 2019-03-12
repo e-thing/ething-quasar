@@ -1,29 +1,57 @@
 // widgets module
 
-import coreWidgets from '../components/widgets'
-
 // global widgets map
 export var widgets = {}
 
-function normalize(widget) {
-  widget.meta = widget.meta || {}
-  return widget
+// defaults
+export var widgetDefaults = {
+  component: null,
+  attributes: {},
+  zIndex: 0,
+  title: '',
+  icon: '',
+  minWidth: 0,
+  minHeight: 0,
+  schema: {
+    type: 'object'
+  },
+  in: ['dashboard']
+}
+
+export var dashboardWidgetSchemaDefaults = {
+  type: 'object',
+  required: ['color', 'bgColor'],
+  properties: {
+    color: {
+      type: 'string',
+      '$component': 'color',
+      description: 'The color of the widget',
+      default: '#027be3'
+    },
+    bgColor: {
+      title: 'background color',
+      type: 'string',
+      '$component': 'color',
+      description: 'The color of the widget\'s background',
+      default: '#ffffff'
+    }
+  }
 }
 
 // find a widget by its name
-function findWidget (name) {
-  if (widgets.hasOwnProperty(name)) {
-    return widgets[name]
+export function findWidget (name) {
+  if (widgets.hasOwnProperty(id)) {
+    return widgets[id]
   }
 }
 
 // register a widget
-function registerWidget (widget) {
-  if (!widget.name) {
-    throw new Error('No name set in the widget definition')
+export function registerWidget (id, widget) {
+  if (!widget.component) {
+    throw new Error('No component attribute set in the widget definition')
   }
-  widgets[widget.name] = normalize(widget)
-  return widgets[widget.name]
+  widgets[id] = Object.assign({}, widgetDefaults, widget)
+  return widgets[id]
 }
 
 // leave the export, even if you don't use it
@@ -35,11 +63,6 @@ export default {
       findWidget,
       registerWidget
     })
-
-    // register core widgets
-    for(var k in coreWidgets) {
-      registerWidget(coreWidgets[k])
-    }
 
   }
 }

@@ -11,44 +11,36 @@ export default {
     }
   },
 
-  mainComponent: 'dimmer.knob',
-
   widgets: {
     'dimmer.label': {
-      extends: WDeviceLabel,
-      props: {
-        attr: {
-          default: 'level'
-        },
-        unit: {
-          default: '%'
-        }
+      in: ['dashboard'],
+      component: WDeviceLabel,
+      attributes: {
+        attr: 'level',
+        unit: '%'
       },
-      metadata: {
-        label: 'level (label)',
+      schema: {
+        title: 'level (label)',
         description: 'show the level'
-      }
+      },
+      minWidth: 100,
+      minHeight: 100
     },
     'dimmer.knob': {
-      extends: WDeviceKnob,
-      props: {
-        attr: {
-          default: 'level'
-        },
-        unit: {
-          default: '%'
-        },
-        min: {
-          default: 0
-        },
-        max: {
-          default: 100
-        }
+      in: ['dashboard', 'devicePage'],
+      component: WDeviceKnob,
+      attributes: {
+        attr: 'level',
+        unit: '%',
+        min: 0,
+        max: 100
       },
-      metadata:{
-        label: 'level (knob)',
+      schema:{
+        title: 'level (knob)',
         description: 'show the level'
-      }
+      },
+      minWidth: 160,
+      minHeight: 180
     }
   }
 

@@ -10,31 +10,28 @@ export default {
     }
   },
 
-  mainComponent: 'state',
-
   widgets: {
-    'state': {
-      extends: WDeviceMultiLabel,
-      props: {
-        items: {
-          default () {
-            return [{
-              attr: 'state',
-              map: [{
-                key: true,
-                value: 'opened'
-              },{
-                key: false,
-                value: 'closed'
-              }]
-            }]
-          }
-        }
+    'door.state': {
+      in: ['dashboard', 'devicePage'],
+      component: WDeviceMultiLabel,
+      attributes: {
+        items: [{
+          attr: 'state',
+          map: [{
+            key: true,
+            value: 'opened'
+          },{
+            key: false,
+            value: 'closed'
+          }]
+        }]
       },
-      metadata: {
-        label: 'state (label)',
-        description: 'show the door state',
-      }
+      schema: {
+        title: 'state (label)',
+        description: 'show the door state'
+      },
+      minWidth: 100,
+      minHeight: 100
     }
   }
 

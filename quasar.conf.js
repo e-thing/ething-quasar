@@ -15,7 +15,8 @@ module.exports = function (ctx) {
       'virtualKeyboard',
       'highlightjs',
       'ething-js',
-      'formSchema'
+      'formSchema',
+      'axios'
     ],
     css: [
       'app.styl'

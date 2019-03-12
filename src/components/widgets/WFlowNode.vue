@@ -23,25 +23,7 @@ export default {
 
     props: ['node'],
 
-    metadata (flow) {
-      return {
-        label: 'Flow node widget',
-        description: 'interact with flow',
-        options: {
-          properties: {
-            node: {
-              description: 'the input/output node to display',
-              type: 'string',
-              '$component': 'ething.flow.node',
-              '$flow': flow,
-              '$filter': function (flow_, node) {
-                return EThingUI.isSubclass(node.type, 'nodes/inputs/Input') || EThingUI.isSubclass(node.type, 'nodes/outputs/Output')
-              }
-            }
-          }
-        }
-      }
-    },
+
 }
 
 </script>

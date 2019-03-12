@@ -10,23 +10,20 @@ export default {
     }
   },
 
-  mainComponent: 'lightLevel.label',
-
   widgets: {
     'lightLevel.label': {
-      extends: WDeviceLabel,
-      props: {
-        attr: {
-          default: 'light_level'
-        },
-        unit: {
-          default: 'Lux'
-        }
+      in: ['dashboard', 'devicePage'],
+      component: WDeviceLabel,
+      attributes: {
+        attr: 'light_level',
+        unit: 'Lux'
       },
-      metadata: {
-        label: 'light level (label)',
-        description: 'show the light level (in Lux)',
-      }
+      schema: {
+        title: 'light level (label)',
+        description: 'show the light level (in Lux)'
+      },
+      minWidth: 100,
+      minHeight: 100
     }
   }
 

@@ -52,12 +52,6 @@ export default {
             this.setError(err)
           })
       }
-    },
-
-    metadata: {
-      label: 'qnob',
-      minWidth: 160,
-      minHeight: 160
     }
 
 

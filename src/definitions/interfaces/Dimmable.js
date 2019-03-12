@@ -10,22 +10,20 @@ export default {
     }
   },
 
-  mainComponent: 'dimmer',
-
   widgets: {
-    'dimmer': {
-      extends: WDimmable,
-      props: {
-        attr: {
-          default: 'level'
-        },
-        fn_setter: {
-          default: 'setLevel'
-        }
+    'dimmable.dimmer': {
+      in: ['dashboard', 'devicePage'],
+      component: WDimmable,
+      attributes: {
+        attr: 'level',
+        fn_setter: 'setLevel'
       },
-      metadata: {
+      schema: {
+        label: 'qnob',
         description: 'adjust the level'
-      }
+      },
+      minWidth: 160,
+      minHeight: 160
     }
   }
 }
