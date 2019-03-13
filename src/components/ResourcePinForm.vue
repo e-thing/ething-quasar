@@ -158,17 +158,25 @@ export default {
 
     widgetNames () {
       var widgets = this.widgets || {}
-      return Object.keys(widgets).map(k => {
+      var options = Object.keys(widgets).map(k => {
         var schema = widgets[k].schema
         var label = schema.title || schema.label
         if (schema.description) {
           label += ' ('+schema.description+')'
         }
         return {
+          zIndex: widgets[k].zIndex,
           label,
           value: k
         }
       })
+
+      // re order by zIndex
+      options.sort(function(a, b) {
+          return b.zIndex - a.zIndex;
+      });
+
+      return options
     },
 
     widgetOptions () {
@@ -191,7 +199,7 @@ export default {
       this.resource = resource
       this.options = {}
       this.optionsError = false
-      this.widgetId = Object.keys(this.widgets)[0] // default
+      this.widgetId = this.widgetNames[0].value // default
 
       if (Object.keys(this.widgets).length === 1 && !this.widgetOptions) {
         this.done()

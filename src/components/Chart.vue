@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div :class="{ expended: expended }">
     <q-resize-observable @resize="onResize" />
 
     <highstock v-if="options" class="chart" :class="{ expended: expended }" :options="options" ref="highcharts"></highstock>
@@ -782,9 +782,13 @@ border-width = 3px
     border-left border-width solid $cyan-5
   padding-left 10px
 
+.expended
+  position:relative;
+  width: 100%;
+  height: 100%;
+
 .chart.expended
-  height 100%
-  width 100%
   position absolute
+
 
 </style>

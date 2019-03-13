@@ -204,7 +204,7 @@ export default {
 
 .thumbnails {
     display: flex;
-    justify-content: space-evenly;
+    justify-content: center;
     flex-direction: row;
     position: absolute;
     bottom: 0;

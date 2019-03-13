@@ -39,27 +39,32 @@
       </div>
 
       <!-- components -->
-      <div class="page-block" v-for="(widget, id) in widgets" :key="id" v-if="widgets">
+      <div class="page-block" v-for="(widget, key) in widgets" :key="key" v-if="widgets">
         <div class="bloc-title" v-if="widget.title">
           <q-icon :name="widget.icon" v-if="widget.icon"/>
           <span>{{ widget.title }}</span>
         </div>
-        <widget class="bloc-content" :resource="resource" :component="widget.component" v-bind="widget.attributes" :minHeight="widget.minHeight" :minWidth="widget.minWidth"/>
+        <div class="bloc-content">
+          <widget :resource="resource" :component="widget.component" v-bind="widget.attributes" :minHeight="widget.minHeight" :minWidth="widget.minWidth"/>
+        </div>
       </div>
 
       <!-- attributes -->
-      <div class="page-block attributes" v-if="attributes.length>0" :class="{detailled: showDetailledAttributes}">
+      <div class="page-block attributes">
         <div class="bloc-title">
           <q-icon name="mdi-format-list-bulleted" />
           <span>Attributes</span>
           <q-btn class="float-right" flat rounded size="small" :label="showDetailledAttributes ? 'less' : 'more'" :icon="showDetailledAttributes ? 'expand_less' : 'expand_more'" style="line-height: initial" @click="showDetailledAttributes = !showDetailledAttributes"/>
         </div>
         <div class="bloc-content">
-          <div class="row">
+          <div class="row" v-if="attributes.length>0">
             <template v-for="attr in attributes">
-              <div class="col-xs-12 col-sm-2 key text-secondary ellipsis" :class="{detailled: attr.detailled}">{{ attr.name }}</div>
-              <div class="col-xs-12 col-sm-10 value ellipsis" :class="{detailled: attr.detailled}">{{ attr.value }}</div>
+              <div class="col-xs-12 col-sm-2 key text-secondary ellipsis">{{ attr.name }}</div>
+              <div class="col-xs-12 col-sm-10 value text-faded ellipsis">{{ attr.value }}</div>
             </template>
+          </div>
+          <div v-else class="text-center text-faded">
+            <small>no attributes</small>
           </div>
         </div>
       </div>
@@ -184,10 +189,13 @@ export default {
         let prop = props[name]
         let value = prop.getFormatted(this.resource)
 
+        if (!this.showDetailledAttributes && detailledFields.indexOf(name) !== -1) continue
+
+        if (value === null || typeof value === 'undefined') value = '-'
+
         attributes.push({
           name,
-          value,
-          detailled: detailledFields.indexOf(name) !== -1
+          value
         })
       }
       return attributes
@@ -208,14 +216,20 @@ export default {
     },
 
     widgets () {
-      var w = {}
+      var w = []
       var widgets = this.$ethingUI.get(this.resource).widgets
       for(var id in widgets) {
         var widget = widgets[id]
         if (widget.in.indexOf('devicePage') !== -1) {
-          w[id] = widget
+          w.push(widget)
         }
       }
+
+      // re order by zIndex
+      w.sort(function(a, b) {
+          return b.zIndex - a.zIndex;
+      });
+
       return w || null
     }
 
