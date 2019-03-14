@@ -10,6 +10,7 @@ import ResourceEditor from './ResourceEditor'
 import ResourceQItem from './ResourceQItem'
 import ResourceSelect from './ResourceSelect'
 import Widget from './Widget'
+import ResourceObservable from './ResourceObservable'
 import widgets from './widgets'
 import FlowNodes from './FlowNodes'
 
@@ -25,5 +26,6 @@ export {
     ResourceEditor,
     ResourceQItem,
     ResourceSelect,
-    Widget
+    Widget,
+    ResourceObservable
 }
