@@ -7,7 +7,7 @@ import * as formSchemaCore from '../plugins/formSchema/core'
 import { extend } from 'quasar'
 import { linearize } from 'c3-linearization'
 import {widgetDefaults} from './widget'
-import {merge,defaultMerge,arrayUniqueMerge,noMerge,mapMerge,vueComponentMerge} from '../utils/merging'
+import {merge,defaultMerge,arrayUniqueMerge,noMerge,mapMerge,functionMerge,vueComponentMerge} from '../utils/merging'
 import localDefinitions from '../definitions'
 
 
@@ -100,7 +100,7 @@ var defaults = {
     },
   }
   */
-  data: {},
+  data (resource) {},
 
   /**
   * FLOW NODE
@@ -145,12 +145,12 @@ var mergeStrategies = {
   },
 
   methods: mapMerge,
-  data: mapMerge,
+  data: functionMerge,
 
 }
 
 
-var instanceAttributes = ['widgets', 'data']
+var instanceAttributes = ['widgets']
 
 
 function getFromPath (obj, path, createIfNotFound) {
@@ -277,6 +277,7 @@ function compile(mro, definitions, resource) {
   var compiled = {}
   if (!mro) return compiled
   var mro_ = mro.slice().reverse()
+  var dynamic = false
 
   mro_.forEach( path => {
 
@@ -288,6 +289,7 @@ function compile(mro, definitions, resource) {
     if (resource) {
 
       if (child.dynamic) {
+        dynamic = true
         var dyn_m = child.dynamic.call(child, resource)
         if (dyn_m) {
           extend(true, child, dyn_m)
@@ -314,7 +316,7 @@ function compile(mro, definitions, resource) {
 
   // add some compile info
   compiled._dep = mro
-  if (resource) {
+  if (resource && dynamic) {
     compiled._cacheEtag = resource.attr('modifiedDate')
   }
 
@@ -356,6 +358,11 @@ function normalize (obj, resource) {
     var originalOpenFn = obj.open
     obj.open = function (more) {
       return originalOpenFn.call(this, resource, more)
+    }
+
+    var originalDataFn = obj.data
+    obj.data = function () {
+      return originalDataFn ? originalDataFn.call(this, resource) : {}
     }
 
     obj._resource = resource

@@ -57,7 +57,9 @@
 <script>
 import { required } from 'vuelidate/lib/validators'
 
-var defaultServerUrl = 'http://localhost:8000'
+var arr = window.location.href.split("/")
+var defaultServerUrl = arr[0] + "//" + arr[2]
+
 
 export default {
   name: 'PageLogin',

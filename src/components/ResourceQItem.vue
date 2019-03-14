@@ -131,7 +131,7 @@ export default {
     },
 
     data () {
-      return this.meta.data || {}
+      return this.meta.data() || {}
     }
 
   },
