@@ -1,7 +1,7 @@
 <template>
   <w-layout v-bind="$attrs">
-    <small slot="header" class="cursor-pointer" @click="$ethingUI.open(r)">
-      {{ r.basename() }}
+    <small slot="header" class="cursor-pointer" @click="$ethingUI.open(resource)">
+      {{ resource.basename() }}
     </small>
 
     <slot></slot>
@@ -19,17 +19,17 @@ import WLayout from './WLayout'
 export default {
     name: 'WDeviceLayout',
 
-    mixins: [WResource],
-
     components: {
       WLayout
     },
 
+    props: ['resource'],
+
     computed: {
       date () {
-        var date = this.r.lastSeenDate()
+        var date = this.resource.lastSeenDate()
         if (!date) {
-          date = this.r.modifiedDate()
+          date = this.resource.modifiedDate()
         }
         return this.$ethingUI.utils.dateToString(date)
       }

@@ -5,8 +5,6 @@ import WChart from './WChart'
 import WImage from './WImage'
 import WSwitch from './WSwitch'
 import WDeviceLayout from './WDeviceLayout'
-import WDeviceRead from './WDeviceRead'
-import WDeviceReadWrite from './WDeviceReadWrite'
 import WDeviceLabel from './WDeviceLabel'
 import WDeviceMultiLabel from './WDeviceMultiLabel'
 import WDeviceKnob from './WDeviceKnob'
@@ -26,8 +24,6 @@ export default {
   WImage,
   WSwitch,
   WDeviceLayout,
-  WDeviceRead,
-  WDeviceReadWrite,
   WDeviceLabel,
   WDeviceMultiLabel,
   WDeviceKnob,

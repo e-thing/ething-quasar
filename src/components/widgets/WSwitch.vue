@@ -1,35 +1,33 @@
 <template>
   <w-device-layout :resource="resource" v-bind="$attrs">
     <div class="absolute-center">
-      <q-toggle :value="!!value" :disable="reading || writing" @input="toggle" :color="color" keep-color />
+      <q-toggle :value="!!resource.attr(attr)" :disable="reading || writing" @input="toggle" :color="color" keep-color />
     </div>
   </w-device-layout>
 </template>
 
 <script>
-import WDeviceReadWrite from './WDeviceReadWrite'
+import WResource from './WResource'
 import WDeviceLayout from './WDeviceLayout'
 
 export default {
     name: 'WSwitch',
 
-    mixins: [WDeviceReadWrite],
+    mixins: [WResource],
 
     components: {
       WDeviceLayout
     },
 
+    props: {
+      attr: String,
+      set: Function
+    },
+
     methods: {
 
       toggle (state) {
-
-        this.write(state)
-          .then(() => {
-            this.setError(false)
-          }).catch(err => {
-            this.setError(err)
-          })
-
+        this.set(this.resource, state)
       }
     },
 

@@ -1,15 +1,15 @@
 <template>
-    <w-layout noFooter :title="r.basename()">
+    <w-layout noFooter :title="resource.basename()">
 
       <div class="row items-center">
         <div class="inputs" :class="outputs.length ? 'col-6' : 'col-12'">
           <div v-for="(node, index) in inputs" :key="index">
-            <flow-node :flow="r" :node="node" />
+            <flow-node :flow="resource" :node="node" />
           </div>
         </div>
         <div class="outputs" :class="inputs.length ? 'col-6' : 'col-12'">
           <div v-for="(node, index) in outputs" :key="index">
-            <flow-node :flow="r" :node="node" />
+            <flow-node :flow="resource" :node="node" />
           </div>
         </div>
       </div>
@@ -37,7 +37,7 @@ export default {
     computed: {
 
         parsedFlow () {
-          var nodes = this.r.attr('nodes')
+          var nodes = this.resource.attr('nodes')
           var inputs = []
           var outputs = []
           nodes.forEach(n => {

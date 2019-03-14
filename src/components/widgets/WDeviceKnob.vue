@@ -1,27 +1,28 @@
 <template>
   <w-device-layout :resource="resource" v-bind="$attrs">
+
     <div class="absolute-center">
       <q-knob
-        :value="value===null ? 0 : value"
+        :value="resource.attr(attr) || 0"
         :min="min"
         :max="max"
         readonly
         :color="color"
       >
-        {{value}} <small class="unit">{{unit}}</small>
+        {{ resource.attr(attr) }} <small class="unit">{{unit}}</small>
       </q-knob>
     </div>
   </w-device-layout>
 </template>
 
 <script>
-import WDeviceRead from './WDeviceRead'
+import WResource from './WResource'
 import WDeviceLayout from './WDeviceLayout'
 
 export default {
     name: 'WDeviceKnob',
 
-    mixins: [WDeviceRead],
+    mixins: [WResource],
 
     components: {
       WDeviceLayout
@@ -37,7 +38,8 @@ export default {
         type: Number,
         default: 100
       },
-    }
+      attr: String
+    },
 
 }
 </script>

@@ -1,8 +1,9 @@
 <template>
   <w-device-layout :resource="resource" v-bind="$attrs">
+
     <div class="absolute-center">
       <span class="value" :style="{color: color}">
-          {{ value===null ? '?' : value }}
+          {{ resource.attr(attr) }}
       </span>
       <small v-if="unit" class="unit" style="filter: brightness(90%);">
           {{ unit }}
@@ -12,13 +13,13 @@
 </template>
 
 <script>
-import WDeviceRead from './WDeviceRead'
+import WResource from './WResource'
 import WDeviceLayout from './WDeviceLayout'
 
 export default {
     name: 'WDeviceLabel',
 
-    mixins: [WDeviceRead],
+    mixins: [WResource],
 
     components: {
       WDeviceLayout
@@ -26,7 +27,8 @@ export default {
 
     props: {
       unit: String,
-    }
+      attr: String
+    },
 
 
 }

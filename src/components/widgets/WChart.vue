@@ -1,5 +1,5 @@
 <template>
-  <chart :preferences="r" :history="history" expended dense readonly :chartOptions="{chart:{backgroundColor:'rgba(255, 255, 255, 0.0)'}, plotOptions:{series:{color:color}}, title:{style:{color:color}}}"/>
+  <chart :preferences="resource" :history="history" expended dense readonly :chartOptions="{chart:{backgroundColor:'rgba(255, 255, 255, 0.0)'}, plotOptions:{series:{color:color}}, title:{style:{color:color}}}"/>
 </template>
 
 <script>
@@ -23,6 +23,3 @@ export default {
 
 }
 </script>
-
-<style scoped>
-</style>

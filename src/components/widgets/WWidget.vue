@@ -18,24 +18,15 @@ export default {
     }
   },
 
-  data() {
-    return {
-      error: false
-    };
-  },
-  watch: {
-    error(value, oldValue) {
-      this.$emit("error", value);
-    }
-  },
   methods: {
     setError (err) {
-      this.error = err
+      this.$emit("error", err);
     }
   },
 
   errorHandler: function (err, vm, info) {
-    this.error = String(err)
+    console.error('widget error:', err, vm, info);
+    this.setError(err)
   }
 }
 </script>

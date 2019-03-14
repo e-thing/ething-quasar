@@ -1,6 +1,6 @@
 <template>
-    <w-layout noFooter :title="r.basename()">
-      <flow-node :flow="r" :node="node" class="absolute-center"/>
+    <w-layout noFooter :title="resource.basename()">
+      <flow-node :flow="resource" :node="node" class="absolute-center"/>
     </w-layout>
 </template>
 

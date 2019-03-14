@@ -1,5 +1,5 @@
 <template>
-  <image-viewer :source="r" no-title/>
+  <image-viewer :source="resource" no-title/>
 </template>
 
 <script>

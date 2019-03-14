@@ -1,11 +1,14 @@
 <template>
   <w-device-layout :resource="resource" v-bind="$attrs">
+
+    <resource-observable :resource="resource" @change="update" />
+
     <div class="fit column items-center justify-center">
       <div class="col-auto" v-for="(item, index) in computedItems" :key="index">
         <span v-if="item.label" class="label text-faded">
             {{ item.label }} :
         </span>
-        <span class="value" :style="item._style">
+        <span class="value" :style="{color: item.color}">
           <template v-if="item.icon">
             <img v-if="isUrlIcon(item.value)" :src="item.value" class="vertical-middle"/>
             <q-icon v-else :name="item.value"/>
@@ -25,7 +28,7 @@
 <script>
 import WResource from './WResource'
 import WDeviceLayout from './WDeviceLayout'
-import WDeviceRead from './WDeviceRead'
+
 
 export default {
     name: 'WDeviceMultiLabel',
@@ -43,24 +46,14 @@ export default {
     data () {
         return {
             computedItems: [],
-            lastUpdate: null
         }
-    },
-
-    watch: {
-      r () {
-        if (!this.lastUpdate || this.r.modifiedDate() > this.lastUpdate) {
-          this.update()
-        }
-      }
     },
 
     methods: {
       update () {
-        this.lastUpdate = this.r.modifiedDate()
-
         var computedItems = this.items.map( (item, index) => {
           var c = Object.assign({
+            attr: undefined, // the resource attribute to get value from
             label: '',
             value: undefined,
             unit: null,
@@ -69,48 +62,34 @@ export default {
             coefficient: 0, // multiply the value by this number
             map: {}, // map value to another value, if number, the value associated to the closest key is returned
             icon: false, // if true, the value is an icon name
-            done: null, // function executed once the value has been resolved
+            update: null, // function(item, value) : is called each time the value changed
             nullValue: undefined, // the value to print in case the walue is null or undefined
             skipIfNull: false, // skip this label if the value is null or undefined
 
             // private
-            _loading: true,
-            _error: false,
-            _prev: this.computedItems[index],
-            _promise: null,
-            _style: {},
             _skipped: false
           }, item)
 
-          c._promise = WDeviceRead.read(c, this.r).then(v => {
-            c.value = v
-          }).catch(err => {
-            c._error = true
-          }).finally(() => {
-            c._loading = false
+          if (c.attr) {
+            c.value = this.resource.attr(c.attr)
+          } else if (typeof c.value === 'function') {
+            c.value = c.value.call(this, c)
+          }
 
-            if (typeof c.done === 'function') {
-              c.done.call(c, c)
-            }
+          if (typeof c.update === 'function') {
+            c.update.call(this, c, c.value)
+          }
 
-            if (c.color) {
-              c._style.color = c.color
-            }
+          this.computedValue(c)
 
-            this.computedValue(c)
-
-            if (c.skipIfNull && (c.value === null || typeof c.value === 'undefined')) {
-              c._skipped = true
-            }
-
-          })
+          if (c.skipIfNull && (c.value === null || typeof c.value === 'undefined')) {
+            c._skipped = true
+          }
 
           return c
         })
 
-        Promise.all(computedItems.map(item => item._promise)).then(() => {
-          this.computedItems = computedItems.filter(i => !i._skipped)
-        })
+        this.computedItems = computedItems.filter(i => !i._skipped)
       },
 
       computedValue (item) {

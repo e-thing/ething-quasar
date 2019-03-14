@@ -1,28 +1,32 @@
+<template>
+  <w-device-multi-label :resource="resource" v-bind="$attrs" :items="items" />
+</template>
 
 <script>
 import WDeviceMultiLabel from './WDeviceMultiLabel'
+import WResource from './WResource'
 
 export default {
     name: 'WGenericSensor',
 
-    mixins: [WDeviceMultiLabel],
+    mixins: [WResource],
 
-    methods: {
-      update () {
-        this.lastUpdate = this.r.modifiedDate()
+    computed: {
+      items () {
 
-        var data = this.r.data()
-        var computedItems = []
+        var data = this.resource.data()
+
+        var items = []
 
         for(var key in data) {
-          computedItems.push({
+          items.push({
             label: key,
             unit: null,
             value: data[key]
           })
         }
 
-        this.computedItems = computedItems
+        return items
       }
     },
 

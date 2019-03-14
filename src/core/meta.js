@@ -314,6 +314,9 @@ function compile(mro, definitions, resource) {
 
   // add some compile info
   compiled._dep = mro
+  if (resource) {
+    compiled._cacheEtag = resource.attr('modifiedDate')
+  }
 
   return compiled
 }
@@ -382,7 +385,10 @@ function get (definitions, type) {
   // check in cache first
   if (resource) {
     if (id in cached_meta_types) {
-      return cached_meta_types[id]
+      var cache = cached_meta_types[id]
+      if (!cache._cacheEtag || resource.attr('modifiedDate') == cache._cacheEtag) {
+        return cache
+      }
     }
   } else {
     if (type in cached_meta_types) {

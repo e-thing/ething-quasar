@@ -17,13 +17,13 @@
 
 
 <script>
-import WDeviceReadWrite from './WDeviceReadWrite'
+import WResource from './WResource'
 import WDeviceLayout from './WDeviceLayout'
 
 export default {
     name: 'WDimmable',
 
-    mixins: [WDeviceReadWrite],
+    mixins: [WResource],
 
     components: {
       WDeviceLayout
@@ -39,18 +39,20 @@ export default {
         type: Number,
         default: 100
       },
+      attr: String,
+      set: Function,
+    },
+
+    computed: {
+      value () {
+        return this.resource.attr(this.attr)
+      }
     },
 
     methods: {
 
       setLevel (value) {
-
-        this.write(value)
-          .then(() => {
-            this.setError(false)
-          }).catch(err => {
-            this.setError(err)
-          })
+        this.set(this.resource, value)
       }
     }
 

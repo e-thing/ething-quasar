@@ -39,7 +39,7 @@
           <widget :ref="'widget_' + layoutItem.i" :key="layoutItem.key" class="absolute fit"
             :component="layoutItem.widget.component"
             :min-height="layoutItem.widget.minHeight"
-            v-bind="extend(layoutItem.widget.attributes, layoutItem.item.options)" />
+            v-bind="computeAttr(layoutItem)" />
         </div>
       </div>
       <grid-layout v-else
@@ -77,7 +77,7 @@
               </div>
               <widget :ref="'widget_' + layoutItem.i" :key="layoutItem.key" class="absolute fit"
                 :component="layoutItem.widget.component"
-                v-bind="extend(layoutItem.widget.attributes, layoutItem.item.options)" />
+                v-bind="computeAttr(layoutItem)" />
           </grid-item>
       </grid-layout>
     </div>
@@ -171,10 +171,6 @@ export default {
   },
 
   methods: {
-
-    extend (parent, child) {
-      return extend(true, {}, parent || {}, child || {})
-    },
 
     getLayoutItem (index) {
       for (var i in this.layout) {
@@ -274,9 +270,10 @@ export default {
     normalizeLayoutItem (item) {
       try {
         var widget = null;
+        var resource = null;
 
         if (typeof item.widgetId !== 'undefined') {
-          var resource = this.$ething.arbo.get(item.options.resource)
+          resource = this.$ething.arbo.get(item.options.resource)
           var resourceMeta = this.$ethingUI.get(resource)
           widget = resourceMeta.widgets[item.widgetId]
           if (!widget) {
@@ -312,20 +309,29 @@ export default {
           key: 0,
           hasContentOverflow: false,
           widget,
-          item: item,
+          item,
+          resource,
           x: item.x,
           y: item.y,
           w: item.w,
           h: item.h,
           minW: minWidth,
           minH: minHeight,
-          i: String(this.idCnt++)
+          i: String(this.idCnt++),
         }
 
         return layoutItem
       } catch(err) {
         console.error('unable to load a widget item:', item, err)
       }
+    },
+
+    computeAttr (layoutItem) {
+      var attributes = extend(true, layoutItem.widget.attributes, layoutItem.item.options)
+      if (layoutItem.resource) {
+        attributes.resource = layoutItem.resource // override widget id by instance
+      }
+      return attributes
     },
 
     save: debounce( function(){

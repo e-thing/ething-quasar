@@ -16,7 +16,9 @@ export default {
       component: WDimmable,
       attributes: {
         attr: 'level',
-        fn_setter: 'setLevel'
+        set (resource, value) {
+          return resource.setLevel(value)
+        }
       },
       schema: {
         label: 'qnob',

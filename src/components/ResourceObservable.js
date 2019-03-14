@@ -12,23 +12,36 @@ export default {
   },
 
   watch: {
-    resource (r, old_r) {
-      if (r!==old_r) {
-        // the resource changed
-        this.lastUpdate = null
-      }
-      if (!this.lastUpdate || r.modifiedDate() > this.lastUpdate) {
-        this.lastUpdate = r.modifiedDate()
-        if (this.attribute) {
-          var value = r.attr(this.attribute)
-          if (this.lastValue !== value) {
-            this.$emit('change', r, value)
-          }
-          this.lastValue = value
-          return // no change
+    resource: {
+      handler (r, old_r) {
+        if (r!==old_r) {
+          // the resource changed
+          this.lastUpdate = null
         }
-        this.$emit('change', r)
-      }
+        if (!this.lastUpdate || r.modifiedDate() > this.lastUpdate) {
+          this.lastUpdate = r.modifiedDate()
+          if (this.attribute) {
+            var attributes = Array.isArray(this.attribute) ? this.attribute : [this.attribute]
+
+            if (!this.lastValue) {
+              this.lastValue = []
+            }
+
+            attributes.forEach((a, i) => {
+              var value = r.attr(a);
+              var lastValue = (this.lastValue && i<this.lastValue.length) ? this.lastValue[i] : undefined;
+              if (lastValue !== value) {
+                this.$emit('change', r, a, value)
+              }
+              this.lastValue[i] = value
+            })
+
+            return // no change
+          }
+          this.$emit('change', r)
+        }
+      },
+      deep: true
     },
     attribute () {
       // reset

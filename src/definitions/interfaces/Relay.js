@@ -16,7 +16,9 @@ export default {
       component: WSwitch,
       attributes: {
         attr: 'state',
-        fn_setter: 'setState'
+        set (resource, value) {
+          return resource.setState(value)
+        }
       },
       schema:{
         title: 'switch',

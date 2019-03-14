@@ -16,6 +16,7 @@ export default {
 
     computed: {
       r () {
+        console.warn('r is deprecated', this);
         if (this.resource instanceof EThing.Resource) {
           return this.resource
         } else {

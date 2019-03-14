@@ -27,7 +27,7 @@ export default {
 
     computed: {
       source () {
-        return this.r.executeUrl('snapshot')
+        return this.resource.executeUrl('snapshot')
       }
     },
 
