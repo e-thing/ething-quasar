@@ -22,7 +22,7 @@
       <div class="row">
         <!--<q-search v-model="filter" hide-underline no-parent-field clearable/>-->
 
-        <q-btn-dropdown color="primary" label="Create" icon="add" flat >
+        <q-btn-dropdown color="primary" :label="$q.screen.gt.xs ? 'create' : null" icon="add" flat dense>
           <q-list link>
             <template v-for="cat in categories">
               <q-list-header inset>{{ cat.name }}</q-list-header>

@@ -1,7 +1,11 @@
 <template>
-  <q-page>
+  <q-page class="bg-white">
 
-    <div class="leftMenu">
+    <div class="leftMenu" :class="{enabled: showMenu}" v-touch-swipe.left="closeMenu">
+
+      <div class="header text-right q-pa-sm" v-if="$q.screen.xs">
+        <q-btn v-if="$q.screen.xs" icon="close" label="close" flat color="faded" @click="showMenu = false" />
+      </div>
 
       <div class="node-filter q-px-md q-py-sm">
         <resource-select
@@ -32,6 +36,7 @@
 
     <div class="main" :style="dbg.enabled ? {} : {right: 0}">
       <div class="top-left-menu">
+        <q-btn icon="menu" flat color="faded" @click="showMenu = true" round class="q-mr-sm"/>
         <span class="text-faded">{{ resource.name() }}</span>
       </div>
 
@@ -41,19 +46,23 @@
       </div>
 
       <drop @drop="handleDrop">
-        <div ref="flowchart" class="flowchart jtk-surface jtk-surface-nopan">
+        <div ref="flowchart" class="flowchart jtk-surface jtk-surface-nopan" @click.self="flowchartClick">
             <div ref="node" class="node"
                   v-for="node in nodes" :key="node.id" :data-id="node.id"
                   @mouseover="nodeHoverHandler(node, true)" @mouseout="nodeHoverHandler(node, false)"
                   :style="computeNodeStyle(node)"
+                  v-touch-hold.noMouse="node._hold"
+                  @dblclick="node._dbclick"
+                  @click="node._click"
+                  :class="{active: node._isActive}"
             >
               <q-icon v-if="node._cls.icon" :name="node._cls.icon" class="icon" />
               <div class="content">
                 <flow-node :flow="resource" :node="node" class="full-width ellipsis"/>
               </div>
               <div class="node-btns">
-                <q-btn flat dense icon="edit" size="sm" color="faded"  @click="editNode(node)" class="node-btn"/>
-                <q-btn flat dense icon="delete" size="sm" color="faded"  @click="removeNode(node)" class="node-btn"/>
+                <q-btn flat dense icon="edit" size="sm" color="faded"  @click.stop.prevent="editNode(node)" class="node-btn"/>
+                <q-btn flat dense icon="delete" size="sm" color="faded"  @click.stop.prevent="removeNode(node)" class="node-btn"/>
               </div>
               <div class="node-dbg text-no-wrap q-caption" v-if="node._dbg.show">
                 <div>
@@ -68,10 +77,11 @@
       </drop>
     </div>
 
-    <div class="rightMenu" v-if="dbg.enabled">
+    <div class="rightMenu" v-if="dbg.enabled" v-touch-swipe.right="closeDebugger">
 
       <div class="text-right q-pa-sm">
         <q-btn v-if="dbg.items.length>0" icon="delete" flat color="faded" @click="dbg.items = []" />
+        <q-btn v-if="$q.screen.xs" icon="close" label="close" flat color="faded" @click="dbg.enabled = false" />
       </div>
 
       <div v-if="dbg.items.length>0">
@@ -174,6 +184,20 @@ function release_socket (sock) {
 }
 
 
+function getEventPos (e) {
+  var out = {x:0, y:0};
+  if(e.type == 'touchstart' || e.type == 'touchmove' || e.type == 'touchend' || e.type == 'touchcancel'){
+    var touch = e.touches[0] || e.changedTouches[0];
+    out.x = touch.pageX;
+    out.y = touch.pageY;
+  } else if (e.type == 'mousedown' || e.type == 'mouseup' || e.type == 'mousemove' || e.type == 'mouseover'|| e.type=='mouseout' || e.type=='mouseenter' || e.type=='mouseleave') {
+    out.x = e.pageX;
+    out.y = e.pageY;
+  }
+  return out;
+}
+
+
 // this is the paint style for the connecting lines..
 var connectorPaintStyle = {
         strokeWidth: 2,
@@ -260,6 +284,8 @@ export default {
         opened: false
       },
       resourceFilter: null,
+      activeNode: null,
+      showMenu: false
     }
 
   },
@@ -319,6 +345,17 @@ export default {
   },
 
   methods: {
+    closeMenu () {
+      this.showMenu = false
+    },
+
+    closeDebugger () {
+      this.dbg.enabled = false
+    },
+
+    flowchartClick (evt) {
+      this.setActiveNode(null)
+    },
 
     computeNodeStyle (node) {
       var style = {
@@ -482,6 +519,34 @@ export default {
       var metadata = nodeComponent.options.metadata
       node._meta = typeof metadata === 'function' ? metadata.call(this) : metadata
 
+      node._hold = (evt) => {
+        this.editNode(node)
+      }
+
+      node._click = (evt) => {
+        if (this.$q.screen.xs && !node._isActive) {
+          this.setActiveNode(node)
+        }
+      }
+
+      node._dbclick = (evt) => {
+        this.editNode(node)
+      }
+
+      // active state
+
+      node._isActive = false
+
+      node._activate = () => {
+        node._isActive = true
+      }
+
+      node._deactivate = () => {
+        node._isActive = false
+      }
+
+
+
       this.$set(node, '_dbg', {
         show: false,
         data: {}
@@ -539,7 +604,8 @@ export default {
             grid: [20, 20],
             stop: (event, ui) => {
               this.dirty = true
-            }
+            },
+            consumeStartEvent: false
           });
 
           if (done) done(node)
@@ -566,6 +632,18 @@ export default {
         }
       }
 
+    },
+
+    setActiveNode (node) {
+      if (node === this.activeNode) return
+      if (this.activeNode) {
+        this.activeNode._deactivate()
+        this.activeNode = null
+      }
+      if (node) {
+        this.activeNode = node
+        node._activate()
+      }
     },
 
     nodeIdToName (nodeId) {
@@ -690,13 +768,12 @@ export default {
 
     cleanNode (node) {
       // copy
-      var copy = Object.assign({}, node)
-
-      // remove privates
-      delete copy._dbg
-      delete copy._cls
-      delete copy._el
-      delete copy._meta
+      var copy = {}
+      for (var i in node) {
+        // remove privates
+        if (i[0] == '_') continue
+        copy[i] = node[i]
+      }
 
       // update x && y
       copy.x = parseInt(node._el.style.left)
@@ -824,7 +901,9 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="stylus" scoped>
+  @import '~variables'
+
   .leftMenu {
     position: absolute;
     left: 0px;
@@ -834,6 +913,8 @@ export default {
     border-right: 4px #d9d9d9 solid;
     overflow-y: auto;
     overflow-x: hidden;
+    background-color: white;
+    z-index: 1005;
   }
 
   .rightMenu {
@@ -845,12 +926,14 @@ export default {
     border-left: 4px #d9d9d9 solid;
     overflow-y: auto;
     overflow-x: auto;
+    background-color: white;
+    z-index: 1000;
   }
 
   .top-left-menu {
     display: inline-block;
     position: absolute;
-    top: 18px;
+    top: 10px;
     left: 25px;
     z-index: 10;
   }
@@ -887,7 +970,7 @@ export default {
     border-bottom: 1px #d9d9d9 solid;
   }
 
-  .node-filter {
+  .leftMenu > .node-filter, .leftMenu > .header {
     border-bottom: 4px #d9d9d9 solid;
   }
 
@@ -1004,6 +1087,37 @@ export default {
     left: 0px;
     top: 56px;
   }
+
+  .flowchart.jtk-surface {
+    touch-action: auto;
+  }
+
+  @media (max-width: $breakpoint-xs)
+    .leftMenu:not(.enabled) {
+      display: none;
+    }
+
+    .leftMenu {
+      width: 100%;
+      border-right: none;
+    }
+
+    .main {
+      left: 0px !important;
+      right: 0px !important;
+    }
+
+    .rightMenu {
+      width: 100%;
+      border-left: none;
+    }
+
+    .flowchart .node.active > .node-btns {
+      display: block;
+    }
+
+
+
 
 </style>
 
