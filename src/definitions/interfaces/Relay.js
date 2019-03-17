@@ -17,7 +17,7 @@ export default {
       attributes: {
         attr: 'state',
         set (resource, value) {
-          return resource.setState(value)
+          return resource.execute('setState', value)
         }
       },
       schema:{

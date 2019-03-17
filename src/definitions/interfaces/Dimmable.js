@@ -17,7 +17,7 @@ export default {
       attributes: {
         attr: 'level',
         set (resource, value) {
-          return resource.setLevel(value)
+          return resource.execute('setLevel', value)
         }
       },
       schema: {

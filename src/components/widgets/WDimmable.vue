@@ -5,7 +5,6 @@
         :value="value"
         :min="min"
         :max="max"
-        :disable="writing"
         :color="color"
         @change="setLevel"
       >
