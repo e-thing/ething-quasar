@@ -57,11 +57,6 @@ export default {
           nodeComponent = FlowNodes[nodeComponent]
         }
         return Vue.extend(nodeComponent)
-      },
-
-      nodeComponentMeta () {
-        var m = this.nodeComponent.options.metadata
-        return typeof m === 'function' ? m.call(this) : m
       }
 
     },

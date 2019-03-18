@@ -13,6 +13,10 @@ import LightSensor from './LightSensor'
 import HumiditySensor from './HumiditySensor'
 import MoistureSensor from './MoistureSensor'
 import DoorSensor from './DoorSensor'
+import DimmableRelay from './DimmableRelay'
+import DimmableLight from './DimmableLight'
+import RGBWLight from './RGBWLight'
+
 
 export default {
   Thermometer,
@@ -28,5 +32,8 @@ export default {
   LightSensor,
   HumiditySensor,
   MoistureSensor,
-  DoorSensor
+  DoorSensor,
+  DimmableRelay,
+  DimmableLight,
+  RGBWLight,
 }

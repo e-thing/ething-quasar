@@ -7,7 +7,7 @@ import Password from './Password'
 import Textarea from './Textarea'
 import Color from './Color'
 import Datetime from './Datetime'
-import Range from './Datetime'
+import Range from './Range'
 import ObjectComponent from './Object'
 import ArrayComponent from './Array'
 import Const from './Const'
@@ -33,7 +33,7 @@ export default [
 
   //object,
   ObjectComponent,
-  
+
   Const,
 
 ]

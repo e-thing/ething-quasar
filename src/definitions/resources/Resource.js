@@ -6,10 +6,7 @@ export default {
   color: 'grey',
 
   properties: {
-    createdBy: {
-      '$component': 'ething.resource',
-      '$readOnly': true
-    },
+    
     data: {
       '$readOnly': true
     },

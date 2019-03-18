@@ -2,7 +2,7 @@
   <div class="widget" :class="{'widget-err': hasError}" :style="style">
     <div v-if="hasError" class="widget-err-layer fit">
         <div class="absolute-center text-center ellipsis-3-lines q-caption">
-            {{ error || 'error' }}
+            {{ String(error || 'error') }}
         </div>
     </div>
     <div class="widget-content-layer" :class="inline ? '' : 'fit'">
@@ -91,6 +91,7 @@ export default {
     /* border 1px solid $negative */
     /* background-color $red-1 */
   & > .widget-err-layer
+    position: relative;
     color white
     background-color $negative
     & > div
@@ -98,7 +99,7 @@ export default {
 
   & > .widget-content-layer
     position: relative;
-    
+
     &.fit > *
       width: 100%
       height: 100%

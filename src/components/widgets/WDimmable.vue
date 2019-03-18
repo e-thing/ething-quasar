@@ -5,6 +5,7 @@
         :value="value"
         :min="min"
         :max="max"
+        :disable="writing"
         :color="color"
         @change="setLevel"
       >
@@ -29,7 +30,10 @@ export default {
     },
 
     props: {
-      unit: String,
+      unit: {
+        type: String,
+        default: '%'
+      },
       min: {
         type: Number,
         default: 0
@@ -42,6 +46,12 @@ export default {
       set: Function,
     },
 
+    data () {
+      return {
+        writing: false
+      }
+    },
+
     computed: {
       value () {
         return this.resource.attr(this.attr)
@@ -51,7 +61,12 @@ export default {
     methods: {
 
       setLevel (value) {
-        this.set(this.resource, value)
+        this.writing = true
+        Promise.resolve(this.set(this.resource, value)).catch(err => {
+          this.setError(err)
+        }).finally(() => {
+          this.writing = false
+        })
       }
     }
 

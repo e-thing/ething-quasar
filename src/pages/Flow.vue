@@ -36,8 +36,8 @@
 
     <div class="main" :style="dbg.enabled ? {} : {right: 0}">
       <div class="top-left-menu">
-        <q-btn icon="menu" flat color="faded" @click="showMenu = true" round class="q-mr-sm"/>
-        <span class="text-faded">{{ resource.name() }}</span>
+        <q-btn icon="menu" flat color="faded" @click="showMenu = true" round class="q-mr-sm" v-if="$q.screen.xs"/>
+        <span class="text-faded filename">{{ resource.name() }}</span>
       </div>
 
       <div class="top-right-menu">
@@ -50,7 +50,6 @@
             <div ref="node" class="node"
                   v-for="node in nodes" :key="node.id" :data-id="node.id"
                   @mouseover="nodeHoverHandler(node, true)" @mouseout="nodeHoverHandler(node, false)"
-                  :style="computeNodeStyle(node)"
                   v-touch-hold.noMouse="node._hold"
                   @dblclick="node._dbclick"
                   @click="node._click"
@@ -357,15 +356,6 @@ export default {
       this.setActiveNode(null)
     },
 
-    computeNodeStyle (node) {
-      var style = {
-        'border-color': node.color,
-        'width': node._meta.width + 'px',
-        'height': node._meta.height + 'px',
-      }
-      return style
-    },
-
     nodeFilter (node) {
       if (this.resourceFilter) {
         if (this.$ethingUI.isSubclass(node, 'nodes/ResourceNode')) {
@@ -510,15 +500,6 @@ export default {
 
       node._cls = cls
 
-      // node component & metadata
-      var nodeComponent = cls.node || 'Base'
-      if (typeof nodeComponent === 'string') {
-        nodeComponent = FlowNodes[nodeComponent]
-      }
-      nodeComponent = Vue.extend(nodeComponent)
-      var metadata = nodeComponent.options.metadata
-      node._meta = typeof metadata === 'function' ? metadata.call(this) : metadata
-
       node._hold = (evt) => {
         this.editNode(node)
       }
@@ -561,6 +542,7 @@ export default {
 
         el.style.left = node.x+'px'
         el.style.top = node.y+'px'
+        el.style['border-color'] = node.color
 
         this.instance.batch(() => {
 
@@ -938,6 +920,10 @@ export default {
     z-index: 10;
   }
 
+  .top-left-menu .filename {
+    line-height: 42px;
+  }
+
   .top-right-menu {
     display: inline-block;
     position: absolute;
@@ -996,6 +982,8 @@ export default {
   }
 
   .node {
+      width: 200px;
+      height: 48px;
       border: 1px solid #346789;
       box-shadow: 2px 2px 19px #aaa;
       -o-box-shadow: 2px 2px 19px #aaa;

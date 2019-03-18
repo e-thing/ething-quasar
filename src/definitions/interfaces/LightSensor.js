@@ -2,7 +2,7 @@ import WDeviceLabel from '../../components/widgets/WDeviceLabel'
 
 export default {
 
-  icon: 'mdi-weight',
+  icon: 'mdi-brightness-6',
 
   data (resource) {
     return {
