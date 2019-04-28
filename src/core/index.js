@@ -178,24 +178,6 @@ EThingUI.install = ({ app, router, Vue, store }) => {
   app.data.error = false
 
 
-  EThingUI.notifSocket.on('notification', function(evt) {
-    console.log('[app] notification received', evt)
-    Notify.create({
-      type: 'info',
-      message: evt.msg,
-      detail: evt.subject,
-      position: 'bottom-right',
-      timeout: 15000,
-      actions: [
-        {
-          label: 'Close',
-          handler: () => {}
-        }
-      ],
-    })
-  })
-
-
   Object.assign(EThingUI, {
 
     reset () {
@@ -316,6 +298,25 @@ EThingUI.install = ({ app, router, Vue, store }) => {
       app.data.state = 'initializing'
 
       console.log('[app] initializing...');
+
+      EThingUI.initSockets()
+
+      EThingUI.notifSocket.on('notification', function(evt) {
+        console.log('[app] notification received', evt)
+        Notify.create({
+          type: 'info',
+          message: evt.msg,
+          detail: evt.subject,
+          position: 'bottom-right',
+          timeout: 15000,
+          actions: [
+            {
+              label: 'Close',
+              handler: () => {}
+            }
+          ],
+        })
+      })
 
       var appInstance = app.router.app
       window.app = appInstance
