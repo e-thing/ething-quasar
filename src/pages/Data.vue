@@ -90,7 +90,7 @@ export default {
     resources () {
       var path = this.path
       var globRe = new RegExp('^' + (path ? (path + '/') : '') + '[^/]+$')
-      return this.$ething.arbo.find(r => globRe.test(r.name()) && !/^\./.test(r.basename()))
+      return this.$ething.arbo.find(r => (r instanceof this.$ething.File || r instanceof this.$ething.Table) && globRe.test(r.name()) && !/^\./.test(r.basename()))
     },
     folders () {
       var path = this.path

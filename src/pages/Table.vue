@@ -100,9 +100,9 @@
 
           <div class="q-mb-md q-mt-lg q-title q-title-opacity"><q-icon name="mdi-menu-right" /> column: {{ key }}</div>
 
-          <div class="row q-mb-md q-ml-lg">
-            <div v-if="statistics[key]">
-              <template v-for="(value, key) in statistics[key]">
+          <div class="q-mb-md q-ml-lg">
+            <div v-if="statistics[key]" class="row">
+              <template v-for="(value, key) in statistics[key]" v-if="value !== null">
                 <div class="col-xs-12 col-sm-4 key text-secondary">{{ key }}</div>
                 <div class="col-xs-12 col-sm-8 value">{{ format(key, value) }}</div>
               </template>
