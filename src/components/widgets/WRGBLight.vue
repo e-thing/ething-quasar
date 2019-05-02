@@ -1,16 +1,12 @@
 <template>
   <w-device-layout :resource="resource" v-bind="$attrs">
-    <div class="absolute-center">
-      <q-knob
-        :value="brightness"
-        :min="0"
-        :max="100"
-        :disable="writing"
-        @change="p_setBrightness"
-        :style="{color: lightColor}"
-      >
-        {{brightness}} <small class="unit" style="filter: brightness(90%);">%</small>
-      </q-knob>
+    <div class="absolute-center" style="min-width: 100%;">
+      <q-btn icon="mdi-lightbulb" flat size="xl" class="full-width" :color="state ? 'primary' : 'faded'" @click="p_toggle"/>
+      <div class="row">
+        <q-icon name="mdi-brightness-5" class="col-auto q-mr-sm"/>
+        <q-slider class="col" :min="0" :max="100" :disable="writing" :value="brightness" @change="p_setBrightness"/>
+        <q-icon name="mdi-brightness-7" class="col-auto q-ml-sm"/>
+      </div>
       <q-slider :min="0" :max="360" :disable="writing" class="hue-slider" :value="colorHue" @change="p_setColorHue" fill-handle-always color="white"/>
     </div>
   </w-device-layout>
@@ -36,6 +32,7 @@ export default {
     props: {
       setBrightness: Function,
       setColor: Function,
+      setState: {}
     },
 
     data () {
@@ -53,6 +50,9 @@ export default {
       },
       colorHue () {
         rgbToHsv(hexToRgb(this.lightColor)).h
+      },
+      state () {
+        return this.resource.attr('state')
       }
     },
 
@@ -78,6 +78,18 @@ export default {
 
       p_setColorHue (colorHue) {
         this.p_setColor(rgbToHex(hsvToRgb({h: colorHue, s:100, v:100})))
+      },
+
+      p_toggle () {
+        if (this.setState) {
+          Promise.resolve(this.setState(this.resource, !this.state)).catch(err => {
+            this.setError(err)
+          }).finally(() => {
+            this.writing = false
+          })
+        } else {
+          this.p_setBrightness(this.state ? 0 : 100)
+        }
       }
     }
 

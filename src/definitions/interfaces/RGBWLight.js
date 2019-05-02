@@ -5,6 +5,7 @@ export default {
   widgets: {
     'default': {
       in: ['dashboard', 'devicePage'],
+      icon: 'mdi-lightbulb',
       component: WRGBLight,
       attributes: {
         setBrightness (resource, level) {
