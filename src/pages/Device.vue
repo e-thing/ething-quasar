@@ -12,7 +12,11 @@
 
       </div>
 
-      <div>
+      <div class="q-subheading text-faded q-py-sm">
+        {{ $ethingUI.get(resource).title }}
+      </div>
+
+      <div class="q-py-sm">
         <q-chip small square detail icon="access time" v-if="resource.lastSeenDate()" class="q-mr-sm">
           {{ $ethingUI.utils.dateToString(resource.lastSeenDate()) }}
         </q-chip>
@@ -23,10 +27,10 @@
 
       </div>
 
-      <div v-if="createdBys.length" class="q-py-md">
+      <div v-if="createdBys.length" class="q-py-sm">
         <template v-for="(item, index) in createdBys">
-          <span v-if="index>0"> - </span>
-          <span class="createdby-item" @click="$ethingUI.open(item)">{{ item.basename() }}</span>
+          <q-icon name="mdi-chevron-right" class="vertical-middle"/>
+          <span class="createdby-item vertical-middle" @click="$ethingUI.open(item)">{{ item.basename() }}</span>
         </template>
       </div>
     </div>
