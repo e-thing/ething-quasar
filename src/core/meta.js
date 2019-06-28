@@ -540,8 +540,11 @@ export default {
       },
 
       isSubclass: function (type, base) {
-        type = normType(type)
         base = normType(base)
+        if (type instanceof EThing.Resource && type.isTypeof(base)) {
+          return true
+        }
+        type = normType(type)
         if (type === base) return true
         var m = this.get(type)
         return m && m._dep && m._dep.indexOf(base) !== -1

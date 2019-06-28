@@ -205,6 +205,10 @@ export default {
       return attributes
     },
 
+    isSensor () {
+      return this.$ethingUI.isSubclass(this.resource, 'interfaces/Sensor')
+    },
+
     createdBys () {
       var createdBys = []
       var p = this.resource.createdBy()
