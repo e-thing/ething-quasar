@@ -11,8 +11,8 @@ export default {
         setBrightness (resource, level) {
           return resource.execute('setLevel', level)
         },
-        setColor (resource, hex) {
-          return resource.execute('setColor', hex)
+        setColor (resource, hue, saturation) {
+          return resource.execute('setColor', hue, saturation)
         },
       },
       schema:{

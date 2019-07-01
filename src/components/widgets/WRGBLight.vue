@@ -67,17 +67,14 @@ export default {
         })
       },
 
-      p_setColor (color) {
+      p_setColorHue (hue) {
+        var saturation = 100
         this.writing = true
-        Promise.resolve(this.setColor(this.resource, color)).catch(err => {
+        Promise.resolve(this.setColor(this.resource, hue, saturation)).catch(err => {
           this.setError(err)
         }).finally(() => {
           this.writing = false
         })
-      },
-
-      p_setColorHue (colorHue) {
-        this.p_setColor(rgbToHex(hsvToRgb({h: colorHue, s:100, v:100})))
       },
 
       p_toggle () {
