@@ -2,7 +2,7 @@
   <div class="column">
     <div class="col-auto text-center text-faded ellipsis" v-if="!noHeader">
       {{ title }}
-      <slot name="header"></slot>
+      <slot name="header" v-if="!title"></slot>
     </div>
     <div class="col relative-position">
       <slot></slot>

@@ -53,6 +53,19 @@
         </div>
       </div>
 
+      <!-- sensor -->
+      <!--
+      <div class="page-block" v-if="isSensor">
+        <div class="bloc-title">
+          <q-icon :name="mdi-access-point"/>
+          <span>Sensors</span>
+        </div>
+        <div class="bloc-content bloc-content-no-padding">
+          <sensors-view :resource="resource"/>
+        </div>
+      </div>
+      -->
+
       <!-- attributes -->
       <div class="page-block attributes">
         <div class="bloc-title">
@@ -124,6 +137,7 @@ import DeviceApi from '../components/DeviceApi'
 import ResourceQItem from '../components/ResourceQItem'
 import ResourceBatteryChip from '../components/ResourceBatteryChip'
 import Widget from '../components/Widget'
+import SensorsGridView from '../components/SensorsGridView'
 
 export default {
   name: 'PageDevice',
@@ -132,7 +146,8 @@ export default {
     DeviceApi,
     ResourceQItem,
     ResourceBatteryChip,
-    Widget
+    Widget,
+    SensorsGridView,
   },
 
   data () {
