@@ -250,13 +250,7 @@ DataSource.prototype.add = function (source, done) {
       var formattedData = data.filter(d => {
         return d.hasOwnProperty(key)
       }).map(d => {
-        var date = new Date(d.date)
-        var v = d[key]
-        if (typeof v != 'number') {
-          if (typeof v === 'string') v = parseFloat(d[key])
-          else if (typeof v === 'boolean') v = v ? 1 : 0
-        }
-        return [date.getTime(), v]
+        return dataFormat(d.date, d[key])
       })
 
       done(formattedData)
@@ -278,6 +272,17 @@ DataSource.prototype.load = function (done) {
     source.fetch.call(source, end)
   })
 }
+
+
+function dataFormat (date, value) {
+  var date = new Date(date)
+  if (typeof value != 'number') {
+    if (typeof value === 'string') v = parseFloat(value)
+    else if (typeof value === 'boolean') value = value ? 1 : 0
+  }
+  return [date.getTime(), value]
+}
+
 
 import { extend } from 'quasar'
 import ResourceSelect from './ResourceSelect'
@@ -564,12 +569,17 @@ export default {
           this.options.yAxis.push(yAxis)
 
           pane.curves.forEach( (curve, index) => {
+            var sid = null
+            if (curve.data.resource && curve.data.key) {
+              sid = 's-' + curve.data.resource + '-' + curve.data.key
+            }
             var serie = {
                 showInNavigator: true,
                 type: curve.type || 'line',
                 name: curve.name || ('data '+index),
                 data: [],
-                yAxis: yAxisId
+                yAxis: yAxisId,
+                id: sid
             }
 
             this.dataSource.add(curve.data, (data) => {
@@ -685,7 +695,20 @@ export default {
       if (updatedKeys.indexOf('contentModifiedDate') !== -1) {
         this.refresh()
       }
-    }
+    },
+
+    onTableDataAdded (evt) {
+      var data = evt.data
+      var chart = this.chart()
+      for (var key in data) {
+        if (key === 'id' || key === 'date') continue
+        var sid = 's-' + this.table.id() + '-' + key
+        var serie = chart.get(sid)
+        if (serie) {
+          serie.addPoint(dataFormat(data.date, data[key]))
+        }
+      }
+    },
 
 
 
@@ -720,7 +743,8 @@ export default {
       if (resource) {
         this.table = resource
 
-        resource.on('updated', this.onTableUpdate)
+        //resource.on('updated', this.onTableUpdate)
+        resource.on('TableDataAdded', this.onTableDataAdded)
 
         var createdBy = this.$ething.arbo.get(resource.createdBy())
         if (createdBy) {
@@ -758,6 +782,7 @@ export default {
   beforeDestroy () {
     if (this.table) {
       this.table.off('updated', this.onTableUpdate)
+      this.table.off('TableDataAdded', this.onTableDataAdded)
     }
   }
 
