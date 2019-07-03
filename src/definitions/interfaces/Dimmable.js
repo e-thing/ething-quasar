@@ -20,10 +20,8 @@ export default {
           return resource.execute('setLevel', value)
         }
       },
-      schema: {
-        label: 'qnob',
-        description: 'adjust the level'
-      },
+      label: 'Dimmer',
+      description: 'adjust the level',
       minWidth: 160,
       minHeight: 160
     }

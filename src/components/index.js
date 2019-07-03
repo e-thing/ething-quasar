@@ -13,7 +13,6 @@ import Widget from './Widget'
 import ResourceObservable from './ResourceObservable'
 import widgets from './widgets'
 import FlowNodes from './FlowNodes'
-import SensorsGridView from './SensorsGridView'
 
 export {
     widgets,

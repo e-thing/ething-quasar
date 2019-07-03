@@ -15,7 +15,7 @@
           v-if="!item.schema.$hideLabel"
         >
           {{ item.schema.title || item.key }}
-          <small v-if="!inlined && !item.required">(optional)</small>
+          <!--<small v-if="!inlined && !item.required">(optional)</small>-->
         </div>
         <form-schema :required="item.required" :inline="inlined" :schema="item.schema" :value="item.model" :level="level+1" @input="onChildValueChange(item, $event)" @error="onChildErrorChange(item, $event)"/>
       </div>
@@ -106,7 +106,7 @@ export default {
       if (errorsDirty) {
         this.$emit('error', Object.values(this.errors).some(err => err))
       }
-      
+
       // clean value
       var copy_value = Object.assign({}, this.c_value)
       var valueDirty = false

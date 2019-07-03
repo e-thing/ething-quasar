@@ -9,6 +9,7 @@
         readonly
         :color="color"
       >
+        <q-icon v-if="icon" :name="icon"/>
         {{ resource.attr(attr) }} <small class="unit">{{unit}}</small>
       </q-knob>
     </div>
@@ -30,6 +31,7 @@ export default {
 
     props: {
       unit: String,
+      icon: String,
       min: {
         type: Number,
         default: 0

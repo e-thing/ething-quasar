@@ -15,10 +15,8 @@ export default {
           return resource.execute('setColor', hue, saturation)
         },
       },
-      schema:{
-        title: 'RGBW light',
-        description: 'control the light'
-      },
+      title: 'RGBW light',
+      description: 'control the light',
       minWidth: 160,
       minHeight: 200
     },

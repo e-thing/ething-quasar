@@ -159,13 +159,17 @@ export default {
     widgetNames () {
       var widgets = this.widgets || {}
       var options = Object.keys(widgets).map(k => {
-        var schema = widgets[k].schema
-        var label = schema.title || schema.label
-        if (schema.description) {
-          label += ' ('+schema.description+')'
+        var widget = widgets[k]
+        var schema = widget.schema
+        var label = widget.title || widget.schema.title || widget.schema.label
+        var description = widget.description || widget.schema.description
+
+        if (description) {
+          label += ' ('+description+')'
         }
+        
         return {
-          zIndex: widgets[k].zIndex,
+          zIndex: widget.zIndex,
           label,
           value: k
         }
@@ -180,11 +184,11 @@ export default {
     },
 
     widgetOptions () {
-      return extendSchema({}, dashboardWidgetSchemaDefaults, this.widgets[this.widgetId].schema)
+      return extendSchema(dashboardWidgetSchemaDefaults(), this.widgets[this.widgetId].schema)
     },
 
     resources () {
-      return this.$ething.arbo.find((r) => Object.keys(this.$ethingUI.get(r).widgets).length)
+      return this.$ething.arbo.find((r) => Object.values(this.$ethingUI.get(r).widgets).filter(w => w.in.indexOf('dashboard')!==-1).length)
     },
 
     filteredResources () {

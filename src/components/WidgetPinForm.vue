@@ -43,10 +43,13 @@ export default {
       var n = []
       for (var id in this.$ethingUI.widgets) {
         var w = this.$ethingUI.widgets[id]
-        var label = w.schema.title || w.schema.label
-        if (w.schema.description) {
-          label += ' ('+w.schema.description+')'
+        var label = w.title || w.schema.title || w.schema.label
+        var description = w.description || w.schema.description
+
+        if (description) {
+          label += ' ('+description+')'
         }
+        
         n.push({
           label,
           value: id
@@ -63,7 +66,7 @@ export default {
 
     selectedWidgetOptions () {
       if (this.selectedWidget) {
-        return extendSchema({}, dashboardWidgetSchemaDefaults, this.selectedWidget.schema)
+        return extendSchema(dashboardWidgetSchemaDefaults(), this.selectedWidget.schema)
       }
     }
 

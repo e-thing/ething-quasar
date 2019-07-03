@@ -6,9 +6,7 @@ export default {
   widgets: {
     'relay.switch': {
       // inherits Switch
-      schema: {
-        description: 'toggle the light'
-      }
+      description: 'toggle the light'
     }
   }
 

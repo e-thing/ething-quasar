@@ -48,23 +48,10 @@
           <q-icon :name="widget.icon" v-if="widget.icon"/>
           <span>{{ widget.title }}</span>
         </div>
-        <div class="bloc-content">
+        <div class="bloc-content" :class="widget.devicePage.padding ? '' : 'bloc-content-no-padding'">
           <widget :resource="resource" :component="widget.component" v-bind="widget.attributes" :minHeight="widget.minHeight" :minWidth="widget.minWidth"/>
         </div>
       </div>
-
-      <!-- sensor -->
-      <!--
-      <div class="page-block" v-if="isSensor">
-        <div class="bloc-title">
-          <q-icon :name="mdi-access-point"/>
-          <span>Sensors</span>
-        </div>
-        <div class="bloc-content bloc-content-no-padding">
-          <sensors-view :resource="resource"/>
-        </div>
-      </div>
-      -->
 
       <!-- attributes -->
       <div class="page-block attributes">
@@ -119,7 +106,7 @@
       <div class="page-block" v-if="Object.keys($ethingUI.get(resource).methods).length">
         <div class="bloc-title">
           <q-icon name="mdi-database" />
-          <span>API</span>
+          <span>Commands</span>
         </div>
         <div class="bloc-content bloc-content-no-padding">
           <device-api :device="resource" />
@@ -137,7 +124,6 @@ import DeviceApi from '../components/DeviceApi'
 import ResourceQItem from '../components/ResourceQItem'
 import ResourceBatteryChip from '../components/ResourceBatteryChip'
 import Widget from '../components/Widget'
-import SensorsGridView from '../components/SensorsGridView'
 
 export default {
   name: 'PageDevice',
@@ -147,12 +133,50 @@ export default {
     ResourceQItem,
     ResourceBatteryChip,
     Widget,
-    SensorsGridView,
   },
 
   data () {
+
     return {
-      showDetailledAttributes: false
+      showDetailledAttributes: false,
+      widgets: [],
+      _resourceId: null,
+      isSensor: false,
+    }
+  },
+
+  watch: {
+    resource : {
+      handler (resource) {
+        if (resource && this._resourceId != resource.id()) {
+          this.load()
+        }
+      },
+      immediate: true
+    }
+  },
+
+  methods: {
+    load () {
+      this._resourceId = this.resource.id()
+
+      this.isSensor = this.$ethingUI.isSubclass(this.resource, 'interfaces/Sensor')
+
+      var w = []
+      var widgets = this.$ethingUI.get(this.resource).widgets
+      for(var id in widgets) {
+        var widget = widgets[id]
+        if (widget.in.indexOf('devicePage') !== -1) {
+          w.push(widget)
+        }
+      }
+
+      // re order by zIndex
+      w.sort(function(a, b) {
+          return b.zIndex - a.zIndex;
+      });
+
+      this.widgets = w || null
     }
   },
 
@@ -171,24 +195,6 @@ export default {
     children () {
       return this.$ething.arbo.find(r => {
         return r.createdBy() === this.resource.id()
-      })
-    },
-
-    tables () {
-      return this.children.filter(r => {
-        return r.isTypeof('resources/Table')
-      })
-    },
-
-    files () {
-      return this.children.filter(r => {
-        return r.isTypeof('resources/File')
-      })
-    },
-
-    devices () {
-      return this.children.filter(r => {
-        return r.isTypeof('resources/Device')
       })
     },
 
@@ -220,10 +226,6 @@ export default {
       return attributes
     },
 
-    isSensor () {
-      return this.$ethingUI.isSubclass(this.resource, 'interfaces/Sensor')
-    },
-
     createdBys () {
       var createdBys = []
       var p = this.resource.createdBy()
@@ -237,24 +239,6 @@ export default {
 
       return createdBys.reverse()
     },
-
-    widgets () {
-      var w = []
-      var widgets = this.$ethingUI.get(this.resource).widgets
-      for(var id in widgets) {
-        var widget = widgets[id]
-        if (widget.in.indexOf('devicePage') !== -1) {
-          w.push(widget)
-        }
-      }
-
-      // re order by zIndex
-      w.sort(function(a, b) {
-          return b.zIndex - a.zIndex;
-      });
-
-      return w || null
-    }
 
   },
 

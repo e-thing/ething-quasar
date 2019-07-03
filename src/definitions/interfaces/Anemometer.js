@@ -2,14 +2,6 @@ import WDeviceMultiLabel from '../../components/widgets/WDeviceMultiLabel'
 
 export default {
 
-  icon: 'mdi-weather-windy',
-
-  data (resource) {
-    return {
-      'wind': resource.attr('wind_speed') + 'm/s'
-    }
-  },
-
   widgets: {
     'anemometer.wind': {
       in: ['dashboard', 'devicePage'],
@@ -53,10 +45,8 @@ export default {
           }
         ]
       },
-      schema: {
-        title: 'wind information',
-        description: 'show the wind speed and wind direction',
-      },
+      title: 'wind information',
+      description: 'show the wind speed and wind direction',
       minWidth: 100,
       minHeight: 100
     }

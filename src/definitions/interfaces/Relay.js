@@ -11,6 +11,9 @@ export default {
   },
 
   widgets: {
+    'switch.state': {
+      in: ['dashboard'],
+    },
     'relay.switch': {
       in: ['dashboard', 'devicePage'],
       component: WSwitch,
@@ -20,10 +23,8 @@ export default {
           return resource.execute('setState', value)
         }
       },
-      schema:{
-        title: 'switch',
-        description: 'toggle the device'
-      },
+      title: 'switch',
+      description: 'toggle the device',
       minWidth: 60,
       minHeight: 60
     }

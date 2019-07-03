@@ -19,10 +19,8 @@ export default {
         attr: 'level',
         unit: '%'
       },
-      schema: {
-        title: 'level (label)',
-        description: 'show the level'
-      },
+      title: 'level',
+      description: 'show the level as a label',
       minWidth: 100,
       minHeight: 100
     },
@@ -35,10 +33,8 @@ export default {
         min: 0,
         max: 100
       },
-      schema:{
-        title: 'level (knob)',
-        description: 'show the level'
-      },
+      title: 'level',
+      description: 'show the level in a knob component',
       minWidth: 160,
       minHeight: 180
     }

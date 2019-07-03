@@ -13,10 +13,8 @@ export default {
       },
       minWidth: 160,
       minHeight: 160,
-      schema: {
-        title: 'camera',
-        description: 'show the last image',
-      }
+      title: 'Camera',
+      description: 'show the last image',
     }
   }
 

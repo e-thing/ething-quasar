@@ -317,6 +317,7 @@ function compile(mro, definitions, resource) {
   // add some compile info
   compiled._dep = mro
   if (resource && dynamic) {
+    // if _cacheEtag is set, the cache will be invalid when the resource is updated
     compiled._cacheEtag = resource.attr('modifiedDate')
   }
 
@@ -375,7 +376,7 @@ var cached_meta_types = {}
 
 
 function get (definitions, type) {
-  var resource = null, id = null, m = {};
+  var resource = null, id = null, m = {}, isList = false;
 
   if (type instanceof EThing.Resource) {
     resource = type
@@ -383,9 +384,10 @@ function get (definitions, type) {
     id = resource.id()
   } else if(typeof type === 'object' && type!== null && type._type) {
     type = type._type
-  }
-
-  if (typeof type !== 'string') {
+  } else if (Array.isArray(type)) {
+    // compile a list of types (no cache)
+    isList = true
+  } else if (typeof type !== 'string') {
     throw 'type must be a string'
   }
 
@@ -397,7 +399,7 @@ function get (definitions, type) {
         return cache
       }
     }
-  } else {
+  } else if (!isList) {
     if (type in cached_meta_types) {
       return cached_meta_types[type]
     }
@@ -407,8 +409,12 @@ function get (definitions, type) {
   if (resource) {
     m = compile(resource.attr('extends'), definitions, resource)
   } else {
-    m = getFromPath(definitions, type)
-    m = compile(m._mro || [], definitions)
+    if (isList) {
+      m = compile(type, definitions)
+    } else {
+      m = getFromPath(definitions, type)
+      m = compile(m._mro || [], definitions)
+    }
   }
 
   // normalize
@@ -417,7 +423,7 @@ function get (definitions, type) {
   // store it in cache
   if (resource) {
     cached_meta_types[id] = m
-  } else {
+  } else if (!isList) {
     cached_meta_types[type] = m
   }
 

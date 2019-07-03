@@ -26,10 +26,8 @@ export default {
           }]
         }]
       },
-      schema: {
-        title: 'state (label)',
-        description: 'show the state of the switch'
-      },
+      title: 'state',
+      description: 'show the state of the switch',
       minWidth: 100,
       minHeight: 100
     }

@@ -15,6 +15,7 @@ import WClock from './WClock'
 import WFlow from './WFlow'
 import WFlowNode from './WFlowNode'
 import WRGBLight from './WRGBLight'
+import WDeviceSensor from './WDeviceSensor'
 
 
 export default {
@@ -32,6 +33,7 @@ export default {
   WDimmable,
   WGenericSensor,
   WRGBLight,
+  WDeviceSensor,
 
   WClock,
   WFlow,

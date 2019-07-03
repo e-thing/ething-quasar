@@ -277,7 +277,7 @@ DataSource.prototype.load = function (done) {
 function dataFormat (date, value) {
   var date = new Date(date)
   if (typeof value != 'number') {
-    if (typeof value === 'string') v = parseFloat(value)
+    if (typeof value === 'string') value = parseFloat(value)
     else if (typeof value === 'boolean') value = value ? 1 : 0
   }
   return [date.getTime(), value]
@@ -296,6 +296,7 @@ export default {
     preferences: {},
     expended: Boolean,
     dense: Boolean,
+    minimal: Boolean,
     readonly: Boolean,
     history: {},
     chartOptions: {
@@ -463,7 +464,8 @@ export default {
                   contextButton: {
                       menuItems: this.readonly ? ['refresh','separator','downloadPNG', 'downloadJPEG', 'downloadPDF'] : ['refresh','options','save','separator','downloadPNG', 'downloadJPEG', 'downloadPDF']
                   }
-              }
+              },
+              enabled: !this.minimal
             },
             rangeSelector: {
                 buttons: [{
@@ -487,14 +489,14 @@ export default {
                     text: 'All'
                 }],
                 selected: 1,
-                enabled: !this.dense
+                enabled: !(this.dense || this.minimal)
             },
             tooltip: {
                 xDateFormat: '%Y-%m-%d %H:%M',
                 valueDecimals: 3
             },
             navigator: {
-              enabled: !this.dense
+              enabled: !(this.dense || this.minimal)
             },
             /*responsive: {
                 rules: [{
@@ -529,10 +531,10 @@ export default {
             series: [],
             yAxis: [],
             title: {
-                text: title
+                text: this.minimal ? null : title
             },
             subtitle: {
-                text: this.dense ? null : preferences.subtitle
+                text: this.dense || this.minimal ? null : preferences.subtitle
             },
             time: {
               useUTC: false

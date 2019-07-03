@@ -89,7 +89,7 @@
     <modal :maximized="smallScreen" v-model="widgetEdit.modal" title="Edit" icon="edit" :valid-btn-disable="widgetEdit.error" @valid="widgetEditDone">
 
       <div class="q-title q-my-md">Options</div>
-      <form-schema :schema="widgetEdit.schema" v-model="widgetEdit.model" @error="widgetEdit.error = $event"/>
+      <form-schema :key="widgetEdit.key" :schema="widgetEdit.schema" v-model="widgetEdit.model" @error="widgetEdit.error = $event"/>
 
     </modal>
 
@@ -105,6 +105,7 @@ import Widget from '../components/Widget'
 import { debounce, extend } from 'quasar'
 import ResourcePinForm from '../components/ResourcePinForm'
 import WidgetPinForm from '../components/WidgetPinForm'
+import {extend as extendSchema} from '../utils/schema'
 import {dashboardWidgetSchemaDefaults} from '../core/widget'
 
 
@@ -153,7 +154,8 @@ export default {
           item: null,
           schema: {},
           model: {},
-          error: false
+          error: false,
+          key: 0
         }
     }
   },
@@ -369,14 +371,14 @@ export default {
     },
 
     editItem (layoutItem) {
-      var schema = Object.assign({}, dashboardWidgetSchemaDefaults, layoutItem.widget.schema)
+      var schema = extendSchema(dashboardWidgetSchemaDefaults(), layoutItem.widget.schema)
 
+      this.widgetEdit.key++
       this.widgetEdit.layoutItem = layoutItem
       this.widgetEdit.schema = schema
       this.widgetEdit.model = extend(true, {}, layoutItem.item.options)
       this.widgetEdit.error = false
       this.widgetEdit.modal = true
-
     },
 
     widgetEditDone () {

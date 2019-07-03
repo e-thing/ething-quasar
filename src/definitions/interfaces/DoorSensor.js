@@ -2,17 +2,15 @@ import WDeviceMultiLabel from '../../components/widgets/WDeviceMultiLabel'
 
 export default {
 
-  icon: 'mdi-door',
-
   data (resource) {
     return {
       'state': resource.attr('state') ? 'opened' : 'closed'
     }
   },
 
-  widgets: {
+  /*widgets: {
     'door.state': {
-      in: ['dashboard', 'devicePage'],
+      in: ['dashboard'],
       component: WDeviceMultiLabel,
       attributes: {
         items: [{
@@ -26,13 +24,11 @@ export default {
           }]
         }]
       },
-      schema: {
-        title: 'state (label)',
-        description: 'show the door state'
-      },
+      title: 'state',
+      description: 'show the door state',
       minWidth: 100,
       minHeight: 100
     }
-  }
+  }*/
 
 }

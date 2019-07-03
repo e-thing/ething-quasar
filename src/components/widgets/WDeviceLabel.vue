@@ -2,10 +2,11 @@
   <w-device-layout :resource="resource" v-bind="$attrs">
 
     <div class="absolute-center">
-      <span class="value" :style="{color: color}">
+      <q-icon v-if="icon" :name="icon" class="vertical-middle"/>
+      <span class="value vertical-middle" :style="{color: color}">
           {{ resource.attr(attr) }}
       </span>
-      <small v-if="unit" class="unit" style="filter: brightness(90%);">
+      <small v-if="unit" class="unit vertical-middle" style="filter: brightness(90%);">
           {{ unit }}
       </small>
     </div>
@@ -27,7 +28,8 @@ export default {
 
     props: {
       unit: String,
-      attr: String
+      attr: String,
+      icon: String,
     },
 
 
