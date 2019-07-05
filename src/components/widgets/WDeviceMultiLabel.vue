@@ -1,43 +1,35 @@
 <template>
-  <w-device-layout :resource="resource" v-bind="$attrs">
-
+  <div class="fit column items-center justify-center">
     <resource-observable :resource="resource" @change="update" />
 
-    <div class="fit column items-center justify-center">
-      <div class="col-auto" v-for="(item, index) in computedItems" :key="index">
-        <span v-if="item.label" class="label text-faded">
-            {{ item.label }} :
-        </span>
-        <span class="value" :style="{color: item.color}">
-          <template v-if="item.icon">
-            <img v-if="isUrlIcon(item.value)" :src="item.value" class="vertical-middle"/>
-            <q-icon v-else :name="item.value"/>
-          </template>
-          <template v-else>
-            {{ item.value }}
-          </template>
-        </span>
-        <small v-if="item.unit" class="unit" style="filter: brightness(90%);">
-            {{ item.unit }}
-        </small>
-      </div>
+    <div class="col-auto" v-for="(item, index) in computedItems" :key="index">
+      <span v-if="item.label" class="label text-faded">
+          {{ item.label }} :
+      </span>
+      <span class="value" :style="{color: item.color}">
+        <template v-if="item.icon">
+          <img v-if="isUrlIcon(item.value)" :src="item.value" class="vertical-middle"/>
+          <q-icon v-else :name="item.value"/>
+        </template>
+        <template v-else>
+          {{ item.value }}
+        </template>
+      </span>
+      <small v-if="item.unit" class="unit" style="filter: brightness(90%);">
+          {{ item.unit }}
+      </small>
     </div>
-  </w-device-layout>
+  </div>
 </template>
 
 <script>
 import WResource from './WResource'
-import WDeviceLayout from './WDeviceLayout'
 
 
 export default {
     name: 'WDeviceMultiLabel',
 
     mixins: [WResource],
-
-    components: {
-      WDeviceLayout
-    },
 
     props: {
       items: Array

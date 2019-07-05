@@ -1,21 +1,18 @@
 <template>
-  <w-device-layout :resource="resource" v-bind="$attrs">
-    <div class="absolute-center" style="min-width: 100%;">
-      <q-btn icon="mdi-lightbulb" flat size="xl" class="full-width" :color="state ? 'primary' : 'faded'" @click="p_toggle"/>
-      <div class="row">
-        <q-icon name="mdi-brightness-5" class="col-auto q-mr-sm"/>
-        <q-slider class="col" :min="0" :max="100" :disable="writing" :value="brightness" @change="p_setBrightness"/>
-        <q-icon name="mdi-brightness-7" class="col-auto q-ml-sm"/>
-      </div>
-      <q-slider :min="0" :max="360" :disable="writing" class="hue-slider" :value="colorHue" @change="p_setColorHue" fill-handle-always color="white"/>
+  <div class="absolute-center" style="min-width: 100%;">
+    <q-btn icon="mdi-lightbulb" flat size="xl" class="full-width" :color="state ? 'primary' : 'faded'" @click="p_toggle"/>
+    <div class="row">
+      <q-icon name="mdi-brightness-5" class="col-auto q-mr-sm"/>
+      <q-slider class="col" :min="0" :max="100" :disable="writing" :value="brightness" @change="p_setBrightness"/>
+      <q-icon name="mdi-brightness-7" class="col-auto q-ml-sm"/>
     </div>
-  </w-device-layout>
+    <q-slider :min="0" :max="360" :disable="writing" class="hue-slider" :value="colorHue" @change="p_setColorHue" fill-handle-always color="white"/>
+  </div>
 </template>
 
 
 <script>
 import WResource from './WResource'
-import WDeviceLayout from './WDeviceLayout'
 import { colors } from 'quasar'
 
 const { hexToRgb, rgbToHsv, hsvToRgb, rgbToHex } = colors
@@ -24,10 +21,6 @@ export default {
     name: 'WRGBLight',
 
     mixins: [WResource],
-
-    components: {
-      WDeviceLayout
-    },
 
     props: {
       setBrightness: Function,

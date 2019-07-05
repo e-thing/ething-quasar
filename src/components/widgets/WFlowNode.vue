@@ -1,13 +1,10 @@
 <template>
-    <w-layout noFooter :title="resource.basename()">
-      <flow-node :flow="resource" :node="node" class="absolute-center"/>
-    </w-layout>
+    <flow-node :flow="resource" :node="node" class="absolute-center"/>
 </template>
 
 <script>
 
 import WResource from './WResource'
-import WLayout from './WLayout'
 import FlowNode from '../FlowNode'
 
 
@@ -17,7 +14,6 @@ export default {
     extends: WResource,
 
     components: {
-        WLayout: WLayout,
         FlowNode
     },
 

@@ -22,6 +22,8 @@ options
 $placeholder: string
 */
 
+const customRequired = (v) => v !== undefined && v !== null
+
 export default {
   name: 'FormSchemaInput',
 
@@ -33,6 +35,9 @@ export default {
 
     if (this.c_schema.type === 'string') {
       if (typeof this.c_schema.minLength === 'number') {
+        if (this.c_schema.minLength===0) {
+          validators.required = customRequired
+        }
         validators.minLength = minLength(this.c_schema.minLength)
       }
       if (typeof this.c_schema.maxLength === 'number') {

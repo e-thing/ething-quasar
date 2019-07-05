@@ -167,7 +167,7 @@ export default {
         if (description) {
           label += ' ('+description+')'
         }
-        
+
         return {
           zIndex: widget.zIndex,
           label,
@@ -184,7 +184,7 @@ export default {
     },
 
     widgetOptions () {
-      return extendSchema(dashboardWidgetSchemaDefaults(), this.widgets[this.widgetId].schema)
+      return extendSchema(dashboardWidgetSchemaDefaults(this.widgets[this.widgetId], this.resource), this.widgets[this.widgetId].schema)
     },
 
     resources () {

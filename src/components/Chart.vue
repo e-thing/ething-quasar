@@ -225,7 +225,7 @@ DataSource.prototype.add = function (source, done) {
 
           if (typeof self.history === 'number') {
             var d = new Date( Date.now() - (parseInt(self.history)*1000) )
-						query = "date > dateTime('"+d.toISOString()+"')";
+						query = "$.date > dateTime('"+d.toISOString()+"')";
           }
 
           r.select({
@@ -707,6 +707,23 @@ export default {
         var sid = 's-' + this.table.id() + '-' + key
         var serie = chart.get(sid)
         if (serie) {
+          if (typeof this.dataSource.history === 'number') {
+            // remove older points
+            var ld = Date.now() - (parseInt(this.dataSource.history)*1000)
+            var cnt = 0
+            for (var i in serie.xData) {
+              var d = serie.xData[i]
+              if (d < ld) {
+                cnt++
+              } else {
+                break
+              }
+            }
+
+            for(var i=0; i<cnt; i++)
+              serie.removePoint(0, false)
+
+          }
           serie.addPoint(dataFormat(data.date, data[key]))
         }
       }

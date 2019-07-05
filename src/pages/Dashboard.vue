@@ -371,7 +371,7 @@ export default {
     },
 
     editItem (layoutItem) {
-      var schema = extendSchema(dashboardWidgetSchemaDefaults(), layoutItem.widget.schema)
+      var schema = extendSchema(dashboardWidgetSchemaDefaults(layoutItem.widget, layoutItem.resource), layoutItem.widget.schema)
 
       this.widgetEdit.key++
       this.widgetEdit.layoutItem = layoutItem

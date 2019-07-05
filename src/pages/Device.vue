@@ -49,7 +49,7 @@
           <span>{{ widget.title }}</span>
         </div>
         <div class="bloc-content" :class="widget.devicePage.padding ? '' : 'bloc-content-no-padding'">
-          <widget :resource="resource" :component="widget.component" v-bind="widget.attributes" :minHeight="widget.minHeight" :minWidth="widget.minWidth"/>
+          <widget :resource="resource" :component="widget.component" title="" footer="" v-bind="widget.attributes" :minHeight="widget.minHeight" :minWidth="widget.minWidth"/>
         </div>
       </div>
 
@@ -185,8 +185,11 @@ export default {
       var id = this.$route.params.id
       var r = this.$ething.arbo.get(id)
       if (id && id.length) {
-        if (!r || !r.isTypeof('resources/Device')) {
+        if (!r) {
           this.$router.replace('/404')
+        }
+        if (!r.isTypeof('resources/Device')) {
+          return
         }
       }
       return r

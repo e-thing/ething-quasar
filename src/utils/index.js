@@ -4,11 +4,13 @@ import FileSaver from 'file-saver'
 import VisibilityObserver from './VisibilityObserver'
 import {createModal} from './modal'
 import {injectScript} from './script'
-
+import {parse} from './templater'
 
 export {VisibilityObserver}
 export {createModal}
 export {injectScript}
+export {parse}
+
 
 /**
  * Get the raw type string of a value e.g. [object Object]
@@ -67,7 +69,7 @@ export function dateToString (d) {
     return '-'
   }
   var ts = d.getTime()
-  return date.formatDate(ts, 'YYYY-MM-DD HH:mm')
+  return date.formatDate(ts, 'YYYY-MM-DD HH:mm:ss')
 }
 
 export function sizeToString (s) {

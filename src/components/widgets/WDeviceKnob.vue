@@ -1,33 +1,25 @@
 <template>
-  <w-device-layout :resource="resource" v-bind="$attrs">
-
-    <div class="absolute-center">
-      <q-knob
-        :value="resource.attr(attr) || 0"
-        :min="min"
-        :max="max"
-        readonly
-        :color="color"
-      >
-        <q-icon v-if="icon" :name="icon"/>
-        {{ resource.attr(attr) }} <small class="unit">{{unit}}</small>
-      </q-knob>
-    </div>
-  </w-device-layout>
+  <div class="absolute-center">
+    <q-knob
+      :value="resource.attr(attr) || 0"
+      :min="min"
+      :max="max"
+      readonly
+      :color="color"
+    >
+      <q-icon v-if="icon" :name="icon"/>
+      {{ resource.attr(attr) }} <small class="unit">{{unit}}</small>
+    </q-knob>
+  </div>
 </template>
 
 <script>
 import WResource from './WResource'
-import WDeviceLayout from './WDeviceLayout'
 
 export default {
     name: 'WDeviceKnob',
 
     mixins: [WResource],
-
-    components: {
-      WDeviceLayout
-    },
 
     props: {
       unit: String,

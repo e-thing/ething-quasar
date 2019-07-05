@@ -6,7 +6,17 @@
         </div>
     </div>
     <div class="widget-content-layer" :class="inline ? '' : 'fit'">
-      <component ref="inner" :is="component" v-bind="$attrs" @error="error=$event"/>
+      <div class="column">
+        <div class="col-auto text-center text-faded ellipsis" v-if="!dense && c_title">
+          <small>{{ c_title }}</small>
+        </div>
+        <div class="col relative-position">
+          <component ref="inner" :is="component" v-bind="$attrs" @error="error=$event"/>
+        </div>
+        <div class="col-auto text-center text-light ellipsis" v-if="!dense && c_footer">
+          <small>{{ c_footer }}</small>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -26,7 +36,10 @@ export default {
       component: {},
       minWidth: Number,
       minHeight: Number,
-      inline: Boolean
+      inline: Boolean,
+      title: String,
+      footer: String,
+      dense: Boolean,
     },
     data() {
       return {
@@ -60,6 +73,50 @@ export default {
       hasError () {
         return !!this.error
       },
+      c_resource () {
+        return this.$attrs['resource']
+      },
+      c_title () {
+        var content = this.title
+        if (typeof content === 'undefined') {
+          // default
+          if (this.c_resource) {
+            content = '%name%'
+          }
+        }
+
+        return this.$ethingUI.utils.parse(content, (propName) => {
+          if (propName === 'createdBy') {
+            return this.$ething.arbo.get(this.c_resource.createdBy()).name()
+          } else {
+            var objPtr = this.c_resource[propName];
+            if (typeof objPtr === 'function') {
+              return objPtr.call(this.c_resource)
+            } else if (typeof objPtr !== 'undefined') {
+              return objPtr
+            } else {
+              return this.c_resource.attr(propName)
+            }
+          }
+        })
+      },
+      c_footer () {
+        var content = this.footer
+        if (typeof content === 'undefined') {
+          // default
+          if (this.c_resource) {
+            if (this.c_resource.lastSeenDate) {
+              content = this.c_resource.lastSeenDate()
+            } else if (this.c_resource.contentModifiedDate) {
+              content = this.c_resource.contentModifiedDate()
+            } else {
+              content = this.c_resource.modifiedDate()
+            }
+            content = content ? this.$ethingUI.utils.dateToString(content) : 'never'
+          }
+        }
+        return content
+      },
     },
 
     mounted () {
@@ -76,7 +133,16 @@ export default {
           return el.scrollWidth > el.clientWidth
         }
         return false
-      }
+      },
+      setError (error) {
+        this.error = error
+      },
+      setTitle (content) {
+        this.title = content
+      },
+      setFooter (content) {
+        this.footer = content
+      },
     }
 
 }

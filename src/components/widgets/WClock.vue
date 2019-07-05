@@ -26,7 +26,7 @@ function pad(n, width, z) {
   return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
 }
 
-var component = {
+var c = {
     name: 'WClock',
 
     mixins: [WWidget],
@@ -71,15 +71,10 @@ var component = {
 }
 
 registerWidget('clock', {
-  component,
-  schema: {
-    title: 'clock',
-    description: 'Display the time'
-  }
+  component: c,
+  title: 'clock',
+  description: 'Display the time',
 })
 
-export default component
+export default c
 </script>
-
-<style scoped>
-</style>

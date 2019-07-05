@@ -1,33 +1,27 @@
 <template>
-  <w-device-layout :resource="resource" v-bind="$attrs">
-    <div class="absolute-center">
-      <q-knob
-        :value="value"
-        :min="min"
-        :max="max"
-        :disable="writing"
-        :color="color"
-        @change="setLevel"
-      >
-        {{value}} <small class="unit" style="filter: brightness(90%);">{{unit}}</small>
-      </q-knob>
-    </div>
-  </w-device-layout>
+  <div class="absolute-center">
+    <q-knob
+      :value="value"
+      :min="min"
+      :max="max"
+      :disable="writing"
+      :color="color"
+      @change="setLevel"
+    >
+      {{value}} <small class="unit" style="filter: brightness(90%);">{{unit}}</small>
+    </q-knob>
+  </div>
 </template>
 
 
 <script>
 import WResource from './WResource'
-import WDeviceLayout from './WDeviceLayout'
+
 
 export default {
     name: 'WDimmable',
 
     mixins: [WResource],
-
-    components: {
-      WDeviceLayout
-    },
 
     props: {
       unit: {

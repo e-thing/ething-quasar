@@ -23,11 +23,16 @@ export var widgetDefaults = {
   in: ['dashboard'],
 }
 
-export function dashboardWidgetSchemaDefaults () {
+export function dashboardWidgetSchemaDefaults (widget, resource) {
   return {
     type: 'object',
-    required: ['color', 'bgColor'],
+    required: ['title', 'color', 'bgColor'],
     properties: {
+      title: {
+        type: 'string',
+        minLength: 0,
+        default: resource ? '%name%' : (widget.title || (widget.schema && widget.schema.title) || '')
+      },
       color: {
         type: 'string',
         '$component': 'color',
@@ -40,7 +45,7 @@ export function dashboardWidgetSchemaDefaults () {
         '$component': 'color',
         description: 'The color of the widget\'s background',
         default: '#ffffff'
-      }
+      },
     }
   }
 }
@@ -57,7 +62,15 @@ export function registerWidget (id, widget) {
   if (!widget.component) {
     throw new Error('No component attribute set in the widget definition')
   }
+
+  // keep reference of component object
+  var c = widget.component
+  delete widget.component
+
   widgets[id] = extend(true, {}, widgetDefaults, widget)
+
+  widgets[id].component = c
+
   return widgets[id]
 }
 

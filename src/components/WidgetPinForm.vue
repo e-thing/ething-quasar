@@ -13,7 +13,7 @@
 
       <div v-if="selectedWidgetOptions" class="q-my-md">
         <div class="q-title q-my-md">Options</div>
-        <form-schema :schema="selectedWidgetOptions" v-model="options" @error="optionsError = $event"/>
+        <form-schema :key="formKey" :schema="selectedWidgetOptions" v-model="options" @error="optionsError = $event"/>
       </div>
 
   </modal>
@@ -33,7 +33,15 @@ export default {
     return {
       selectedWidgetId: null,
       optionsError: false,
-      options: {}
+      options: {},
+      formKey: 0
+    }
+  },
+
+  watch: {
+    selectedWidgetId () {
+      this.formKey++
+      this.options = {}
     }
   },
 
@@ -49,7 +57,7 @@ export default {
         if (description) {
           label += ' ('+description+')'
         }
-        
+
         n.push({
           label,
           value: id
@@ -66,7 +74,12 @@ export default {
 
     selectedWidgetOptions () {
       if (this.selectedWidget) {
-        return extendSchema(dashboardWidgetSchemaDefaults(), this.selectedWidget.schema)
+        var schema = extendSchema(dashboardWidgetSchemaDefaults(this.selectedWidget), this.selectedWidget.schema)
+
+        // default title to the title of the widget
+
+
+        return schema
       }
     }
 
