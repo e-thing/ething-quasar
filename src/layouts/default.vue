@@ -18,26 +18,11 @@
         <q-btn class="gt-xs" flat label="Data" @click="$router.push('/data')" />
         <q-btn class="gt-xs" flat label="Flows" @click="$router.push('/flows')" />
 
-        <!--<q-btn-dropdown label="Data" flat content-style="color: #fff;background: #027be3;">
-          <q-list link>
-            <q-item v-close-overlay @click.native="$router.push('/data/tables')">
-              <q-item-main>
-                <q-item-tile label>Tables</q-item-tile>
-              </q-item-main>
-            </q-item>
-            <q-item v-close-overlay @click.native="$router.push('/data/files')">
-              <q-item-main>
-                <q-item-tile label>Files</q-item-tile>
-              </q-item-main>
-            </q-item>
-          </q-list>
-        </q-btn-dropdown>-->
-
         <q-toolbar-title class="gt-xs"/>
 
-        <q-btn v-if="refreshEnabled" class="gt-xs" flat dense icon="refresh" aria-label="refresh" @click="refresh"/>
-        <q-btn class="gt-xs" flat dense icon="settings" aria-label="settings" @click="$router.push('/settings')"/>
-        <q-btn v-if="!$ethingUI.autoLogin" class="gt-xs" flat dense icon="exit to app" aria-label="logout" @click="logout" />
+        <q-btn v-if="refreshEnabled" class="gt-xs" flat icon="refresh" aria-label="refresh" @click="refresh"/>
+        <q-btn class="gt-xs" flat icon="settings" aria-label="Settings" @click="$router.push('/settings')"/>
+        <q-btn v-if="!$ethingUI.autoLogin" class="gt-xs" flat icon="exit to app" aria-label="Logout" @click="logout" />
 
       </q-toolbar>
 

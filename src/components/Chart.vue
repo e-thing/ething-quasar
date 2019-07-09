@@ -298,6 +298,7 @@ export default {
     dense: Boolean,
     minimal: Boolean,
     readonly: Boolean,
+    noZoom: Boolean,
     history: {},
     chartOptions: {
       type: Object,
@@ -435,7 +436,7 @@ export default {
         this.options = extend(true, {
             chart: {
               plotBorderWidth: 1,
-              zoomType: 'x'
+              zoomType: this.noZoom ? '' : 'x'
             },
             exporting: {
               menuItemDefinitions: {
@@ -488,16 +489,21 @@ export default {
                     type: 'all',
                     text: 'All'
                 }],
-                selected: 1,
-                enabled: !(this.dense || this.minimal)
+                selected: this.noZoom ? 4 : 1,
+                enabled: !(this.dense || this.minimal || this.noZoom)
             },
             tooltip: {
                 xDateFormat: '%Y-%m-%d %H:%M',
                 valueDecimals: 3
             },
             navigator: {
-              enabled: !(this.dense || this.minimal)
+              enabled: !(this.dense || this.minimal || this.noZoom)
             },
+
+            scrollbar: {
+                enabled: !this.noZoom
+            },
+
             /*responsive: {
                 rules: [{
                     condition: {

@@ -8,78 +8,114 @@
       </q-inner-loading>
     </div>
 
-    <div v-else-if="layout.length==0" class="absolute-center text-center">
-      <p>
-        <img
-          src="~assets/sad.svg"
-          style="width:30vw;max-width:150px;"
-        >
-      </p>
-      <p class="text-faded">No widgets</p>
-      <q-btn icon="mdi-pin" label="pin resource" color="secondary" @click="pinResourceModal = true"/>
-      <q-btn icon="mdi-pin" label="pin widget" color="secondary" @click="pinWidgetModal = true" class="q-ml-md"/>
-    </div>
+    <div v-else-if="currentDashboard" class="page-fit page-fit-no-padding column">
 
-    <div v-else>
-
-      <q-btn-group flat >
-        <q-btn flat icon="mdi-pin" label="pin resource" color="faded" @click="pinResourceModal = true"/>
-        <q-btn flat icon="mdi-pin" label="pin widget" color="faded" @click="pinWidgetModal = true"/>
-        <q-btn flat icon="edit" :color="editing ? 'primary' : 'faded'" label="edit" @click="editing = !editing"/>
+      <q-btn-group flat class="col-auto row items-center">
+        <q-btn class="col-auto" flat icon="mdi-chevron-left" color="faded" :disabled="iDashboard <= 0" @click="iDashboard = iDashboard - 1"/>
+        <div class="col text-faded text-center">
+          <span class="vertical-middle">{{ currentDashboard.options.title }}</span>
+          <q-btn class="vertical-middle q-ml-sm" icon="more_vert" round flat dense color="light">
+            <q-popover>
+              <q-list link>
+                <q-item v-close-overlay @click.native="pinResourceModal = true">
+                  <q-item-side icon="mdi-pin" />
+                  <q-item-main label="pin resource" />
+                </q-item>
+                <q-item v-close-overlay @click.native="pinWidgetModal = true">
+                  <q-item-side icon="mdi-pin" />
+                  <q-item-main label="pin widget" />
+                </q-item>
+                <q-item v-close-overlay tag="label">
+                  <q-item-side>
+                    <q-checkbox v-model="editing" />
+                  </q-item-side>
+                  <q-item-main>
+                    <q-item-tile label>edit</q-item-tile>
+                  </q-item-main>
+                </q-item>
+                <q-item v-close-overlay @click.native="editDashboard()">
+                  <q-item-side icon="settings" />
+                  <q-item-main label="settings" />
+                </q-item>
+              </q-list>
+            </q-popover>
+          </q-btn>
+        </div>
+        <q-btn class="col-auto" flat :icon="iDashboard >= dashboards.length - 1 ? 'mdi-plus' : 'mdi-chevron-right'" color="faded" @click="nextOrAddDashboard()"/>
       </q-btn-group>
 
-      <div v-if="smallScreen && !$q.platform.is.desktop && !$q.platform.is.electron && !$q.platform.is.chromeExt" class="smallScreenContainer">
-        <div v-for="(layoutItem) in layout" :key="layoutItem.i" :style="{height: (layoutItem.h * grid.rowHeight + (layoutItem.h-1) * grid.margin) + 'px'}" class="bg-white">
-          <div v-show="editing" class="absolute fit widget-edit-layer">
-            <q-btn-group flat class="absolute-center">
-              <q-btn v-if="isEditable(layoutItem)" flat icon="settings" color="faded" @click="editItem(layoutItem)"/>
-              <q-btn flat icon="delete" color="negative" @click="removeItem(layoutItem)"/>
-            </q-btn-group>
-          </div>
-          <widget :ref="'widget_' + layoutItem.i" :key="layoutItem.key" class="absolute fit"
-            :component="layoutItem.widget.component"
-            :min-height="layoutItem.widget.minHeight"
-            v-bind="computeAttr(layoutItem)" />
+      <keep-alive>
+        <div v-if="currentDashboard.layout.length==0" class="absolute-center text-center">
+          <p>
+            <img
+              src="~assets/sad.svg"
+              style="width:30vw;max-width:150px;"
+            >
+          </p>
+          <p class="text-faded">No widgets</p>
+          <q-btn icon="mdi-pin" label="pin resource" color="secondary" @click="pinResourceModal = true"/>
+          <q-btn icon="mdi-pin" label="pin widget" color="secondary" @click="pinWidgetModal = true" class="q-ml-md"/>
         </div>
-      </div>
-      <grid-layout v-else
-        :layout="layout"
-        :col-num="grid.columnNb"
-        :row-height="grid.rowHeight"
-        :is-draggable="draggable"
-        :is-resizable="resizable"
-        :vertical-compact="true"
-        :margin="[grid.margin, grid.margin]"
-        :use-css-transforms="true"
-      >
-          <grid-item v-for="(layoutItem) in layout" :key="layoutItem.i"
-             :x="layoutItem.x"
-             :y="layoutItem.y"
-             :w="layoutItem.w"
-             :h="layoutItem.h"
-             :i="layoutItem.i"
-             :minW="layoutItem.minW"
-             :minH="layoutItem.minH"
-             @resized="resizedEvent"
-             @moved="movedEvent"
-             class="bg-white gditem"
-          >
-              <div v-show="editing" class="absolute fit widget-edit-layer">
-                <q-btn-group flat class="absolute-center" >
-                  <q-btn v-if="isEditable(layoutItem)" flat icon="settings" color="faded" @click="editItem(layoutItem)"/>
-                  <q-btn flat icon="delete" color="negative" @click="removeItem(layoutItem)"/>
-                </q-btn-group>
-              </div>
-              <div v-show="layoutItem.hasContentOverflow && !editing" class="absolute fit widget-overflow-layer">
-                <div class="absolute-center">
-                  This widget needs to be resized
+
+        <div v-else-if="smallScreen && !$q.platform.is.desktop && !$q.platform.is.electron && !$q.platform.is.chromeExt"
+          class="smallScreenContainer col"
+          :key="iDashboard"
+        >
+          <div v-for="(layoutItem) in currentDashboard.layout" :key="layoutItem.i" :style="{height: (layoutItem.h * grid.rowHeight + (layoutItem.h-1) * grid.margin) + 'px'}" class="bg-white">
+            <div v-show="editing" class="absolute fit widget-edit-layer">
+              <q-btn-group flat class="absolute-center">
+                <q-btn v-if="isEditable(layoutItem)" flat icon="settings" color="faded" @click="editItem(layoutItem)"/>
+                <q-btn flat icon="delete" color="negative" @click="removeItem(layoutItem)"/>
+              </q-btn-group>
+            </div>
+            <widget :ref="'widget_' + layoutItem.i" :key="layoutItem.key" class="absolute fit"
+              :component="layoutItem.widget.component"
+              :min-height="layoutItem.widget.minHeight"
+              v-bind="computeAttr(layoutItem)" />
+          </div>
+        </div>
+
+        <grid-layout v-else
+          class="col scroll"
+          :layout="currentDashboard.layout"
+          :col-num="currentDashboard.options.columnNb"
+          :row-height="grid.rowHeight"
+          :is-draggable="draggable"
+          :is-resizable="resizable"
+          :vertical-compact="true"
+          :margin="[grid.margin, grid.margin]"
+          :use-css-transforms="true"
+          :key="iDashboard"
+        >
+            <grid-item v-for="(layoutItem) in currentDashboard.layout" :key="layoutItem.i"
+               :x="layoutItem.x"
+               :y="layoutItem.y"
+               :w="layoutItem.w"
+               :h="layoutItem.h"
+               :i="layoutItem.i"
+               :minW="layoutItem.minW"
+               :minH="layoutItem.minH"
+               @resized="resizedEvent"
+               @moved="movedEvent"
+               class="bg-white gditem"
+            >
+                <div v-show="editing" class="absolute fit widget-edit-layer">
+                  <q-btn-group flat class="absolute-center" >
+                    <q-btn v-if="isEditable(layoutItem)" flat icon="settings" color="faded" @click="editItem(layoutItem)"/>
+                    <q-btn flat icon="delete" color="negative" @click="removeItem(layoutItem)"/>
+                  </q-btn-group>
                 </div>
-              </div>
-              <widget :ref="'widget_' + layoutItem.i" :key="layoutItem.key" class="absolute fit"
-                :component="layoutItem.widget.component"
-                v-bind="computeAttr(layoutItem)" />
-          </grid-item>
-      </grid-layout>
+                <div v-show="layoutItem.hasContentOverflow && !editing" class="absolute fit widget-overflow-layer">
+                  <div class="absolute-center">
+                    This widget needs to be resized
+                  </div>
+                </div>
+                <widget :ref="'widget_' + layoutItem.i" :key="layoutItem.key" class="absolute fit"
+                  :component="layoutItem.widget.component"
+                  v-bind="computeAttr(layoutItem)" />
+            </grid-item>
+        </grid-layout>
+      </keep-alive>
     </div>
 
     <resource-pin-form v-model="pinResourceModal" :pinned="pinnedResources" :maximized="smallScreen" @done="pin"/>
@@ -90,6 +126,13 @@
 
       <div class="q-title q-my-md">Options</div>
       <form-schema :key="widgetEdit.key" :schema="widgetEdit.schema" v-model="widgetEdit.model" @error="widgetEdit.error = $event"/>
+
+    </modal>
+
+    <modal :maximized="smallScreen" v-model="dashboardEdit.modal" :title="dashboardEdit.create ? 'New dashboard' : 'Edit dashboard'" icon="edit" :valid-btn-disable="dashboardEdit.error" @valid="dashboardEditDone">
+
+      <div class="q-title q-my-md">Options</div>
+      <form-schema :key="dashboardEdit.key" :schema="dashboardEdit.schema" v-model="dashboardEdit.model" @error="dashboardEdit.error = $event"/>
 
     </modal>
 
@@ -136,9 +179,10 @@ export default {
 
     return {
         loading: false,
-        layout: [],
+        iDashboard: 0,
+        dashboards: [],
         grid: {
-          columnNb: 6,
+          columnNb: 6, // default
           rowHeight: 60, // in px
           minWidth: minWidth,
           margin: 10
@@ -156,6 +200,15 @@ export default {
           model: {},
           error: false,
           key: 0
+        },
+
+        dashboardEdit: {
+          modal: false,
+          schema: {},
+          model: {},
+          error: false,
+          key: 0,
+          create: false
         }
     }
   },
@@ -168,23 +221,83 @@ export default {
       return this.editing
     },
     pinnedResources () {
-      return this.layout.map(l => l.item.options.resource).filter(r => !!r)
+      return this.currentDashboard ? this.currentDashboard.layout.map(l => l.item.options.resource).filter(r => !!r) : []
+    },
+    currentDashboard () {
+      return this.dashboards[this.iDashboard]
     }
   },
 
   methods: {
 
+    nextOrAddDashboard () {
+      if (this.iDashboard >= this.dashboards.length - 1) {
+        this.editDashboard(true)
+      } else {
+        this.iDashboard = this.iDashboard + 1
+      }
+    },
+
+    editDashboard (create) {
+      var schema = {
+        properties: {
+          title: {
+            type: 'string',
+            default: 'dashboard #' + this.dashboards.length
+          },
+          columnNb: {
+            title: 'column number',
+            type: 'integer',
+            minimum: 1,
+            maximum: 16,
+            default: this.grid.columnNb
+          }
+        },
+        required: ['title', 'columnNb']
+      }
+
+      var model = create ? {} : this.currentDashboard.options
+
+      this.dashboardEdit.key++
+      this.dashboardEdit.schema = schema
+      this.dashboardEdit.model = extend(true, {}, model)
+      this.dashboardEdit.error = false
+      this.dashboardEdit.modal = true
+      this.dashboardEdit.create = !!create
+    },
+
+    dashboardEditDone () {
+      if (!this.currentDashboard.error) {
+
+        if (this.dashboardEdit.create) {
+          this.dashboards.push({
+            options: this.dashboardEdit.model,
+            layout: []
+          })
+          this.iDashboard++
+        } else {
+          Object.assign(this.currentDashboard.options, this.dashboardEdit.model)
+        }
+
+        this.dashboardEdit.modal = false
+
+        this.save()
+      }
+    },
+
     getLayoutItem (index) {
-      for (var i in this.layout) {
-        if (this.layout[i].i === index) {
-          return this.layout[i]
+      var layout = this.currentDashboard.layout
+      for (var i in layout) {
+        if (layout[i].i === index) {
+          return layout[i]
         }
       }
     },
 
     checkWidgetsContentOverflow () {
-      for (let i in this.layout) {
-        let layoutItem = this.layout[i]
+      var layout = this.currentDashboard.layout
+      for (let i in layout) {
+        let layoutItem = layout[i]
         let component = this.$refs['widget_' + layoutItem.i][0]
         if (component) {
           setTimeout(() => {
@@ -243,18 +356,43 @@ export default {
       if (file) {
         file.read().then( (config) => {
 
-          if(typeof config == 'string')
+          if(typeof config == 'string') {
 						try{
 							config = JSON.parse(config);
 						}
 						catch(e){
               config = {}
             }
+          }
 
-          var layout = config.widgets || []
-          layout = layout.map(this.normalizeLayoutItem).filter(l => !!l)
+          if (typeof config.widgets != 'undefined') {
+            config = {
+              dashboards: [config]
+            }
+          }
 
-          this.layout = layout
+          var dashboards = config.dashboards || []
+
+          if (dashboards.length == 0) {
+            dashboards.push({})
+          }
+
+          dashboards = dashboards.map((d, i) => {
+            var options = extend(true, {
+              title: 'dashboard #' + i,
+              columnNb: this.grid.columnNb,
+            }, d.options || {})
+
+            var layout = d.widgets || []
+            layout = layout.map(l => this.normalizeLayoutItem(l, options)).filter(l => !!l)
+
+            return {
+              options,
+              layout
+            }
+          })
+
+          this.dashboards = dashboards
 
           setTimeout(() => {
             this.checkWidgetsContentOverflow()
@@ -269,7 +407,12 @@ export default {
 
     },
 
-    normalizeLayoutItem (item) {
+    normalizeLayoutItem (item, dashboardOptions) {
+
+      if (typeof dashboardOptions === 'undefined') {
+        dashboardOptions = this.currentDashboard.options
+      }
+
       try {
         var widget = null;
         var resource = null;
@@ -293,8 +436,9 @@ export default {
         var minWidth = 1
         var minHeight = 1
         if (widget.minWidth) {
-          var widthUnit = Math.floor(this.grid.minWidth / this.grid.columnNb)
-          minWidth = Math.max(Math.min(Math.round(widget.minWidth / widthUnit), this.grid.columnNb), 1)
+          var columnNb = dashboardOptions.columnNb
+          var widthUnit = Math.floor(this.grid.minWidth / columnNb)
+          minWidth = Math.max(Math.min(Math.round(widget.minWidth / widthUnit), columnNb), 1)
         }
         if (widget.minHeight) {
           minHeight = Math.max(Math.round(widget.minHeight / this.grid.rowHeight), 1)
@@ -338,23 +482,31 @@ export default {
 
     save: debounce( function(){
       this.file( file => {
-        var config = {}
-        config.widgets = this.layout.map(layoutItem => {
-          return Object.assign(layoutItem.item, {
-            x: layoutItem.x,
-            y: layoutItem.y,
-            w: layoutItem.w,
-            h: layoutItem.h
-          })
+
+        var dashboards = this.dashboards.map(d => {
+          return {
+            options: d.options,
+            widgets: d.layout.map(layoutItem => {
+              return Object.assign(layoutItem.item, {
+                x: layoutItem.x,
+                y: layoutItem.y,
+                w: layoutItem.w,
+                h: layoutItem.h
+              })
+            })
+          }
         })
-        file.write( JSON.stringify(config, null, 4) )
+
+        file.write( JSON.stringify({
+          dashboards
+        }, null, 4) )
       })
     }, 500),
 
     addWidget (attr) {
       var l  = this.normalizeLayoutItem(attr)
       if (l)
-        this.layout.push(l)
+        this.currentDashboard.layout.push(l)
     },
 
     pin (info) {
@@ -395,9 +547,9 @@ export default {
     },
 
     removeItem (layoutItem) {
-      var index = this.layout.indexOf(layoutItem)
+      var index = this.currentDashboard.layout.indexOf(layoutItem)
       if (index !== -1) {
-        this.layout.splice(index, 1)
+        this.currentDashboard.layout.splice(index, 1)
         this.save()
       }
     },

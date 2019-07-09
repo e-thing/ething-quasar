@@ -52,8 +52,9 @@ body
   width: 100% !important;
   height: 100% !important;
 
-  @media (min-width: $breakpoint-xs)
-    padding: 8px 8px;
+  &:not(.page-fit-no-padding)
+    @media (min-width: $breakpoint-xs)
+      padding: 8px 8px;
 
   .page-block
     background-color white
