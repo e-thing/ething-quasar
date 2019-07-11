@@ -4,8 +4,6 @@ import EThingUI from '../../core'
 
 export default {
 
-  icon: 'mdi-access-point',
-
   widgets: {
     'sensor.main': {
       in: 'devicePage',

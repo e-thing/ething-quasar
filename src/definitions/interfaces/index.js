@@ -2,7 +2,6 @@
 import Sensor from './Sensor'
 import Switch from './Switch'
 import Relay from './Relay'
-import Button from './Button'
 import Light from './Light'
 import Dimmer from './Dimmer'
 import Dimmable from './Dimmable'
@@ -18,7 +17,6 @@ export default {
   Sensor,
   Switch,
   Relay,
-  Button,
   Light,
   Dimmer,
   Dimmable,

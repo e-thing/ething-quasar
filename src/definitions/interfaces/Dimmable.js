@@ -2,8 +2,6 @@ import WDimmable from '../../components/widgets/WDimmable'
 
 export default {
 
-  icon: 'mdi-contrast-circle',
-
   data (resource) {
     return {
       'level': resource.attr('level') + '%'

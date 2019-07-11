@@ -2,8 +2,6 @@ import WCamera from '../../components/widgets/WCamera'
 
 export default {
 
-  icon: 'photo_camera',
-
   widgets: {
     'camera': {
       in: ['dashboard', 'devicePage'],
