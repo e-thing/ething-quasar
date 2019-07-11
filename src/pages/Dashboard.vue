@@ -1,5 +1,5 @@
 <template>
-  <q-page class="bg-grey-2">
+  <q-page class="dpage" :style="pageStyle">
 
     <div v-if="loading">
       <q-inner-loading class="text-center" :visible="loading">
@@ -11,10 +11,10 @@
     <div v-else-if="currentDashboard" class="page-fit page-fit-no-padding column">
 
       <q-btn-group flat class="col-auto row items-center">
-        <q-btn class="col-auto" flat icon="mdi-chevron-left" color="faded" :disabled="iDashboard <= 0" @click="iDashboard = iDashboard - 1"/>
-        <div class="col text-faded text-center">
+        <q-btn class="col-auto" flat icon="mdi-chevron-left" :disabled="iDashboard <= 0" @click="iDashboard = iDashboard - 1"/>
+        <div class="col text-center">
           <span class="vertical-middle">{{ currentDashboard.options.title }}</span>
-          <q-btn class="vertical-middle q-ml-sm" icon="more_vert" round flat dense color="light">
+          <q-btn class="vertical-middle q-ml-sm" icon="more_vert" round flat dense>
             <q-popover>
               <q-list link>
                 <q-item v-close-overlay @click.native="pinResourceModal = true">
@@ -41,7 +41,7 @@
             </q-popover>
           </q-btn>
         </div>
-        <q-btn class="col-auto" flat :icon="iDashboard >= dashboards.length - 1 ? 'mdi-plus' : 'mdi-chevron-right'" color="faded" @click="nextOrAddDashboard()"/>
+        <q-btn class="col-auto" flat :icon="iDashboard >= dashboards.length - 1 ? 'mdi-plus' : 'mdi-chevron-right'" @click="nextOrAddDashboard()"/>
       </q-btn-group>
 
       <keep-alive>
@@ -61,7 +61,7 @@
           class="smallScreenContainer col"
           :key="iDashboard"
         >
-          <div v-for="(layoutItem) in currentDashboard.layout" :key="layoutItem.i" :style="{height: (layoutItem.h * grid.rowHeight + (layoutItem.h-1) * grid.margin) + 'px'}" class="bg-white">
+          <div v-for="(layoutItem) in currentDashboard.layout" :key="layoutItem.i" :style="mergeStyle({height: (layoutItem.h * grid.rowHeight + (layoutItem.h-1) * grid.margin) + 'px'}, widgetStyle)">
             <div v-show="editing" class="absolute fit widget-edit-layer">
               <q-btn-group flat class="absolute-center">
                 <q-btn v-if="isEditable(layoutItem)" flat icon="settings" color="faded" @click="editItem(layoutItem)"/>
@@ -97,18 +97,14 @@
                :minH="layoutItem.minH"
                @resized="resizedEvent"
                @moved="movedEvent"
-               class="bg-white gditem"
+               class="gditem"
+               :style="widgetStyle"
             >
                 <div v-show="editing" class="absolute fit widget-edit-layer">
                   <q-btn-group flat class="absolute-center" >
                     <q-btn v-if="isEditable(layoutItem)" flat icon="settings" color="faded" @click="editItem(layoutItem)"/>
                     <q-btn flat icon="delete" color="negative" @click="removeItem(layoutItem)"/>
                   </q-btn-group>
-                </div>
-                <div v-show="layoutItem.hasContentOverflow && !editing" class="absolute fit widget-overflow-layer">
-                  <div class="absolute-center">
-                    This widget needs to be resized
-                  </div>
                 </div>
                 <widget :ref="'widget_' + layoutItem.i" :key="layoutItem.key" class="absolute fit"
                   :component="layoutItem.widget.component"
@@ -209,7 +205,7 @@ export default {
           error: false,
           key: 0,
           create: false
-        }
+        },
     }
   },
 
@@ -225,10 +221,55 @@ export default {
     },
     currentDashboard () {
       return this.dashboards[this.iDashboard]
-    }
+    },
+    pageStyle () {
+      if (this.currentDashboard) {
+        var style = {}
+        var options = this.currentDashboard.options
+
+        if (options.backgroundColor) {
+    			style['background-color'] = options.backgroundColor
+        }
+
+        if (options.backgroundImage) {
+          style['background-image'] = 'url('+options.backgroundImage+')'
+          style['background-position'] = 'center center'
+    			style['background-repeat'] = 'no-repeat'
+    			style['background-attachment'] = 'fixed'
+    			style['background-size'] = 'cover'
+        }
+
+        if (options.widgetsColor) {
+          style['color'] = options.widgetsColor
+        }
+
+        return style
+      }
+    },
+
+    widgetStyle () {
+      if (this.currentDashboard) {
+        var style = {}
+        var options = this.currentDashboard.options
+
+        if (options.widgetsBackgroundColor) {
+    			style['background-color'] = options.widgetsBackgroundColor
+        }
+
+        if (options.widgetsColor) {
+          style['color'] = options.widgetsColor
+        }
+
+        return style
+      }
+    },
   },
 
   methods: {
+
+    mergeStyle (a, b) {
+      return Object.assign(a, b)
+    },
 
     nextOrAddDashboard () {
       if (this.iDashboard >= this.dashboards.length - 1) {
@@ -251,7 +292,34 @@ export default {
             minimum: 1,
             maximum: 16,
             default: this.grid.columnNb
-          }
+          },
+          backgroundColor: {
+            title: 'background color',
+            type: 'string',
+            '$component': 'color',
+            description: 'The color of the dashboard\'s background',
+            default: '#f5f5f5'
+          },
+          backgroundImage: {
+            title: 'background image',
+            type: 'string',
+            description: 'url of the background image.'
+          },
+          widgetsColor: {
+            title: 'widget color',
+            type: 'string',
+            '$component': 'color',
+            description: 'The default color of the widget',
+            default: '#027be3'
+          },
+          widgetsBackgroundColor: {
+            title: 'widget background color',
+            type: 'string',
+            format: 'hexa',
+            '$component': 'color',
+            description: 'The default color of the widget\'s background',
+            default: '#ffffffff'
+          },
         },
         required: ['title', 'columnNb']
       }
@@ -276,7 +344,7 @@ export default {
           })
           this.iDashboard++
         } else {
-          Object.assign(this.currentDashboard.options, this.dashboardEdit.model)
+          this.$set(this.currentDashboard, 'options', this.dashboardEdit.model)
         }
 
         this.dashboardEdit.modal = false
@@ -294,31 +362,11 @@ export default {
       }
     },
 
-    checkWidgetsContentOverflow () {
-      var layout = this.currentDashboard.layout
-      for (let i in layout) {
-        let layoutItem = layout[i]
-        let component = this.$refs['widget_' + layoutItem.i][0]
-        if (component) {
-          setTimeout(() => {
-            this.$set(layoutItem, 'hasContentOverflow', component.hasContentOverflow())
-          }, 200)
-        }
-      }
-    },
-
     movedEvent (i, newX, newY) {
       this.save()
     },
 
     resizedEvent (i, newH, newW, newHPx, newWPx) {
-      var component = this.$refs['widget_' + i][0]
-
-      if (component) {
-        setTimeout(() => {
-          this.$set(this.getLayoutItem(i), 'hasContentOverflow', component.hasContentOverflow())
-        }, 200)
-      }
 
       this.save()
     },
@@ -394,10 +442,6 @@ export default {
 
           this.dashboards = dashboards
 
-          setTimeout(() => {
-            this.checkWidgetsContentOverflow()
-          }, 1)
-
         }).finally(() => {
           this.loading = false
         })
@@ -453,7 +497,6 @@ export default {
 
         var layoutItem = {
           key: 0,
-          hasContentOverflow: false,
           widget,
           item,
           resource,
@@ -473,7 +516,7 @@ export default {
     },
 
     computeAttr (layoutItem) {
-      var attributes = extend(true, layoutItem.widget.attributes, layoutItem.item.options)
+      var attributes = extend(true, {}, layoutItem.widget.attributes, layoutItem.item.options)
       if (layoutItem.resource) {
         attributes.resource = layoutItem.resource // override widget id by instance
       }
@@ -566,6 +609,10 @@ export default {
 <style lang="stylus" scoped>
 @import '~variables'
 
+.dpage {
+  background-color: #f5f5f5;
+}
+
 /* Cf. https://github.com/taye/interact.js/issues/580 */
 .gditem {
   -ms-touch-action: none;
@@ -573,13 +620,13 @@ export default {
 }
 
 .vue-grid-item {
-    border: 1px solid #f4f4f4;
+    /*border: 1px solid #f4f4f4;*/
 }
 
 .smallScreenContainer > div {
   width: 100%;
   position: relative;
-  border: 1px solid #f4f4f4;
+  /*border: 1px solid #f4f4f4;*/
 }
 
 .smallScreenContainer > div:not(:first-child) {

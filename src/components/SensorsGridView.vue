@@ -40,10 +40,13 @@ export default {
             var attr = {
               title: prop.title || propName,
               unit: prop.unit,
-              minHeight: 160,
-              minWidth: 160,
+              icon: prop.icon,
+              minHeight: 220,
+              minWidth: 220,
               component: 'WDeviceLabel',
-              attr: propName
+              attr: propName,
+              color: '#027be3',
+              bgColor: '#ffffff'
             }
 
             if (prop.type === 'number' && typeof prop.minimum == 'number' && typeof prop.maximum == 'number') {

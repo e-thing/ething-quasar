@@ -9,7 +9,8 @@
 
       <div class="gt-xs col q-ml-sm relative-position bg-white" style="height: 220px">
 
-        <chart :preferences="attr.chart.table" minimal expended v-if="!!attr.chart" />
+        <!--<chart :preferences="attr.chart.table" minimal expended v-if="!!attr.chart" />-->
+        <widget class="absolute fit" component="WChart" :resource="attr.chart.table" color="#027be3" v-if="!!attr.chart" />
         <small v-else class="absolute-center text-light">No data</small>
       </div>
 
@@ -41,10 +42,13 @@ export default {
             var wattr = {
               title: prop.title || propName,
               unit: prop.unit,
+              icon: prop.icon,
               minHeight: 220,
               minWidth: 220,
               component: 'WDeviceLabel',
-              attr: propName
+              attr: propName,
+              color: '#027be3',
+              bgColor: '#ffffff'
             }
 
             if (prop.type === 'number' && typeof prop.minimum == 'number' && typeof prop.maximum == 'number') {

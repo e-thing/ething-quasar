@@ -10,11 +10,9 @@ export default {
   props: {
     color: {
       type: String,
-      default: '#027be3'
     },
     bgColor: {
       type: String,
-      default: '#ffffff'
     }
   },
 

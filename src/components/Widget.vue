@@ -53,8 +53,8 @@ export default {
 
         if (widgetInstance) {
 
-          style['background-color'] = widgetInstance.bgColor || '#FFFFFF'
-          style['color'] = widgetInstance.color || '#027be3'
+          if (widgetInstance.bgColor) style['background-color'] = widgetInstance.bgColor
+          if (widgetInstance.color) style['color'] = widgetInstance.color
 
           if (this.minWidth) {
             style.minWidth = this.minWidth + 'px'

@@ -1,28 +1,28 @@
 <template>
   <q-page class="page page-width-lg">
 
-    <div class="row justify-between page-block">
+    <div class="row justify-between page-block" style="background: transparent;">
 
       <div>
-        <q-btn class="q-mr-xs" label="All" flat :color="category==='' ? 'primary' : 'faded'" @click="category = ''"/>
-        <q-btn class="q-mr-xs" flat :color="category==='sensor' ? 'primary' : 'faded'" @click="category = 'sensor'">
+        <q-btn class="q-mr-xs bg-white" flat label="All" :text-color="category==='' ? 'primary' : 'faded'" @click="category = ''"/>
+        <q-btn class="q-mr-xs bg-white" flat :text-color="category==='sensor' ? 'primary' : 'faded'" @click="category = 'sensor'">
           <q-icon name="mdi-thermometer"/>
-          <span class="gt-xs">Sensor</span>
+          <span class="gt-sm q-ml-xs">Sensor</span>
         </q-btn>
-        <q-btn class="q-mr-xs" flat :color="category==='switch' ? 'primary' : 'faded'" @click="category = 'switch'">
+        <q-btn class="q-mr-xs bg-white" flat :text-color="category==='switch' ? 'primary' : 'faded'" @click="category = 'switch'">
           <q-icon name="mdi-lightbulb"/>
-          <span class="gt-xs">Switch/Light</span>
+          <span class="gt-sm q-ml-xs">Switch/Light</span>
         </q-btn>
-        <q-btn flat :color="category==='camera' ? 'primary' : 'faded'" @click="category = 'camera'">
+        <q-btn class="bg-white" flat :text-color="category==='camera' ? 'primary' : 'faded'" @click="category = 'camera'">
           <q-icon name="mdi-camera"/>
-          <span class="gt-xs">Camera</span>
+          <span class="gt-sm q-ml-xs">Camera</span>
         </q-btn>
       </div>
 
       <div class="row">
         <!--<q-search v-model="filter" hide-underline no-parent-field clearable/>-->
 
-        <q-btn-dropdown color="primary" :label="$q.screen.gt.xs ? 'create' : null" icon="add" flat dense>
+        <q-btn-dropdown class="bg-white" flat text-color="primary" :label="$q.screen.gt.xs ? 'create' : null" icon="add" dense>
           <q-list link>
             <template v-for="cat in categories">
               <q-list-header inset>{{ cat.name }}</q-list-header>

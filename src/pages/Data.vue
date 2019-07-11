@@ -1,50 +1,17 @@
 <template>
   <q-page class="page page-width-md">
 
-    <!--
-    <div class="row justify-between page-block">
-      <q-breadcrumbs class="q-pa-md">
-        <q-breadcrumbs-el v-for="(item, index) in pathItems" :key="index" :label="item.label" :icon="item.icon" :to="item.link" />
-      </q-breadcrumbs>
-
-      <q-btn-dropdown color="primary" label="Create" icon="add" flat >
-        <q-list link>
-          <q-item v-close-overlay @click.native="create('resources/File')">
-            <q-item-side :icon="$ethingUI.get('resources/File').icon" :color="$ethingUI.get('resources/File').color" />
-            <q-item-main>
-              <q-item-tile label>File</q-item-tile>
-            </q-item-main>
-          </q-item>
-
-          <q-item v-close-overlay @click.native="create('resources/Table')">
-            <q-item-side :icon="$ethingUI.get('resources/Table').icon" :color="$ethingUI.get('resources/Table').color" />
-            <q-item-main>
-              <q-item-tile label>Table</q-item-tile>
-            </q-item-main>
-          </q-item>
-
-          <q-item v-close-overlay @click.native="$router.push('/chart')">
-            <q-item-side icon="mdi-chart-line" :color="$ethingUI.get('resources/File').color" />
-            <q-item-main>
-              <q-item-tile label>Chart</q-item-tile>
-            </q-item-main>
-          </q-item>
-        </q-list>
-      </q-btn-dropdown>
-    </div>
-  -->
-
-    <div class="row justify-between page-block">
+    <div class="row justify-between page-block" style="background: transparent;">
       <div>
-        <q-btn class="q-mr-xs" label="All" flat :color="category==='' ? 'primary' : 'faded'" @click="category = ''"/>
-        <q-btn v-for="cat in categories" :key="cat.name" class="q-mr-xs" flat :color="category===cat.name ? 'primary' : 'faded'" @click="category = cat.name">
+        <q-btn class="q-mr-xs bg-white" label="All" flat :color="category==='' ? 'primary' : 'faded'" @click="category = ''"/>
+        <q-btn v-for="cat in categories" :key="cat.name" class="q-mr-xs bg-white" flat :color="category===cat.name ? 'primary' : 'faded'" @click="category = cat.name">
           <q-icon :name="cat.icon"/>
-          <span class="gt-xs">{{ cat.label }}</span>
+          <span class="gt-sm q-ml-xs">{{ cat.label }}</span>
         </q-btn>
       </div>
 
       <div class="row">
-        <q-btn-dropdown color="primary" label="Create" icon="add" flat >
+        <q-btn-dropdown class="bg-white" color="primary" label="Create" icon="add" flat dense >
           <q-list link>
             <q-item v-close-overlay @click.native="create('resources/File')">
               <q-item-side :icon="$ethingUI.get('resources/File').icon" :color="$ethingUI.get('resources/File').color" />
@@ -75,7 +42,7 @@
       <q-list link no-border>
 
         <resource-q-item v-for="resource in resources" :key="resource.id()" :resource="resource" />
-        
+
       </q-list>
     </div>
 

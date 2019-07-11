@@ -16,8 +16,10 @@
         >
           {{ item.schema.title || item.key }}
           <!--<small v-if="!inlined && !item.required">(optional)</small>-->
+
+          <q-toggle class="q-ml-sm" :value="item.enable" v-if="item.schema.$optional" @input="onEnableChange(item, $event)"/>
         </div>
-        <form-schema :required="item.required" :inline="inlined" :schema="item.schema" :value="item.model" :level="level+1" @input="onChildValueChange(item, $event)" @error="onChildErrorChange(item, $event)"/>
+        <form-schema v-if="item.enable" :required="item.required" :inline="inlined" :schema="item.schema" :value="item.model" :level="level+1" @input="onChildValueChange(item, $event)" @error="onChildErrorChange(item, $event)"/>
       </div>
     </template>
 
@@ -54,7 +56,8 @@ export default {
 
   data () {
     return {
-      errors: {}
+      errors: {},
+      cache: {}
     }
   },
 
@@ -71,7 +74,7 @@ export default {
         } else {
           if (!schema.properties[k]['$readOnly']) {
               // todo: warning, required does not work for object since this attribute is already used as array
-              if (schema.properties[k]['$required'] && requiredProperties.indexOf(k)===-1) {
+              if (schema.properties[k]['$required'] && requiredProperties.indexOf(k)===-1 && !schema.properties[k]['$optional']) {
                   requiredProperties.push(k)
               }
           } else {
@@ -121,11 +124,21 @@ export default {
       }
 
       return keyOrdered.map(key => {
+        var schema_ = schema.properties[key]
+        var value = (this.c_value || {})[key]
+
+        var enable = true
+
+        if (schema_.$optional) {
+          enable = this.c_value && (key in this.c_value)
+        }
+
         return {
           key,
-          schema: schema.properties[key],
+          schema: schema_,
           required:  requiredProperties.indexOf(key) !== -1,
-          model: (this.c_value || {})[key]
+          model: value,
+          enable
         }
       })
     }
@@ -145,6 +158,16 @@ export default {
     onChildErrorChange (item, val) {
       this.$set(this.errors, item.key, val)
       this.$emit('error', Object.values(this.errors).some(err => err))
+    },
+
+    onEnableChange (item, val) {
+      if (val) {
+        this.$set(this.c_value, item.key, this.cache[item.key])
+        delete this.cache[item.key]
+      } else {
+        this.cache[item.key] = this.c_value[item.key]
+        this.$delete(this.c_value, item.key)
+      }
     }
   },
 

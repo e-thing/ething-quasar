@@ -26,7 +26,7 @@ export var widgetDefaults = {
 export function dashboardWidgetSchemaDefaults (widget, resource) {
   return {
     type: 'object',
-    required: ['title', 'color', 'bgColor'],
+    required: ['title'],
     properties: {
       title: {
         type: 'string',
@@ -36,6 +36,7 @@ export function dashboardWidgetSchemaDefaults (widget, resource) {
       color: {
         type: 'string',
         '$component': 'color',
+        '$optional': true,
         description: 'The color of the widget',
         default: '#027be3'
       },
@@ -43,8 +44,10 @@ export function dashboardWidgetSchemaDefaults (widget, resource) {
         title: 'background color',
         type: 'string',
         '$component': 'color',
+        '$optional': true,
+        format: 'hexa',
         description: 'The color of the widget\'s background',
-        default: '#ffffff'
+        default: '#ffffffff'
       },
     }
   }
