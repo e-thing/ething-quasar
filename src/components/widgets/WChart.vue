@@ -1,5 +1,5 @@
 <template>
-  <chart :preferences="resource" :history="history" expended dense readonly no-zoom :chartOptions="chartOptions"/>
+  <chart :preferences="resource || {}" :history="history" expended minimal readonly no-zoom :chartOptions="chartOptions"/>
 </template>
 
 <script>

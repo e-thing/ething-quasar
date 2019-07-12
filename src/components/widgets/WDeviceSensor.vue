@@ -1,5 +1,5 @@
 <template>
-  <component :is="sensorAttributeInfo.component" :resource="resource" v-bind="sensorAttributeInfo.attrs" />
+  <component :is="sensorAttributeInfo.component" v-bind="sensorAttributeInfo.attrs" />
 </template>
 
 <script>
@@ -27,7 +27,10 @@ export default {
               var attrs = {
                 attr: propName,
                 unit: prop.unit,
-                icon: prop.icon
+                icon: prop.icon,
+                resource: this.resource,
+                color: this.color,
+                bgColor: this.bgColor,
               }
 
               if (prop.type === 'number' && typeof prop.minimum == 'number' && typeof prop.maximum == 'number') {
@@ -36,8 +39,24 @@ export default {
                 attrs.max = prop.maximum
               }
 
+              component = this.widgetType || component
+
+              if (component === 'WChart') {
+                // the resource is the table
+                attrs.resource = null
+                if (prop.history) {
+                  var tables = this.$ething.arbo.find(r => r.createdBy() == this.resource.id() && r.name() == propName)
+                  if (tables.length > 0) {
+                    attrs.resource = tables[0]
+                  }
+                }
+                /*if (!attrs.resource) {
+                  component = null
+                }*/
+              }
+
               return {
-                component: this.widgetType || component,
+                component,
                 attrs: Object.assign(attrs, this.$attrs)
               }
             }

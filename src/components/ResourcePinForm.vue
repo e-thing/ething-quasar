@@ -40,28 +40,25 @@
               class="q-mr-xs"
             />
           </div>
-
-
+          
           <div class="row gutter-xs q-my-sm" v-if="filteredResources.length">
             <div
-              class="resource"
-              :class="'col-xs-12 col-sm-6 col-md-4 col-lg-3 ' + (pinned.find(id => id === r.id()) ? 'pinned' : '')"
+              class="resource col-xs-12 col-sm-6 col-md-4 col-lg-3 col-xl-2"
+              :class="pinned.find(id => id === r.id()) ? 'pinned' : ''"
               v-for="r in filteredResources"
               :key="r.id()"
             >
-              <q-card
-                @click.native="select(r)"
-                style="height: 100%" flat square
-                class="cursor-pointer col-xs-12 col-sm-6"
-                :color="$ethingUI.get(r).color"
-                text-color="white"
+              <div class="cursor-pointer row items-center q-pa-md"
+                style="height: 100%"
+                @click="select(r)"
+                :class="'bg-' + $ethingUI.get(r).color"
               >
-                <q-card-title>
-                  <div class="ellipsis">{{ r.basename() }}</div>
-                  <div v-if="$ething.arbo.get(r.createdBy())" class="ellipsis" slot="subtitle">{{ $ething.arbo.get(r.createdBy()).basename() }}</div>
-                  <q-icon slot="right" :name="$ethingUI.get(r).icon" color="white"/>
-                </q-card-title>
-              </q-card>
+                <div class="col">
+                  <div class="ellipsis text-white">{{ r.basename() }}</div>
+                  <small v-if="$ething.arbo.get(r.createdBy())" class="ellipsis text-light">{{ $ething.arbo.get(r.createdBy()).basename() }}</small>
+                </div>
+                <q-icon class="col-auto" style="font-size: 120%;" :name="$ethingUI.get(r).icon" color="white"/>
+              </div>
             </div>
           </div>
           <div v-else class="q-my-sm q-mx-md text-faded">

@@ -435,8 +435,9 @@ export default {
 
         this.options = extend(true, {
             chart: {
-              plotBorderWidth: 1,
-              zoomType: this.noZoom ? '' : 'x'
+              plotBorderWidth: 0,
+              zoomType: this.noZoom ? '' : 'x',
+              spacingBottom: 10
             },
             exporting: {
               menuItemDefinitions: {
@@ -547,6 +548,14 @@ export default {
             }
         }, this.chartOptions)
 
+        if (!preferences.panes) {
+          this.loading = false
+          setTimeout(() => {
+            this.chart().showLoading('no data')
+          }, 1000)
+          return
+        }
+
         var marge = 5; // vertical space between 2 panes (in %)
         var paneHeight = (100-(preferences.panes.length-1)*marge)/preferences.panes.length; // in %
 
@@ -567,7 +576,7 @@ export default {
                 x: -3,
                 y: 4
             },
-            lineWidth: 1,
+            lineWidth: 0,
             opposite: false,
             showLastLabel: true,
             gridLineWidth: 1,
