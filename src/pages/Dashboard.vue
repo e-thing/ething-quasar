@@ -86,6 +86,7 @@
           :margin="[grid.margin, grid.margin]"
           :use-css-transforms="true"
           :key="iDashboard"
+          @click.native="bgClick"
         >
             <grid-item v-for="(layoutItem) in currentDashboard.layout" :key="layoutItem.i"
                :x="layoutItem.x"
@@ -153,6 +154,8 @@ var GridItem = VueGridLayout.GridItem
 
 const LAYOUT_FILENAME = ".dashboard.json"
 
+const DBL_CLICK_DELAY  = 200
+
 export default {
   name: 'PageDashboard',
 
@@ -206,6 +209,9 @@ export default {
           key: 0,
           create: false
         },
+
+        bgClickTs: 0,
+        bgClickTimer: null,
     }
   },
 
@@ -266,7 +272,32 @@ export default {
   },
 
   methods: {
+    bgClick (evt) {
+      var ts = Date.now()
 
+      if (ts - this.bgClickTs < DBL_CLICK_DELAY) {
+        // double click
+        clearTimeout(this.bgClickTimer)
+        //console.log('BG DBL CLICK', evt)
+
+        this.pinResourceModal = true
+
+      } else {
+        // 1 click ?
+        this.bgClickTimer = setTimeout(() => {
+          // yes 1 click
+          //console.log('BG CLICK', evt)
+
+          if (this.editing) {
+            this.editing = !this.editing
+          }
+
+        }, DBL_CLICK_DELAY + 10)
+
+        this.bgClickTs = ts
+      }
+
+    },
     mergeStyle (a, b) {
       return Object.assign(a, b)
     },
