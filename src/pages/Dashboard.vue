@@ -427,6 +427,31 @@ export default {
 
     },
 
+    initDashboard (dashboards) {
+      dashboards = dashboards || []
+
+      if (dashboards.length == 0) {
+        dashboards.push({})
+      }
+
+      dashboards = dashboards.map((d, i) => {
+        var options = extend(true, {
+          title: 'dashboard #' + i,
+          columnNb: this.grid.columnNb,
+        }, d.options || {})
+
+        var layout = d.widgets || []
+        layout = layout.map(l => this.normalizeLayoutItem(l, options)).filter(l => !!l)
+
+        return {
+          options,
+          layout
+        }
+      })
+
+      this.dashboards = dashboards
+    },
+
     load: function() {
       this.loading = true
 
@@ -450,33 +475,14 @@ export default {
             }
           }
 
-          var dashboards = config.dashboards || []
-
-          if (dashboards.length == 0) {
-            dashboards.push({})
-          }
-
-          dashboards = dashboards.map((d, i) => {
-            var options = extend(true, {
-              title: 'dashboard #' + i,
-              columnNb: this.grid.columnNb,
-            }, d.options || {})
-
-            var layout = d.widgets || []
-            layout = layout.map(l => this.normalizeLayoutItem(l, options)).filter(l => !!l)
-
-            return {
-              options,
-              layout
-            }
-          })
-
-          this.dashboards = dashboards
+          this.initDashboard(config.dashboards)
 
         }).finally(() => {
+          this.initDashboard()
           this.loading = false
         })
       } else {
+        this.initDashboard()
         this.loading = false
       }
 
