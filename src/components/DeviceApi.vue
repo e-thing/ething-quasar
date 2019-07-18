@@ -81,12 +81,20 @@ export default {
 
     data () {
         return {
-          operations: this.buildApi()
+          operations: [],
+          _resourceId: null
         }
     },
 
-    computed: {
-
+    watch: {
+      device : {
+        handler (resource) {
+          if (resource && this._resourceId != resource.id()) {
+            this.buildApi()
+          }
+        },
+        immediate: true
+      }
     },
 
     methods: {
@@ -119,7 +127,7 @@ export default {
           })
         }
 
-        return operations
+        this.operations = operations
       },
 
       hasParameters (operation) {
