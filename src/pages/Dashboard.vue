@@ -477,8 +477,9 @@ export default {
 
           this.initDashboard(config.dashboards)
 
-        }).finally(() => {
+        }).catch(err => {
           this.initDashboard()
+        }).finally(() => {
           this.loading = false
         })
       } else {
