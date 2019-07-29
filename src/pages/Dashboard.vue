@@ -8,7 +8,7 @@
       </q-inner-loading>
     </div>
 
-    <div v-else-if="currentDashboard" class="page-fit page-fit-no-padding column">
+    <div v-else-if="currentDashboard" class="page-fit page-fit-no-padding scroll column">
 
       <q-btn-group flat class="col-auto row items-center">
         <q-btn class="col-auto" flat icon="mdi-chevron-left" :disabled="iDashboard <= 0" @click="iDashboard = iDashboard - 1"/>
@@ -61,7 +61,7 @@
           class="smallScreenContainer col"
           :key="iDashboard"
         >
-          <div v-for="(layoutItem) in currentDashboard.layout" :key="layoutItem.i" :style="mergeStyle({height: (layoutItem.h * grid.rowHeight + (layoutItem.h-1) * grid.margin) + 'px'}, widgetStyle)">
+          <div v-for="(layoutItem) in currentDashboard.layout" :key="layoutItem.i" :style="{height: (layoutItem.h * grid.rowHeight + (layoutItem.h-1) * grid.margin) + 'px'}">
             <div v-show="editing" class="absolute fit widget-edit-layer">
               <q-btn-group flat class="absolute-center">
                 <q-btn v-if="isEditable(layoutItem)" flat icon="settings" color="faded" @click="editItem(layoutItem)"/>
@@ -99,7 +99,6 @@
                @resized="resizedEvent"
                @moved="movedEvent"
                class="gditem"
-               :style="widgetStyle"
             >
                 <div v-show="editing" class="absolute fit widget-edit-layer">
                   <q-btn-group flat class="absolute-center" >
@@ -253,7 +252,7 @@ export default {
       }
     },
 
-    widgetStyle () {
+    /*widgetStyle () {
       if (this.currentDashboard) {
         var style = {}
         var options = this.currentDashboard.options
@@ -268,12 +267,17 @@ export default {
 
         return style
       }
-    },
+    },*/
   },
 
   methods: {
     bgClick (evt) {
       var ts = Date.now()
+
+      if (! evt.srcElement.classList.contains('vue-grid-layout')) {
+        // only background click
+        return
+      }
 
       if (ts - this.bgClickTs < DBL_CLICK_DELAY) {
         // double click
@@ -558,6 +562,12 @@ export default {
       if (layoutItem.resource) {
         attributes.resource = layoutItem.resource // override widget id by instance
       }
+      if (!attributes.bgColor) {
+        attributes.bgColor = this.currentDashboard.options.widgetsBackgroundColor
+      }
+      if (!attributes.color) {
+        attributes.color = this.currentDashboard.options.widgetsColor
+      }
       return attributes
     },
 
@@ -616,8 +626,14 @@ export default {
 
     widgetEditDone () {
       if (!this.widgetEdit.error) {
+        var resource = this.widgetEdit.layoutItem.item.options.resource;
+        var options = this.widgetEdit.model
 
-        Object.assign(this.widgetEdit.layoutItem.item.options, this.widgetEdit.model)
+        if (resource) {
+          options = Object.assign({resource}, options)
+        }
+
+        this.$set(this.widgetEdit.layoutItem.item, 'options', options)
 
         this.widgetEdit.layoutItem.key++
 
@@ -669,6 +685,10 @@ export default {
 
 .smallScreenContainer > div:not(:first-child) {
   margin-top: 10px;
+}
+
+.smallScreenContainer > div:last-child {
+  margin-bottom: 10px;
 }
 
 .widget-edit-layer {
