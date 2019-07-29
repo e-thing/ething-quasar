@@ -24,16 +24,14 @@ export default {
     return {
       'flow.full': {
         component: WFlow,
-        schema: {
-          title: 'Flow widget',
-          description: 'interact with flow',
-        }
+        title: 'Flow widget',
+        description: 'interact with flow'
       },
       'flow.node': {
         component: WFlowNode,
+        title: 'Flow node widget',
+        description: 'interact with flow',
         schema: {
-          title: 'Flow node widget',
-          description: 'interact with flow',
           properties: {
             node: {
               description: 'the input/output node to display',

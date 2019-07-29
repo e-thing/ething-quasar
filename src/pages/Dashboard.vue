@@ -350,7 +350,7 @@ export default {
           widgetsBackgroundColor: {
             title: 'widget background color',
             type: 'string',
-            format: 'hexa',
+            '$format': 'hexa',
             '$component': 'color',
             description: 'The default color of the widget\'s background',
             default: '#ffffffff'

@@ -45,7 +45,7 @@ export function dashboardWidgetSchemaDefaults (widget, resource) {
         type: 'string',
         '$component': 'color',
         '$optional': true,
-        format: 'hexa',
+        '$format': 'hexa',
         description: 'The color of the widget\'s background',
         default: '#ffffffff'
       },

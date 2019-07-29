@@ -45,6 +45,12 @@
         <q-btn label="debug" flat :color="dbg.enabled?'primary':'faded'" @click="toggle_debug" />
       </div>
 
+      <div class="bottom-right-menu bg-secondary q-pl-md" v-if="selectedNodes.length>0">
+        <span class="text-white vertical-middle">{{ selectedNodes.length }} node{{ selectedNodes.length>1 ? 's' : ''}} selected</span>
+        <q-btn label="cancel" :round="$q.screen.xs" icon="mdi-cancel" flat color="white" @click="clearSelection()" />
+        <q-btn label="duplicate" :round="$q.screen.xs" icon="mdi-content-duplicate" flat color="white" @click="duplicate(selectedNodes);clearSelection();" />
+      </div>
+
       <drop @drop="handleDrop">
         <div ref="flowchart" class="flowchart jtk-surface jtk-surface-nopan" @click.self="flowchartClick">
             <div ref="node" class="node"
@@ -53,7 +59,9 @@
                   v-touch-hold.noMouse="node._hold"
                   @dblclick="node._dbclick"
                   @click="node._click"
-                  :class="{active: node._isActive}"
+                  @mousedown="node._mousedown"
+                  @mouseup="node._mouseup"
+                  :class="{active: node._isActive, selected: node._selected}"
             >
               <q-icon v-if="node._cls.icon" :name="node._cls.icon" class="icon" />
               <div class="content">
@@ -284,7 +292,8 @@ export default {
       },
       resourceFilter: null,
       activeNode: null,
-      showMenu: false
+      showMenu: false,
+      selectedNodes: []
     }
 
   },
@@ -354,6 +363,7 @@ export default {
 
     flowchartClick (evt) {
       this.setActiveNode(null)
+      this.clearSelection()
     },
 
     nodeFilter (node) {
@@ -500,18 +510,48 @@ export default {
 
       node._cls = cls
 
+      node._selected = false
+
       node._hold = (evt) => {
         this.editNode(node)
       }
 
       node._click = (evt) => {
-        if (this.$q.screen.xs && !node._isActive) {
-          this.setActiveNode(node)
+        if (this.$q.screen.xs) {
+          if (!node._isActive) {
+            this.setActiveNode(node)
+          }
+        } else {
+          //this.selectNode(node, !node._selected, evt.ctrlKey)
         }
       }
 
       node._dbclick = (evt) => {
         this.editNode(node)
+      }
+
+      node._mousedown = (evt) => {
+        if (evt.which === 1) {
+          this.mouseInfo = {
+            ts: evt.timeStamp,
+            x: evt.x,
+            y: evt.y
+          }
+        }
+      }
+
+      node._mouseup = (evt) => {
+        if (evt.which === 1 && this.mouseInfo) {
+
+          //if (evt.timeStamp - this.mouseInfo.ts < 500) {
+            var d = Math.sqrt( Math.pow(evt.x - this.mouseInfo.x, 2) + Math.pow(evt.y - this.mouseInfo.y, 2) )
+            if (d < 10) {
+              this.selectNode(node, !node._selected, evt.ctrlKey)
+            }
+          //}
+
+          this.mouseInfo = null
+        }
       }
 
       // active state
@@ -535,6 +575,12 @@ export default {
 
       this.nodes.push(node)
 
+      node._draw = () => {
+        if (node._el) {
+          node._el.style['border-color'] = node.color
+        }
+      }
+
       this.$nextTick(() => {
         var el = this.getNodeElement(node.id)
 
@@ -542,7 +588,8 @@ export default {
 
         el.style.left = node.x+'px'
         el.style.top = node.y+'px'
-        el.style['border-color'] = node.color
+
+        node._draw()
 
         this.instance.batch(() => {
 
@@ -616,6 +663,18 @@ export default {
 
     },
 
+    duplicate (nodes) {
+      if (!nodes || !nodes.length) return
+
+      nodes.forEach(node => {
+        var nodeCopy = this.cleanNode(node)
+        delete nodeCopy.id
+        nodeCopy.x += 50
+        nodeCopy.y += 50
+        this.addNodeToFlow(nodeCopy)
+      })
+    },
+
     setActiveNode (node) {
       if (node === this.activeNode) return
       if (this.activeNode) {
@@ -626,6 +685,35 @@ export default {
         this.activeNode = node
         node._activate()
       }
+    },
+
+    selectNode (node, selected, add) {
+      if (add) {
+        var i = this.selectedNodes.indexOf(node)
+        if (selected) {
+          if (i === -1) {
+            this.selectedNodes.push(node)
+          }
+        } else {
+          if (i !== -1) {
+            this.selectedNodes.splice(i, 1)
+          }
+        }
+        node._selected = selected
+      } else {
+        this.clearSelection()
+        if (selected) {
+          this.selectedNodes = [node]
+          node._selected = selected
+        }
+      }
+    },
+
+    clearSelection () {
+      this.selectedNodes.forEach(n => {
+        n._selected = false
+      })
+      this.selectedNodes = []
     },
 
     nodeIdToName (nodeId) {
@@ -740,6 +828,7 @@ export default {
       var model = Object.assign({}, this.edit.model, this.edit.extra || {})
       if (this.edit.node) {
         Object.assign(this.edit.node, model)
+        this.edit.node._draw()
       } else {
         this.addNodeToFlow(Object.assign({
           type: this.edit.type
@@ -932,6 +1021,14 @@ export default {
     z-index: 10;
   }
 
+  .bottom-right-menu {
+    display: inline-block;
+    position: absolute;
+    bottom: 26px;
+    right: 25px;
+    z-index: 10;
+  }
+
   .main {
     position: absolute;
     left: 300px;
@@ -1068,6 +1165,11 @@ export default {
       -o-box-shadow: 2px 2px 19px #ffb427;
       -webkit-box-shadow: 2px 2px 19px #ffb427;
       -moz-box-shadow: 2px 2px 19px #ffb427;
+  }
+
+  .flowchart .node.selected {
+    border-color: #26a69a !important;
+    border-width: 2px !important;
   }
 
   .flowchart .node > .node-dbg {

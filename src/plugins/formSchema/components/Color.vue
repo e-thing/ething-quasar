@@ -4,7 +4,7 @@
       :value="c_value"
       v-on:input="c_value = $event"
       :error="!!error"
-      :format-model="c_schema.format || 'hex'"
+      :format-model="c_schema.$format || 'hex'"
       :style="{'border-bottom': '4px solid '+c_value}"
       hide-underline
     />
@@ -13,6 +13,11 @@
 
 <script>
 import Input from './Input'
+
+/*
+options:
+$format: hex | hexa
+*/
 
 export default {
   name: 'FormSchemaColor',
