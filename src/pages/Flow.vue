@@ -71,7 +71,7 @@
                 <q-btn flat dense icon="edit" size="sm" color="faded"  @click.stop.prevent="editNode(node)" class="node-btn"/>
                 <q-btn flat dense icon="delete" size="sm" color="faded"  @click.stop.prevent="removeNode(node)" class="node-btn"/>
               </div>
-              <div class="node-dbg text-no-wrap q-caption" v-if="node._dbg.show">
+              <div class="node-dbg text-no-wrap q-caption" v-if="dbg.enabled">
                 <div>
                   id: {{ node.id }}
                 </div>
@@ -258,6 +258,20 @@ var connectorPaintStyle = {
     init = function (c) {
         //connection.getOverlay("label").setLabel(connection.source.getAttribute('data-id') + "-" + connection.target.getAttribute('data-id'));
     };
+
+
+function checkMouseEvent (evt) {
+  var path = evt.path
+  for(var i in path) {
+    var el = path[i]
+    if (el.classList.contains("node")) break
+    var type = el.type
+    if (type==='button' || type ==='input') {
+      return false
+    }
+  }
+  return true
+}
 
 
 export default {
@@ -517,20 +531,23 @@ export default {
       }
 
       node._click = (evt) => {
-        if (this.$q.screen.xs) {
+        if (!checkMouseEvent(evt)) return
+        /*if (this.$q.screen.xs) {
           if (!node._isActive) {
             this.setActiveNode(node)
           }
         } else {
           //this.selectNode(node, !node._selected, evt.ctrlKey)
-        }
+        }*/
       }
 
       node._dbclick = (evt) => {
+        if (!checkMouseEvent(evt)) return
         this.editNode(node)
       }
 
       node._mousedown = (evt) => {
+        if (!checkMouseEvent(evt)) return
         if (evt.which === 1) {
           this.mouseInfo = {
             ts: evt.timeStamp,
@@ -541,6 +558,7 @@ export default {
       }
 
       node._mouseup = (evt) => {
+        if (!checkMouseEvent(evt)) return
         if (evt.which === 1 && this.mouseInfo) {
 
           //if (evt.timeStamp - this.mouseInfo.ts < 500) {
@@ -1094,6 +1112,7 @@ export default {
       background-color: #eeeeef;
       color: black;
       font-family: helvetica, sans-serif;
+      cursor: pointer;
   }
 
   .node.node-menu {
@@ -1118,7 +1137,6 @@ export default {
     flex: 10000 1 0%;
     justify-content: center;
     align-items: center;
-    cursor: pointer;
     text-align: center;
     display: flex;
     font-size: 0.9em;

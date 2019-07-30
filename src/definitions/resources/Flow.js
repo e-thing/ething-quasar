@@ -39,7 +39,7 @@ export default {
               '$component': 'ething.flow.node',
               '$flow': flow,
               '$filter': function (flow_, node) {
-                return EThingUI.isSubclass(node.type, 'nodes/inputs/Input') || EThingUI.isSubclass(node.type, 'nodes/outputs/Output')
+                return EThingUI.isSubclass(node.type, 'nodes/Input') || EThingUI.isSubclass(node.type, 'nodes/Output')
               }
             }
           }

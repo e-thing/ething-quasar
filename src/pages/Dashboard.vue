@@ -86,7 +86,7 @@
           :margin="[grid.margin, grid.margin]"
           :use-css-transforms="true"
           :key="iDashboard"
-          @click.native="bgClick"
+          @click.native.self="bgClick"
         >
             <grid-item v-for="(layoutItem) in currentDashboard.layout" :key="layoutItem.i"
                :x="layoutItem.x"
@@ -274,10 +274,10 @@ export default {
     bgClick (evt) {
       var ts = Date.now()
 
-      if (! evt.srcElement.classList.contains('vue-grid-layout')) {
+      /*if (! evt.srcElement.classList.contains('vue-grid-layout')) {
         // only background click
         return
-      }
+      }*/
 
       if (ts - this.bgClickTs < DBL_CLICK_DELAY) {
         // double click

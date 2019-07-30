@@ -1,14 +1,22 @@
 <template>
-    <div class="row items-center">
-      <div class="inputs" :class="outputs.length ? 'col-6' : 'col-12'">
-        <div v-for="(node, index) in inputs" :key="index">
-          <flow-node :flow="resource" :node="node" />
-        </div>
+    <div class="fit" :class="outputs.length &&  inputs.length? 'row items-center' : ''">
+      <div class="inputs column justify-around items-center" :class="outputs.length ? 'col-6' : 'fit'" v-if="inputs.length">
+        <flow-node
+          v-for="(node, index) in inputs"
+          :key="index"
+          class="col-auto"
+          :flow="resource"
+          :node="node"
+        />
       </div>
-      <div class="outputs" :class="inputs.length ? 'col-6' : 'col-12'">
-        <div v-for="(node, index) in outputs" :key="index">
-          <flow-node :flow="resource" :node="node" />
-        </div>
+      <div class="outputs column justify-around items-center" :class="inputs.length ? 'col-6' : 'fit'" v-if="outputs.length">
+        <flow-node
+          v-for="(node, index) in outputs"
+          :key="index"
+          class="col-auto"
+          :flow="resource"
+          :node="node"
+        />
       </div>
     </div>
 </template>
@@ -35,9 +43,9 @@ export default {
           var inputs = []
           var outputs = []
           nodes.forEach(n => {
-            if (this.$ethingUI.isSubclass(n.type, 'nodes/inputs/Input')) {
+            if (this.$ethingUI.isSubclass(n.type, 'nodes/Input')) {
               inputs.push(n)
-            } else if (this.$ethingUI.isSubclass(n.type, 'nodes/outputs/Output')) {
+            } else if (this.$ethingUI.isSubclass(n.type, 'nodes/Output')) {
               outputs.push(n)
             }
           })

@@ -1,5 +1,5 @@
 <template>
-  <q-btn class="" :label="node.name" @click="_inject"/>
+  <q-btn class="" :label="node.name" @click.stop="_inject" />
 </template>
 
 <script>
@@ -12,9 +12,9 @@ export default {
     mixins: [Input],
 
     methods: {
-      _inject () {
+      _inject (evt) {
         this.inject(new Date().getTime() / 1000)
-      }
+      },
     }
 }
 
