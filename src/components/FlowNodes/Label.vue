@@ -13,7 +13,11 @@ export default {
     computed: {
       displayValue () {
         if (typeof this.data === 'undefined') return ''
-        return String(this.data)
+        try {
+          return JSON.stringify(this.data)
+        } catch(err) {
+          return String(this.data)
+        }
       }
     }
 }

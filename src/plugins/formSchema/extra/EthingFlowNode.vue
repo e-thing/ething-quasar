@@ -59,7 +59,12 @@ export default {
     filter (flow, node, schema) {
       var filter = schema['$filter']
       if (filter) {
-        if (!filter.call(schema, flow, node)) return false
+        if (typeof filter === 'string') {
+          if (!this.$ethingUI.isSubclass(node.type, filter)) return false
+        } else {
+          // function
+          if (!filter.call(schema, flow, node)) return false
+        }
       }
       return true
     }

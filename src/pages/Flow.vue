@@ -61,7 +61,7 @@
                   @click="node._click"
                   @mousedown="node._mousedown"
                   @mouseup="node._mouseup"
-                  :class="{active: node._isActive, selected: node._selected}"
+                  :class="{active: node._isActive, selected: node._selected, error: !!node._dbg.data.error}"
             >
               <q-icon v-if="node._cls.icon" :name="node._cls.icon" class="icon" />
               <div class="content">
@@ -70,6 +70,9 @@
               <div class="node-btns">
                 <q-btn flat dense icon="edit" size="sm" color="faded"  @click.stop.prevent="editNode(node)" class="node-btn"/>
                 <q-btn flat dense icon="delete" size="sm" color="faded"  @click.stop.prevent="removeNode(node)" class="node-btn"/>
+              </div>
+              <div class="node-error text-no-wrap q-caption" v-if="node._dbg.data.error">
+                {{ node._dbg.data.error }}
               </div>
               <div class="node-dbg text-no-wrap q-caption" v-if="dbg.enabled">
                 <div>
@@ -118,7 +121,7 @@
 
     </div>
 
-    <modal v-model="edit.show" :title="(edit.node?'Edit':'Add')+' '+edit.type" icon="add" :valid-btn-disable="edit.error" valid-btn-label="Add" @valid="onEditDone">
+    <modal v-model="edit.show" :title="editTitle()" icon="add" :valid-btn-disable="edit.error" valid-btn-label="Add" @valid="onEditDone">
       <form-schema :key="edit.key" :schema="edit.schema" v-model="edit.model" :context="edit.context" @error="edit.error = $event"/>
     </modal>
 
@@ -130,7 +133,7 @@
 import { jsPlumb } from 'jsplumb'
 import 'jsplumb/css/jsplumbtoolkit-defaults.css'
 
-import { extend } from 'quasar'
+import { debounce, extend } from 'quasar'
 
 import { Drag, Drop } from 'vue-drag-drop'
 import FlowRecursiveMenuNode from '../components/FlowRecursiveMenuNode'
@@ -287,6 +290,8 @@ export default {
       instance: null,
       nodes: [],
       edit: {
+        cls: {},
+        title: '',
         type: null,
         show: false,
         model: undefined,
@@ -398,10 +403,19 @@ export default {
 
     handleDrop (data, event) {
       this.addNodeClick(data.node, {
-        x: event.offsetX,
-        y: event.offsetY
+        x: Math.round((event.offsetX - 100) / 20) * 20, // round to the closest 20 pixels
+        y: Math.round((event.offsetY - 24) / 20) * 20,
       })
     },
+
+    save: debounce( function(){
+      var flow = this.exportFlow()
+      if (flow) {
+        this.resource.set(flow).catch((err) => {
+          console.error(err);
+        })
+      }
+    }, 500),
 
     deploy () {
       var flow = this.exportFlow()
@@ -417,7 +431,7 @@ export default {
 
     toggle_debug () {
       this.dbg.enabled = !this.dbg.enabled;
-      this.dbg.enabled ? this.start_debug() : this.stop_debug();
+      //this.dbg.enabled ? this.start_debug() : this.stop_debug();
     },
 
     start_debug () {
@@ -459,6 +473,10 @@ export default {
       console.log('[socketio:Flow] data:', data)
 
       this.dbg.items.push(data)
+
+      if (this.dbg.items.length > 100) {
+        this.dbg.items = this.dbg.items.slice(-100)
+      }
     },
 
     debug_info_handler (data) {
@@ -468,9 +486,11 @@ export default {
 
       var node = this.getNode(data.node)
 
-      node._dbg = Object.assign(node._dbg, {
-        data: data.data
-      })
+      if (node) {
+        node._dbg = Object.assign(node._dbg, {
+          data: data.data
+        })
+      }
     },
 
     addNodesToFlow (nodes, done) {
@@ -650,7 +670,8 @@ export default {
           this.instance.draggable(el, {
             grid: [20, 20],
             stop: (event, ui) => {
-              this.dirty = true
+              //this.dirty = true // no need to redeploy
+              this.save()
             },
             consumeStartEvent: false
           });
@@ -689,7 +710,8 @@ export default {
         delete nodeCopy.id
         nodeCopy.x += 50
         nodeCopy.y += 50
-        this.addNodeToFlow(nodeCopy)
+        this.addNodeToFlow(nodeCopy, this.save)
+        this.dirty = true
       })
     },
 
@@ -740,8 +762,11 @@ export default {
     },
 
     removeNode (node) {
-      this.removeNodeToFlow(node)
-      this.dirty = true
+      if (confirm("Delete node " + node.name + "?")) {
+        this.removeNodeToFlow(node)
+        this.dirty = true
+        this.save()
+      }
     },
 
     setDbgActiveNode (node, active) {
@@ -808,9 +833,14 @@ export default {
       this.edit.model = Object.assign(this.edit.model, this.cleanNode(node))
     },
 
+    editTitle () {
+      return (this.edit.node?'Edit':'Add')+' "'+this.edit.cls.title+'" node'
+    },
+
     _initEditObj (type) {
       var cls = this.getNodeCls(type)
 
+      this.edit.cls = cls
       this.edit.node = null
       this.edit.type = type
 
@@ -847,10 +877,11 @@ export default {
       if (this.edit.node) {
         Object.assign(this.edit.node, model)
         this.edit.node._draw()
+        this.save()
       } else {
         this.addNodeToFlow(Object.assign({
           type: this.edit.type
-        }, model))
+        }, model), this.save)
       }
       this.dirty = true
     },
@@ -965,6 +996,7 @@ export default {
         instance.bind("connection", (connInfo, originalEvent) => {
             init(connInfo.connection);
             this.dirty = true
+            this.save()
         });
 
         //
@@ -974,10 +1006,13 @@ export default {
             if (confirm("Delete connection from " + conn.sourceId + " to " + conn.targetId + "?")) {
                 instance.deleteConnection(conn);
                 this.dirty = true
+                this.save()
             }
         });
 
-        this.load()
+        this.load(() => {
+          this.start_debug()
+        })
 
     });
 
@@ -1185,8 +1220,13 @@ export default {
       -moz-box-shadow: 2px 2px 19px #ffb427;
   }
 
-  .flowchart .node.selected {
+  .flowchart .node.selected:not(.error) {
     border-color: #26a69a !important;
+    border-width: 2px !important;
+  }
+
+  .flowchart .node.error {
+    border-color: $negative !important;
     border-width: 2px !important;
   }
 
@@ -1194,6 +1234,13 @@ export default {
     position: absolute;
     left: 0px;
     top: 56px;
+  }
+
+  .flowchart .node > .node-error {
+    position: absolute;
+    left: 0px;
+    top: -24px;
+    color: $negative;
   }
 
   .flowchart.jtk-surface {

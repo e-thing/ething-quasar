@@ -1,7 +1,7 @@
 <template>
   <q-select
    v-bind:value="formattedValue"
-   v-on:input="$emit('input', $event)"
+   v-on:input="$emit('input', _formatValueOut($event))"
    :options="options"
    :multiple="multiple"
    v-bind="$attrs"
@@ -34,15 +34,15 @@ export default {
 
       formattedValue () {
         if (this.multiple) {
+          var val = [];
           if (Array.isArray(this.value)) {
-            return this.value
+            val = this.value
           } else if (this.value) {
-            return [this.value]
-          } else {
-            return []
+            val = [this.value]
           }
+          return val.map(this._formatValueIn)
         } else {
-          return this.value
+          return this._formatValueIn(this.value)
         }
       },
 
@@ -72,19 +72,19 @@ export default {
 
       options () {
         return this.nodes.map( item => {
-          var flow = item.node
+          var flow = item.flow
           var node = item.node
           var value;
 
           if (this.flow) {
-            value = this.useId ? node.id : node
+            value = node.id
           } else {
-            value = {
+            value = flow.id() + ':' + node.id
+            /*value = {
               flow: this.useId ? flow.id() : flow,
               node: this.useId ? node.id : node,
-            }
+            }*/
           }
-
 
           return {
             label: node.name,
@@ -93,11 +93,64 @@ export default {
             leftColor: this.$ethingUI.get(node.type).color,
             inset: true,
             stamp: this.$ethingUI.get(node.type).title,
-            sublabel: this.flow ? null : flow.basename
+            sublabel: this.flow ? null : flow.basename()
           }
         })
       }
     },
+
+    methods: {
+      _formatValueIn (value) {
+        if (this.flow) {
+          if (this.useId) {
+            return value
+          } else {
+            return value.id
+          }
+        } else {
+          /*value = {
+            flow: this.useId ? flow.id() : flow,
+            node: this.useId ? node.id : node,
+          }*/
+          if (this.useId) {
+            return value.flow + ':' + value.node
+          } else {
+            return value.flow.id() + ':' + value.node.id
+          }
+        }
+      },
+      _formatValueOut (value) {
+        if (this.flow) {
+          // node id
+          if (this.useId) {
+            return value
+          } else {
+            var nodes = this.nodes
+            for (var i in nodes) {
+              if (nodes[i].node.id === value) return nodes[i].node
+            }
+          }
+        } else {
+          /*
+            value = <flow id>:<node id>
+          }*/
+          var items = value.split(':')
+          var flowId = items[0]
+          var nodeId = items[1]
+          if (this.useId) {
+            return {
+              flow: flowId,
+              node: nodeId
+            }
+          } else {
+            var nodes = this.nodes
+            for (var i in nodes) {
+              if (nodes[i].flow.id() === flowId && nodes[i].node.id === nodeId) return nodes[i]
+            }
+          }
+        }
+      },
+    }
 
 
 }
