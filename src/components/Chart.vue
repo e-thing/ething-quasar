@@ -39,7 +39,7 @@
           Panes
           <q-btn flat size="md"
             color="blue-5"
-            @click="optionsData.panes.push({}); $v.optionsData.$touch()"
+            @click="optionsData.panes.push({curves:[]}); $v.optionsData.$touch()"
             label="Add pane"
             icon="add"
           />

@@ -74,7 +74,14 @@ var categories = [{
   label: 'File',
   icon: 'mdi-file',
   filter (r) {
-    return r instanceof this.$ething.File
+    return r instanceof this.$ething.File && !/\.plot$/.test(r.name())
+  }
+},{
+  name: 'chart',
+  label: 'Chart',
+  icon: 'mdi-chart-line',
+  filter (r) {
+    return r instanceof this.$ething.File && /\.plot$/.test(r.name())
   }
 }]
 
