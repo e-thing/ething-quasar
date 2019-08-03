@@ -1,21 +1,22 @@
 <template>
   <q-page>
+    <div class="page-fit scroll">
+      <div class="page-block">
+        <q-btn-group flat >
+          <q-btn :loading="saveLoading" label="save" icon="mdi-content-save-outline" @click="save"/>
+          <q-btn-dropdown :label="langage">
+            <q-list>
+              <q-item v-for="(value, key, index) in langages" :key="key" v-close-popup clickable @click="setLangage(key)">
+                <q-item-section>{{ key }}</q-item-section>
+              </q-item>
+            </q-list>
+          </q-btn-dropdown>
+        </q-btn-group>
+        <span class="title text-faded" :class="{dirty: dirty}">{{ resource.name() }}</span>
 
-    <q-btn-group flat >
-      <q-btn :loading="saveLoading" label="save" icon="mdi-content-save-outline" @click="save"/>
-      <q-btn-dropdown :label="langage">
-        <q-list link>
-          <q-item v-for="(value, key, index) in langages" :key="key" v-close-overlay @click.native="setLangage(key)">
-            <q-item-main>
-              <q-item-tile label>{{ key }}</q-item-tile>
-            </q-item-main>
-          </q-item>
-        </q-list>
-      </q-btn-dropdown>
-    </q-btn-group>
-    <span class="title text-faded" :class="{dirty: dirty}">{{ resource.name() }}</span>
-
-    <codemirror ref='cm' v-model="content" :options="cmOption" @changes="onChange"></codemirror>
+        <codemirror ref='cm' v-model="content" :options="cmOption" @changes="onChange"></codemirror>
+      </div>
+    </div>
 
   </q-page>
 </template>
@@ -209,7 +210,6 @@ export default {
 </script>
 
 <style lang="stylus">
-@import '~variables'
 
 .CodeMirror
   height 100%

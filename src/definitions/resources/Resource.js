@@ -6,10 +6,7 @@ export default {
   color: 'grey',
 
   properties: {
-    createdBy: {
-      '$component': 'ething.resource',
-      '$readOnly': true
-    },
+
     data: {
       '$readOnly': true
     },
@@ -31,6 +28,12 @@ export default {
         return (this.get(resource) || []).join(', ')
       }
     },
+
+    location: {
+      get: function (resource) {
+        return resource.attr('location') // necessary for ething.js <= v0.1.19
+      }
+    }
 
   }
 }

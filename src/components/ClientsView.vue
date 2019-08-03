@@ -5,18 +5,29 @@
       <div v-if="clients.length > 0">
 
         <q-card v-for="client in clients" :key="client.id" class="page-block">
-          <q-card-title>
-            {{ client.ip}}
-            <small v-if="isCurrent(client)" class="text-faded">(current)</small>
-            <div slot="right" class="row items-center">
-              <q-icon name="mdi-checkbox-blank-circle" :color="client.online ? 'green' : 'red'"></q-icon>
+
+          <q-card-section>
+            <div class="row items-center no-wrap">
+              <div class="col">
+                <div class="text-h6">
+                  {{ client.ip}} <small v-if="isCurrent(client)" class="text-faded">(current)</small>
+                </div>
+              </div>
+
+              <div class="col-auto">
+                <q-icon name="mdi-checkbox-blank-circle" :color="client.online ? 'green' : 'red'"></q-icon>
+              </div>
             </div>
-          </q-card-title>
-          <q-card-main class="text-faded">
+          </q-card-section>
+
+          <q-card-section class="text-faded">
             <div>online: {{ client.online }}</div>
             <div>platform: {{ client.platform }}</div>
             <div>browser: {{ client.browser }}</div>
-          </q-card-main>
+          </q-card-section>
+
+          <q-separator />
+
           <q-card-actions>
             <q-btn flat color="primary" label="Identify" @click="notify(client, 'hello !')"/>
             <q-btn flat color="faded" label="Remove" @click="remove(client)"/>
@@ -48,7 +59,7 @@ export default {
     methods: {
 
       isCurrent(client) {
-        return client.id === LocalStorage.get.item('ething.cid')
+        return client.id === LocalStorage.getItem('ething.cid')
       },
 
       load () {

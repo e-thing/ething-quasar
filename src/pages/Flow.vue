@@ -1,19 +1,23 @@
 <template>
-  <q-page>
+  <q-page class="bg-white">
 
-    <div class="leftMenu">
+    <div class="leftMenu" :class="{enabled: showMenu}" v-touch-swipe.left="closeMenu">
+
+      <div class="header text-right q-pa-sm" v-if="$q.screen.xs">
+        <q-btn v-if="$q.screen.xs" icon="close" label="close" flat color="faded" @click="showMenu = false" />
+      </div>
 
       <div class="node-filter q-px-md q-py-sm">
         <resource-select
           :display-value="resourceFilterDisplayValue"
           v-model="resourceFilter"
           clearable
-          hide-underline
-          stack-label="Resource Filter"
+          label="Resource Filter"
+          stack-label
         />
       </div>
 
-      <q-list separator no-border>
+      <q-list separator>
         <flow-recursive-menu-node :root="menu" @click="addNodeClick" :opened="resourceFilter!==null" :key="resourceFilter && resourceFilter.id()">
           <div slot-scope="{node}" class="node node-menu" :style="{'background-color': node.color}">
             <div class="endpoint" v-if="node.inputs"></div>
@@ -32,7 +36,8 @@
 
     <div class="main" :style="dbg.enabled ? {} : {right: 0}">
       <div class="top-left-menu">
-        <span class="text-faded">{{ resource.name() }}</span>
+        <q-btn icon="menu" flat color="faded" @click="showMenu = true" round class="q-mr-sm" v-if="$q.screen.xs"/>
+        <span class="text-faded filename">{{ resource.name() }}</span>
       </div>
 
       <div class="top-right-menu">
@@ -40,22 +45,36 @@
         <q-btn label="debug" flat :color="dbg.enabled?'primary':'faded'" @click="toggle_debug" />
       </div>
 
+      <div class="bottom-right-menu bg-secondary q-pl-md" v-if="selectedNodes.length>0">
+        <span class="text-white vertical-middle">{{ selectedNodes.length }} node{{ selectedNodes.length>1 ? 's' : ''}} selected</span>
+        <q-btn label="cancel" :round="$q.screen.xs" icon="mdi-cancel" flat color="white" @click="clearSelection()" />
+        <q-btn label="duplicate" :round="$q.screen.xs" icon="mdi-content-duplicate" flat color="white" @click="duplicate(selectedNodes);clearSelection();" />
+      </div>
+
       <drop @drop="handleDrop">
-        <div ref="flowchart" class="flowchart jtk-surface jtk-surface-nopan">
+        <div ref="flowchart" class="flowchart jtk-surface jtk-surface-nopan" @click.self="flowchartClick">
             <div ref="node" class="node"
                   v-for="node in nodes" :key="node.id" :data-id="node.id"
                   @mouseover="nodeHoverHandler(node, true)" @mouseout="nodeHoverHandler(node, false)"
-                  :style="computeNodeStyle(node)"
+                  v-touch-hold.noMouse="node._hold"
+                  @dblclick="node._dbclick"
+                  @click="node._click"
+                  @mousedown="node._mousedown"
+                  @mouseup="node._mouseup"
+                  :class="{active: node._isActive, selected: node._selected, error: !!node._dbg.data.error}"
             >
               <q-icon v-if="node._cls.icon" :name="node._cls.icon" class="icon" />
               <div class="content">
                 <flow-node :flow="resource" :node="node" class="full-width ellipsis"/>
               </div>
               <div class="node-btns">
-                <q-btn flat dense icon="edit" size="sm" color="faded"  @click="editNode(node)" class="node-btn"/>
-                <q-btn flat dense icon="delete" size="sm" color="faded"  @click="removeNode(node)" class="node-btn"/>
+                <q-btn flat dense icon="edit" size="sm" color="faded"  @click.stop.prevent="editNode(node)" class="node-btn"/>
+                <q-btn flat dense icon="delete" size="sm" color="faded"  @click.stop.prevent="removeNode(node)" class="node-btn"/>
               </div>
-              <div class="node-dbg text-no-wrap q-caption" v-if="node._dbg.show">
+              <div class="node-error text-no-wrap text-caption" v-if="node._dbg.data.error">
+                {{ node._dbg.data.error }}
+              </div>
+              <div class="node-dbg text-no-wrap text-caption" v-if="dbg.enabled">
                 <div>
                   id: {{ node.id }}
                 </div>
@@ -68,15 +87,16 @@
       </drop>
     </div>
 
-    <div class="rightMenu" v-if="dbg.enabled">
+    <div class="rightMenu" v-if="dbg.enabled" v-touch-swipe.right="closeDebugger">
 
       <div class="text-right q-pa-sm">
         <q-btn v-if="dbg.items.length>0" icon="delete" flat color="faded" @click="dbg.items = []" />
+        <q-btn v-if="$q.screen.xs" icon="close" label="close" flat color="faded" @click="dbg.enabled = false" />
       </div>
 
       <div v-if="dbg.items.length>0">
         <div class="dbg-item q-pa-sm" v-for="(item, index) in dbg.items" :key="index" @mouseover="setDbgActiveNode(item.node, true)" @mouseout="setDbgActiveNode(item.node, false)">
-          <div class="dbg-item-header q-caption">
+          <div class="dbg-item-header text-caption">
             <span class="dbg-item-header-date text-faded">
               {{ $ethingUI.utils.dateToString(item.ts * 1000) }}
             </span>
@@ -95,13 +115,13 @@
           </div>
         </div>
       </div>
-      <div v-else class="text-faded text-center q-caption">
+      <div v-else class="text-faded text-center text-caption">
         debug console
       </div>
 
     </div>
 
-    <modal v-model="edit.show" :title="(edit.node?'Edit':'Add')+' '+edit.type" icon="add" :valid-btn-disable="edit.error" valid-btn-label="Add" @valid="onEditDone">
+    <modal v-model="edit.show" :title="editTitle()" icon="add" :valid-btn-disable="edit.error" valid-btn-label="Add" @valid="onEditDone">
       <form-schema :key="edit.key" :schema="edit.schema" v-model="edit.model" :context="edit.context" @error="edit.error = $event"/>
     </modal>
 
@@ -113,18 +133,18 @@
 import { jsPlumb } from 'jsplumb'
 import 'jsplumb/css/jsplumbtoolkit-defaults.css'
 
-import { extend } from 'quasar'
+import { debounce, extend } from 'quasar'
 
 import { Drag, Drop } from 'vue-drag-drop'
 import FlowRecursiveMenuNode from '../components/FlowRecursiveMenuNode'
-import FlowNode from 'ething-quasar-core/src/components/FlowNode'
-import FlowNodes from 'ething-quasar-core/src/components/FlowNodes'
+import FlowNode from '../components/FlowNode'
+import FlowNodes from '../components/FlowNodes'
 
-import EThingUI from 'ething-quasar-core'
+import EThingUI from '../core'
 import EThing from 'ething-js'
 
-import ResourceSelect from 'ething-quasar-core/src/components/ResourceSelect'
-import FormSchemaEthingResource from 'ething-quasar-core/src/formSchema/extra/EthingResource'
+import ResourceSelect from '../components/ResourceSelect'
+import FormSchemaEthingResource from '../boot/formSchema/extra/EthingResource'
 
 import JsonFormatter from '../components/JsonFormatter'
 
@@ -171,6 +191,20 @@ function release_socket (sock) {
       }, SOCKET_RELEASE_DELAY)
     }
   }
+}
+
+
+function getEventPos (e) {
+  var out = {x:0, y:0};
+  if(e.type == 'touchstart' || e.type == 'touchmove' || e.type == 'touchend' || e.type == 'touchcancel'){
+    var touch = e.touches[0] || e.changedTouches[0];
+    out.x = touch.pageX;
+    out.y = touch.pageY;
+  } else if (e.type == 'mousedown' || e.type == 'mouseup' || e.type == 'mousemove' || e.type == 'mouseover'|| e.type=='mouseout' || e.type=='mouseenter' || e.type=='mouseleave') {
+    out.x = e.pageX;
+    out.y = e.pageY;
+  }
+  return out;
 }
 
 
@@ -229,6 +263,20 @@ var connectorPaintStyle = {
     };
 
 
+function checkMouseEvent (evt) {
+  var path = evt.path
+  for(var i in path) {
+    var el = path[i]
+    if (el.classList.contains("node")) break
+    var type = el.type
+    if (type==='button' || type ==='input') {
+      return false
+    }
+  }
+  return true
+}
+
+
 export default {
   name: 'PageFlow',
 
@@ -242,6 +290,8 @@ export default {
       instance: null,
       nodes: [],
       edit: {
+        cls: {},
+        title: '',
         type: null,
         show: false,
         model: undefined,
@@ -260,6 +310,9 @@ export default {
         opened: false
       },
       resourceFilter: null,
+      activeNode: null,
+      showMenu: false,
+      selectedNodes: []
     }
 
   },
@@ -319,14 +372,17 @@ export default {
   },
 
   methods: {
+    closeMenu () {
+      this.showMenu = false
+    },
 
-    computeNodeStyle (node) {
-      var style = {
-        'border-color': node.color,
-        'width': node._meta.width + 'px',
-        'height': node._meta.height + 'px',
-      }
-      return style
+    closeDebugger () {
+      this.dbg.enabled = false
+    },
+
+    flowchartClick (evt) {
+      this.setActiveNode(null)
+      this.clearSelection()
     },
 
     nodeFilter (node) {
@@ -347,10 +403,19 @@ export default {
 
     handleDrop (data, event) {
       this.addNodeClick(data.node, {
-        x: event.offsetX,
-        y: event.offsetY
+        x: Math.round((event.offsetX - 100) / 20) * 20, // round to the closest 20 pixels
+        y: Math.round((event.offsetY - 24) / 20) * 20,
       })
     },
+
+    save: debounce( function(){
+      var flow = this.exportFlow()
+      if (flow) {
+        this.resource.set(flow).catch((err) => {
+          console.error(err);
+        })
+      }
+    }, 500),
 
     deploy () {
       var flow = this.exportFlow()
@@ -366,7 +431,7 @@ export default {
 
     toggle_debug () {
       this.dbg.enabled = !this.dbg.enabled;
-      this.dbg.enabled ? this.start_debug() : this.stop_debug();
+      //this.dbg.enabled ? this.start_debug() : this.stop_debug();
     },
 
     start_debug () {
@@ -408,6 +473,10 @@ export default {
       console.log('[socketio:Flow] data:', data)
 
       this.dbg.items.push(data)
+
+      if (this.dbg.items.length > 100) {
+        this.dbg.items = this.dbg.items.slice(-100)
+      }
     },
 
     debug_info_handler (data) {
@@ -417,9 +486,11 @@ export default {
 
       var node = this.getNode(data.node)
 
-      node._dbg = Object.assign(node._dbg, {
-        data: data.data
-      })
+      if (node) {
+        node._dbg = Object.assign(node._dbg, {
+          data: data.data
+        })
+      }
     },
 
     addNodesToFlow (nodes, done) {
@@ -473,14 +544,67 @@ export default {
 
       node._cls = cls
 
-      // node component & metadata
-      var nodeComponent = cls.node || 'Base'
-      if (typeof nodeComponent === 'string') {
-        nodeComponent = FlowNodes[nodeComponent]
+      node._selected = false
+
+      node._hold = (evt) => {
+        this.editNode(node)
       }
-      nodeComponent = Vue.extend(nodeComponent)
-      var metadata = nodeComponent.options.metadata
-      node._meta = typeof metadata === 'function' ? metadata.call(this) : metadata
+
+      node._click = (evt) => {
+        if (!checkMouseEvent(evt)) return
+        /*if (this.$q.screen.xs) {
+          if (!node._isActive) {
+            this.setActiveNode(node)
+          }
+        } else {
+          //this.selectNode(node, !node._selected, evt.ctrlKey)
+        }*/
+      }
+
+      node._dbclick = (evt) => {
+        if (!checkMouseEvent(evt)) return
+        this.editNode(node)
+      }
+
+      node._mousedown = (evt) => {
+        if (!checkMouseEvent(evt)) return
+        if (evt.which === 1) {
+          this.mouseInfo = {
+            ts: evt.timeStamp,
+            x: evt.x,
+            y: evt.y
+          }
+        }
+      }
+
+      node._mouseup = (evt) => {
+        if (!checkMouseEvent(evt)) return
+        if (evt.which === 1 && this.mouseInfo) {
+
+          //if (evt.timeStamp - this.mouseInfo.ts < 500) {
+            var d = Math.sqrt( Math.pow(evt.x - this.mouseInfo.x, 2) + Math.pow(evt.y - this.mouseInfo.y, 2) )
+            if (d < 10) {
+              this.selectNode(node, !node._selected, evt.ctrlKey)
+            }
+          //}
+
+          this.mouseInfo = null
+        }
+      }
+
+      // active state
+
+      node._isActive = false
+
+      node._activate = () => {
+        node._isActive = true
+      }
+
+      node._deactivate = () => {
+        node._isActive = false
+      }
+
+
 
       this.$set(node, '_dbg', {
         show: false,
@@ -489,6 +613,12 @@ export default {
 
       this.nodes.push(node)
 
+      node._draw = () => {
+        if (node._el) {
+          node._el.style['border-color'] = node.color
+        }
+      }
+
       this.$nextTick(() => {
         var el = this.getNodeElement(node.id)
 
@@ -496,6 +626,8 @@ export default {
 
         el.style.left = node.x+'px'
         el.style.top = node.y+'px'
+
+        node._draw()
 
         this.instance.batch(() => {
 
@@ -538,8 +670,10 @@ export default {
           this.instance.draggable(el, {
             grid: [20, 20],
             stop: (event, ui) => {
-              this.dirty = true
-            }
+              //this.dirty = true // no need to redeploy
+              this.save()
+            },
+            consumeStartEvent: false
           });
 
           if (done) done(node)
@@ -568,14 +702,71 @@ export default {
 
     },
 
+    duplicate (nodes) {
+      if (!nodes || !nodes.length) return
+
+      nodes.forEach(node => {
+        var nodeCopy = this.cleanNode(node)
+        delete nodeCopy.id
+        nodeCopy.x += 50
+        nodeCopy.y += 50
+        this.addNodeToFlow(nodeCopy, this.save)
+        this.dirty = true
+      })
+    },
+
+    setActiveNode (node) {
+      if (node === this.activeNode) return
+      if (this.activeNode) {
+        this.activeNode._deactivate()
+        this.activeNode = null
+      }
+      if (node) {
+        this.activeNode = node
+        node._activate()
+      }
+    },
+
+    selectNode (node, selected, add) {
+      if (add) {
+        var i = this.selectedNodes.indexOf(node)
+        if (selected) {
+          if (i === -1) {
+            this.selectedNodes.push(node)
+          }
+        } else {
+          if (i !== -1) {
+            this.selectedNodes.splice(i, 1)
+          }
+        }
+        node._selected = selected
+      } else {
+        this.clearSelection()
+        if (selected) {
+          this.selectedNodes = [node]
+          node._selected = selected
+        }
+      }
+    },
+
+    clearSelection () {
+      this.selectedNodes.forEach(n => {
+        n._selected = false
+      })
+      this.selectedNodes = []
+    },
+
     nodeIdToName (nodeId) {
       var node = this.getNode(nodeId)
       return node && node.name ? node.name : nodeId
     },
 
     removeNode (node) {
-      this.removeNodeToFlow(node)
-      this.dirty = true
+      if (confirm("Delete node " + node.name + "?")) {
+        this.removeNodeToFlow(node)
+        this.dirty = true
+        this.save()
+      }
     },
 
     setDbgActiveNode (node, active) {
@@ -642,9 +833,14 @@ export default {
       this.edit.model = Object.assign(this.edit.model, this.cleanNode(node))
     },
 
+    editTitle () {
+      return (this.edit.node?'Edit':'Add')+' "'+this.edit.cls.title+'" node'
+    },
+
     _initEditObj (type) {
       var cls = this.getNodeCls(type)
 
+      this.edit.cls = cls
       this.edit.node = null
       this.edit.type = type
 
@@ -680,23 +876,24 @@ export default {
       var model = Object.assign({}, this.edit.model, this.edit.extra || {})
       if (this.edit.node) {
         Object.assign(this.edit.node, model)
+        this.edit.node._draw()
+        this.save()
       } else {
         this.addNodeToFlow(Object.assign({
           type: this.edit.type
-        }, model))
+        }, model), this.save)
       }
       this.dirty = true
     },
 
     cleanNode (node) {
       // copy
-      var copy = Object.assign({}, node)
-
-      // remove privates
-      delete copy._dbg
-      delete copy._cls
-      delete copy._el
-      delete copy._meta
+      var copy = {}
+      for (var i in node) {
+        // remove privates
+        if (i[0] == '_') continue
+        copy[i] = node[i]
+      }
 
       // update x && y
       copy.x = parseInt(node._el.style.left)
@@ -799,6 +996,7 @@ export default {
         instance.bind("connection", (connInfo, originalEvent) => {
             init(connInfo.connection);
             this.dirty = true
+            this.save()
         });
 
         //
@@ -808,10 +1006,13 @@ export default {
             if (confirm("Delete connection from " + conn.sourceId + " to " + conn.targetId + "?")) {
                 instance.deleteConnection(conn);
                 this.dirty = true
+                this.save()
             }
         });
 
-        this.load()
+        this.load(() => {
+          this.start_debug()
+        })
 
     });
 
@@ -824,7 +1025,9 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="stylus" scoped>
+
+
   .leftMenu {
     position: absolute;
     left: 0px;
@@ -834,6 +1037,8 @@ export default {
     border-right: 4px #d9d9d9 solid;
     overflow-y: auto;
     overflow-x: hidden;
+    background-color: white;
+    z-index: 1005;
   }
 
   .rightMenu {
@@ -845,20 +1050,34 @@ export default {
     border-left: 4px #d9d9d9 solid;
     overflow-y: auto;
     overflow-x: auto;
+    background-color: white;
+    z-index: 1000;
   }
 
   .top-left-menu {
     display: inline-block;
     position: absolute;
-    top: 18px;
+    top: 10px;
     left: 25px;
     z-index: 10;
+  }
+
+  .top-left-menu .filename {
+    line-height: 42px;
   }
 
   .top-right-menu {
     display: inline-block;
     position: absolute;
     top: 10px;
+    right: 25px;
+    z-index: 10;
+  }
+
+  .bottom-right-menu {
+    display: inline-block;
+    position: absolute;
+    bottom: 26px;
     right: 25px;
     z-index: 10;
   }
@@ -887,7 +1106,7 @@ export default {
     border-bottom: 1px #d9d9d9 solid;
   }
 
-  .node-filter {
+  .leftMenu > .node-filter, .leftMenu > .header {
     border-bottom: 4px #d9d9d9 solid;
   }
 
@@ -913,6 +1132,8 @@ export default {
   }
 
   .node {
+      width: 200px;
+      height: 48px;
       border: 1px solid #346789;
       box-shadow: 2px 2px 19px #aaa;
       -o-box-shadow: 2px 2px 19px #aaa;
@@ -926,6 +1147,7 @@ export default {
       background-color: #eeeeef;
       color: black;
       font-family: helvetica, sans-serif;
+      cursor: pointer;
   }
 
   .node.node-menu {
@@ -950,7 +1172,6 @@ export default {
     flex: 10000 1 0%;
     justify-content: center;
     align-items: center;
-    cursor: pointer;
     text-align: center;
     display: flex;
     font-size: 0.9em;
@@ -999,11 +1220,59 @@ export default {
       -moz-box-shadow: 2px 2px 19px #ffb427;
   }
 
+  .flowchart .node.selected:not(.error) {
+    border-color: #26a69a !important;
+    border-width: 2px !important;
+  }
+
+  .flowchart .node.error {
+    border-color: $negative !important;
+    border-width: 2px !important;
+  }
+
   .flowchart .node > .node-dbg {
     position: absolute;
     left: 0px;
     top: 56px;
   }
+
+  .flowchart .node > .node-error {
+    position: absolute;
+    left: 0px;
+    top: -24px;
+    color: $negative;
+  }
+
+  .flowchart.jtk-surface {
+    touch-action: auto;
+  }
+
+  @media (max-width: $breakpoint-xs)
+    .leftMenu:not(.enabled) {
+      display: none;
+    }
+
+    .leftMenu {
+      width: 100%;
+      border-right: none;
+    }
+
+    .main {
+      left: 0px !important;
+      right: 0px !important;
+    }
+
+    .rightMenu {
+      width: 100%;
+      border-left: none;
+    }
+
+    .flowchart .node.active > .node-btns {
+      display: block;
+    }
+
+
+
 
 </style>
 

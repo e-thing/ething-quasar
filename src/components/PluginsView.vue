@@ -3,19 +3,29 @@
   <div class="page page-width-sm">
 
     <div class="page-block page-block-padding">
-      <div class="q-title q-title-opacity q-mb-md">Installed</div>
+      <div class="text-h6 q-mb-md">Installed</div>
 
       <div v-if="installedPlugins.length > 0">
-        <q-card class="q-my-sm" color="secondary" v-for="plugin in installedPlugins" :key="plugin.name">
-          <q-card-title>
-            {{ plugin.name }}
-            <span v-if="plugin.package.version" slot="subtitle">version: {{ plugin.package.version }}</span>
-            <q-icon slot="right" name="mdi-puzzle" />
-          </q-card-title>
-          <q-card-main>
+        <q-card class="q-my-sm bg-secondary text-white" v-for="plugin in installedPlugins" :key="plugin.name">
+
+          <q-card-section>
+            <div class="row items-center no-wrap">
+              <div class="col">
+                <div class="text-h6">
+                  {{ plugin.name }} <span v-if="plugin.package.version" slot="subtitle">version: {{ plugin.package.version }}</span>
+                </div>
+              </div>
+
+              <div class="col-auto">
+                <q-icon slot="right" name="mdi-puzzle" />
+              </div>
+            </div>
+          </q-card-section>
+
+          <q-card-section>
             {{ plugin.package.summary || 'no description' }}
-          </q-card-main>
-          <q-card-separator />
+          </q-card-section>
+
         </q-card>
       </div>
       <div v-else class="text-faded">
@@ -24,31 +34,49 @@
     </div>
 
     <div v-if="localPlugins.length > 0" class="page-block page-block-padding">
-      <div class="q-title q-title-opacity q-mb-md">Local</div>
+      <div class="text-h6 q-mb-md">Local</div>
 
-      <q-card class="q-my-sm" color="secondary" v-for="plugin in localPlugins" :key="plugin.name">
-        <q-card-title>
-          {{ plugin.name }}
-          <span v-if="plugin.version" slot="subtitle">version: {{ plugin.version }}</span>
-          <q-icon slot="right" name="mdi-puzzle" />
-        </q-card-title>
-        <q-card-main>
+      <q-card class="q-my-sm bg-secondary text-white" v-for="plugin in localPlugins" :key="plugin.name">
+
+        <q-card-section>
+          <div class="row items-center no-wrap">
+            <div class="col">
+              <div class="text-h6">
+                {{ plugin.name }} <span v-if="plugin.version" slot="subtitle">version: {{ plugin.version }}</span>
+              </div>
+            </div>
+
+            <div class="col-auto">
+              <q-icon slot="right" name="mdi-puzzle" />
+            </div>
+          </div>
+        </q-card-section>
+
+        <q-card-section>
           location: {{ plugin.package.location }}
-        </q-card-main>
-        <q-card-separator />
+        </q-card-section>
       </q-card>
     </div>
 
     <div v-if="builtinPlugins.length > 0" class="page-block page-block-padding">
-      <div class="q-title q-title-opacity q-mb-md">Builtin</div>
+      <div class="text-h6 q-mb-md">Builtin</div>
 
-      <q-card class="q-my-sm" color="secondary" v-for="plugin in builtinPlugins" :key="plugin.name">
-        <q-card-title>
-          {{ plugin.name }}
-          <span v-if="plugin.version" slot="subtitle">version: {{ plugin.version }}</span>
-          <q-icon slot="right" name="mdi-puzzle" />
-        </q-card-title>
-        <q-card-separator />
+      <q-card class="q-my-sm bg-secondary text-white" v-for="plugin in builtinPlugins" :key="plugin.name">
+
+        <q-card-section>
+          <div class="row items-center no-wrap">
+            <div class="col">
+              <div class="text-h6">
+                {{ plugin.name }} <span v-if="plugin.version" slot="subtitle">version: {{ plugin.version }}</span>
+              </div>
+            </div>
+
+            <div class="col-auto">
+              <q-icon slot="right" name="mdi-puzzle" />
+            </div>
+          </div>
+        </q-card-section>
+        
       </q-card>
     </div>
 

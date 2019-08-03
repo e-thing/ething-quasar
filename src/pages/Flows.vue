@@ -6,7 +6,7 @@
     </div>
 
     <div v-if="flows.length" class="page-block">
-      <q-list link no-border>
+      <q-list>
         <resource-q-item v-for="flow in flows" :key="flow.id()" :resource="flow" />
       </q-list>
     </div>
@@ -25,7 +25,7 @@
 </template>
 
 <script>
-import ResourceQItem from 'ething-quasar-core/src/components/ResourceQItem'
+import ResourceQItem from '../components/ResourceQItem'
 
 export default {
   name: 'PageFlows',

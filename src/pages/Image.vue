@@ -1,11 +1,15 @@
 <template>
   <q-page>
-    <image-viewer :source="sources" :value="resource" thumbnails controls/>
+    <div class="page-fit">
+      <div class="fit page-block" style="position: relative;">
+        <image-viewer :source="sources" :value="resource" thumbnails controls/>
+      </div>
+    </div>
   </q-page>
 </template>
 
 <script>
-import ImageViewer from 'ething-quasar-core/src/components/ImageViewer'
+import ImageViewer from '../components/ImageViewer'
 
 export default {
   name: 'PageImage',

@@ -1,10 +1,10 @@
 <template>
   <div class="fixed-center content">
-    <div class="q-display-3 text-primary text-center">EThing</div>
+    <div class="text-h2 text-primary text-center">EThing</div>
 
     <div class="q-pb-md">
       <q-field
-        v-if="$ui.dynamicServerUrl"
+        v-if="$ethingUI.dynamicServerUrl"
         :error="$v.server.$error"
         error-label="required"
       >
@@ -13,7 +13,7 @@
           ref="server"
           autofocus
           v-model="server"
-          float-label="Server Url"
+          label="Server Url"
           @keyup.enter="$refs.login.focus()"
           @blur="$v.server.$touch"
         />
@@ -27,7 +27,7 @@
           ref="login"
           autofocus
           v-model="form.login"
-          float-label="Login"
+          label="Login"
           @keyup.enter="$refs.password.focus()"
           @blur="$v.form.login.$touch"
         />
@@ -41,7 +41,7 @@
           ref="password"
           v-model="form.password"
           type="password"
-          float-label="Password"
+          label="Password"
           @keyup.enter="onConnect"
           @blur="$v.form.password.$touch"
           :error="$v.form.password.$error"
@@ -57,7 +57,9 @@
 <script>
 import { required } from 'vuelidate/lib/validators'
 
-var defaultServerUrl = 'http://localhost:8000'
+var arr = window.location.href.split("/")
+var defaultServerUrl = arr[0] + "//" + arr[2]
+
 
 export default {
   name: 'PageLogin',
@@ -66,7 +68,7 @@ export default {
 
     return {
       loading: false,
-      server: this.$ui.getServerUrl() || defaultServerUrl,
+      server: this.$ethingUI.getServerUrl() || defaultServerUrl,
       form: {
         login: '',
         password: ''
@@ -82,7 +84,7 @@ export default {
       }
     }
 
-    if (this.$ui.dynamicServerUrl) {
+    if (this.$ethingUI.dynamicServerUrl) {
       v.server = {
         required
       }
@@ -102,7 +104,7 @@ export default {
       this.loading = true
       var server = this.server.trim().replace(/\/+$/, '')
 
-      this.$ui.login(server, this.form.login, this.form.password).catch(error => {
+      this.$ethingUI.login(server, this.form.login, this.form.password).catch(error => {
 
         if (error.response) {
           // The request was made and the server responded with a status code

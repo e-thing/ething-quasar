@@ -1,61 +1,47 @@
 <template>
   <q-page class="page page-width-md">
 
-    <div class="row justify-between page-block">
-      <q-breadcrumbs class="q-pa-md">
-        <q-breadcrumbs-el v-for="(item, index) in pathItems" :key="index" :label="item.label" :icon="item.icon" :to="item.link" />
-      </q-breadcrumbs>
+    <div class="row justify-between page-block" style="background: transparent;">
+      <div>
+        <q-btn class="q-mr-xs bg-white" label="All" flat :color="category==='' ? 'primary' : 'faded'" @click="category = ''"/>
+        <q-btn v-for="cat in categories" :key="cat.name" class="q-mr-xs bg-white" flat :color="category===cat.name ? 'primary' : 'faded'" @click="category = cat.name">
+          <q-icon :name="cat.icon"/>
+          <span class="gt-sm q-ml-xs">{{ cat.label }}</span>
+        </q-btn>
+      </div>
 
-      <q-btn-dropdown color="primary" label="Create" icon="add" flat >
-        <q-list link>
-          <q-item v-close-overlay @click.native="create('resources/File')">
-            <q-item-side :icon="$ethingUI.get('resources/File').icon" :color="$ethingUI.get('resources/File').color" />
-            <q-item-main>
-              <q-item-tile label>File</q-item-tile>
-            </q-item-main>
-          </q-item>
+      <div class="row">
+        <q-btn-dropdown class="bg-white" color="primary" label="Create" icon="add" flat dense >
+          <q-list>
+            <q-item v-close-popup clickable @click="create('resources/File')">
+              <q-item-section avatar>
+                <q-icon :name="$ethingUI.get('resources/File').icon" :color="$ethingUI.get('resources/File').color"/>
+              </q-item-section>
+              <q-item-section>File</q-item-section>
+            </q-item>
 
-          <q-item v-close-overlay @click.native="create('resources/Table')">
-            <q-item-side :icon="$ethingUI.get('resources/Table').icon" :color="$ethingUI.get('resources/Table').color" />
-            <q-item-main>
-              <q-item-tile label>Table</q-item-tile>
-            </q-item-main>
-          </q-item>
+            <q-item v-close-popup clickable @click="create('resources/Table')">
+              <q-item-section avatar>
+                <q-icon :name="$ethingUI.get('resources/Table').icon" :color="$ethingUI.get('resources/Table').color"/>
+              </q-item-section>
+              <q-item-section>Table</q-item-section>
+            </q-item>
 
-          <q-item v-close-overlay @click.native="$router.push('/chart')">
-            <q-item-side icon="mdi-chart-line" :color="$ethingUI.get('resources/File').color" />
-            <q-item-main>
-              <q-item-tile label>Chart</q-item-tile>
-            </q-item-main>
-          </q-item>
-        </q-list>
-      </q-btn-dropdown>
+            <q-item v-close-popup clickable @click="$router.push('/chart')">
+              <q-item-section avatar>
+                <q-icon name="mdi-chart-line" :color="$ethingUI.get('resources/File').color"/>
+              </q-item-section>
+              <q-item-section>Chart</q-item-section>
+            </q-item>
+          </q-list>
+        </q-btn-dropdown>
+      </div>
     </div>
 
     <div v-if="resources.length" class="page-block">
-      <q-list link no-border>
+      <q-list>
 
-        <div v-if="folders.length">
-          <q-list-header inset>Folders</q-list-header>
-          <q-item v-for="(folder, key) in folders" :key="folder" :to="pJoin(path, folder)" append>
-            <q-item-side icon="folder" inverted color="yellow" />
-            <q-item-main>
-              <q-item-tile label>{{ folder }}</q-item-tile>
-            </q-item-main>
-          </q-item>
-        </div>
-
-        <div v-if="files.length">
-          <q-item-separator inset v-if="folders.length"/>
-          <q-list-header inset>Files</q-list-header>
-          <resource-q-item v-for="file in files" :key="file.id()" :resource="file" />
-        </div>
-
-        <div v-if="tables.length">
-          <q-item-separator inset v-if="folders.length || files.length"/>
-          <q-list-header inset>Table</q-list-header>
-          <resource-q-item v-for="table in tables" :key="table.id()" :resource="table" />
-        </div>
+        <resource-q-item v-for="resource in resources" :key="resource.id()" :resource="resource" />
 
       </q-list>
     </div>
@@ -74,13 +60,43 @@
 </template>
 
 <script>
-import ResourceQItem from 'ething-quasar-core/src/components/ResourceQItem'
+import ResourceQItem from '../components/ResourceQItem'
+
+var categories = [{
+  name: 'table',
+  label: 'Table',
+  icon: 'mdi-table',
+  filter (r) {
+    return r instanceof this.$ething.Table
+  }
+},{
+  name: 'file',
+  label: 'File',
+  icon: 'mdi-file',
+  filter (r) {
+    return r instanceof this.$ething.File && !/\.plot$/.test(r.name())
+  }
+},{
+  name: 'chart',
+  label: 'Chart',
+  icon: 'mdi-chart-line',
+  filter (r) {
+    return r instanceof this.$ething.File && /\.plot$/.test(r.name())
+  }
+}]
 
 export default {
   name: 'PageData',
 
   components: {
     ResourceQItem
+  },
+
+  data () {
+    return {
+      categories,
+      category: ''
+    }
   },
 
   computed: {
@@ -90,7 +106,7 @@ export default {
     resources () {
       var path = this.path
       var globRe = new RegExp('^' + (path ? (path + '/') : '') + '[^/]+$')
-      return this.$ething.arbo.find(r => globRe.test(r.name()) && !/^\./.test(r.basename()))
+      return this.$ething.arbo.find(r => globRe.test(r.name()) && !/^\./.test(r.basename()) && this.matchCategory(r))
     },
     folders () {
       var path = this.path
@@ -130,6 +146,24 @@ export default {
   },
 
   methods: {
+    matchCategory (r) {
+      var category = this.category
+
+      if (category) {
+        for (var i in this.categories) {
+          if (this.categories[i].name === category) {
+            return this.categories[i].filter.call(this, r)
+          }
+        }
+      } else {
+        // all
+        for (var i in this.categories) {
+          if (this.categories[i].filter.call(this, r)) {
+            return true
+          }
+        }
+      }
+    },
 
     pJoin (a, b) {
       if (!a) {

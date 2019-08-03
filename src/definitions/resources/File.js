@@ -1,5 +1,7 @@
-import { format } from 'quasar'
-import { date } from 'quasar'
+import { format, date } from 'quasar'
+import WChart from '../../components/widgets/WChart'
+import WImage from '../../components/widgets/WImage'
+
 
 export default {
   icon: 'mdi-file',
@@ -24,12 +26,35 @@ export default {
 
     if (resource.extension() === 'plot') {
       icon = 'mdi-file-chart'
-      widgets.chart = 'WChart'
+      widgets.chart = {
+        component: WChart,
+        schema: {
+          title: 'chart',
+          properties: {
+            history: {
+              description: 'the past data to plot',
+              type: 'number',
+              enum: [3600, 3600*6, 3600*12, 86400, 86400*2, 86400*7, 'all'],
+              '$labels': ['1 hour', '6 hours', '12 hours', '1 day', '2 days', '1 week', 'all'],
+              default: 86400
+            }
+          }
+        },
+        minWidth: 250,
+        minHeight: 150,
+      }
     } else if (/^text/.test(resource.mime())) {
       icon = 'mdi-file-document'
     } else if (/^image/.test(resource.mime())) {
       icon = 'mdi-file-image'
-      widgets.image = 'WImage'
+      widgets.image = {
+        component: WImage,
+        schema: {
+          title: 'image',
+        },
+        minWidth: 320,
+        minHeight: 280
+      }
     } else if (/^video/.test(resource.mime())) {
       icon = 'mdi-file-video'
     } else if (/^application/.test(resource.mime())) {

@@ -1,26 +1,28 @@
 <template>
   <div>
-    <q-collapsible v-for="(c, name) in root.children" :key="name" v-if="notEmpty(c)" :opened="opened">
+    <q-expansion-item v-for="(c, name) in root.children" :key="name" v-if="notEmpty(c)" :opened="opened">
       <template slot="header">
-        <q-item-main :label="formatLabel(name)" />
-        <q-item-side right>
-          <q-chip color="light" small dense square>
+        <q-item-section>
+          {{ formatLabel(name) }}
+        </q-item-section>
+        <q-item-section side>
+          <q-chip color="light" dense square>
             {{ getLength(c) }}
           </q-chip>
-        </q-item-side>
+        </q-item-section>
       </template>
 
       <flow-recursive-menu-node :root="c" @click="$emit('click', $event)">
         <template v-for="slot in Object.keys($scopedSlots)" :slot="slot" slot-scope="node"><slot :name="slot" v-bind="node"/></template>
       </flow-recursive-menu-node>
 
-    </q-collapsible>
+    </q-expansion-item>
 
     <drag :transfer-data="{node}" v-for="(node, index) in root.nodes" :key="index">
-      <q-item :style="{color: node.color}" style="cursor: pointer;" class="q-px-md" @click.native="$emit('click', node)">
-        <q-item-main>
+      <q-item :style="{color: node.color}" style="cursor: pointer;" class="q-px-md" clickable @click="$emit('click', node)">
+        <q-item-section>
           <slot :node="node" />
-        </q-item-main>
+        </q-item-section>
       </q-item>
     </drag>
   </div>

@@ -1,8 +1,6 @@
-import WSwitch from 'ething-quasar-core/src/components/widgets/WSwitch'
+import WSwitch from '../../components/widgets/WSwitch'
 
 export default {
-
-  icon: 'mdi-toggle-switch',
 
   data (resource) {
     return {
@@ -10,22 +8,23 @@ export default {
     }
   },
 
-  mainComponent: 'switch',
-
   widgets: {
-    'switch': {
-      extends: WSwitch,
-      props: {
-        attr: {
-          default: 'state',
-        },
-        fn_setter: {
-          default: 'setState',
+    'switch.state': {
+      in: ['dashboard'],
+    },
+    'relay.switch': {
+      in: ['dashboard', 'devicePage'],
+      component: WSwitch,
+      attributes: {
+        attr: 'state',
+        set (resource, value) {
+          return resource.execute('setState', value)
         }
       },
-      metadata: {
-        description: 'toggle the device'
-      }
+      title: 'switch',
+      description: 'toggle the device',
+      minWidth: 60,
+      minHeight: 60
     }
   }
 

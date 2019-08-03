@@ -2,20 +2,19 @@
   <q-page class="page page-width-md">
 
     <div class="page-block q-pa-xl">
-      <div class="q-my-md q-mb-xl q-display-1 text-primary">
+      <div class="q-my-md q-mb-xl text-h4 text-primary">
         <q-icon :name="$ethingUI.get(resource).icon" class="q-mr-sm"/>
         <small class="text-faded">settings:</small> {{ resource.basename() }}
       </div>
 
       <resource-editor ref="form" :resource="resource" @error="formError=$event"/>
 
-      <q-alert
+      <q-banner
           v-if="error"
-          type="negative"
-          class="q-mb-xl"
+          class="bg-red text-white q-mb-xl"
       >
         {{ String(error) }}
-      </q-alert>
+      </q-banner>
 
       <div>
           <q-btn :loading="loading" :disable="formError" color="primary" icon="done" label="valid" @click="handler"/>
@@ -27,7 +26,7 @@
 
 <script>
 
-import ResourceEditor from 'ething-quasar-core/src/components/ResourceEditor'
+import ResourceEditor from '../components/ResourceEditor'
 
 export default {
   name: 'PageResource',

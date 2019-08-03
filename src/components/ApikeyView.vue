@@ -8,7 +8,7 @@
 
       <div v-if="apikeys.length > 0" class="page-block page-block-padding">
 
-        <div class="item row items-center gutter-x-sm">
+        <div class="item row items-center q-gutter-x-sm">
           <div class="name col-xs-2 col-sm-2 col-md-2 text-secondary ellipsis">
             name
           </div>
@@ -23,7 +23,7 @@
           </div>
         </div>
 
-        <div class="item row items-center gutter-x-sm q-mt-md" v-for="apikey in apikeys" :key="apikey.id">
+        <div class="item row items-center q-gutter-x-sm q-mt-md" v-for="apikey in apikeys" :key="apikey.id">
           <div class="date col-xs-2 col-sm-2 col-md-2 text-faded ellipsis">
             {{ apikey.name }}
           </div>
@@ -53,13 +53,12 @@
 
       <form-schema :key="formKey" :schema="schema" v-model="model" @error="error = $event"/>
 
-      <q-alert
+      <q-banner
           v-if="serverError"
-          type="negative"
-          class="q-mb-xl"
+          class="bg-red text-white q-mb-xl"
       >
         {{ String(serverError) }}
-      </q-alert>
+      </q-banner>
 
     </modal>
   </div>

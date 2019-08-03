@@ -4,7 +4,7 @@
 
     <dl class="page page-block page-block-padding">
       <dt>UI</dt>
-      <dd>version: {{ $ui.VERSION }}</dd>
+      <dd>version: {{ $ethingUI.VERSION }}</dd>
 
       <dt>Server</dt>
       <dd>version: {{ $ethingUI.info.VERSION }}</dd>

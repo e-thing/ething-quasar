@@ -1,8 +1,6 @@
-import WDeviceMultiLabel from 'ething-quasar-core/src/components/widgets/WDeviceMultiLabel'
+import WDeviceMultiLabel from '../../components/widgets/WDeviceMultiLabel'
 
 export default {
-
-  icon: 'mdi-toggle-switch',
 
   data (resource) {
     return {
@@ -10,31 +8,26 @@ export default {
     }
   },
 
-  mainComponent: 'state',
-
   widgets: {
-    'state': {
-      extends: WDeviceMultiLabel,
-      props: {
-        items: {
-          default () {
-            return [{
-              attr: 'state',
-              map: [{
-                key: true,
-                value: 'On'
-              },{
-                key: false,
-                value: 'Off'
-              }]
-            }]
-          }
-        }
+    'switch.state': {
+      in: ['dashboard', 'devicePage'],
+      component: WDeviceMultiLabel,
+      attributes: {
+        items: [{
+          attr: 'state',
+          map: [{
+            key: true,
+            value: 'On'
+          },{
+            key: false,
+            value: 'Off'
+          }]
+        }]
       },
-      metadata: {
-        label: 'state',
-        description: 'show the state of the switch',
-      }
+      title: 'state',
+      description: 'show the state of the switch',
+      minWidth: 100,
+      minHeight: 100
     }
   }
 

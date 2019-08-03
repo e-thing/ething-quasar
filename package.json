@@ -1,53 +1,56 @@
 {
-  "name": "ething-quasar",
-  "version": "0.1.0",
-  "description": "EThing app based on the quasar framework",
-  "productName": "EThing App",
-  "cordovaId": "org.cordova.quasar.app",
-  "author": "Adrien Mezerette <a.mezerette@gmail.com>",
+  "name": "ething-ui",
+  "version": "0.0.1",
+  "description": "IOT app",
+  "productName": "ething",
+  "cordovaId": "org.ething.app",
+  "author": "Adrien Mezerette <amezerette@cls.fr>",
   "private": true,
   "scripts": {
     "lint": "eslint --ext .js,.vue src",
     "test": "echo \"No test specified\" && exit 0"
   },
   "dependencies": {
+    "@quasar/extras": "^1.0.0",
+    "axios": "^0.18.1",
+    "quasar": "^1.0.0",
+    "vue-i18n": "^8.0.0",
+    "c3-linearization": "^0.3.0",
+    "cronstrue": "^1.60.0",
+    "csvtojson": "^2.0.8",
     "ething-js": "^0.1.19",
-    "ething-quasar-core": "github:e-thing/ething-quasar-core#master",
-    "ething-quasar-dll": "github:e-thing/ething-quasar-dll#master",
+    "file-saver": "^2.0.0",
+    "highcharts": "^6.1.0",
+    "intersection-observer": "^0.5.1",
     "json-formatter-js": "^2.2.1",
     "jsplumb": "^2.9.0",
+    "lodash": "^4.17.11",
+    "promise.prototype.finally": "^3.1.0",
     "qs": "^6.5.2",
+    "socket.io-client": "^2.1.1",
+    "socketio-wildcard": "^2.0.0",
+    "vue-codemirror": "^4.0.5",
     "vue-drag-drop": "^1.1.4",
     "vue-grid-layout": "^2.2.0",
-    "vue-i18n": "^7.8.1",
-    "vue-touch-keyboard": "^0.3.0"
+    "vue-highcharts": "0.0.10",
+    "vue-markdown": "^2.2.4",
+    "vue-touch-keyboard": "^0.3.0",
+    "vuelidate": "^0.7.4"
   },
   "devDependencies": {
-    "babel-eslint": "^8.2.6",
-    "devtron": "1.4.0",
-    "electron": "1.8.3",
-    "electron-debug": "1.5.0",
-    "electron-devtools-installer": "2.2.1",
-    "electron-packager": "^12.2.0",
-    "eslint": "^4.18.2",
-    "eslint-config-standard": "^11.0.0",
-    "eslint-friendly-formatter": "^3.0.0",
+    "@quasar/app": "^1.0.0",
+    "@vue/eslint-config-standard": "^4.0.0",
+    "babel-eslint": "^10.0.1",
+    "eslint": "^5.10.0",
     "eslint-loader": "^2.1.1",
-    "eslint-plugin-import": "^2.14.0",
-    "eslint-plugin-node": "^6.0.1",
-    "eslint-plugin-promise": "^3.8.0",
-    "eslint-plugin-standard": "^3.1.0",
-    "eslint-plugin-vue": "^4.7.1",
-    "quasar-cli": "^0.17.19",
-    "strip-ansi": "^3.0.1"
+    "eslint-plugin-vue": "^5.0.0"
   },
   "engines": {
     "node": ">= 8.9.0",
-    "npm": ">= 5.6.0"
+    "npm": ">= 5.6.0",
+    "yarn": ">= 1.6.0"
   },
   "browserslist": [
-    "> 1%",
-    "last 2 versions",
-    "not ie <= 10"
+    "last 1 version, not dead, ie >= 11"
   ]
 }

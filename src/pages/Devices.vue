@@ -1,27 +1,35 @@
 <template>
   <q-page class="page page-width-lg">
 
-    <div class="row justify-between page-block">
+    <div class="row justify-between page-block" style="background: transparent;">
 
       <div>
-        <q-btn class="q-mr-xs" label="All" flat :color="category==='' ? 'primary' : 'faded'" @click="category = ''"/>
-        <q-btn class="q-mr-xs" label="Sensor" flat :color="category==='sensor' ? 'primary' : 'faded'" @click="category = 'sensor'"/>
-        <q-btn class="q-mr-xs" label="Switch/Light" flat :color="category==='switch' ? 'primary' : 'faded'" @click="category = 'switch'"/>
-        <q-btn label="Camera" flat :color="category==='camera' ? 'primary' : 'faded'" @click="category = 'camera'"/>
+        <q-btn class="q-mr-xs bg-white" flat label="All" :text-color="category==='' ? 'primary' : 'faded'" @click="category = ''"/>
+        <q-btn class="q-mr-xs bg-white" flat :text-color="category==='sensor' ? 'primary' : 'faded'" @click="category = 'sensor'">
+          <q-icon name="mdi-thermometer"/>
+          <span class="gt-sm q-ml-xs">Sensor</span>
+        </q-btn>
+        <q-btn class="q-mr-xs bg-white" flat :text-color="category==='switch' ? 'primary' : 'faded'" @click="category = 'switch'">
+          <q-icon name="mdi-lightbulb"/>
+          <span class="gt-sm q-ml-xs">Switch/Light</span>
+        </q-btn>
+        <q-btn class="bg-white" flat :text-color="category==='camera' ? 'primary' : 'faded'" @click="category = 'camera'">
+          <q-icon name="mdi-camera"/>
+          <span class="gt-sm q-ml-xs">Camera</span>
+        </q-btn>
       </div>
 
       <div class="row">
-        <!--<q-search v-model="filter" hide-underline no-parent-field clearable/>-->
 
-        <q-btn-dropdown color="primary" label="Create" icon="add" flat >
-          <q-list link>
+        <q-btn-dropdown class="bg-white" flat text-color="primary" :label="$q.screen.gt.xs ? 'create' : null" icon="add" dense>
+          <q-list>
             <template v-for="cat in categories">
-              <q-list-header inset>{{ cat.name }}</q-list-header>
-              <q-item v-close-overlay v-for="type in cat.types" :key="type.type" @click.native="create(type.type)">
-                <q-item-side :icon="$ethingUI.get(type.type).icon" :color="$ethingUI.get(type.type).color" />
-                <q-item-main>
-                  <q-item-tile label>{{ type.label }}</q-item-tile>
-                </q-item-main>
+              <q-item-label header>{{ cat.name }}</q-item-label>
+              <q-item v-close-popup v-for="type in cat.types" :key="type.type" clickable @click="create(type.type)">
+                <q-item-section avatar>
+                  <q-icon :name="$ethingUI.get(type.type).icon" :color="$ethingUI.get(type.type).color"/>
+                </q-item-section>
+                <q-item-section>{{ type.label }}</q-item-section>
               </q-item>
             </template>
           </q-list>
@@ -30,7 +38,7 @@
     </div>
 
     <div v-if="deviceFiltered.length" class="page-block">
-      <q-list link no-border>
+      <q-list>
           <resource-q-item v-for="(item, index) in deviceFiltered" :key="index" :resource="item.device" :level="item.level" no-parent />
       </q-list>
     </div>
@@ -50,7 +58,7 @@
 
 <script>
 import EThing from 'ething-js'
-import ResourceQItem from 'ething-quasar-core/src/components/ResourceQItem'
+import ResourceQItem from '../components/ResourceQItem'
 
 
 export default {

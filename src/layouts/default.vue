@@ -1,6 +1,6 @@
 <template>
   <q-layout view="hHh Lpr lFf">
-    <q-layout-header>
+    <q-header elevated>
       <q-toolbar
         color="primary"
       >
@@ -18,74 +18,70 @@
         <q-btn class="gt-xs" flat label="Data" @click="$router.push('/data')" />
         <q-btn class="gt-xs" flat label="Flows" @click="$router.push('/flows')" />
 
-        <!--<q-btn-dropdown label="Data" flat content-style="color: #fff;background: #027be3;">
-          <q-list link>
-            <q-item v-close-overlay @click.native="$router.push('/data/tables')">
-              <q-item-main>
-                <q-item-tile label>Tables</q-item-tile>
-              </q-item-main>
-            </q-item>
-            <q-item v-close-overlay @click.native="$router.push('/data/files')">
-              <q-item-main>
-                <q-item-tile label>Files</q-item-tile>
-              </q-item-main>
-            </q-item>
-          </q-list>
-        </q-btn-dropdown>-->
-
         <q-toolbar-title class="gt-xs"/>
 
-        <q-btn v-if="refreshEnabled" class="gt-xs" flat dense icon="refresh" aria-label="refresh" @click="refresh"/>
-        <q-btn class="gt-xs" flat dense icon="settings" aria-label="settings" @click="$router.push('/settings')"/>
-        <q-btn v-if="!$ui.autoLogin" class="gt-xs" flat dense icon="exit to app" aria-label="logout" @click="logout" />
+        <q-btn v-if="refreshEnabled" class="gt-xs" flat icon="refresh" aria-label="refresh" @click="refresh"/>
+        <q-btn class="gt-xs" flat icon="settings" aria-label="Settings" @click="$router.push('/settings')"/>
+        <q-btn v-if="!$ethingUI.autoLogin" class="gt-xs" flat icon="exit to app" aria-label="Logout" @click="logout" />
 
       </q-toolbar>
 
-    </q-layout-header>
+    </q-header>
 
-    <q-layout-drawer
+    <q-drawer
       v-model="leftDrawerOpen"
-      :content-class="$q.theme === 'mat' ? 'bg-grey-2' : null"
+      bordered
+      content-class="bg-grey-2"
     >
       <q-list
-        no-border
-        link
         inset-delimiter
       >
-        <q-list-header>Menu</q-list-header>
-        <q-item @click.native="$router.push('/dashboard')">
-          <q-item-side icon="dashboard" />
-          <q-item-main label="Dashboard" />
+        <q-item-label header>Menu</q-item-label>
+        <q-item clickable @click="$router.push('/dashboard')">
+          <q-item-section avatar>
+            <q-icon name="dashboard" />
+          </q-item-section>
+          <q-item-section>Dashboard</q-item-section>
         </q-item>
-        <q-item @click.native="$router.push('/devices')">
-          <q-item-side icon="devices" />
-          <q-item-main label="Devices" />
+        <q-item clickable @click="$router.push('/devices')">
+          <q-item-section avatar>
+            <q-icon name="devices" />
+          </q-item-section>
+          <q-item-section>Devices</q-item-section>
         </q-item>
-        <q-item @click.native="$router.push('/data')">
-          <q-item-side icon="mdi-database" />
-          <q-item-main label="Data" />
+        <q-item clickable @click="$router.push('/data')">
+          <q-item-section avatar>
+            <q-icon name="mdi-database" />
+          </q-item-section>
+          <q-item-section>Data</q-item-section>
         </q-item>
-        <q-item @click.native="$router.push('/flows')">
-          <q-item-side icon="mdi-ray-start-arrow" />
-          <q-item-main label="Flows" />
+        <q-item clickable @click="$router.push('/flows')">
+          <q-item-section avatar>
+            <q-icon name="mdi-ray-start-arrow" />
+          </q-item-section>
+          <q-item-section>Flows</q-item-section>
         </q-item>
 
-        <q-item-separator />
+        <q-separator />
 
-        <q-item @click.native="$router.push('/settings')">
-          <q-item-side icon="settings" />
-          <q-item-main label="Settings" />
+        <q-item clickable @click="$router.push('/settings')">
+          <q-item-section avatar>
+            <q-icon name="settings" />
+          </q-item-section>
+          <q-item-section>Settings</q-item-section>
         </q-item>
-        <q-item v-if="!$ui.autoLogin" @click.native="logout">
-          <q-item-side icon="exit to app" />
-          <q-item-main label="Logout" />
+        <q-item v-if="!$ethingUI.autoLogin" clickable @click="logout">
+          <q-item-section avatar>
+            <q-icon name="exit to app" />
+          </q-item-section>
+          <q-item-section>Logout</q-item-section>
         </q-item>
 
       </q-list>
-    </q-layout-drawer>
+    </q-drawer>
 
     <q-page-container>
-      <q-inner-loading v-if="$root.state!=='ok'" visible class="text-center">
+      <q-inner-loading v-if="$root.state!=='ok'" showing class="text-center">
         <div v-if="$root.state==='error'">
           <div class="q-pa-lg text-negative">
             {{ String($root.error) }}
@@ -116,13 +112,13 @@ export default {
   },
   computed: {
     back () {
-      return this.$route.meta.back && (this.$q.platform.within.iframe || this.$q.platform.is.electron || this.$ui.kioskMode)
+      return this.$route.meta.back && (this.$q.platform.within.iframe || this.$q.platform.is.electron || this.$ethingUI.kioskMode)
     },
     refreshEnabled () {
-      return this.$q.platform.has.touch && (!this.$q.platform.is.desktop || this.$ui.kioskMode)
+      return this.$q.platform.has.touch && (!this.$q.platform.is.desktop || this.$ethingUI.kioskMode)
     },
     vKeyboardEnabled () {
-      return this.$ui.virtualKeyboardEnabled
+      return this.$ethingUI.virtualKeyboardEnabled
     }
   },
   methods: {
@@ -133,10 +129,8 @@ export default {
         message: 'Are you sure you want to logout ?',
         ok: 'Logout',
         cancel: 'Cancel'
-      }).then(() => {
-        this.$ui.logout()
-      }).catch(() => {
-
+      }).onOk(() => {
+        this.$ethingUI.logout()
       })
     },
     reload () {

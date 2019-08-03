@@ -1,13 +1,15 @@
 <template>
-  <q-page>
+  <q-page >
 
-    <chart :preferences="resource" expended/>
+    <div class="page-fit">
+      <chart :preferences="resource" expended class="page-block"/>
+    </div>
 
   </q-page>
 </template>
 
 <script>
-import Chart from 'ething-quasar-core/src/components/Chart'
+import Chart from '../components/Chart'
 
 export default {
   name: 'PageChart',
@@ -38,5 +40,10 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
+.wrapper {
+  position:relative;
+  width: 100%;
+  height: 100%;
+}
 </style>

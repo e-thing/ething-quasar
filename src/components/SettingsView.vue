@@ -4,7 +4,7 @@
 
       <div class="page-block page-block-padding">
 
-        <div class="q-title q-title-opacity">General</div>
+        <div class="text-h6">General</div>
 
         <form-schema :schema="$ethingUI.get('Config')" v-model="settings['global']" @error="error = $event" class="q-my-md"/>
 
@@ -12,19 +12,18 @@
 
       <div v-for="(plugin, name) in plugins" :key="name" v-if="typeof plugin.schema === 'object'" class="page-block page-block-padding">
 
-        <div class="q-title q-title-opacity">{{ name }}</div>
+        <div class="text-h6">{{ name }}</div>
 
         <form-schema :schema="plugin.schema" v-model="settings[name]" @error="plugin.error = $event" class="q-my-md"/>
 
       </div>
 
-      <q-alert
+      <q-banner
           v-if="saveError"
-          type="negative"
-          class="page-block"
+          class="bg-red text-white page-block"
       >
         {{ String(saveError) }}
-      </q-alert>
+      </q-banner>
 
       <div class="page-block page-block-transparent">
           <q-btn :disable="globalError" :loading="saving" color="secondary" icon="done" label="save changes" @click="onSave"/>
@@ -145,9 +144,9 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-@import '~variables'
 
-.q-title
+
+.text-h6
   border-bottom 1px solid $grey-3
   padding-bottom $space-y-base
 

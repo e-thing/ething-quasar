@@ -10,12 +10,6 @@ export default {
   disableCreation: false,
 
   properties: {
-    battery: {
-      '$readOnly': true
-    },
-    connected: {
-      '$readOnly': true
-    },
 
     lastSeenDate: {
       getFormatted: function (resource) {
@@ -23,7 +17,7 @@ export default {
         return d ? date.formatDate(d.getTime(), 'YYYY-MM-DD HH:mm') : 'never'
       }
     },
-    
+
   },
 
   open (resource, more) {

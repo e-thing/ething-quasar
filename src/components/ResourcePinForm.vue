@@ -2,7 +2,7 @@
   <modal icon="mdi-pin" ref="modal" :value="value" @input="$emit('input', $event)" title="Pin resource" v-bind="$attrs" size="lg" valid-btn-label="pin" :valid-btn-disable="!resource || optionsError" @valid="done">
 
     <div class="q-my-md">
-      <div class="q-title q-my-md">Select the resource to pin</div>
+      <div class="text-h6 q-my-md">Select the resource to pin</div>
       <div v-if="resources.length">
 
         <div v-if="resource">
@@ -12,15 +12,21 @@
           >
             <q-card
               style="height: 100%" flat square
-              class="cursor-pointer col-xs-12 col-sm-6"
-              :color="$ethingUI.get(resource).color"
-              text-color="white"
+              class="cursor-pointer col-xs-12 col-sm-6 text-white"
+              :class="'bg-' + $ethingUI.get(resource).color"
             >
-              <q-card-title>
-                <div class="ellipsis">{{ resource.basename() }}</div>
-                <div v-if="$ething.arbo.get(resource.createdBy())" class="ellipsis" slot="subtitle">{{ $ething.arbo.get(resource.createdBy()).basename() }}</div>
-                <q-icon slot="right" :name="$ethingUI.get(resource).icon" color="white"/>
-              </q-card-title>
+              <q-card-section>
+                <div class="row items-center no-wrap">
+                  <div class="col">
+                    <div class="text-h6 ellipsis">{{ resource.basename() }}</div>
+                    <div class="text-subtitle2 ellipsis" v-if="$ething.arbo.get(resource.createdBy())">{{ $ething.arbo.get(resource.createdBy()).basename() }}</div>
+                  </div>
+
+                  <div class="col-auto">
+                    <q-icon slot="right" :name="$ethingUI.get(resource).icon" color="white"/>
+                  </div>
+                </div>
+              </q-card-section>
             </q-card>
           </div>
 
@@ -41,27 +47,24 @@
             />
           </div>
 
-
-          <div class="row gutter-xs q-my-sm" v-if="filteredResources.length">
+          <div class="row q-col-gutter-xs q-my-sm" v-if="filteredResources.length">
             <div
-              class="resource"
-              :class="'col-xs-12 col-sm-6 col-md-4 col-lg-3 ' + (pinned.find(id => id === r.id()) ? 'pinned' : '')"
+              class="resource col-xs-12 col-sm-6 col-md-4 col-lg-3 col-xl-2"
+              :class="pinned.find(id => id === r.id()) ? 'pinned' : ''"
               v-for="r in filteredResources"
               :key="r.id()"
             >
-              <q-card
-                @click.native="select(r)"
-                style="height: 100%" flat square
-                class="cursor-pointer col-xs-12 col-sm-6"
-                :color="$ethingUI.get(r).color"
-                text-color="white"
+              <div class="cursor-pointer row items-center q-pa-md"
+                style="height: 100%"
+                @click="select(r)"
+                :class="'bg-' + $ethingUI.get(r).color"
               >
-                <q-card-title>
-                  <div class="ellipsis">{{ r.basename() }}</div>
-                  <div v-if="$ething.arbo.get(r.createdBy())" class="ellipsis" slot="subtitle">{{ $ething.arbo.get(r.createdBy()).basename() }}</div>
-                  <q-icon slot="right" :name="$ethingUI.get(r).icon" color="white"/>
-                </q-card-title>
-              </q-card>
+                <div class="col">
+                  <div class="ellipsis text-white">{{ r.basename() }}</div>
+                  <small v-if="$ething.arbo.get(r.createdBy())" class="ellipsis text-light">{{ $ething.arbo.get(r.createdBy()).basename() }}</small>
+                </div>
+                <q-icon class="col-auto" style="font-size: 120%;" :name="$ethingUI.get(r).icon" color="white"/>
+              </div>
             </div>
           </div>
           <div v-else class="q-my-sm q-mx-md text-faded">
@@ -71,21 +74,21 @@
 
       </div>
 
-      <q-alert v-else
-        type="warning"
-        class="q-mb-sm"
-        :actions="[
-          { label: 'Add Device', icon: 'add', handler: () => { this.$router.push('/devices') } }
-        ]"
+      <q-banner v-else
+        inline-actions
+        class="bg-warning text-white q-mb-sm"
       >
         No resource found !
-      </q-alert>
+        <template v-slot:action>
+          <q-btn flat color="white" label="Add Device" icon="add" @click="$router.push('/devices')" ></q-btn>
+        </template>
+      </q-banner>
     </div>
 
     <div v-if="resource">
 
       <div v-if="Object.keys(widgets).length > 1" class="q-my-md">
-        <div class="q-title q-my-md">Choose the widget type</div>
+        <div class="text-h6 q-my-md">Choose the widget type</div>
         <q-option-group
           color="secondary"
           type="radio"
@@ -94,9 +97,9 @@
         />
       </div>
 
-      <div v-if="widgetMetaOptions" class="q-my-md">
-        <div class="q-title q-my-md">Options</div>
-        <form-schema :key="widgetId" :schema="widgetMetaOptions" v-model="options" @error="optionsError = $event"/>
+      <div v-if="widgetOptions" class="q-my-md">
+        <div class="text-h6 q-my-md">Options</div>
+        <form-schema :key="widgetId" :schema="widgetOptions" v-model="options" @error="optionsError = $event"/>
       </div>
 
     </div>
@@ -107,7 +110,8 @@
 <script>
 
 import Vue from 'vue'
-
+import {extend as extendSchema} from '../utils/schema'
+import {dashboardWidgetSchemaDefaults} from '../core/widget'
 
 export default {
   name: 'ResourcePinForm',
@@ -149,54 +153,45 @@ export default {
       var widgetsMap = {}
       Object.keys(widgets).map(k => {
         var widget = widgets[k]
-        if (typeof widget === 'string') {
-          var widgetClsName = widget
-          widget = this.$ethingUI.findWidget(widgetClsName)
-          if (!widget) throw 'unknown widget type: ' + widgetClsName
-        }
-        var component = Vue.extend(widget)
-        var metadata = component.options.metadata
-        widgetsMap[k] = {
-          component,
-          'metadata': typeof metadata === 'function' ? metadata.call(this, this.resource) : metadata
-        }
+        if (widget.in.indexOf('dashboard') === -1) return
+        widgetsMap[k] = widget
       })
       return widgetsMap
     },
 
     widgetNames () {
       var widgets = this.widgets || {}
-      return Object.keys(widgets).map(k => {
-        var metadata = widgets[k].metadata
-        var label = metadata.label
-        if (metadata.description) {
-          label += ' ('+metadata.description+')'
+      var options = Object.keys(widgets).map(k => {
+        var widget = widgets[k]
+        var schema = widget.schema
+        var label = widget.title || widget.schema.title || widget.schema.label
+        var description = widget.description || widget.schema.description
+
+        if (description) {
+          label += ' ('+description+')'
         }
+
         return {
+          zIndex: widget.zIndex,
           label,
           value: k
         }
       })
+
+      // re order by zIndex
+      options.sort(function(a, b) {
+          return b.zIndex - a.zIndex;
+      });
+
+      return options
     },
 
-    widgetMetaOptions () {
-      var metadata = this.widgets[this.widgetId].metadata
-      if (metadata.options && metadata.options.properties && Object.keys(metadata.options.properties).length>0) {
-        if (metadata.options.properties.resource) {
-          // remove the resource property
-          var copy = extend(true, { type: 'object' }, metadata.options)
-          delete copy.properties['resource']
-          if (Object.keys(copy.properties).length>0) {
-            return copy
-          }
-        } else {
-          return Object.assign({ type: 'object' }, metadata.options)
-        }
-      }
+    widgetOptions () {
+      return extendSchema(dashboardWidgetSchemaDefaults(this.widgets[this.widgetId], this.resource), this.widgets[this.widgetId].schema)
     },
 
     resources () {
-      return this.$ething.arbo.find((r) => Object.keys(this.$ethingUI.get(r).widgets).length)
+      return this.$ething.arbo.find((r) => Object.values(this.$ethingUI.get(r).widgets).filter(w => w.in.indexOf('dashboard')!==-1).length)
     },
 
     filteredResources () {
@@ -211,9 +206,9 @@ export default {
       this.resource = resource
       this.options = {}
       this.optionsError = false
-      this.widgetId = Object.keys(this.widgets)[0] // default
+      this.widgetId = this.widgetNames[0].value // default
 
-      if (Object.keys(this.widgets).length === 1 && !this.widgetMetaOptions) {
+      if (Object.keys(this.widgets).length === 1 && !this.widgetOptions) {
         this.done()
       }
     },
@@ -252,7 +247,7 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-  @import '~variables'
+
 
   .resource
     transition all 0.3s ease

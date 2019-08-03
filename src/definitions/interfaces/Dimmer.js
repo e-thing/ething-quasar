@@ -1,9 +1,7 @@
-import WDeviceLabel from 'ething-quasar-core/src/components/widgets/WDeviceLabel'
-import WDeviceKnob from 'ething-quasar-core/src/components/widgets/WDeviceKnob'
+import WDeviceLabel from '../../components/widgets/WDeviceLabel'
+import WDeviceKnob from '../../components/widgets/WDeviceKnob'
 
 export default {
-
-  icon: 'mdi-contrast-circle',
 
   data (resource) {
     return {
@@ -11,44 +9,32 @@ export default {
     }
   },
 
-  mainComponent: 'dimmer.knob',
-
   widgets: {
     'dimmer.label': {
-      extends: WDeviceLabel,
-      props: {
-        attr: {
-          default: 'level'
-        },
-        unit: {
-          default: '%'
-        }
+      in: ['dashboard'],
+      component: WDeviceLabel,
+      attributes: {
+        attr: 'level',
+        unit: '%'
       },
-      metadata: {
-        label: 'level (label)',
-        description: 'show the level'
-      }
+      title: 'level',
+      description: 'show the level as a label',
+      minWidth: 100,
+      minHeight: 100
     },
     'dimmer.knob': {
-      extends: WDeviceKnob,
-      props: {
-        attr: {
-          default: 'level'
-        },
-        unit: {
-          default: '%'
-        },
-        min: {
-          default: 0
-        },
-        max: {
-          default: 100
-        }
+      in: ['dashboard', 'devicePage'],
+      component: WDeviceKnob,
+      attributes: {
+        attr: 'level',
+        unit: '%',
+        min: 0,
+        max: 100
       },
-      metadata:{
-        label: 'level (knob)',
-        description: 'show the level'
-      }
+      title: 'level',
+      description: 'show the level in a knob component',
+      minWidth: 160,
+      minHeight: 180
     }
   }
 

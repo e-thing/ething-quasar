@@ -1,80 +1,89 @@
 <template>
   <q-page>
 
-    <q-table
-      :data="serverData"
-      :columns="columns"
-      row-key="id"
-      :visible-columns="visibleColumns"
-      :loading="loading"
-      :pagination.sync="serverPagination"
-      @request="request"
-      :selection="edit ? 'multiple' : 'none'"
-      :selected.sync="selected"
-      color="secondary"
-      class="absolute fit scroll"
-    >
+    <div class="page-fit scroll">
+      <q-table
+        :data="serverData"
+        :columns="columns"
+        row-key="id"
+        :visible-columns="visibleColumns"
+        :loading="loading"
+        :pagination.sync="serverPagination"
+        @request="request"
+        :selection="edit ? 'multiple' : 'none'"
+        :selected.sync="selected"
+        color="secondary"
+        class="page-block"
+      >
 
-      <template slot="top-left" slot-scope="props">
-        <div class="q-title q-title-opacity">{{ resource.basename() }} <small v-if="createdBy" class="cursor-pointer text-faded" @click="$ethingUI.open(createdBy)"> - {{ createdBy.basename() }}</small></div>
-      </template>
+        <template slot="top-left" slot-scope="props">
+          <div class="text-h6">{{ resource.basename() }} <small v-if="createdBy" class="cursor-pointer text-faded" @click="$ethingUI.open(createdBy)"> - {{ createdBy.basename() }}</small></div>
+        </template>
 
-      <template slot="top-right" slot-scope="props">
+        <template slot="top-right" slot-scope="props">
 
-        <q-table-columns
-          color="secondary"
-          class="q-mr-sm"
-          v-model="visibleColumns"
-          :columns="columns"
-        />
-        <q-btn
-          flat round dense
-          icon="mdi-chart-line"
-          color="faded"
-          @click="$ethingUI.open(resource, 'chart')"
-          :disable="isEmpty"
-        />
-        <q-btn
-          flat round dense
-          icon="mdi-information-outline"
-          color="faded"
-          @click="showStats"
-          :disable="isEmpty"
-        />
-        <q-btn
-          flat round dense
-          icon="mdi-filter"
-          :color="filter ? 'secondary' : 'faded'"
-          @click="showFilter"
-        />
-        <q-btn
-          flat round dense
-          icon="add"
-          color="faded"
-          @click="showAddRow"
-        />
-        <q-btn
-          flat round dense
-          icon="check_box"
-          :color="edit ? 'secondary' : 'faded'"
-          @click="edit = !edit"
-          :disable="isEmpty"
-        />
-        <q-btn
-          flat round dense
-          v-if="selected.length"
-          color="negative"
-          icon="delete"
-          @click="removeSelection"
-        />
-        <q-btn
-          flat round dense
-          :color="props.inFullscreen ? 'secondary' : 'faded'"
-          :icon="props.inFullscreen ? 'fullscreen_exit' : 'fullscreen'"
-          @click="props.toggleFullscreen"
-        />
-      </template>
-    </q-table>
+          <q-select
+            v-model="visibleColumns"
+            multiple
+            borderless
+            dense
+            options-dense
+            emit-value
+            map-options
+            :options="columns"
+            option-value="name"
+            style="min-width: 150px"
+          />
+
+          <q-btn
+            flat round dense
+            icon="mdi-chart-line"
+            color="faded"
+            @click="$ethingUI.open(resource, 'chart')"
+            :disable="isEmpty"
+          />
+          <q-btn
+            flat round dense
+            icon="mdi-information-outline"
+            color="faded"
+            @click="showStats"
+            :disable="isEmpty"
+          />
+          <q-btn
+            flat round dense
+            icon="mdi-filter"
+            :color="filter ? 'secondary' : 'faded'"
+            @click="showFilter"
+          />
+          <q-btn
+            flat round dense
+            icon="add"
+            color="faded"
+            @click="showAddRow"
+          />
+          <q-btn
+            flat round dense
+            icon="check_box"
+            :color="edit ? 'secondary' : 'faded'"
+            @click="edit = !edit"
+            :disable="isEmpty"
+          />
+          <q-btn
+            flat round dense
+            v-if="selected.length"
+            color="negative"
+            icon="delete"
+            @click="removeSelection"
+          />
+          <q-btn
+            flat round dense
+            :color="props.inFullscreen ? 'secondary' : 'faded'"
+            :icon="props.inFullscreen ? 'fullscreen_exit' : 'fullscreen'"
+            @click="props.toggleFullscreen"
+          />
+        </template>
+      </q-table>
+    </div>
 
     <modal v-model="modalStatistics" title="Statistics" icon="mdi-information-outline" valid-btn-hide cancel-btn-label="Close" cancel-btn-color="faded">
 
@@ -96,11 +105,11 @@
       <div v-else-if="statistics !== null">
         <div v-for="key in resource.keys()">
 
-          <div class="q-mb-md q-mt-lg q-title q-title-opacity"><q-icon name="mdi-menu-right" /> column: {{ key }}</div>
+          <div class="q-mb-md q-mt-lg text-h6"><q-icon name="mdi-menu-right" /> column: {{ key }}</div>
 
-          <div class="row q-mb-md q-ml-lg">
-            <div v-if="statistics[key]">
-              <template v-for="(value, key) in statistics[key]">
+          <div class="q-mb-md q-ml-lg">
+            <div v-if="statistics[key]" class="row">
+              <template v-for="(value, key) in statistics[key]" v-if="value !== null">
                 <div class="col-xs-12 col-sm-4 key text-secondary">{{ key }}</div>
                 <div class="col-xs-12 col-sm-8 value">{{ format(key, value) }}</div>
               </template>
@@ -138,7 +147,8 @@
           >
             <q-input
               v-model.trim="item.key"
-              stack-label="Column name"
+              label="Column name"
+              stack-label
               @focus="addRowShowKeySuggestion(index)"
               @blur="$v.add.data.$each[index].key.$touch"
             >
@@ -192,13 +202,12 @@
         </div>
       </div>
 
-      <q-alert
+      <q-banner
           v-if="add.error"
-          type="negative"
-          class="q-my-md"
+          class="bg-red text-white q-my-md"
       >
         {{ String(add.error) }}
-      </q-alert>
+      </q-banner>
 
     </modal>
 
@@ -580,7 +589,7 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-@import '~variables'
+
 
 .add-row-item
   &:not(:first-child)

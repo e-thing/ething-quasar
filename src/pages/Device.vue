@@ -2,64 +2,88 @@
   <q-page class="">
 
     <div class="bg-white q-py-lg q-px-lg" style="border-bottom: 5px solid #eee">
-      <div class="q-my-md q-display-1 q-display-1-opacity">
-        <q-icon :name="$ethingUI.get(resource).icon" class="vertical-middle"/>
-        <span class="vertical-middle">
-          {{ resource.basename() }}
-        </span>
 
-        <q-btn class="float-right" flat :dense="$q.screen.lt.sm" label="settings" icon="settings" @click="$router.push('/resource/' + resource.id())"/>
+      <q-list dense>
+        <q-item>
+          <q-item-section avatar>
+            <q-avatar :icon="meta.icon" text-color="white" :color="meta.color" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label class="text-h4" :class="'text-' + meta.color">{{ resource.basename() }}</q-item-label>
+            <q-item-label caption>{{ meta.title }}</q-item-label>
+          </q-item-section>
+          <q-item-section side>
+            <q-btn
+              flat
+              :dense="$q.screen.lt.sm"
+              label="settings"
+              color="faded"
+              icon="settings"
+              @click="$router.push('/resource/' + resource.id())"
+            />
+          </q-item-section>
+        </q-item>
+        <q-item :inset-level="1" v-if="createdBys.length">
+          <q-item-section>
+            <div>
+              <template v-for="(item, index) in createdBys">
+                <q-icon name="mdi-chevron-right" />
+                <span class="createdby-item" @click="$ethingUI.open(item)">{{ item.basename() }}</span>
+              </template>
+            </div>
+          </q-item-section>
+        </q-item>
+        <q-item :inset-level="1">
+          <q-item-section>
+            <div>
+              <q-chip dense square icon="access time" v-if="resource.lastSeenDate()" class="q-ma-none q-mr-sm">
+                {{ $ethingUI.utils.dateToString(resource.lastSeenDate()) }}
+              </q-chip>
+              <resource-battery-chip :resource="resource" class="vertical-middle q-ma-none q-mr-sm" square/>
+              <q-chip dense square icon="location_on" v-if="resource.location()" class="q-ma-none q-mr-sm">
+                {{ resource.location() }}
+              </q-chip>
 
-      </div>
-
-      <div>
-        <q-chip small square detail icon="access time" v-if="resource.lastSeenDate()" class="q-mr-sm">
-          {{ $ethingUI.utils.dateToString(resource.lastSeenDate()) }}
-        </q-chip>
-        <resource-battery-chip :resource="resource" class="vertical-middle q-mr-sm" square/>
-        <q-chip small square detail icon="location_on" v-if="resource.location()" class="q-mr-sm">
-          {{ resource.location() }}
-        </q-chip>
-
-      </div>
-
-      <div v-if="createdBys.length" class="q-py-md">
-        <template v-for="(item, index) in createdBys">
-          <span v-if="index>0"> - </span>
-          <span class="createdby-item" @click="$ethingUI.open(item)">{{ item.basename() }}</span>
-        </template>
-      </div>
+            </div>
+          </q-item-section>
+        </q-item>
+      </q-list>
     </div>
 
     <div class="page page-width-md">
 
       <!-- error -->
       <div class="page-block" v-if="resource.attr('error')">
-        <q-alert type="negative">{{ resource.attr('error') }}</q-alert>
+        <q-banner class="bg-red text-white">{{ resource.attr('error') }}</q-banner>
       </div>
 
       <!-- components -->
-      <div class="page-block" v-for="type in $ethingUI.get(resource)._dep" :key="type" v-if="$ethingUI.get(type).mainComponent">
-        <div class="bloc-title">
-          <q-icon :name="$ethingUI.get(type).icon" />
-          <span>{{ $ethingUI.get(type).title }}</span>
+      <div class="page-block" v-for="(widget, key) in widgets" :key="key" v-if="widgets">
+        <div class="bloc-title" v-if="widget.title">
+          <q-icon :name="widget.icon" v-if="widget.icon"/>
+          <span>{{ widget.title }}</span>
         </div>
-        <device-component class="bloc-content" :device="resource" :component="$ethingUI.get(type).mainComponent" :componentAttr="$ethingUI.get(type).mainComponentAttributes"/>
+        <div class="bloc-content" :class="widget.devicePage.padding ? '' : 'bloc-content-no-padding'">
+          <widget :resource="resource" :component="widget.component" title="" footer="" v-bind="widget.attributes" :minHeight="widget.minHeight" :minWidth="widget.minWidth" color="#027be3"/>
+        </div>
       </div>
 
       <!-- attributes -->
-      <div class="page-block attributes" v-if="attributes.length>0" :class="{detailled: showDetailledAttributes}">
+      <div class="page-block attributes">
         <div class="bloc-title">
           <q-icon name="mdi-format-list-bulleted" />
           <span>Attributes</span>
           <q-btn class="float-right" flat rounded size="small" :label="showDetailledAttributes ? 'less' : 'more'" :icon="showDetailledAttributes ? 'expand_less' : 'expand_more'" style="line-height: initial" @click="showDetailledAttributes = !showDetailledAttributes"/>
         </div>
         <div class="bloc-content">
-          <div class="row">
+          <div class="row" v-if="attributes.length>0">
             <template v-for="attr in attributes">
-              <div class="col-xs-12 col-sm-2 key text-secondary ellipsis" :class="{detailled: attr.detailled}">{{ attr.name }}</div>
-              <div class="col-xs-12 col-sm-10 value ellipsis" :class="{detailled: attr.detailled}">{{ attr.value }}</div>
+              <div class="col-xs-12 col-sm-2 key text-secondary ellipsis">{{ attr.name }}</div>
+              <div class="col-xs-12 col-sm-10 value text-faded ellipsis">{{ attr.value }}</div>
             </template>
+          </div>
+          <div v-else class="text-center text-faded">
+            <small>no attributes</small>
           </div>
         </div>
       </div>
@@ -87,7 +111,7 @@
           <span>Resources</span>
         </div>
         <div class="bloc-content bloc-content-no-padding">
-          <q-list no-border>
+          <q-list>
             <resource-q-item v-for="child in children" :key="child.id()" :resource="child" />
           </q-list>
         </div>
@@ -97,7 +121,7 @@
       <div class="page-block" v-if="Object.keys($ethingUI.get(resource).methods).length">
         <div class="bloc-title">
           <q-icon name="mdi-database" />
-          <span>API</span>
+          <span>Commands</span>
         </div>
         <div class="bloc-content bloc-content-no-padding">
           <device-api :device="resource" />
@@ -111,10 +135,10 @@
 
 <script>
 
-import DeviceApi from 'ething-quasar-core/src/components/DeviceApi'
-import ResourceQItem from 'ething-quasar-core/src/components/ResourceQItem'
-import ResourceBatteryChip from 'ething-quasar-core/src/components/ResourceBatteryChip'
-import DeviceComponent from 'ething-quasar-core/src/components/DeviceComponent'
+import DeviceApi from '../components/DeviceApi'
+import ResourceQItem from '../components/ResourceQItem'
+import ResourceBatteryChip from '../components/ResourceBatteryChip'
+import Widget from '../components/Widget'
 
 export default {
   name: 'PageDevice',
@@ -123,12 +147,51 @@ export default {
     DeviceApi,
     ResourceQItem,
     ResourceBatteryChip,
-    DeviceComponent
+    Widget,
   },
 
   data () {
+
     return {
-      showDetailledAttributes: false
+      showDetailledAttributes: false,
+      widgets: [],
+      _resourceId: null,
+      isSensor: false,
+    }
+  },
+
+  watch: {
+    resource : {
+      handler (resource) {
+        if (resource && this._resourceId != resource.id()) {
+          this.load()
+        }
+      },
+      immediate: true
+    }
+  },
+
+  methods: {
+    load () {
+      this._resourceId = this.resource.id()
+
+      this.isSensor = this.$ethingUI.isSubclass(this.resource, 'interfaces/Sensor')
+
+      var w = []
+      var widgets = this.$ethingUI.get(this.resource).widgets
+      for(var id in widgets) {
+        var widget = widgets[id]
+        if (widget.in.indexOf('devicePage') !== -1) {
+          w.push(widget)
+        }
+      }
+
+      // re order by zIndex
+      w.sort(function(a, b) {
+          return b.zIndex - a.zIndex;
+      });
+
+      this.widgets = w || null
     }
   },
 
@@ -137,34 +200,23 @@ export default {
       var id = this.$route.params.id
       var r = this.$ething.arbo.get(id)
       if (id && id.length) {
-        if (!r || !r.isTypeof('resources/Device')) {
+        if (!r) {
           this.$router.replace('/404')
+        }
+        if (!r.isTypeof('resources/Device')) {
+          return
         }
       }
       return r
     },
 
+    meta () {
+      return this.$ethingUI.get(this.resource)
+    },
+
     children () {
       return this.$ething.arbo.find(r => {
         return r.createdBy() === this.resource.id()
-      })
-    },
-
-    tables () {
-      return this.children.filter(r => {
-        return r.isTypeof('resources/Table')
-      })
-    },
-
-    files () {
-      return this.children.filter(r => {
-        return r.isTypeof('resources/File')
-      })
-    },
-
-    devices () {
-      return this.children.filter(r => {
-        return r.isTypeof('resources/Device')
       })
     },
 
@@ -184,10 +236,13 @@ export default {
         let prop = props[name]
         let value = prop.getFormatted(this.resource)
 
+        if (!this.showDetailledAttributes && detailledFields.indexOf(name) !== -1) continue
+
+        if (value === null || typeof value === 'undefined') value = '-'
+
         attributes.push({
           name,
-          value,
-          detailled: detailledFields.indexOf(name) !== -1
+          value
         })
       }
       return attributes
@@ -205,7 +260,7 @@ export default {
       }
 
       return createdBys.reverse()
-    }
+    },
 
   },
 
@@ -215,7 +270,7 @@ export default {
 </script>
 
 <style lang="stylus">
-@import '~variables'
+
 
 .attributes
   .key.detailled, .value.detailled
