@@ -7,6 +7,7 @@
    v-bind="$attrs"
    :after="after"
    emit-value
+   borderless
   />
 </template>
 

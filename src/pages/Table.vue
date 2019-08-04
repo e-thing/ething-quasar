@@ -28,11 +28,12 @@
             borderless
             dense
             options-dense
+            display-value="Columns"
             emit-value
             map-options
             :options="columns"
             option-value="name"
-            style="min-width: 150px"
+            color="faded"
           />
 
           <q-btn
@@ -125,7 +126,7 @@
 
     <modal v-model="add.modal" title="Insert data" icon="add" valid-btn-label="Add" :valid-btn-disable="add.error" :valid-btn-loading="add.loading" @valid="addRow">
 
-      <span slot="buttons">
+      <span slot="buttons-right">
         <q-btn
           color="primary"
           @click="addRowTmpl"
@@ -133,112 +134,90 @@
           label="add another column"
           flat
           size="md"
-          class="float-right"
         />
       </span>
 
-      <div>
-        <div v-for="(item, index) in add.data" :key="index" class="q-my-lg add-row-item">
+      <q-card flat>
+        <q-card-section v-for="(item, index) in add.data" :key="index">
 
-          <q-field
-            class="q-my-md"
-            :error="$v.add.data.$each[index].key.$error"
-            error-label="required"
-          >
-            <q-input
-              v-model.trim="item.key"
-              label="Column name"
-              stack-label
-              @focus="addRowShowKeySuggestion(index)"
-              @blur="$v.add.data.$each[index].key.$touch"
-            >
-              <q-autocomplete
-                ref="addRowKeyAutocomplete"
-                :min-characters="0"
-                @selected="selected"
-                :filter="addRowKeyFilter"
-                :static-data="{field: 'value', list: addRowListKeys()}"
-              />
-            </q-input>
-          </q-field>
+          <q-select
+            v-model.trim="item.key"
+            use-input
+            input-debounce="0"
+            @new-value="createColumnValue"
+            :options="resource.keys()"
+          />
 
-          <q-field
-            class="q-my-md"
-            icon="keyboard_arrow_right"
+          <q-select
+            v-model="item.type"
+            :options="add.typeOptions"
             label="Type"
-          >
-            <q-select
-              v-model="item.type"
-              :options="add.typeOptions"
-            />
-          </q-field>
+            emit-value
+          />
 
-          <q-field
-            class="q-my-md"
-            icon="keyboard_arrow_right"
+          <q-input
+            v-if="item.type==='string'"
+            v-model="item.value"
+            @blur="$v.add.data.$each[index].value.$touch"
             label="Value"
-            :error="$v.add.data.$each[index].value.$error"
-            error-label="required"
+          />
+          <q-input
+            v-else-if="item.type==='number'"
+            v-model="item.value"
+            type="number"
+            label="Value"
+          />
+          <q-select
+            v-else-if="item.type==='boolean'"
+            v-model="item.value"
+            :options="[{label: 'True', value: true}, {label: 'False', value: false}]"
+            @blur="$v.add.data.$each[index].value.$touch"
+            label="Value"
+          />
+
+        </q-card-section>
+
+        <q-card-section>
+          <q-banner
+              v-if="add.error"
+              class="bg-red text-white"
           >
-            <q-input
-              v-if="item.type==='string'"
-              v-model="item.value"
-              @blur="$v.add.data.$each[index].value.$touch"
-            />
-            <q-input
-              v-else-if="item.type==='number'"
-              v-model="item.value"
-              type="number"
-              @blur="$v.add.data.$each[index].value.$touch"
-            />
-            <q-select
-              v-else-if="item.type==='boolean'"
-              v-model="item.value"
-              :options="[{label: 'True', value: true}, {label: 'False', value: false}]"
-              @blur="$v.add.data.$each[index].value.$touch"
-            />
-          </q-field>
-
-        </div>
-      </div>
-
-      <q-banner
-          v-if="add.error"
-          class="bg-red text-white q-my-md"
-      >
-        {{ String(add.error) }}
-      </q-banner>
+            {{ String(add.error) }}
+          </q-banner>
+        </q-card-section>
+      </q-card>
 
     </modal>
 
     <modal v-model="filterModal" title="Filter" icon="mdi-filter" valid-btn-label="Filter" @valid="validFilter">
+      <q-card>
+        <q-card-section>
+          Enter an ObjectPath expression to filter the data.
+          See <a href="http://objectpath.org" target="_blank">ObjectPath website</a> for more details.
+        </q-card-section>
 
-      <p>
-        Enter an ObjectPath expression to filter the data.
-        See <a href="http://objectpath.org" target="_blank">ObjectPath website</a> for more details.
-      </p>
+        <q-card-section>
+          <q-input v-model="filterModel" placeholder="$.temperature > 20 ..." />
+        </q-card-section>
 
-      <p>
-        <q-input v-model="filterModel" placeholder="$.temperature > 20 ..." />
-      </p>
+        <q-card-section>
+            <h6>Examples</h6>
 
-      <p>
-          <h6>Examples</h6>
+            <p class="caption">Comparison operators</p>
+            <pre>$.temperature is 20</pre>
+            <pre>$.temperature is not 20</pre>
+            <pre>$.temperature > 20</pre>
 
-          <p class="caption">Comparison operators</p>
-          <pre>$.temperature is 20</pre>
-          <pre>$.temperature is not 20</pre>
-          <pre>$.temperature > 20</pre>
+            <p class="caption">Boolean logic operators</p>
+            <pre>$.temperature > 10 and $.temperature < 20</pre>
+            <pre>$.state is 'foo' or $.state is 'bar'</pre>
 
-          <p class="caption">Boolean logic operators</p>
-          <pre>$.temperature > 10 and $.temperature < 20</pre>
-          <pre>$.state is 'foo' or $.state is 'bar'</pre>
+            <p class="caption">Membership</p>
+            <pre>$.state in ['foo', 'bar']</pre>
+            <pre>$.state not in ['foo', 'bar']</pre>
 
-          <p class="caption">Membership</p>
-          <pre>$.state in ['foo', 'bar']</pre>
-          <pre>$.state not in ['foo', 'bar']</pre>
-
-      </p>
+        </q-card-section>
+      </q-card>
 
     </modal>
 
@@ -285,23 +264,6 @@ export default {
       filter: '',
       filterModal: false,
       filterModel: ''
-    }
-  },
-
-  validations () {
-    return {
-      add: {
-        data: {
-          $each: {
-            key: {
-              required
-            },
-            value: {
-              required
-            }
-          }
-        }
-      }
     }
   },
 
@@ -411,6 +373,29 @@ export default {
   },
 
   methods: {
+
+    createColumnValue (val, done) {
+      // Calling done(var) when new-value-mode is not set or "add", or done(var, "add") adds "var" content to the model
+      // and it resets the input textbox to empty string
+      // ----
+      // Calling done(var) when new-value-mode is "add-unique", or done(var, "add-unique") adds "var" content to the model
+      // only if is not already set
+      // and it resets the input textbox to empty string
+      // ----
+      // Calling done(var) when new-value-mode is "toggle", or done(var, "toggle") toggles the model with "var" content
+      // (adds to model if not already in the model, removes from model if already has it)
+      // and it resets the input textbox to empty string
+      // ----
+      // If "var" content is undefined/null, then it doesn't tampers with the model
+      // and only resets the input textbox to empty string
+
+      if (val.length > 0) {
+        if (!this.resource.keys().includes(val)) {
+          done(val, 'add-unique')
+        }
+      }
+    },
+
     request ({ pagination, filter }, done, err) {
       if (!this.resource) return
 
@@ -529,23 +514,6 @@ export default {
       })
     },
 
-    addRowListKeys () {
-      return this.resource.keys().map(k => {
-        return {
-          label: k,
-          value: k
-        }
-      })
-    },
-
-    addRowKeyFilter(terms, { field, list }) {
-      return list
-    },
-
-    addRowShowKeySuggestion(index) {
-      this.$refs['addRowKeyAutocomplete'][index].trigger()
-    },
-
     addRow () {
       var d = {}
       this.add.data.forEach(item => {
@@ -590,9 +558,5 @@ export default {
 
 <style lang="stylus" scoped>
 
-
-.add-row-item
-  &:not(:first-child)
-    border-top 1px solid $blue-2
 
 </style>

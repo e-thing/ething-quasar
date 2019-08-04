@@ -9,65 +9,99 @@
     @escape-key="$emit('cancel')"
     @dismiss="$emit('cancel')"
   >
-    <q-card :style="widthCss">
+    <div class="column bg-white" :style="Object.assign({}, widthCss, heightCss)">
 
-      <q-card-section class="bg-primary text-white">
+      <div class="col-auto bg-primary text-white q-py-sm q-px-md title">
         <div class="row items-center">
           <q-icon v-if="icon" :name="icon" left />
           <div v-if="title" class="text-h6">{{ title }}</div>
           <q-space/>
           <q-btn dense flat icon="close" @click="onCloseBtnClick">Close</q-btn>
         </div>
-      </q-card-section>
+      </div>
 
-      <q-separator />
+      <div class="col scroll">
 
-      <q-card-section :style="heightCss" class="scroll q-px-none">
+        <slot ></slot>
 
-        <div class="q-px-md">
-          <slot ></slot>
+        <div class="q-py-sm q-px-md buttons row items-center" v-if="!noButtons && scroll">
+
+          <q-btn
+            v-if="!validBtnHide"
+            :color="validBtnColor"
+            @click="onValidBtnClick()"
+            :label="validBtnLabel"
+            :disable="validBtnDisable"
+            :loading="validBtnLoading"
+            flat
+          />
+
+          <q-btn
+            v-if="!cancelBtnHide"
+            :color="cancelBtnColor"
+            @click="onCancelBtnClick()"
+            :label="cancelBtnLabel"
+            :disable="cancelBtnDisable"
+            flat
+          />
+
+          <q-btn
+            v-for="(btn, index) in buttons" :key="index"
+            :color="btn.color"
+            @click="onBtnClick(btn)"
+            :label="btn.label"
+            :flat="btn.flat"
+            :disable="btn.disable"
+          />
+
+          <slot name="buttons"></slot>
+
+          <q-space/>
+
+          <slot name="buttons-right"></slot>
+
         </div>
 
-        <template v-if="!noButtons">
-          <q-separator />
+      </div>
 
-          <q-card-actions align="right">
+      <div class="col-auto q-py-sm q-px-md buttons row items-center" v-if="!noButtons && !scroll">
 
-            <q-btn
-              v-if="!validBtnHide"
-              :color="validBtnColor"
-              @click="onValidBtnClick()"
-              :label="validBtnLabel"
-              :disable="validBtnDisable"
-              :loading="validBtnLoading"
-              flat
-            />
+        <q-btn
+          v-if="!validBtnHide"
+          :color="validBtnColor"
+          @click="onValidBtnClick()"
+          :label="validBtnLabel"
+          :disable="validBtnDisable"
+          :loading="validBtnLoading"
+          flat
+        />
 
-            <q-btn
-              v-if="!cancelBtnHide"
-              :color="cancelBtnColor"
-              @click="onCancelBtnClick()"
-              :label="cancelBtnLabel"
-              :disable="cancelBtnDisable"
-              flat
-            />
+        <q-btn
+          v-if="!cancelBtnHide"
+          :color="cancelBtnColor"
+          @click="onCancelBtnClick()"
+          :label="cancelBtnLabel"
+          :disable="cancelBtnDisable"
+          flat
+        />
 
-            <q-btn
-              v-for="(btn, index) in buttons" :key="index"
-              :color="btn.color"
-              @click="onBtnClick(btn)"
-              :label="btn.label"
-              :flat="btn.flat"
-              :disable="btn.disable"
-            />
+        <q-btn
+          v-for="(btn, index) in buttons" :key="index"
+          :color="btn.color"
+          @click="onBtnClick(btn)"
+          :label="btn.label"
+          :flat="btn.flat"
+          :disable="btn.disable"
+        />
 
-            <slot name="buttons"></slot>
+        <slot name="buttons"></slot>
 
-          </q-card-actions>
-        </template>
-      </q-card-section>
+        <q-space/>
 
-    </q-card>
+        <slot name="buttons-right"></slot>
+        
+      </div>
+    </div>
   </q-dialog>
 </template>
 
@@ -85,6 +119,8 @@ export default {
         type: String,
         default: 'md'
       },
+
+      scroll: Boolean,
 
       noButtons: Boolean,
 
@@ -121,38 +157,38 @@ export default {
 
     computed: {
       heightCss () {
-        var css = {}
+        var height;
 
         if ( this.size == 'xs') {
-          css = {maxHeight: '40vh'}
+          height = '40vh'
         } else if ( this.size == 'sm') {
-          css = {maxHeight: '50vh'}
+          height = '50vh'
         } else if ( this.size == 'md') {
-          css = { maxHeight: '70vh'}
+          height = '70vh'
         } else if ( this.size == 'lg') {
-          css = {maxHeight: '80vh'}
+          height = '80vh'
         } else if ( this.size == 'xl') {
-          css = {maxHeight: '90vh'}
+          height = '90vh'
         }
 
-        return css
+        return {height}
       },
       widthCss () {
-        var css = {}
+        var width;
 
         if ( this.size == 'xs') {
-          css = {maxWidth: '30vw', width: '30vw'}
+          width = '30vw'
         } else if ( this.size == 'sm') {
-          css = {maxWidth: '40vw', width: '40vw'}
+          width = '40vw'
         } else if ( this.size == 'md') {
-          css = {maxWidth: '50vw', width: '50vw'}
+          width = '50vw'
         } else if ( this.size == 'lg') {
-          css = {maxWidth: '70vw', width: '70vw'}
+          width = '70vw'
         } else if ( this.size == 'xl') {
-          css = {maxWidth: '90vw', width: '90vw'}
+          width = '90vw'
         }
 
-        return css
+        return {width, maxWidth: width}
       }
     },
 
@@ -192,11 +228,10 @@ export default {
 
 <style lang="stylus" scoped>
 
+.title
+  border-bottom 1px solid rgba(0,0,0,0.12)
 
-.no-shadow {
-  -webkit-box-shadow: none;
-	-moz-box-shadow: none;
-	box-shadow: none;
-}
+.buttons
+  border-top 1px solid rgba(0,0,0,0.12)
 
 </style>

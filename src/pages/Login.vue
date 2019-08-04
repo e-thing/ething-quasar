@@ -3,50 +3,40 @@
     <div class="text-h2 text-primary text-center">EThing</div>
 
     <div class="q-pb-md">
-      <q-field
+      <q-input
         v-if="$ethingUI.dynamicServerUrl"
+        class="q-py-md"
+        ref="server"
+        autofocus
+        v-model="server"
+        label="Server Url"
+        @keyup.enter="$refs.login.focus()"
+        @blur="$v.server.$touch"
         :error="$v.server.$error"
-        error-label="required"
-      >
-        <q-input
-          class="q-py-md"
-          ref="server"
-          autofocus
-          v-model="server"
-          label="Server Url"
-          @keyup.enter="$refs.login.focus()"
-          @blur="$v.server.$touch"
-        />
-      </q-field>
-      <q-field
+        error-message="required"
+      />
+      <q-input
+        class="q-py-md"
+        ref="login"
+        autofocus
+        v-model="form.login"
+        label="Login"
+        @keyup.enter="$refs.password.focus()"
+        @blur="$v.form.login.$touch"
         :error="$v.form.login.$error"
-        error-label="Login is required"
-      >
-        <q-input
-          class="q-py-md"
-          ref="login"
-          autofocus
-          v-model="form.login"
-          label="Login"
-          @keyup.enter="$refs.password.focus()"
-          @blur="$v.form.login.$touch"
-        />
-      </q-field>
-      <q-field
+        error-message="Login is required"
+      />
+      <q-input
+        class="q-py-md"
+        ref="password"
+        v-model="form.password"
+        type="password"
+        label="Password"
+        @keyup.enter="onConnect"
+        @blur="$v.form.password.$touch"
         :error="$v.form.password.$error"
-        error-label="Password is required"
-      >
-        <q-input
-          class="q-py-md"
-          ref="password"
-          v-model="form.password"
-          type="password"
-          label="Password"
-          @keyup.enter="onConnect"
-          @blur="$v.form.password.$touch"
-          :error="$v.form.password.$error"
-        />
-      </q-field>
+        error-message="Password is required"
+      />
     </div>
 
     <q-btn :loading="loading" :disable="$v.$error" color="primary" class="full-width" @click="onConnect">Connect</q-btn>
