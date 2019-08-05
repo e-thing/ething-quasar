@@ -4,7 +4,13 @@
             <div class="img-wrapper">
                 <div v-if="currentImage">
                   <img :key="imgKey" :src="addTimestampToUrl(currentImage.getSrc())" alt="" @load="onload" @error="onerror">
-                  <div v-if="loading" class="loader text-center">loading...</div>
+                  <div v-if="loading" class="loader">
+                    <q-circular-progress
+                      indeterminate
+                      size="24px"
+                      color="white"
+                    />
+                  </div>
                   <div v-if="error" class="error text-center text-negative">Error</div>
                   <div v-if="!noTitle" class="title text-center text-faded">{{ currentImage.name() }}</div>
                 </div>
@@ -50,7 +56,8 @@ export default {
         activeImage: 0,
         images: [],
         imgKey: 0,
-        loading: false
+        loading: false,
+        _lastTs: 0
     }
   },
   computed: {
@@ -175,7 +182,13 @@ export default {
       },
 
       addTimestampToUrl (url) {
-        return url + ( url.indexOf('?') === -1 ? '?' : '&' ) + Date.now()
+        var ts = Date.now()
+        if (ts - this._lastTs < 1000) { // kind of debounce
+          ts = this._lastTs
+        } else {
+          this._lastTs = ts
+        }
+        return url + ( url.indexOf('?') === -1 ? '?' : '&' ) + ts
       },
 
       onload () {

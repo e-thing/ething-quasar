@@ -1,6 +1,6 @@
 <template>
-  <q-page class="page bg-secondary text-white">
-    <q-tabs v-model="tab">
+  <q-page class="page">
+    <q-tabs v-model="tab" class="bg-secondary text-white">
       <q-tab label="settings" name="settings" icon="settings" />
       <q-tab label="api key" name="apikey" icon="mdi-key" />
       <q-tab label="plugins" name="plugins" icon="mdi-puzzle" />

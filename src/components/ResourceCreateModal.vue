@@ -20,7 +20,32 @@
      v-model="selectedType"
      :options="items"
      class="q-mb-xl"
-    />
+     emit-value
+
+    >
+      <template v-slot:selected>
+        <div v-if="selectedType">
+          <q-avatar :icon="selectedClass.icon" :color="selectedClass.color" text-color="white" size="24px" class="q-mr-sm"/>
+          <span>{{ selectedClass.title }}</span>
+        </div>
+        <div v-else>select a resource</div>
+      </template>
+
+      <template v-slot:option="scope">
+        <q-item
+          v-bind="scope.itemProps"
+          v-on="scope.itemEvents"
+        >
+          <q-item-section avatar>
+            <q-avatar :color="scope.opt.color" text-color="white" :icon="scope.opt.icon" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>{{ scope.opt.label }}</q-item-label>
+            <q-item-label caption>{{ scope.opt.sublabel }}</q-item-label>
+          </q-item-section>
+        </q-item>
+      </template>
+    </q-select>
 
     <resource-editor v-if="selectedType" ref="form" :resource="selectedType" :key="selectedType" @error="formError=$event"/>
 
@@ -37,22 +62,29 @@
 <script>
 
 import ResourceEditor from './ResourceEditor'
+import Modal from './Modal'
 
 export default {
     name: 'ResourceCreateModal',
 
     components: {
+      Modal,
       ResourceEditor
     },
 
     props: {
       value: Boolean,
-      types: Array,
+      types: {
+        type: Array,
+        default () {
+          return ['resources/Resource']
+        }
+      }
     },
 
     data () {
         return {
-          selectedType: this.types[0],
+          selectedType: undefined,
           loading: false,
           error: false,
           formError: false
@@ -64,25 +96,29 @@ export default {
       items () {
         var r = []
 
-        this.types.forEach(t => {
-          var m = this.$ethingUI.get(t)
-
-          if (m.virtual) {
-            // find all subclass
-            this.$ethingUI.iterate('resources', (resourceClsName) => {
-              if (this.$ethingUI.isSubclass(resourceClsName, t)) {
-                r.push(resourceClsName)
+        this.$ethingUI.iterate('resources', (resourceClsName) => {
+          var resourceCls = this.$ethingUI.get(resourceClsName)
+          if (!resourceCls.virtual && !resourceCls.disableCreation) {
+            var append = false
+            if (this.types.indexOf(resourceClsName) !== -1) {
+              append = true
+            } else {
+              for (var i in this.types) {
+                if (this.$ethingUI.isSubclass(resourceCls, this.types[i])) {
+                  append = true
+                  break
+                }
               }
-            })
-          } else {
-            r.push(t)
+            }
+
+            if (append) {
+              r.push(resourceCls)
+            }
           }
         })
 
-        r = r.filter((v, i, a) => a.indexOf(v) === i);
-
-        return r.map(t => {
-          var m = this.$ethingUI.get(t)
+        return r.map(m => {
+          var t = m._type
 
           var cat = t.split('/')
           cat.pop()
@@ -91,7 +127,7 @@ export default {
           return {
             label: m.title,
             icon: m.icon,
-            leftColor: m.color,
+            color: m.color,
             sublabel: cat,
             value: t
           }
@@ -101,6 +137,10 @@ export default {
       title () {
         if (this.items.length==1) return 'create '+this.items[0].label
         return 'create'
+      },
+
+      selectedClass () {
+        return this.selectedType ? this.$ethingUI.get(this.selectedType) : undefined
       }
 
     },

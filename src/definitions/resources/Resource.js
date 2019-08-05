@@ -29,11 +29,5 @@ export default {
       }
     },
 
-    location: {
-      get: function (resource) {
-        return resource.attr('location') // necessary for ething.js <= v0.1.19
-      }
-    }
-
   }
 }

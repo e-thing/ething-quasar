@@ -12,12 +12,12 @@
             <div class="row items-center no-wrap">
               <div class="col">
                 <div class="text-h6">
-                  {{ plugin.name }} <span v-if="plugin.package.version" slot="subtitle">version: {{ plugin.package.version }}</span>
+                  {{ plugin.name }}
                 </div>
               </div>
 
               <div class="col-auto">
-                <q-icon slot="right" name="mdi-puzzle" />
+                <q-badge v-if="plugin.package.version" color="white" text-color="secondary">version: {{ plugin.package.version }}</q-badge>
               </div>
             </div>
           </q-card-section>
@@ -76,7 +76,7 @@
             </div>
           </div>
         </q-card-section>
-        
+
       </q-card>
     </div>
 

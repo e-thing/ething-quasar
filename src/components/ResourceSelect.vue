@@ -1,14 +1,40 @@
 <template>
   <q-select
-   v-bind:value="formattedValue"
-   @input="$emit('input', $event)"
+   v-model="model"
    :options="options"
    :multiple="multiple"
    v-bind="$attrs"
-   :after="after"
    emit-value
-   borderless
-  />
+   @filter="filterFn"
+   :display-value="displayValue"
+   items-aligned
+   options-selected-class="text-deep-orange"
+  >
+    <template v-slot:option="scope">
+      <q-item
+        v-bind="scope.itemProps"
+        v-on="scope.itemEvents"
+      >
+        <q-item-section avatar>
+          <q-avatar :color="scope.opt.color" text-color="white" :icon="scope.opt.icon" />
+        </q-item-section>
+        <q-item-section>
+          <q-item-label>{{ scope.opt.label }}</q-item-label>
+          <q-item-label caption>{{ scope.opt.title }}</q-item-label>
+          <q-item-label v-if="!!scope.opt.createBys" caption>
+            <template v-for="createBy in scope.opt.createBys">
+              <q-icon name="keyboard_arrow_right"/>
+              <span>{{ createBy.basename() }}</span>
+            </template>
+          </q-item-label>
+        </q-item-section>
+      </q-item>
+    </template>
+
+    <template v-slot:append v-if="!disableCreate && computedCreateTypes.length==0">
+      <q-icon name="add" class="cursor-pointer" @click="openCreateModal" />
+    </template>
+  </q-select>
 </template>
 
 <script>
@@ -27,27 +53,76 @@ export default {
       useId: Boolean,
       multiple: Boolean,
       disableCreate: Boolean,
-      createTypes: Array
+      createTypes: Array,
     },
 
     data () {
-        return {}
+        return {
+          options: this.compute_options(),
+          p_model: null
+        }
     },
 
     computed: {
-      formattedValue () {
-        if (this.multiple) {
-          if (Array.isArray(this.value)) {
-            return this.value
-          } else if (this.value) {
-            return [this.value]
+
+      model: {
+        get: function () {
+          var mids = this.selectedResources.map(r => r.id())
+          return this.multiple ? mids : mids[0]
+        },
+        set: function (val) {
+          var m;
+          if (this.multiple) {
+            m = this.useId ? val : val.map(id => this.$ething.arbo.get(id))
           } else {
-            return []
+            m = this.useId ? val : this.$ething.arbo.get(val)
           }
-        } else {
-          return this.value
+          this.$emit('input', m)
         }
       },
+
+      computedCreateTypes () {
+        if (this.createTypes) {
+          return this.createTypes
+        } else if (this.type) {
+          return this.type.split(/[ ;,]+/)
+        } else {
+          return ['resources/Resource']
+        }
+      },
+
+      selectedResources () {
+        if (this.multiple) {
+          var v = []
+          if (Array.isArray(this.value)) {
+            v = this.value
+          } else if (this.value) {
+            v = [this.value]
+          }
+
+          return this.useId ? v.map(id => {
+            return this.$ething.arbo.get(id)
+          }) : v
+        } else if (this.value) {
+          return [this.useId ? this.$ething.arbo.get(this.value) : this.value]
+        } else {
+          return []
+        }
+      },
+
+      displayValue () {
+        if (this.selectedResources.length==0) return 'none'
+        return this.selectedResources.map(r=>r.basename()).join(', ')
+      }
+    },
+
+    methods: {
+      openCreateModal () {
+        createModal({
+          types: this.computedCreateTypes
+        })
+      },
+
       resources () {
 
         var notTypes = null
@@ -88,8 +163,8 @@ export default {
         })
       },
 
-      options () {
-        return this.resources.map( r => {
+      compute_options () {
+        return this.resources().map( r => {
           var createdByArr = []
           var p = r
           for (let i = 0; i<2; i++) {
@@ -106,45 +181,21 @@ export default {
 
           return {
             label: r.name(),
-            value: this.useId ? r.id() : r,
-            icon: this.$ethingUI.get(r).icon,
-            leftColor: this.$ethingUI.get(r).color,
-            inset: true,
-            stamp: meta.title,
-            sublabel: createdByArr.length ? createdByArr.reverse().map(r => r.basename()).join(' -> ') : undefined
+            value: r.id(),
+            icon: meta.icon,
+            color: meta.color,
+            title: meta.title,
+            createBys: createdByArr,
           }
         })
       },
 
-      computedCreateTypes () {
-        if (this.createTypes) {
-          return this.createTypes
-        } else if (this.type) {
-          return this.type.split(/[ ;,]+/)
-        } else {
-          return []
-        }
+      filterFn (val, update, abort) {
+        update(() => {
+          this.options = this.compute_options()
+        })
       },
 
-      after () {
-        if (this.disableCreate || this.computedCreateTypes.length==0) return []
-        return [
-          {
-            icon: 'add',
-            handler: () => {
-              this.openCreateModal()
-            }
-          }
-        ]
-      }
-    },
-
-    methods: {
-      openCreateModal () {
-        createModal({
-          types: this.computedCreateTypes
-        })
-      }
     }
 
 

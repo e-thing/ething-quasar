@@ -22,7 +22,7 @@
 
         <q-btn v-if="refreshEnabled" class="gt-xs" flat icon="refresh" aria-label="refresh" @click="refresh"/>
         <q-btn class="gt-xs" flat icon="settings" aria-label="Settings" @click="$router.push('/settings')"/>
-        <q-btn v-if="!$ethingUI.autoLogin" class="gt-xs" flat icon="exit to app" aria-label="Logout" @click="logout" />
+        <q-btn v-if="!$ethingUI.autoLogin" class="gt-xs" flat icon="exit_to_app" aria-label="Logout" @click="logout" />
 
       </q-toolbar>
 
@@ -72,7 +72,7 @@
         </q-item>
         <q-item v-if="!$ethingUI.autoLogin" clickable @click="logout">
           <q-item-section avatar>
-            <q-icon name="exit to app" />
+            <q-icon name="exit_to_app" />
           </q-item-section>
           <q-item-section>Logout</q-item-section>
         </q-item>

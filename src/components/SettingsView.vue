@@ -126,7 +126,14 @@ export default {
         this.saving = true
         this.saveError = false
 
-        this.$ething.settings.set(settings).catch(err => {
+        this.$ething.settings.set(settings).then(() => {
+          this.$q.notify({
+            icon: 'done',
+            color: 'positive',
+            message: 'Changes applied',
+            timeout: 1500
+          })
+        }).catch(err => {
           this.saveError = err
         }).finally(() => {
           this.saving = false

@@ -9,11 +9,13 @@
 
       <div class="node-filter q-px-md q-py-sm">
         <resource-select
-          :display-value="resourceFilterDisplayValue"
           v-model="resourceFilter"
           clearable
           label="Resource Filter"
           stack-label
+          disable-create
+          popup-content-style="width: 300px"
+          borderless
         />
       </div>
 
@@ -34,92 +36,104 @@
       </q-list>
     </div>
 
-    <div class="main" :style="dbg.enabled ? {} : {right: 0}">
-      <div class="top-left-menu">
-        <q-btn icon="menu" flat color="faded" @click="showMenu = true" round class="q-mr-sm" v-if="$q.screen.xs"/>
-        <span class="text-faded filename">{{ resource.name() }}</span>
-      </div>
-
-      <div class="top-right-menu">
-        <q-btn label="deploy" flat :color="dirty?'primary':'faded'" @click="deploy" />
-        <q-btn label="debug" flat :color="dbg.enabled?'primary':'faded'" @click="toggle_debug" />
-      </div>
-
-      <div class="bottom-right-menu bg-secondary q-pl-md" v-if="selectedNodes.length>0">
-        <span class="text-white vertical-middle">{{ selectedNodes.length }} node{{ selectedNodes.length>1 ? 's' : ''}} selected</span>
-        <q-btn label="cancel" :round="$q.screen.xs" icon="mdi-cancel" flat color="white" @click="clearSelection()" />
-        <q-btn label="duplicate" :round="$q.screen.xs" icon="mdi-content-duplicate" flat color="white" @click="duplicate(selectedNodes);clearSelection();" />
-      </div>
-
-      <drop @drop="handleDrop">
-        <div ref="flowchart" class="flowchart jtk-surface jtk-surface-nopan" @click.self="flowchartClick">
-            <div ref="node" class="node"
-                  v-for="node in nodes" :key="node.id" :data-id="node.id"
-                  @mouseover="nodeHoverHandler(node, true)" @mouseout="nodeHoverHandler(node, false)"
-                  v-touch-hold.noMouse="node._hold"
-                  @dblclick="node._dbclick"
-                  @click="node._click"
-                  @mousedown="node._mousedown"
-                  @mouseup="node._mouseup"
-                  :class="{active: node._isActive, selected: node._selected, error: !!node._dbg.data.error}"
-            >
-              <q-icon v-if="node._cls.icon" :name="node._cls.icon" class="icon" />
-              <div class="content">
-                <flow-node :flow="resource" :node="node" class="full-width ellipsis"/>
-              </div>
-              <div class="node-btns">
-                <q-btn flat dense icon="edit" size="sm" color="faded"  @click.stop.prevent="editNode(node)" class="node-btn"/>
-                <q-btn flat dense icon="delete" size="sm" color="faded"  @click.stop.prevent="removeNode(node)" class="node-btn"/>
-              </div>
-              <div class="node-error text-no-wrap text-caption" v-if="node._dbg.data.error">
-                {{ node._dbg.data.error }}
-              </div>
-              <div class="node-dbg text-no-wrap text-caption" v-if="dbg.enabled">
-                <div>
-                  id: {{ node.id }}
-                </div>
-                <div v-for="(value, key) in node._dbg.data" :key="key">
-                  {{ key }}: {{ value }}
-                </div>
-              </div>
-            </div>
-        </div>
-      </drop>
-    </div>
-
-    <div class="rightMenu" v-if="dbg.enabled" v-touch-swipe.right="closeDebugger">
-
-      <div class="text-right q-pa-sm">
-        <q-btn v-if="dbg.items.length>0" icon="delete" flat color="faded" @click="dbg.items = []" />
-        <q-btn v-if="$q.screen.xs" icon="close" label="close" flat color="faded" @click="dbg.enabled = false" />
-      </div>
-
-      <div v-if="dbg.items.length>0">
-        <div class="dbg-item q-pa-sm" v-for="(item, index) in dbg.items" :key="index" @mouseover="setDbgActiveNode(item.node, true)" @mouseout="setDbgActiveNode(item.node, false)">
-          <div class="dbg-item-header text-caption">
-            <span class="dbg-item-header-date text-faded">
-              {{ $ethingUI.utils.dateToString(item.ts * 1000) }}
-            </span>
-            <span v-if="item.node" class="dbg-item-header-node text-purple">
-              [{{ nodeIdToName(item.node) }}]
-            </span>
+    <q-splitter
+      v-model="splitterModel"
+      :limits="splitterLimits"
+      :disable="splitterDisable"
+      class="main"
+    >
+      <template v-slot:before>
+        <div class="board">
+          <div class="top-left-menu">
+            <q-btn icon="menu" flat color="faded" @click="showMenu = true" round class="q-mr-sm" v-if="$q.screen.xs"/>
+            <span class="text-faded filename">{{ resource.name() }}</span>
           </div>
-          <div class="dbg-item-data">
-            <div v-if="item.exception" class="text-negative">
-              {{ item.data.type }}: {{ item.data.message }}
-              <pre class="dbg-item-data-exc-traceback">{{ item.data.traceback }}</pre>
+
+          <div class="top-right-menu">
+            <q-btn label="deploy" flat :color="dirty?'primary':'faded'" @click="deploy" />
+            <q-btn label="debug" flat :color="dbg.enabled?'primary':'faded'" @click="toggle_debug" />
+          </div>
+
+          <div class="bottom-right-menu bg-secondary q-pl-md" v-if="selectedNodes.length>0">
+            <span class="text-white vertical-middle">{{ selectedNodes.length }} node{{ selectedNodes.length>1 ? 's' : ''}} selected</span>
+            <q-btn label="cancel" :round="$q.screen.xs" icon="mdi-cancel" flat color="white" @click="clearSelection()" />
+            <q-btn label="duplicate" :round="$q.screen.xs" icon="mdi-content-duplicate" flat color="white" @click="duplicate(selectedNodes);clearSelection();" />
+            <q-btn label="remove" :round="$q.screen.xs" icon="delete" flat color="white" @click="deleteSelection()" />
+          </div>
+
+
+          <drop @drop="handleDrop">
+            <div ref="flowchart" class="flowchart jtk-surface jtk-surface-nopan" @click.self="flowchartClick">
+                <div ref="node" class="node"
+                      v-for="node in nodes" :key="node.id" :data-id="node.id"
+                      @mouseover="nodeHoverHandler(node, true)" @mouseout="nodeHoverHandler(node, false)"
+                      v-touch-hold.noMouse="node._hold"
+                      @mousedown="node._mousedown"
+                      @mouseup="node._mouseup"
+                      :class="{active: node._isActive, selected: node._selected, error: !!node._dbg.data.error}"
+                >
+                  <q-icon v-if="node._cls.icon" :name="node._cls.icon" class="icon" />
+                  <div class="content">
+                    <flow-node :flow="resource" :node="node" class="full-width ellipsis"/>
+                  </div>
+                  <div class="node-btns">
+                    <q-btn flat dense icon="edit" size="sm" color="faded"  @click.stop.prevent="editNode(node)" class="node-btn"/>
+                    <q-btn flat dense icon="delete" size="sm" color="faded"  @click.stop.prevent="removeNode(node)" class="node-btn"/>
+                  </div>
+                  <div class="node-error text-no-wrap text-caption" v-if="node._dbg.data.error">
+                    {{ node._dbg.data.error }}
+                  </div>
+                  <div class="node-dbg text-no-wrap text-caption" v-if="dbg.enabled">
+                    <div>
+                      id: {{ node.id }}
+                    </div>
+                    <div v-for="(value, key) in node._dbg.data" :key="key">
+                      {{ key }}: {{ value }}
+                    </div>
+                  </div>
+                </div>
             </div>
-            <div v-else>
-              <json-formatter :value="item.data" :options="{}" />
+          </drop>
+        </div>
+      </template>
+
+      <template v-slot:after>
+
+        <div>
+
+          <div class="text-right q-pa-sm">
+            <q-btn v-if="dbg.items.length>0" icon="delete" flat color="faded" @click="dbg.items = []" />
+            <q-btn v-if="$q.screen.xs" icon="close" label="close" flat color="faded" @click="dbg.enabled = false" />
+          </div>
+
+          <div v-if="dbg.items.length>0">
+            <div class="dbg-item q-pa-sm" v-for="(item, index) in dbg.items" :key="index" @mouseover="setDbgActiveNode(item.node, true)" @mouseout="setDbgActiveNode(item.node, false)">
+              <div class="dbg-item-header text-caption">
+                <span class="dbg-item-header-date text-faded">
+                  {{ $ethingUI.utils.dateToString(item.ts * 1000) }}
+                </span>
+                <span v-if="item.node" class="dbg-item-header-node text-purple">
+                  [{{ nodeIdToName(item.node) }}]
+                </span>
+              </div>
+              <div class="dbg-item-data">
+                <div v-if="item.exception" class="text-negative">
+                  {{ item.data.type }}: {{ item.data.message }}
+                  <pre class="dbg-item-data-exc-traceback">{{ item.data.traceback }}</pre>
+                </div>
+                <div v-else>
+                  <json-formatter :value="item.data" :options="{}" />
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
-      <div v-else class="text-faded text-center text-caption">
-        debug console
-      </div>
+          <div v-else class="text-faded text-center text-caption">
+            debug console
+          </div>
 
-    </div>
+        </div>
+      </template>
+    </q-splitter>
 
     <modal v-model="edit.show" :title="editTitle()" icon="add" :valid-btn-disable="edit.error" valid-btn-label="Add" @valid="onEditDone">
       <form-schema :key="edit.key" :schema="edit.schema" v-model="edit.model" :context="edit.context" @error="edit.error = $event"/>
@@ -312,7 +326,12 @@ export default {
       resourceFilter: null,
       activeNode: null,
       showMenu: false,
-      selectedNodes: []
+      selectedNodes: [],
+      _lastClickTs: 0,
+      _clickTimer: null,
+      splitterModel: 100,
+      splitterLimits: [0, 100],
+      splitterDisable: true
     }
 
   },
@@ -328,10 +347,6 @@ export default {
       }
 
       return r
-    },
-
-    resourceFilterDisplayValue () {
-      return this.resourceFilter===null ? 'none' : this.resourceFilter.basename()
     },
 
     menu () {
@@ -374,10 +389,6 @@ export default {
   methods: {
     closeMenu () {
       this.showMenu = false
-    },
-
-    closeDebugger () {
-      this.dbg.enabled = false
     },
 
     flowchartClick (evt) {
@@ -431,6 +442,15 @@ export default {
 
     toggle_debug () {
       this.dbg.enabled = !this.dbg.enabled;
+      if (this.dbg.enabled) {
+        this.splitterModel = 70
+        this.splitterLimits = [20, 80]
+        this.splitterDisable = false
+      } else {
+        this.splitterModel = 100
+        this.splitterLimits = [30, 100]
+        this.splitterDisable = true
+      }
       //this.dbg.enabled ? this.start_debug() : this.stop_debug();
     },
 
@@ -470,7 +490,7 @@ export default {
       // {flow_id: "owBdc-U", data: "debug Tick", ts: 1546608540.8292224, node: "1460686"}
       data.data = JSON.parse(data.data)
 
-      console.log('[socketio:Flow] data:', data)
+      //console.log('[socketio:Flow] data:', data)
 
       this.dbg.items.push(data)
 
@@ -482,7 +502,7 @@ export default {
     debug_info_handler (data) {
       data.data = JSON.parse(data.data)
 
-      console.log('[socketio:Flow] info:', data)
+      //console.log('[socketio:Flow] info:', data)
 
       var node = this.getNode(data.node)
 
@@ -551,7 +571,8 @@ export default {
       }
 
       node._click = (evt) => {
-        if (!checkMouseEvent(evt)) return
+        //if (!checkMouseEvent(evt)) return
+        this.selectNode(node, !node._selected, evt.ctrlKey)
         /*if (this.$q.screen.xs) {
           if (!node._isActive) {
             this.setActiveNode(node)
@@ -562,7 +583,7 @@ export default {
       }
 
       node._dbclick = (evt) => {
-        if (!checkMouseEvent(evt)) return
+        //if (!checkMouseEvent(evt)) return
         this.editNode(node)
       }
 
@@ -580,11 +601,28 @@ export default {
       node._mouseup = (evt) => {
         if (!checkMouseEvent(evt)) return
         if (evt.which === 1 && this.mouseInfo) {
-
           //if (evt.timeStamp - this.mouseInfo.ts < 500) {
             var d = Math.sqrt( Math.pow(evt.x - this.mouseInfo.x, 2) + Math.pow(evt.y - this.mouseInfo.y, 2) )
             if (d < 10) {
-              this.selectNode(node, !node._selected, evt.ctrlKey)
+              var ts = Date.now()
+              if (this._lastClickTs && ts - this._lastClickTs < 200) {
+                // dbclick
+                this._lastClickTs = 0
+                if (this._clickTimer!== null) {
+                  clearTimeout(this._clickTimer)
+                  this._clickTimer = null
+                }
+
+                node._dbclick(evt)
+              } else {
+                this._lastClickTs = ts
+                this._clickTimer = setTimeout(() => {
+                  // click
+                  node._click(evt)
+                }, 200)
+              }
+            } else {
+              // drag
             }
           //}
 
@@ -754,6 +792,17 @@ export default {
         n._selected = false
       })
       this.selectedNodes = []
+    },
+
+    deleteSelection () {
+      if (this.selectedNodes.length && confirm('Delete selected nodes ?')) {
+        this.selectedNodes.forEach(node => {
+          this.removeNodeToFlow(node)
+        })
+        this.selectedNodes = []
+        this.dirty = true
+        this.save()
+      }
     },
 
     nodeIdToName (nodeId) {
@@ -956,6 +1005,12 @@ export default {
       })
     },
 
+    onKeyUp (evt) {
+      if (evt.keyCode == 8 || evt.keyCode == 46) {
+        this.deleteSelection()
+      }
+    }
+
   },
 
   mounted () {
@@ -1016,11 +1071,15 @@ export default {
 
     });
 
+    // add global keyboard listener
+    window.addEventListener('keyup', this.onKeyUp);
 
   },
 
   beforeDestroy () {
     this.stop_debug()
+
+    window.removeEventListener('keyup', this.onKeyUp)
   }
 }
 </script>
@@ -1087,7 +1146,13 @@ export default {
     left: 300px;
     top: 0px;
     bottom: 0px;
-    right: 300px;
+    right: 0px;
+    overflow: hidden;
+  }
+
+  .board {
+    width: 100%;
+    height: 100%;
   }
 
   .flowchart {
@@ -1158,6 +1223,7 @@ export default {
   .node > .icon {
     font-size: 24px;
     width: 50px;
+    height: 100%;
     border-top-left-radius: 5px;
     border-bottom-left-radius: 5px;
     background-color: rgba(0, 0, 0, 0.15);

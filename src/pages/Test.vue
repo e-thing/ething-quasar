@@ -1,18 +1,31 @@
 <template>
   <q-page padding>
 
-    <div @click="onclick">tosdfdf sdfd sdf </div>
+    <resource-select
+      v-model="resourceFilter"
+      clearable
+      label="Resource Filter"
+      stack-label
+      borderless
+      multiple
+    />
+
+    <ResourceCreateModal
+      value
+    />
 
   </q-page>
 </template>
 
 <script>
+import ResourceSelect from '../components/ResourceSelect'
+import ResourceCreateModal from '../components/ResourceCreateModal'
 
 export default {
   name: 'PageTest',
 
   components: {
-
+    ResourceCreateModal
   },
 
   data () {
@@ -20,6 +33,7 @@ export default {
 
 
     return {
+      resourceFilter: [],
       templ: 'toto',
       schema: {
       "type": "object",
