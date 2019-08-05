@@ -65,6 +65,11 @@
         <q-banner class="bg-warning text-white"><q-icon left name="mdi-lan-disconnect"/> This device is disconnected !</q-banner>
       </div>
 
+      <!-- description -->
+      <div class="page-block q-pa-md test-faded" v-if="resource.description()">
+        {{ resource.description() }}
+      </div>
+
       <!-- components -->
       <div class="page-block" v-for="(widget, key) in widgets" :key="key" v-if="widgets">
         <div class="bloc-title" v-if="widget.title">

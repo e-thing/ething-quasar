@@ -4,7 +4,7 @@
 
       <div v-if="clients.length > 0">
 
-        <q-card v-for="client in clients" :key="client.id" class="page-block">
+        <q-card flat v-for="client in clients" :key="client.id" class="page-block">
 
           <q-card-section>
             <div class="row items-center no-wrap">

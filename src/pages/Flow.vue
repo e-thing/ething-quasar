@@ -1207,8 +1207,8 @@ export default {
       -o-box-shadow: 2px 2px 19px #aaa;
       -webkit-box-shadow: 2px 2px 19px #aaa;
       -moz-box-shadow: 2px 2px 19px #aaa;
-      -moz-border-radius: 5px;
-      border-radius: 5px;
+      -moz-border-radius: $generic-border-radius;
+      border-radius: $generic-border-radius;
       opacity: 0.8;
       display: flex;
       position: relative;
@@ -1227,8 +1227,8 @@ export default {
     font-size: 24px;
     width: 50px;
     height: 100%;
-    border-top-left-radius: 5px;
-    border-bottom-left-radius: 5px;
+    border-top-left-radius: $generic-border-radius;
+    border-bottom-left-radius: $generic-border-radius;
     background-color: rgba(0, 0, 0, 0.15);
   }
 
@@ -1289,14 +1289,23 @@ export default {
       -moz-box-shadow: 2px 2px 19px #ffb427;
   }
 
-  .flowchart .node.selected:not(.error) {
+  .flowchart .node.error {
+    border-color: $negative !important;
+    border-width: 2px !important;
+  }
+
+  .flowchart .node.selected {
     border-color: #26a69a !important;
     border-width: 2px !important;
   }
 
-  .flowchart .node.error {
-    border-color: $negative !important;
-    border-width: 2px !important;
+  .flowchart .node.selected > .icon, .flowchart .node.error > .icon {
+    border-top-left-radius: 0px;
+    border-bottom-left-radius: 0px;
+  }
+
+  .flowchart .node.selected > .icon {
+    background-color: $secondary;
   }
 
   .flowchart .node > .node-dbg {

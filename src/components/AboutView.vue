@@ -2,23 +2,34 @@
 
   <div class="page page-width-sm">
 
-    <dl class="page page-block page-block-padding">
-      <dt>UI</dt>
-      <dd>version: {{ $ethingUI.VERSION }}</dd>
+    <q-card flat class="page page-block page-block-padding">
 
-      <dt>Server</dt>
-      <dd>version: {{ $ethingUI.info.VERSION }}</dd>
+      <q-card-section>
+        <div class="text-subtitle2">UI</div>
+        <div>version: {{ $ethingUI.VERSION }}</div>
+      </q-card-section>
 
-      <dt>JS api</dt>
-      <dd>version: {{ $ething.VERSION }}</dd>
+      <q-card-section>
+        <div class="text-subtitle2">Server</div>
+        <div>version: {{ $ethingUI.info.VERSION }}</div>
+      </q-card-section>
 
-      <dt>Python</dt>
-      <dd>version: {{ $ethingUI.info.python.version }} type: {{ $ethingUI.info.python.type }}</dd>
+      <q-card-section>
+        <div class="text-subtitle2">JS api</div>
+        <div>version: {{ $ething.VERSION }}</div>
+      </q-card-section>
 
-      <dt>Platform</dt>
-      <dd>{{ $ethingUI.info.platform.name }}</dd>
+      <q-card-section>
+        <div class="text-subtitle2">Python</div>
+        <div>version: {{ $ethingUI.info.python.version }} type: {{ $ethingUI.info.python.type }}</div>
+      </q-card-section>
 
-    </dl>
+      <q-card-section>
+        <div class="text-subtitle2">Platform</div>
+        <div>{{ $ethingUI.info.platform.name }}</div>
+      </q-card-section>
+
+    </q-card>
 
   </div>
 

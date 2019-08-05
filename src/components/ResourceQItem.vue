@@ -19,34 +19,35 @@
       <q-item-label caption v-if="showLength">{{ resource.length() }} rows</q-item-label>
       <q-item-label caption v-if="showError" color="negative"><q-icon name="mdi-alert" /> {{ resource.attr('error') }}</q-item-label>
     </q-item-section>
-    <q-item-section side v-if="Object.keys(data).length>0" class="data gt-sm ellipsis">
+    <!--<q-item-section side v-if="Object.keys(data).length>0" class="data gt-sm ellipsis">
       {{ $ethingUI.utils.describe(data) }}
+    </q-item-section>-->
+    <q-item-section side>
+      <div>
+        <q-chip dense class="gt-sm" outline square color="secondary" v-for="(value, key) in data" :key="key">{{ key }}: {{ value }}</q-chip>
+        <q-chip v-if="showLocation" dense outline square color="secondary" icon="location_on" class="gt-xs">
+          {{ resource.location() }}
+        </q-chip>
+        <resource-battery-chip square v-if="showBattery" class="gt-xs" :resource="resource" />
+      </div>
     </q-item-section>
-    <q-item-section side v-if="showLocation" class="gt-xs">
+    <!--<q-item-section side v-if="showLocation" class="gt-xs">
       <q-chip dense icon="location_on">
         {{ resource.location() }}
       </q-chip>
-    </q-item-section>
-    <q-item-section side v-if="showBattery" class="gt-xs">
+    </q-item-section>-->
+    <!--<q-item-section side v-if="showBattery" class="gt-xs">
       <resource-battery-chip :resource="resource" />
+    </q-item-section>-->
+    <q-item-section side v-if="!readonly">
+      <div>
+        <q-btn v-if="showChart" class="gt-xs" icon="mdi-chart-line" round flat dense color="secondary" @click.stop="chart"/>
+        <q-btn v-if="showDownload" class="gt-xs" icon="cloud_download" round flat dense color="secondary" @click.stop="download"/>
+        <q-btn class="gt-xs" icon="delete" round flat dense @click.stop="remove"/>
+        <q-btn class="gt-xs" icon="settings" round flat dense @click.stop="settings"/>
+        <q-btn class="lt-sm" icon="more_vert" round flat dense @click.stop="more"/>
+      </div>
     </q-item-section>
-    <template v-if="!readonly">
-      <q-item-section side v-if="showChart" class="gt-xs">
-        <q-btn icon="mdi-chart-line" round flat dense color="secondary" @click.stop="chart"/>
-      </q-item-section>
-      <q-item-section side v-if="showDownload" class="gt-xs">
-        <q-btn icon="cloud_download" round flat dense color="secondary" @click.stop="download"/>
-      </q-item-section>
-      <q-item-section side class="gt-xs">
-        <q-btn icon="delete" round flat dense @click.stop="remove"/>
-      </q-item-section>
-      <q-item-section side class="gt-xs">
-        <q-btn icon="settings" round flat dense @click.stop="settings"/>
-      </q-item-section>
-      <q-item-section side class="lt-sm">
-        <q-btn icon="more_vert" round flat dense @click.stop="more"/>
-      </q-item-section>
-    </template>
   </q-item>
 </template>
 

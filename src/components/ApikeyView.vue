@@ -44,7 +44,7 @@
           </div>
         </div>
       </div>
-      <div v-else class="absolute-center text-faded">No API keys</div>
+      <div v-else class="text-faded text-center q-py-lg">No API keys</div>
     </div>
     <div v-else>loading ...</div>
 
