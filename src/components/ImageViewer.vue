@@ -8,7 +8,7 @@
                     <q-circular-progress
                       indeterminate
                       size="24px"
-                      color="white"
+                      color="secondary"
                     />
                   </div>
                   <div v-if="error" class="error text-center text-negative">Error</div>
@@ -16,8 +16,8 @@
                 </div>
             </div>
             <div class="actions" v-if="controls && images.length>1">
-                <q-btn round flat size="lg" icon="chevron left" @click="prevImage" class="prev"/>
-                <q-btn round flat size="lg" icon="chevron right" @click="nextImage" class="next"/>
+                <q-btn round flat size="lg" icon="chevron_left" @click="prevImage" class="prev"/>
+                <q-btn round flat size="lg" icon="chevron_right" @click="nextImage" class="next"/>
             </div>
         </div>
         <div class="thumbnails" v-if="thumbnails && images.length>1">

@@ -9,35 +9,31 @@
     </div>
 
     <q-inner-loading class="text-center" :showing="loading">
-      <div class="q-pa-lg text-primary">loading...</div>
       <q-spinner-oval color="primary" size="50px" />
     </q-inner-loading>
 
     <modal v-model="saveModal" title="Chart save" icon="save" size="xs" valid-btn-label="Save" @valid="onSave" @show="$v.filename.$touch">
 
-      <q-field label="Filename" class="q-my-md" orientation="vertical"
+      <q-input
+        v-model="filename"
+        @input="$v.filename.$touch"
         :error="$v.filename.$error"
-        error-label="Required"
-      >
-        <q-input v-model="filename" @input="$v.filename.$touch"/>
-      </q-field>
+        error-message="Required"
+        label="Filename"
+      />
 
     </modal>
 
     <modal v-model="optionsModal" size="lg" :no-esc-dismiss="!options" :no-backdrop-dismiss="!options" title="Chart options" icon="edit" :valid-btn-disable="$v.optionsData.$error" @valid="onOptionsValidate">
 
-      <q-field label="Title" class="q-my-md" orientation="vertical">
-        <q-input v-model="optionsData.title" />
-      </q-field>
+      <q-input v-model="optionsData.title" label="Title"/>
 
-      <q-field label="Subtitle" class="q-my-md" orientation="vertical">
-        <q-input v-model="optionsData.subtitle" />
-      </q-field>
+      <q-input v-model="optionsData.subtitle" label="Subtitle"/>
 
       <div class="q-my-md">
         <div class="q-subheading q-mb-md">
           Panes
-          <q-btn flat size="md"
+          <q-btn flat size="sm"
             color="blue-5"
             @click="optionsData.panes.push({curves:[]}); $v.optionsData.$touch()"
             label="Add pane"
@@ -47,24 +43,18 @@
 
         <div class="q-ml-md q-mb-md">
           <div v-for="(pane, index) in optionsData.panes" :key="index" class="pane">
-            <q-field
+            <q-input
+              v-model="pane.name"
               label="name/unit"
-              class="q-my-md"
-              orientation="vertical"
+              @blur="$v.optionsData.panes.$each[index].name.$touch"
               :error="$v.optionsData.panes.$each[index].name.$error"
-              error-label="Required"
-            >
-              <q-input
-                v-model="pane.name"
-                @blur="$v.optionsData.panes.$each[index].name.$touch"
-                :error="$v.optionsData.panes.$each[index].name.$error"
-              />
-            </q-field>
+              error-message="Required"
+            />
 
             <div class="q-my-md">
               <div class="q-subheading q-mb-md">
                 Curves
-                <q-btn flat size="md"
+                <q-btn flat size="sm"
                   color="cyan-5"
                   @click="pane.curves.push({type:'line',  data:{}}); $v.optionsData.$touch()"
                   label="Add"
@@ -74,68 +64,44 @@
 
               <div class="q-ml-md q-mb-md">
                 <div v-for="(curve, cindex) in pane.curves" :key="cindex" class="curve">
-                  <q-field
+                  <q-input
+                    v-model="curve.name"
                     label="name"
-                    class="q-my-md"
-                    orientation="vertical"
+                    @blur="$v.optionsData.panes.$each[index].curves.$each[cindex].name.$touch"
                     :error="$v.optionsData.panes.$each[index].curves.$each[cindex].name.$error"
-                    error-label="Required"
-                  >
-                    <q-input
-                      v-model="curve.name"
-                      @blur="$v.optionsData.panes.$each[index].curves.$each[cindex].name.$touch"
-                      :error="$v.optionsData.panes.$each[index].curves.$each[cindex].name.$error"
-                    />
-                  </q-field>
+                    error-message="Required"
+                  />
 
-                  <q-field
+                  <q-select
+                    v-model="curve.type"
                     label="type"
-                    class="q-my-md"
-                    orientation="vertical"
+                    :options="serieTypeOptions"
+                    @blur="$v.optionsData.panes.$each[index].curves.$each[cindex].type.$touch"
                     :error="$v.optionsData.panes.$each[index].curves.$each[cindex].type.$error"
-                    error-label="Required"
-                  >
-                    <q-select
-                      v-model="curve.type"
-                      :options="serieTypeOptions"
-                      @blur="$v.optionsData.panes.$each[index].curves.$each[cindex].type.$touch"
-                      :error="$v.optionsData.panes.$each[index].curves.$each[cindex].type.$error"
-                    />
-                  </q-field>
+                    error-message="Required"
+                  />
 
-                  <q-field
+                  <resource-select
+                    type="resources/Table"
                     label="table"
-                    class="q-my-md"
-                    orientation="vertical"
+                    v-model="curve.data.resource"
+                    use-id
+                    @input="$v.optionsData.panes.$each[index].curves.$each[cindex].data.resource.$touch"
                     :error="$v.optionsData.panes.$each[index].curves.$each[cindex].data.resource.$error"
-                    error-label="Required"
-                  >
-                    <resource-select
-                      type="resources/Table"
-                      v-model="curve.data.resource"
-                      use-id
-                      @input="$v.optionsData.panes.$each[index].curves.$each[cindex].data.resource.$touch"
-                      :error="$v.optionsData.panes.$each[index].curves.$each[cindex].data.resource.$error"
-                    />
-                  </q-field>
+                    error-message="Required"
+                  />
 
-                  <q-field
+                  <q-select
                     v-if="curve.data.resource"
+                    v-model="curve.data.key"
                     label="key"
-                    class="q-my-md"
-                    orientation="vertical"
+                    :options="optionsBuildKeyOptions(curve, $v.optionsData.panes.$each[index].curves.$each[cindex].data.key)"
+                    @input="$v.optionsData.panes.$each[index].curves.$each[cindex].data.key.$touch"
                     :error="$v.optionsData.panes.$each[index].curves.$each[cindex].data.key.$error"
-                    error-label="Required"
-                  >
-                    <q-select
-                      v-model="curve.data.key"
-                      :options="optionsBuildKeyOptions(curve, $v.optionsData.panes.$each[index].curves.$each[cindex].data.key)"
-                      @input="$v.optionsData.panes.$each[index].curves.$each[cindex].data.key.$touch"
-                      :error="$v.optionsData.panes.$each[index].curves.$each[cindex].data.key.$error"
-                    />
-                  </q-field>
+                    error-message="Required"
+                  />
 
-                  <q-btn flat size="md"
+                  <q-btn flat size="sm"
                     color="negative"
                     @click="pane.curves.splice(cindex, 1)"
                     label="remove"
@@ -145,7 +111,7 @@
                 </div>
               </div>
             </div>
-            <q-btn flat size="md"
+            <q-btn flat size="sm"
               color="negative"
               @click="optionsData.panes.splice(index, 1)"
               label="remove"
@@ -631,6 +597,11 @@ export default {
 
         this.dataSource.load( () => {
           this.loading = false
+
+          if (this.options.series.length==0) {
+            // no data
+            this.chart().showLoading('no data')
+          }
           //this.options = options
           // cleaning ...
           // todo: remove empty pane

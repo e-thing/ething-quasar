@@ -10,7 +10,7 @@
         :style="{display: inlined ? 'inline' : 'block'}"
       >
         <div
-          class="form-schema-object-item-title q-field-label q-field-label-inner"
+          class="form-schema-object-item-title"
           :style="{display: inlined ? 'inline' : 'block'}"
           v-if="!item.schema.$hideLabel"
         >

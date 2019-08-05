@@ -41,6 +41,7 @@
       :limits="splitterLimits"
       :disable="splitterDisable"
       class="main"
+      separator-style="width: 4px; background-color: #d9d9d9;"
     >
       <template v-slot:before>
         <div class="board">
@@ -135,7 +136,7 @@
       </template>
     </q-splitter>
 
-    <modal v-model="edit.show" :title="editTitle()" icon="add" :valid-btn-disable="edit.error" valid-btn-label="Add" @valid="onEditDone">
+    <modal v-model="edit.show" :title="editTitle()" :icon="edit.node ? 'edit' : 'add'" :valid-btn-disable="edit.error" :valid-btn-label="edit.node ? 'Save' : 'Add'" @valid="onEditDone">
       <form-schema :key="edit.key" :schema="edit.schema" v-model="edit.model" :context="edit.context" @error="edit.error = $event"/>
     </modal>
 
@@ -161,6 +162,8 @@ import ResourceSelect from '../components/ResourceSelect'
 import FormSchemaEthingResource from '../boot/formSchema/extra/EthingResource'
 
 import JsonFormatter from '../components/JsonFormatter'
+
+const DBLE_CLICK_DELAY = 400;//ms
 
 var flowSocket = EThingUI.io(EThing.config.serverUrl + '/flow', {
   autoConnect: false
@@ -605,7 +608,7 @@ export default {
             var d = Math.sqrt( Math.pow(evt.x - this.mouseInfo.x, 2) + Math.pow(evt.y - this.mouseInfo.y, 2) )
             if (d < 10) {
               var ts = Date.now()
-              if (this._lastClickTs && ts - this._lastClickTs < 200) {
+              if (this._lastClickTs && ts - this._lastClickTs < DBLE_CLICK_DELAY) {
                 // dbclick
                 this._lastClickTs = 0
                 if (this._clickTimer!== null) {
@@ -619,7 +622,7 @@ export default {
                 this._clickTimer = setTimeout(() => {
                   // click
                   node._click(evt)
-                }, 200)
+                }, DBLE_CLICK_DELAY)
               }
             } else {
               // drag
@@ -1336,9 +1339,6 @@ export default {
     .flowchart .node.active > .node-btns {
       display: block;
     }
-
-
-
 
 </style>
 

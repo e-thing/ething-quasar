@@ -7,6 +7,9 @@
         :options="selectOptions"
         :class="inlined?(subschema ? 'col-auto' : 'col-12'):''"
         emit-value
+        :display-value="subtype || 'none'"
+        hide-bottom-space
+        dense
       />
       <form-schema :class="inlined?'col':''" :inline="inlined" v-if="subschema" :level="level+1" :schema="subschema" required :value="subvalue" @input="subvalue = $event" @error="$emit('error',$event)"/>
     </div>

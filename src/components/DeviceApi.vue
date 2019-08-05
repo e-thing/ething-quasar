@@ -21,7 +21,7 @@
             <q-banner
                 class="bg-red text-white"
             >
-              {{ String(operation.error) }}
+              <q-icon left name="mdi-alert"/> {{ String(operation.error) }}
             </q-banner>
           </q-card-section>
 

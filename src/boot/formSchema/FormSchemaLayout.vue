@@ -24,11 +24,11 @@ import VueMarkdown from 'vue-markdown'
 
 export default {
   name: 'formSchemaLayout',
-  
+
   components: {
     VueMarkdown
   },
-  
+
   props: {
     'forceDescription': Boolean
   },
@@ -60,7 +60,6 @@ export default {
 
 
 .form-schema-description
-    margin-bottom 8px
     display inline-block
     color $faded
 

@@ -182,7 +182,7 @@
               v-if="add.error"
               class="bg-red text-white"
           >
-            {{ String(add.error) }}
+            <q-icon left name="mdi-alert"/> {{ String(add.error) }}
           </q-banner>
         </q-card-section>
       </q-card>

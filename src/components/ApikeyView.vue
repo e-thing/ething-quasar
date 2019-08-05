@@ -57,7 +57,7 @@
           v-if="serverError"
           class="bg-red text-white q-mb-xl"
       >
-        {{ String(serverError) }}
+        <q-icon left name="mdi-alert"/> {{ String(serverError) }}
       </q-banner>
 
     </modal>

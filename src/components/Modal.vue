@@ -22,7 +22,9 @@
 
       <div class="col scroll">
 
-        <slot ></slot>
+        <div :class="noContentPadding ? '' : 'q-pa-md'">
+          <slot></slot>
+        </div>
 
         <div class="q-py-sm q-px-md buttons row items-center" v-if="!noButtons && scroll">
 
@@ -99,7 +101,7 @@
         <q-space/>
 
         <slot name="buttons-right"></slot>
-        
+
       </div>
     </div>
   </q-dialog>
@@ -121,6 +123,8 @@ export default {
       },
 
       scroll: Boolean,
+
+      noContentPadding: Boolean,
 
       noButtons: Boolean,
 

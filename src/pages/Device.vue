@@ -9,7 +9,10 @@
             <q-avatar :icon="meta.icon" text-color="white" :color="meta.color" />
           </q-item-section>
           <q-item-section>
-            <q-item-label class="text-h4" :class="'text-' + meta.color">{{ resource.basename() }}</q-item-label>
+            <q-item-label class="text-h4" :class="'text-' + meta.color">
+              {{ resource.basename() }}
+              <q-icon v-if="!resource.connected()" right name="mdi-lan-disconnect" color="warning" />
+            </q-item-label>
             <q-item-label caption>{{ meta.title }}</q-item-label>
           </q-item-section>
           <q-item-section side>
@@ -36,7 +39,7 @@
         <q-item :inset-level="1">
           <q-item-section>
             <div>
-              <q-chip dense square icon="access time" v-if="resource.lastSeenDate()" class="q-ma-none q-mr-sm">
+              <q-chip dense square icon="access_time" v-if="resource.lastSeenDate()" class="q-ma-none q-mr-sm">
                 {{ $ethingUI.utils.dateToString(resource.lastSeenDate()) }}
               </q-chip>
               <resource-battery-chip :resource="resource" class="vertical-middle q-ma-none q-mr-sm" square/>
@@ -54,7 +57,12 @@
 
       <!-- error -->
       <div class="page-block" v-if="resource.attr('error')">
-        <q-banner class="bg-red text-white">{{ resource.attr('error') }}</q-banner>
+        <q-banner class="bg-red text-white"><q-icon left name="mdi-alert"/> {{ resource.attr('error') }}</q-banner>
+      </div>
+
+      <!-- disconnected -->
+      <div class="page-block" v-if="!resource.connected()">
+        <q-banner class="bg-warning text-white"><q-icon left name="mdi-alert"/> This device is disconnected !</q-banner>
       </div>
 
       <!-- components -->
@@ -118,7 +126,7 @@
       </div>
 
       <!-- api -->
-      <div class="page-block" v-if="Object.keys($ethingUI.get(resource).methods).length">
+      <div class="page-block" v-if="Object.keys(meta.methods).length">
         <div class="bloc-title">
           <q-icon name="mdi-database" />
           <span>Commands</span>
@@ -178,7 +186,7 @@ export default {
       this.isSensor = this.$ethingUI.isSubclass(this.resource, 'interfaces/Sensor')
 
       var w = []
-      var widgets = this.$ethingUI.get(this.resource).widgets
+      var widgets = this.meta.widgets
       for(var id in widgets) {
         var widget = widgets[id]
         if (widget.in.indexOf('devicePage') !== -1) {
@@ -226,7 +234,7 @@ export default {
     },
 
     attributes () {
-      var props = this.$ethingUI.get(this.resource).properties
+      var props = this.meta.properties
       var attributes = []
       var skippedFields = ['name', 'data', 'description']
       var detailledFields = ['id', 'modifiedDate', 'createdBy', 'type', 'extends', 'public', 'createdDate', 'methods', 'battery', 'location', 'interfaces', 'connected', 'lastSeenDate', 'error']

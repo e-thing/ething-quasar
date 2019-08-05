@@ -2,9 +2,10 @@
   <q-page class="page page-width-md">
 
     <div class="page-block q-pa-xl">
-      <div class="q-my-md q-mb-xl text-h4">
-        <q-icon :name="$ethingUI.get(type).icon" />
-        {{ $ethingUI.get(type).title || defaultLabel }}
+
+      <div class="row items-center q-mb-xl">
+        <q-avatar :icon="meta.icon" text-color="white" :color="meta.color" class="q-mr-md" />
+        <div class="text-h4">{{ meta.title || defaultLabel }}</div>
       </div>
 
       <resource-editor ref="form" :resource="type" @error="formError=$event"/>
@@ -13,7 +14,7 @@
           v-if="error"
           class="bg-red text-white q-mb-xl"
       >
-        {{ String(error) }}
+        <q-icon left name="mdi-alert"/> {{ String(error) }}
       </q-banner>
 
       <div>
@@ -47,6 +48,10 @@ export default {
   computed: {
     type () {
       return this.$route.params.type
+    },
+
+    meta () {
+      return this.$ethingUI.get(this.type)
     },
 
     defaultLabel () {

@@ -3,7 +3,7 @@ import WChart from '../../components/widgets/WChart'
 
 
 export default {
-  icon: 'mdi-table',
+  icon: 'mdi-table-large',
 
   color: 'blue',
 

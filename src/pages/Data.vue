@@ -70,11 +70,18 @@ var categories = [{
     return r instanceof this.$ething.Table
   }
 },{
-  name: 'file',
-  label: 'File',
-  icon: 'mdi-file',
+  name: 'image',
+  label: 'Image',
+  icon: 'mdi-file-image',
   filter (r) {
-    return r instanceof this.$ething.File && !/\.plot$/.test(r.name())
+    return r instanceof this.$ething.File && /^image/.test(r.mime())
+  }
+},{
+  name: 'text',
+  label: 'Text',
+  icon: 'mdi-file-document',
+  filter (r) {
+    return r instanceof this.$ething.File && /^text/.test(r.mime())
   }
 },{
   name: 'chart',
