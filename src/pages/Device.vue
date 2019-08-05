@@ -62,7 +62,7 @@
 
       <!-- disconnected -->
       <div class="page-block" v-if="!resource.connected()">
-        <q-banner class="bg-warning text-white"><q-icon left name="mdi-alert"/> This device is disconnected !</q-banner>
+        <q-banner class="bg-warning text-white"><q-icon left name="mdi-lan-disconnect"/> This device is disconnected !</q-banner>
       </div>
 
       <!-- components -->
