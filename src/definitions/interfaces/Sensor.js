@@ -22,7 +22,10 @@ export default {
     for (var propName in props) {
       var prop = props[propName]
       if (prop.sensor) {
-        d[prop.title || propName] = resource.attr(propName) + (prop.unit || '')
+        var val = resource.attr(propName)
+        if (typeof val != 'undefined' && val !== null) {
+          d[prop.title || propName] = val + (prop.unit || '')
+        }
       }
     }
     return d

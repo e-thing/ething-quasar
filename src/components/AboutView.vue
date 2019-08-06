@@ -2,7 +2,7 @@
 
   <div class="page page-width-sm">
 
-    <q-card flat class="page page-block page-block-padding">
+    <q-card flat class="page page-block">
 
       <q-card-section>
         <div class="text-subtitle2">UI</div>
@@ -10,13 +10,15 @@
       </q-card-section>
 
       <q-card-section>
-        <div class="text-subtitle2">Server</div>
-        <div>version: {{ $ethingUI.info.VERSION }}</div>
-      </q-card-section>
-
-      <q-card-section>
         <div class="text-subtitle2">JS api</div>
         <div>version: {{ $ething.VERSION }}</div>
+      </q-card-section>
+
+      <q-separator />
+
+      <q-card-section>
+        <div class="text-subtitle2">Server</div>
+        <div>version: {{ $ethingUI.info.VERSION }}</div>
       </q-card-section>
 
       <q-card-section>
@@ -29,6 +31,12 @@
         <div>{{ $ethingUI.info.platform.name }}</div>
       </q-card-section>
 
+      <q-separator />
+
+      <q-card-actions vertical>
+        <q-btn flat @click="downloadLogFile">Download LOG file</q-btn>
+      </q-card-actions>
+
     </q-card>
 
   </div>
@@ -37,7 +45,14 @@
 
 <script>
 
+import { openURL } from 'quasar'
+
 export default {
-    name: 'AboutView'
+    name: 'AboutView',
+    methods: {
+      downloadLogFile () {
+        openURL(EThing.config.serverUrl + '/log.txt')
+      }
+    }
 }
 </script>

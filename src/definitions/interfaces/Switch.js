@@ -1,4 +1,4 @@
-import WDeviceMultiLabel from '../../components/widgets/WDeviceMultiLabel'
+import WDeviceLabel from '../../components/widgets/WDeviceLabel'
 
 export default {
 
@@ -11,17 +11,15 @@ export default {
   widgets: {
     'switch.state': {
       in: ['dashboard', 'devicePage'],
-      component: WDeviceMultiLabel,
+      component: WDeviceLabel,
       attributes: {
-        items: [{
-          attr: 'state',
-          map: [{
-            key: true,
-            value: 'On'
-          },{
-            key: false,
-            value: 'Off'
-          }]
+        attr: 'state',
+        map: [{
+          key: true,
+          value: 'On'
+        },{
+          key: false,
+          value: 'Off'
         }]
       },
       title: 'state',

@@ -1,4 +1,4 @@
-import WDeviceMultiLabel from '../../components/widgets/WDeviceMultiLabel'
+//import WDeviceMultiLabel from '../../components/widgets/WDeviceMultiLabel'
 
 export default {
 

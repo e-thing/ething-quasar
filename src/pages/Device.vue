@@ -12,6 +12,9 @@
             <q-item-label class="text-h4" :class="'text-' + meta.color">
               {{ resource.basename() }}
               <q-icon v-if="!resource.connected()" right name="mdi-lan-disconnect" color="warning" />
+
+              <q-avatar v-for="(icon, key) in extendsIcons" :key="key" :icon="icon" :color="meta.color" text-color="white" size="24px" class="gt-sm q-mr-xs" />
+
             </q-item-label>
             <q-item-label caption>{{ meta.title }}</q-item-label>
           </q-item-section>
@@ -39,8 +42,8 @@
         <q-item :inset-level="1">
           <q-item-section>
             <div>
-              <q-chip dense square icon="access_time" v-if="resource.lastSeenDate()" class="q-ma-none q-mr-sm">
-                {{ $ethingUI.utils.dateToString(resource.lastSeenDate()) }}
+              <q-chip dense square icon="access_time" class="q-ma-none q-mr-sm">
+                {{ $ethingUI.utils.dateToString(resource.lastSeenDate(), 'never') }}
               </q-chip>
               <resource-battery-chip :resource="resource" class="vertical-middle q-ma-none q-mr-sm" square/>
               <q-chip dense square icon="location_on" v-if="resource.location()" class="q-ma-none q-mr-sm">
@@ -131,7 +134,7 @@
       </div>
 
       <!-- api -->
-      <div class="page-block" v-if="Object.keys(meta.methods).length">
+      <div class="page-block" v-if="Object.keys(staticMeta.methods).length">
         <div class="bloc-title">
           <q-icon name="mdi-database" />
           <span>Commands</span>
@@ -170,6 +173,8 @@ export default {
       widgets: [],
       _resourceId: null,
       isSensor: false,
+      staticMeta: {},
+      extendsIcons: []
     }
   },
 
@@ -191,7 +196,8 @@ export default {
       this.isSensor = this.$ethingUI.isSubclass(this.resource, 'interfaces/Sensor')
 
       var w = []
-      var widgets = this.meta.widgets
+      var staticMeta = this.staticMeta = this.$ethingUI.get(this.resource)
+      var widgets = staticMeta.widgets
       for(var id in widgets) {
         var widget = widgets[id]
         if (widget.in.indexOf('devicePage') !== -1) {
@@ -205,6 +211,21 @@ export default {
       });
 
       this.widgets = w || null
+
+      // extends
+      var currentType = this.resource.type()
+      var extendsIcons = this.extendsIcons = []
+      var types = this.resource.types()
+      for (var i in types) {
+        var t = types[i]
+        console.log(t)
+        if (t==currentType || t=='interfaces/Sensor') continue
+        if (t=='resources/Device') break
+        var m = this.$ethingUI.getRaw(t)
+        if (m && m.icon && extendsIcons.indexOf(m.icon) === -1 && m.icon != staticMeta.icon) {
+          extendsIcons.push(m.icon)
+        }
+      }
     }
   },
 
@@ -274,6 +295,8 @@ export default {
 
       return createdBys.reverse()
     },
+
+
 
   },
 

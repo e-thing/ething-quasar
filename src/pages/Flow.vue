@@ -1218,6 +1218,27 @@ export default {
       cursor: pointer;
   }
 
+  /* margins */
+  .node:before {
+      content: "";
+      display: block;
+      position: absolute;
+      left: -50px;
+      width: 50px;
+      height: 50px;
+      top: -50px;
+  }
+
+  .node:after {
+      content: "";
+      display: block;
+      position: absolute;
+      right: -50px;
+      width: 50px;
+      height: 50px;
+      bottom: -50px;
+  }
+
   .node.node-menu {
     width: 100%;
     height: 42px;

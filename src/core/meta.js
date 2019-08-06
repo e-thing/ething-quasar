@@ -540,6 +540,12 @@ export default {
         }
       },
 
+      getRaw: function (type) {
+        try {
+          return getFromPath(this.definitions, normType(type))
+        } catch(e) {}
+      },
+
       // returns metadata of any type or resource
       get: function (type) {
         return get (this.definitions, type)

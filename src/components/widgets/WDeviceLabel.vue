@@ -1,10 +1,10 @@
 <template>
-  <div class="absolute-center">
-    <q-icon v-if="icon" :name="icon" class="vertical-middle"/>
-    <span class="value vertical-middle" :style="{color: color}">
-        {{ resource.attr(attr) }}
+  <div class="absolute-center text-h6 text-no-wrap row items-center q-gutter-x-xs">
+    <q-icon v-if="icon" :name="icon"/>
+    <span class="value" :style="{color: color}">
+        {{ __map(resource.attr(attr)) }}
     </span>
-    <small v-if="unit" class="unit vertical-middle" style="filter: brightness(90%);">
+    <small v-if="unit" class="unit" style="filter: brightness(90%);">
         {{ unit }}
     </small>
   </div>
@@ -22,8 +22,21 @@ export default {
       unit: String,
       attr: String,
       icon: String,
+      map: Array
     },
 
+    methods: {
+      __map (value) {
+        var map = this.map
+        if (map && map.length) {
+          for (var i in map) {
+            if (map[i].key === value) return map[i].value
+          }
+
+        }
+        return value
+      }
+    }
 
 }
 </script>

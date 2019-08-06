@@ -1,5 +1,5 @@
 <template>
-  <q-chip dense :icon="batteryIcon(battery)" :color="batteryColor(battery)"  v-bind="$attrs" v-if="typeof battery === 'number'">
+  <q-chip dense :icon="batteryIcon" v-bind="attrs" v-if="typeof battery === 'number'">
     {{ battery }}%
   </q-chip>
 </template>
@@ -20,12 +20,10 @@ export default {
   computed: {
     battery () {
       return this.resource.battery()
-    }
-  },
+    },
 
-  methods: {
-
-    batteryIcon (level) {
+    batteryIcon () {
+      var level = this.battery
       if (level > 95) return 'mdi-battery'
       if (level > 85) return 'mdi-battery-90'
       if (level > 75) return 'mdi-battery-80'
@@ -36,12 +34,15 @@ export default {
       if (level > 25) return 'mdi-battery-30'
       if (level > 15) return 'mdi-battery-20'
       if (level >= 0) return 'mdi-battery-alert'
-      return 'battery unknown'
+      return 'battery_unknown'
     },
 
-    batteryColor (level) {
-      if (level <= 15) return 'negative'
-      if (level <= 40) return 'warning'
+    attrs () {
+      var attrs = Object.assign({}, this.$attrs)
+      var level = this.battery
+      if (level <= 15) attrs.color = 'negative'
+      if (level <= 40) attrs.color = 'warning'
+      return attrs
     },
 
   }

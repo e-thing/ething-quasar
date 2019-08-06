@@ -63,10 +63,10 @@ export function getParameterByName(name, url) {
 }
 
 
-export function dateToString (d) {
+export function dateToString (d, def) {
   if (typeof d === 'string' || typeof d === 'number') d = new Date(d)
   if (!d) {
-    return '-'
+    return typeof def === 'undefined' ? '-' : def
   }
   var ts = d.getTime()
   return date.formatDate(ts, 'YYYY-MM-DD HH:mm:ss')

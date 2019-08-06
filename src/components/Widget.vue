@@ -1,20 +1,28 @@
 <template>
   <div class="widget" :class="{'widget-err': hasError}" :style="style">
-    <div v-if="hasError" class="widget-err-layer fit">
-        <div class="absolute-center text-center ellipsis-3-lines text-caption">
-            {{ String(error || 'error') }}
-        </div>
+    <div v-show="hasError" class="widget-err-layer fit column items-center">
+      <div class="col"></div>
+      <div class="col-auto text-center text-caption">
+          <slot name="error-before"></slot>
+          <div>{{ String(error || 'error') }}</div>
+          <slot name="error-after"></slot>
+      </div>
+      <div class="col"></div>
     </div>
     <div class="widget-content-layer" :class="inline ? '' : 'fit'">
       <div class="column">
-        <div class="col-auto text-center text-faded ellipsis" v-if="!dense && c_title">
-          <small>{{ c_title }}</small>
+        <div class="col-auto text-center text-faded ellipsis" v-if="!dense && (c_title || $slots.title)">
+          <slot name="title">
+            <small>{{ c_title }}</small>
+          </slot>
         </div>
         <div class="col relative-position">
           <component ref="inner" :is="component" v-bind="$attrs" @error="error=$event"/>
         </div>
-        <div class="col-auto text-center text-light ellipsis" v-if="!dense && c_footer">
-          <small>{{ c_footer }}</small>
+        <div class="col-auto text-center text-light ellipsis" v-if="!dense && (c_footer || $slots.footer)">
+          <slot name="footer">
+            <small>{{ c_footer }}</small>
+          </slot>
         </div>
       </div>
     </div>

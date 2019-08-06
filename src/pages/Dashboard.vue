@@ -72,7 +72,10 @@
             <widget :ref="'widget_' + layoutItem.i" :key="layoutItem.key" class="absolute fit"
               :component="layoutItem.widget.component"
               :min-height="layoutItem.widget.minHeight"
-              v-bind="computeAttr(layoutItem)" />
+              v-bind="computeAttr(layoutItem)"
+            >
+              <q-btn label="remove" size="sm" flat icon="delete" slot="error-after" @click="removeItem(layoutItem)"/>
+            </widget>
           </div>
         </div>
 
@@ -109,7 +112,10 @@
                 </div>
                 <widget :ref="'widget_' + layoutItem.i" :key="layoutItem.key" class="absolute fit"
                   :component="layoutItem.widget.component"
-                  v-bind="computeAttr(layoutItem)" />
+                  v-bind="computeAttr(layoutItem)"
+                >
+                  <q-btn label="remove" size="sm" flat icon="delete" slot="error-after" @click="removeItem(layoutItem)"/>
+                </widget>
             </grid-item>
         </grid-layout>
       </keep-alive>

@@ -28,7 +28,7 @@
         <q-chip v-if="showLocation" dense outline square color="secondary" icon="location_on" class="gt-xs">
           {{ resource.location() }}
         </q-chip>
-        <resource-battery-chip square v-if="showBattery" class="gt-xs" :resource="resource" />
+        <resource-battery-chip outline square color="secondary" v-if="showBattery" class="gt-xs" :resource="resource" />
       </div>
     </q-item-section>
     <!--<q-item-section side v-if="showLocation" class="gt-xs">
