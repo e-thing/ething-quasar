@@ -51,7 +51,8 @@
           </div>
 
           <div class="top-right-menu">
-            <q-btn label="deploy" flat :color="dirty?'primary':'faded'" @click="deploy" />
+            <q-btn :label="resource.attr('enabled') ? 'stop' : 'run'" :icon="resource.attr('enabled') ? 'stop' : 'mdi-play'" flat :color="resource.attr('enabled')?'negative':'secondary'" @click="toggleFlowEnable(!resource.attr('enabled'))" />
+            <q-btn label="deploy" flat :color="dirty?'primary':'faded'" @click="deploy" v-show="resource.attr('enabled')" />
             <q-btn label="debug" flat :color="dbg.enabled?'primary':'faded'" @click="toggle_debug" />
           </div>
 
@@ -390,6 +391,15 @@ export default {
   },
 
   methods: {
+
+    toggleFlowEnable (val) {
+      this.resource.set({enabled: !!val}).then(() => {
+
+      }).catch((err) => {
+        console.error(err);
+      })
+    },
+
     closeMenu () {
       this.showMenu = false
     },
