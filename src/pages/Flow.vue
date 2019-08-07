@@ -66,7 +66,7 @@
 
           <drop @drop="handleDrop">
             <div ref="flowchart" class="flowchart jtk-surface jtk-surface-nopan" @click.self="flowchartClick">
-                <div ref="node" class="node"
+                <div ref="node" class="node non-selectable"
                       v-for="node in nodes" :key="node.id" :data-id="node.id"
                       @mouseover="nodeHoverHandler(node, true)" @mouseout="nodeHoverHandler(node, false)"
                       v-touch-hold.noMouse="node._hold"
@@ -393,9 +393,7 @@ export default {
   methods: {
 
     toggleFlowEnable (val) {
-      this.resource.set({enabled: !!val}).then(() => {
-
-      }).catch((err) => {
+      this.resource.set({enabled: !!val}).catch((err) => {
         console.error(err);
       })
     },
@@ -474,8 +472,7 @@ export default {
 
       lock_socket(flowSocket)
 
-      flowSocket.on('dbg_data', this.debug_data_handler);
-      flowSocket.on('dbg_info', this.debug_info_handler);
+      flowSocket.on('dbg_evt', this.debug_evt_handler);
 
       flowSocket.emit('dbg_open', {
           flow_id: this.resource.id()
@@ -493,36 +490,57 @@ export default {
         })
       }
 
-      flowSocket.off('dbg_data', this.debug_data_handler);
-      flowSocket.off('dbg_info', this.debug_info_handler);
+      flowSocket.off('dbg_evt', this.debug_evt_handler);
 
       release_socket(flowSocket)
     },
 
-    debug_data_handler (data) {
-      // {flow_id: "owBdc-U", data: "debug Tick", ts: 1546608540.8292224, node: "1460686"}
-      data.data = JSON.parse(data.data)
+    debug_evt_handler (pkt) {
+      var event = pkt.event
+      var payload = JSON.parse(pkt.payload)
 
-      //console.log('[socketio:Flow] data:', data)
+      //console.log('[socketio:Flow] evt:', event)
 
-      this.dbg.items.push(data)
+      switch (event) {
+        case 'flow_started':
+          this.$q.notify({
+            icon: 'mdi-play',
+            color: 'positive',
+            message: 'Flow started',
+            timeout: 1500
+          })
+          break;
+        case 'flow_warn':
+          this.$q.notify({
+            icon: 'mdi-information',
+            color: 'info',
+            message: payload.msg,
+            timeout: 3000
+          })
+          break;
+        case 'flow_dbg':
 
-      if (this.dbg.items.length > 100) {
-        this.dbg.items = this.dbg.items.slice(-100)
-      }
-    },
+          this.dbg.items.push(payload)
 
-    debug_info_handler (data) {
-      data.data = JSON.parse(data.data)
+          if (this.dbg.items.length > 100) {
+            this.dbg.items = this.dbg.items.slice(-100)
+          }
 
-      //console.log('[socketio:Flow] info:', data)
+          break;
+        case 'flow_info':
 
-      var node = this.getNode(data.node)
+          // console.log('[socketio:Flow] info:', payload)
 
-      if (node) {
-        node._dbg = Object.assign(node._dbg, {
-          data: data.data
-        })
+          var node = this.getNode(payload.node)
+
+          if (node) {
+            node._dbg = Object.assign(node._dbg, {
+              data: payload.data
+            })
+          }
+
+          break;
+
       }
     },
 

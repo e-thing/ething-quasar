@@ -1,9 +1,7 @@
 <template>
   <q-page>
     <div class="page-fit">
-      <div class="fit page-block" style="position: relative;">
-        <image-viewer :source="sources" :value="resource" thumbnails controls/>
-      </div>
+      <image-viewer class="page-block fit" :source="resource"/>
     </div>
   </q-page>
 </template>

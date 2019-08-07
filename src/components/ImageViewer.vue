@@ -1,39 +1,39 @@
 <template>
-    <div class="card-carousel" :class="{ hasThumbnails: thumbnails, noTitle: !noTitle }" >
-        <div class="card-img">
-            <div class="img-wrapper">
-                <div v-if="currentImage">
-                  <img :key="imgKey" :src="addTimestampToUrl(currentImage.getSrc())" alt="" @load="onload" @error="onerror">
-                  <div v-if="loading" class="loader">
-                    <q-circular-progress
-                      indeterminate
-                      size="24px"
-                      color="secondary"
-                    />
-                  </div>
-                  <div v-if="error" class="error text-center text-negative">Error</div>
-                  <div v-if="!noTitle" class="title text-center text-faded">{{ currentImage.name() }}</div>
-                </div>
-            </div>
-            <div class="actions" v-if="controls && images.length>1">
-                <q-btn round flat size="lg" icon="chevron_left" @click="prevImage" class="prev"/>
-                <q-btn round flat size="lg" icon="chevron_right" @click="nextImage" class="next"/>
-            </div>
-        </div>
-        <div class="thumbnails" v-if="thumbnails && images.length>1">
-            <div
-                v-for="(image, index) in  images"
-                :key="index"
-                :class="['thumbnail-image', (activeImage == index) ? 'active' : '']"
-                @click="activateImage(index)"
-            >
-                <img :src="image.getThumbSrc(image)">
-            </div>
-        </div>
+  <div :class="fullscreen ? 'fullscreen' : 'relative-position fit'" :style="__style">
+    <component :is="__zoom ? 'v-zoomer' : 'div'" v-show="!error" style="width: 100%; height: 100%;">
+      <img
+        :key="key"
+        :src="__url"
+        style="object-fit: contain; width: 100%; height: 100%;"
+        alt=""
+        @load="onload"
+        @error="onerror"
+      >
+    </component>
+    <div class="absolute-top row items-center q-pa-sm" :style="__toolbarStyle">
+      <div class="col text-subtitle1">
+        <span v-if="!noTitle">{{ __data.title }}</span>
+      </div>
+      <div class="col-auto">
+        <q-btn round flat icon="mdi-refresh" @click="refresh()" />
+        <q-btn round flat :icon="fullscreen ? 'fullscreen_exit' : 'fullscreen'" @click="toggleFullscreen()" />
+      </div>
     </div>
+    <div v-show="loading" class="absolute-center">
+      <q-circular-progress
+        indeterminate
+        size="48px"
+        color="white"
+      />
+    </div>
+    <div v-show="error" class="absolute-center text-negative">
+      Unable to load the picture
+    </div>
+  </div>
 </template>
 
 <script>
+
 
 export default {
   name: 'ImageViewer',
@@ -41,286 +41,98 @@ export default {
   props: {
     /*
     source:
-      - File: image
+      - File or url
     */
     source: {},
-    value: {},
-    thumbnails: Boolean,
-    controls: Boolean,
-    noTitle: Boolean
+    noTitle: Boolean,
+    zoom: {
+      type: String,
+      default: 'both'
+    },
+    contentStyle: Object,
+    toolbarStyle: Object
   },
 
   data() {
     return {
-        //Index of the active image on the images array
-        activeImage: 0,
-        images: [],
-        imgKey: 0,
-        loading: false,
-        _lastTs: 0
+        fullscreen: false,
+        key: 1,
+        urlSuffix: '',
+        loading: true,
+        error: false,
     }
   },
   computed: {
-      // currentImage gets called whenever activeImage changes
-      // and is the reason why we don't have to worry about the
-      // big image getting updated
-      currentImage () {
-          return this.images[this.activeImage]
-      },
-
-  },
-
-  watch: {
-    source (src) {
-      this.setSource(src)
+    __data () {
+      if (/^https?:\/\//.test(this.source)) {
+        return {
+          url: this.source,
+          title: this.source
+        }
+      } else if (this.source instanceof this.$ething.File) {
+        return {
+          url: this.source.getContentUrl(false),
+          title: this.source.name()
+        }
+      }
     },
-    value (val) {
-      this.activateImage (val)
+    __url () {
+      var url = this.__data.url
+      return url + ( url.indexOf('?') === -1 ? '?' : '&' ) + this.urlSuffix
     },
-    activeImage : {
-      handler () {
-        this.loading = true
-        this.error = false
-      },
-      immediate: true
-    }
-  },
+    __zoom () {
+      if (this.zoom === 'none') return false
+      if (this.zoom === 'fullscreen') return this.fullscreen
+      if (this.zoom === 'inline') return !this.fullscreen
+      return true
+    },
+    __style () {
+      var style = {
+        'color': 'white',
+        'background-color': '#2b2b2b'
+      }
 
-  mounted () {
-    this.setSource(this.source)
-    if (this.value) {
-      this.activateImage(this.value)
+      if (!this.fullscreen && this.contentStyle) {
+        Object.assign(style, this.contentStyle)
+      }
+
+      return style
+    },
+    __toolbarStyle () {
+      var style = {
+        'background': 'rgba(0,0,0,0.47)'
+      }
+
+      if (this.toolbarStyle) {
+        Object.assign(style, this.toolbarStyle)
+      }
+
+      return style
     }
   },
 
   methods: {
+    toggleFullscreen () {
+    	this.fullscreen = !this.fullscreen
+    },
+    refresh () {
+      this.loading = true
+      this.error = false
 
-      setSource (source) {
-        if (Array.isArray(source)) {
-          this.images = source.map(s => this.parseSource(s)).filter(s => !!s)
-        } else {
-          var image = this.parseSource(source)
-          this.images = []
-          if (image) {
-            this.images.push(image)
-          }
-        }
-      },
-
-      // Go forward on the images array
-      // or go at the first image if you can't go forward :/
-      nextImage() {
-        var active = this.activeImage + 1
-        if(active >= this.images.length) {
-            active = 0
-        }
-        this.activateImage(active)
-      },
-
-      // Go backwards on the images array
-      // or go at the last image
-      prevImage() {
-        var active = this.activeImage - 1
-        if(active < 0) {
-            active = this.images.length - 1
-        }
-        this.activateImage(active)
-      },
-
-      activateImage(imageIndex) {
-        if (typeof imageIndex == 'number') {
-          this.activeImage = imageIndex
-          this.$emit('input', this.images[this.activeImage].source)
-        } else {
-          var index = this.images.findIndex(s => {
-            return s.source === imageIndex
-          })
-          if (index !== -1) {
-            this.activeImage = index
-          }
-        }
-
-      },
-
-      refresh () {
-        this.loading = true
-        this.error = false
-        this.imgKey += 1
-      },
-
-      parseSource (source) {
-        var obj = {}
-
-        if (/^https?:\/\//.test(source)) {
-          obj = {
-            type: 'url',
-            getSrc () {
-              return source
-            },
-            name () {
-              return source
-            }
-          }
-        } else if (source instanceof this.$ething.File) {
-          obj = {
-            type: 'resource.File',
-            getSrc () {
-              return source.getContentUrl(false)
-            },
-            getThumbSrc () {
-              return source.thumbnailLink(false)
-            },
-            name () {
-              return source.name()
-            }
-          }
-        }
-
-        obj.source = source
-
-        return obj
-      },
-
-      addTimestampToUrl (url) {
-        var ts = Date.now()
-        if (ts - this._lastTs < 1000) { // kind of debounce
-          ts = this._lastTs
-        } else {
-          this._lastTs = ts
-        }
-        return url + ( url.indexOf('?') === -1 ? '?' : '&' ) + ts
-      },
-
-      onload () {
-        this.loading = false
-        this.error = false
-      },
-
-      onerror (err) {
-        this.loading = false
-        this.error = true
+      if (this.source instanceof this.$ething.File) {
+        this.urlSuffix = '_ts=' + Date.now()
+      } else {
+        this.key += 1
       }
+    },
+    onload () {
+      this.loading = false
+    },
+    onerror () {
+      this.error = true
+      this.loading = false
+    },
   }
 
 }
 </script>
-
-<style scoped>
-.card-carousel {
-    user-select: none;
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-}
-
-.thumbnails {
-    display: flex;
-    justify-content: center;
-    flex-direction: row;
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-}
-
-.thumbnail-image {
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    padding: 2px;
-}
-
-.thumbnail-image > img {
-    width: 100%;
-    height: auto;
-    transition: all 250ms;
-}
-
-.thumbnail-image:hover > img,
-.thumbnail-image.active > img {
-    opacity: 0.6;
-    box-shadow: 2px 2px 6px 1px rgba(0,0,0, 0.5);
-}
-
-.card-img {
-    position: absolute;
-    top: 0;
-    bottom: 0px;
-    width: 100%;
-    overflow-x: hidden;
-}
-
-.card-carousel.hasThumbnails .card-img {
-  bottom: 132px;
-}
-
-.card-img > div.img-wrapper {
-    position: absolute;
-    width: 200%;
-    text-align: center;
-    height: 100%;
-}
-
-.card-img > div.img-wrapper > div {
-    height: 100%;
-    float: left;
-    position: relative;
-    overflow: hidden;
-    width: 50%;
-}
-
-.card-img > div.img-wrapper > div:before {
-    content: ' ';
-    display: inline-block;
-    vertical-align: middle;
-    height: 100%;
-}
-
-.card-img > div.img-wrapper > div > img {
-    max-width: 100%;
-    max-height: 100%;
-    width: auto;
-    height: auto;
-    display: inline-block;
-    vertical-align: middle;
-}
-
-.card-img.hasTitle > div.img-wrapper > div > img {
-    padding: 30px;
-}
-
-
-.title {
-    position: absolute;
-    bottom: 0px;
-    width: 100%;
-    padding: 5px 0;
-}
-
-.loader {
-    position: absolute;
-    bottom: 50%;
-    width: 100%;
-}
-
-.error {
-    position: absolute;
-    bottom: 50%;
-    width: 100%;
-}
-
-.actions {
-    font-size: 1.5em;
-    height: 40px;
-    position: absolute;
-    top: 50%;
-    margin-top: -20px;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    color: #585858;
-}
-
-</style>

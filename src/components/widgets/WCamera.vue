@@ -1,5 +1,5 @@
 <template>
-  <image-viewer ref="view" :source="source" no-title/>
+  <image-viewer ref="view" :source="source" no-title zoom="fullscreen" :toolbarStyle="{background: 'transparent'}" :content-style="{'color': color, 'background-color': 'transparent'}" :toolbar-style="{background: 'transparent'}"/>
 </template>
 
 <script>

@@ -41,6 +41,8 @@
     </q-item-section>-->
     <q-item-section side v-if="!readonly">
       <div>
+        <slot name="buttons-prepend"></slot>
+        <q-btn v-if="showFlowEnable" class="gt-xs" :icon="flowEnableIcon" flat dense :label="flowEnableLabel" :color="flowEnableColor" @click.stop="toggleFlowEnable()"/>
         <q-btn v-if="showChart" class="gt-xs" icon="mdi-chart-line" round flat dense color="secondary" @click.stop="chart"/>
         <q-btn v-if="showDownload" class="gt-xs" icon="cloud_download" round flat dense color="secondary" @click.stop="download"/>
         <q-btn class="gt-xs" icon="delete" round flat dense @click.stop="remove"/>
@@ -129,13 +131,29 @@ export default {
       return this.resource instanceof this.$ething.File || this.resource instanceof this.$ething.Table
     },
 
+    showFlowEnable () {
+      return this.$ethingUI.isSubclass(this.resource, 'resources/Flow')
+    },
+
     meta () {
       return this.$ethingUI.get(this.resource)
     },
 
     data () {
       return this.meta.data() || {}
-    }
+    },
+
+    flowEnableIcon () {
+      return this.resource.attr('enabled') ? 'stop' : 'mdi-play'
+    },
+
+    flowEnableLabel () {
+      return this.resource.attr('enabled') ? 'stop' : 'run'
+    },
+
+    flowEnableColor () {
+      return this.resource.attr('enabled') ?'negative' : 'secondary'
+    },
 
   },
 
@@ -171,6 +189,18 @@ export default {
     more () {
       var actions = []
       var handlers = {}
+
+      if (this.showFlowEnable) {
+        actions.push({
+          label: this.flowEnableLabel,
+          color: this.flowEnableColor,
+          icon: this.flowEnableIcon,
+          id: 'flowEnable'
+        })
+        handlers['flowEnable'] = () => {
+          return this.toggleFlowEnable()
+        }
+      }
 
       if (this.showChart) {
         actions.push({
@@ -282,6 +312,12 @@ export default {
 
     open (r) {
       if (!this.readonly) this.$ethingUI.open(r)
+    },
+
+    toggleFlowEnable () {
+      this.resource.set({enabled: !this.resource.attr('enabled')}).catch((err) => {
+        console.error(err);
+      })
     }
   }
 

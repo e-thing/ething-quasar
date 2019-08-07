@@ -6,7 +6,7 @@
 
         <q-card class="content">
           <q-card-section v-if="operation.description">
-            <vue-markdown class="markdown text-faded" :anchorAttributes="{target: '_blank'}">{{ operation.description }}</vue-markdown>
+            <q-markdown class="text-faded">{{ operation.description }}</q-markdown>
           </q-card-section>
 
           <q-card-section v-if="hasParameters(operation)">
@@ -49,7 +49,6 @@
 
 <script>
 import EThing from 'ething-js'
-import VueMarkdown from 'vue-markdown'
 import Vue from 'vue'
 
 var supportsAudioPlayback = function (contentType) {
@@ -76,10 +75,6 @@ var blobToText = function(blob, cb){
 
 export default {
     name: 'DeviceApi',
-
-    components: {
-      VueMarkdown
-    },
 
     props: ['device'],
 

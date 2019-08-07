@@ -2,7 +2,7 @@
   <div>
     <slot></slot>
 
-    <vue-markdown v-if="!!meta.description" class="markdown" :anchorAttributes="{target: '_blank'}">{{ meta.description.trim() }}</vue-markdown>
+    <q-markdown v-if="!!meta.description">{{ meta.description.trim() }}</q-markdown>
 
     <form-schema :schema="schema" v-model="model" @error="inputError = $event" class="q-mb-xl"/>
 
@@ -16,16 +16,11 @@
 
 <script>
 import EThing from 'ething-js'
-import VueMarkdown from 'vue-markdown'
 import { extend } from 'quasar'
 const csv = require('csvtojson')
 
 export default {
     name: 'ResourceEditor',
-
-    components: {
-      VueMarkdown
-    },
 
     props: ['resource'], // either a resource or a string describing a type
 
