@@ -1,16 +1,16 @@
 <template>
   <div class="absolute-center" style="min-width: 100%;">
-    <q-btn icon="mdi-lightbulb" flat size="xl" class="full-width" :color="state ? 'primary' : 'faded'" @click="p_toggle"/>
+    <q-btn icon="mdi-lightbulb" flat size="xl" class="full-width" :style="{color: displayHex}" @click="p_toggle"/>
 
     <div class="row items-center">
       <q-icon name="mdi-brightness-5" class="col-auto q-mx-sm"/>
-      <q-slider class="col" :min="0" :max="100" :disable="writing" :value="brightness || NaN" @change="p_setBrightness"/>
+      <q-slider class="col" :min="0" :max="100" :disable="writing" :value="brightness || 0" @change="p_setBrightness"/>
       <q-icon name="mdi-brightness-7" class="col-auto q-mx-sm"/>
     </div>
 
     <div class="row items-center">
       <q-icon name="mdi-brightness-5" class="col-auto q-mx-sm" style="visibility: hidden"/>
-      <q-slider :min="0" :max="360" :disable="writing" class="col hue-slider" :value="colorHue || 0" @change="p_setColorHue"/>
+      <q-slider :min="0" :max="360" :disable="writing" class="col hue-slider" :value="hue" @change="p_setColorHue"/>
       <q-icon name="mdi-brightness-7" class="col-auto q-mx-sm" style="visibility: hidden"/>
     </div>
 
@@ -45,11 +45,14 @@ export default {
       brightness () {
         return this.resource.attr('level') || 0
       },
-      lightColor () {
-        return this.resource.attr('color') || '#FFFFFF'
+      hue () {
+        return this.resource.attr('hue')
       },
-      colorHue () {
-        rgbToHsv(hexToRgb(this.lightColor)).h
+      saturation () {
+        return this.resource.attr('saturation')
+      },
+      displayHex () {
+        return this.state ? rgbToHex(hsvToRgb({h: this.hue, s: this.saturation, v:100})) : '#777'
       },
       state () {
         return this.resource.attr('state')
@@ -85,7 +88,7 @@ export default {
             this.writing = false
           })
         } else {
-          this.p_setBrightness(this.state ? 0 : 100)
+          this.p_setBrightness(this.state ? 0 : this.brightness || 100)
         }
       }
     }

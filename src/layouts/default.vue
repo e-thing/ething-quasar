@@ -37,25 +37,25 @@
         inset-delimiter
       >
         <q-item-label header>Menu</q-item-label>
-        <q-item clickable @click="$router.push('/dashboard')">
+        <q-item clickable @click="$router.push('/dashboard')" v-ripple>
           <q-item-section avatar>
             <q-icon name="dashboard" />
           </q-item-section>
           <q-item-section>Dashboard</q-item-section>
         </q-item>
-        <q-item clickable @click="$router.push('/devices')">
+        <q-item clickable @click="$router.push('/devices')" v-ripple>
           <q-item-section avatar>
             <q-icon name="devices" />
           </q-item-section>
           <q-item-section>Devices</q-item-section>
         </q-item>
-        <q-item clickable @click="$router.push('/data')">
+        <q-item clickable @click="$router.push('/data')" v-ripple>
           <q-item-section avatar>
             <q-icon name="mdi-database" />
           </q-item-section>
           <q-item-section>Data</q-item-section>
         </q-item>
-        <q-item clickable @click="$router.push('/flows')">
+        <q-item clickable @click="$router.push('/flows')" v-ripple>
           <q-item-section avatar>
             <q-icon name="mdi-ray-start-arrow" />
           </q-item-section>
@@ -64,13 +64,13 @@
 
         <q-separator />
 
-        <q-item clickable @click="$router.push('/settings')">
+        <q-item clickable @click="$router.push('/settings')" v-ripple>
           <q-item-section avatar>
             <q-icon name="settings" />
           </q-item-section>
           <q-item-section>Settings</q-item-section>
         </q-item>
-        <q-item v-if="!$ethingUI.autoLogin" clickable @click="logout">
+        <q-item v-if="!$ethingUI.autoLogin" clickable @click="logout" v-ripple>
           <q-item-section avatar>
             <q-icon name="exit_to_app" />
           </q-item-section>

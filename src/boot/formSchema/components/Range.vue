@@ -1,7 +1,7 @@
 <template>
   <form-schema-layout class="form-schema-range">
     <q-slider
-      :value="c_value"
+      :value="typeof c_value === 'undefined' ? 0 : c_value"
       @input="c_value = $event"
       :error="!!error"
       v-bind="attributes"

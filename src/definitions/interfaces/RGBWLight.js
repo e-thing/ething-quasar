@@ -12,7 +12,7 @@ export default {
           return resource.execute('setLevel', level)
         },
         setColor (resource, hue, saturation) {
-          return resource.execute('setColor', hue, saturation)
+          return resource.execute('setColor', {hue, saturation})
         },
       },
       title: 'RGBW light',
