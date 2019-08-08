@@ -1,12 +1,8 @@
 <template>
-  <div class="absolute-center text-h6 text-no-wrap row items-center q-gutter-x-xs">
+  <div class="absolute-center text-h6 text-no-wrap q-gutter-x-xs ellipsis">
     <q-icon v-if="icon" :name="icon"/>
-    <span class="value" :style="{color: color}">
-        {{ __map(resource.attr(attr)) }}
-    </span>
-    <small v-if="unit" class="unit" style="filter: brightness(90%);">
-        {{ unit }}
-    </small>
+    <span class="value" :style="{color: color}">{{ __map(resource.attr(attr)) }}</span>
+    <small v-if="unit" class="unit" style="filter: brightness(90%);">{{ unit }}</small>
   </div>
 </template>
 
@@ -34,6 +30,7 @@ export default {
           }
 
         }
+        if (value === null || value === undefined) return '?'
         return value
       }
     }

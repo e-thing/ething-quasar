@@ -243,7 +243,10 @@ DataSource.prototype.load = function (done) {
 function dataFormat (date, value) {
   var date = new Date(date)
   if (typeof value != 'number') {
-    if (typeof value === 'string') value = parseFloat(value)
+    if (typeof value === 'string'){
+      value = parseFloat(value)
+      if (isNaN(value)) return // invalid data
+    }
     else if (typeof value === 'boolean') value = value ? 1 : 0
   }
   return [date.getTime(), value]
@@ -710,7 +713,8 @@ export default {
               serie.removePoint(0, false)
 
           }
-          serie.addPoint(dataFormat(data.date, data[key]))
+          var p = dataFormat(data.date, data[key])
+          if (p) serie.addPoint(p)
         }
       }
     },

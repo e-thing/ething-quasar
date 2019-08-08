@@ -4,7 +4,7 @@
 
     <q-markdown v-if="!!meta.description">{{ meta.description.trim() }}</q-markdown>
 
-    <form-schema :schema="schema" v-model="model" @error="inputError = $event" class="q-mb-xl"/>
+    <form-schema :schema="schema" v-model="model" @error="inputError = $event"/>
 
     <q-inner-loading class="text-center" :showing="!ready">
       <div class="q-pa-lg text-primary">loading...</div>

@@ -1,15 +1,24 @@
 <template>
-  <div class="absolute-center">
-    <q-knob
-      :value="resource.attr(attr) || 0"
-      :min="min"
-      :max="max"
-      readonly
-      :color="color"
-    >
-      <q-icon v-if="icon" :name="icon"/>
-      {{ resource.attr(attr) }} <small class="unit">{{unit}}</small>
-    </q-knob>
+  <div class="fit">
+    <q-resize-observer @resize="updateLayout" />
+    <div class="absolute-center">
+      <q-knob
+        :value="resource.attr(attr) || 0"
+        :min="min"
+        :max="max"
+        readonly
+        :color="color"
+        show-value
+        :size="this.knobSize + 'px'"
+        :thickness="0.1"
+        track-color="grey-3"
+      >
+        <div class="text-h6 text-no-wrap">
+          <q-icon v-if="icon" :name="icon"/>
+          {{ resource.attr(attr) }} <small class="unit">{{unit}}</small>
+        </div>
+      </q-knob>
+    </div>
   </div>
 </template>
 
@@ -34,6 +43,19 @@ export default {
       },
       attr: String
     },
+
+    data () {
+      return {
+        knobSize: 32
+      }
+    },
+
+    methods: {
+      updateLayout (size) {
+        var len = Math.max(Math.min(size.width, size.height), 64)
+        this.knobSize = parseInt(len * 0.8)
+      }
+    }
 
 }
 </script>

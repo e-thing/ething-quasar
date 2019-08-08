@@ -3,7 +3,7 @@
     <q-input
       :type="inputType"
       :value="c_value"
-      @input="c_value = $event"
+      @input="c_value = __cast_input_val($event)"
       :error="!!error"
       v-bind="attributes"
       :placeholder="c_schema['$placeholder']"
@@ -65,6 +65,13 @@ export default {
 
     return {
       c_value: validators
+    }
+  },
+
+  methods: {
+    __cast_input_val (val) {
+      if (this.inputType === 'number') val = Number(val)
+      return val
     }
   },
 

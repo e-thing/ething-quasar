@@ -7,6 +7,9 @@
       :multiple="multiple"
       use-id
       :create-types="createTypes"
+      dense
+      :error="!!error"
+      hide-bottom-space
     />
   </form-schema-layout>
 </template>
@@ -15,6 +18,7 @@
 
 import ResourceSelect from '../../../components/ResourceSelect'
 import { FormComponent } from '../core'
+import { minLength, maxLength } from 'vuelidate/lib/validators'
 
 /*
 options
@@ -36,8 +40,11 @@ export default {
     multiple () {
       return this.c_schema.type === 'array'
     },
+    __r_schema () {
+      return this.multiple ? this.c_schema.items : this.c_schema
+    },
     computed_filter () {
-      var schema = this.c_schema
+      var schema = this.__r_schema
 
       return (r) => {
         return this.filter(r, schema)
@@ -45,19 +52,36 @@ export default {
     },
     createTypes () {
       var r = []
-      if (this.c_schema['$onlyTypes']) {
-        r = r.concat(this.c_schema['$onlyTypes'])
+      if (this.__r_schema['$onlyTypes']) {
+        r = r.concat(this.__r_schema['$onlyTypes'])
       }
-      if (this.c_schema['$must_throw']) {
+      if (this.__r_schema['$must_throw']) {
         // find all class that emits the signal
         this.$ethingUI.iterate('resources', (resourceClsName) => {
           var resourceCls = this.$ethingUI.get(resourceClsName)
-          if (resourceCls.signals.indexOf(this.c_schema['$must_throw']) !== -1) {
+          if (resourceCls.signals.indexOf(this.__r_schema['$must_throw']) !== -1) {
             r.push(resourceClsName)
           }
         })
       }
       return r
+    }
+  },
+
+  validations () {
+
+    var validators = {}
+
+    if (typeof this.c_schema.minItems === 'number') {
+      validators.minLength = minLength(this.c_schema.minItems)
+    }
+
+    if (typeof this.c_schema.maxItems === 'number') {
+      validators.maxLength = maxLength(this.c_schema.maxItems)
+    }
+
+    return {
+      c_value: validators
     }
   },
 

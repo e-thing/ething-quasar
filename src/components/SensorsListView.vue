@@ -2,7 +2,7 @@
   <div class="container">
     <div class="row items-stretch" v-for="(attr, name, index) in sensorAttributes" :key="name" :class="index>0 ? 'q-mt-sm' : ''">
 
-      <widget class="col-md-auto col-xs-12"
+      <widget class="col-sm-auto col-xs-12"
         component="WDeviceSensor"
         :resource="resource"
         v-bind="attr.widget"

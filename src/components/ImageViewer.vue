@@ -1,5 +1,6 @@
 <template>
-  <div :class="fullscreen ? 'fullscreen' : 'relative-position fit'" :style="__style">
+  <div class="fit">
+  <div ref="container" :class="fullscreen ? 'fullscreen' : 'relative-position fit'" :style="__style">
     <component :is="__zoom ? 'v-zoomer' : 'div'" v-show="!error" style="width: 100%; height: 100%;">
       <img
         :key="key"
@@ -29,6 +30,7 @@
     <div v-show="error" class="absolute-center text-negative">
       Unable to load the picture
     </div>
+  </div>
   </div>
 </template>
 
@@ -114,6 +116,12 @@ export default {
   methods: {
     toggleFullscreen () {
     	this.fullscreen = !this.fullscreen
+
+      if (this.fullscreen) {
+        document.body.appendChild(this.$refs.container);
+      } else {
+        this.$el.appendChild(this.$refs.container);
+      }
     },
     refresh () {
       this.loading = true

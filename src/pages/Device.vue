@@ -1,28 +1,27 @@
 <template>
   <q-page class="">
 
-    <div class="bg-white q-py-lg q-px-lg" style="border-bottom: 5px solid #eee">
+    <div class="bg-white" :class="$q.screen.lt.md ? 'q-py-sm' : 'q-py-lg q-px-md'" style="border-bottom: 5px solid #eee">
 
       <q-list dense>
         <q-item>
-          <q-item-section avatar>
+          <q-item-section avatar top>
             <q-avatar :icon="meta.icon" text-color="white" :color="meta.color" />
           </q-item-section>
           <q-item-section>
-            <q-item-label class="text-h4" :class="'text-' + meta.color">
+            <q-item-label class="text-h4 ellipsis" :class="'text-' + meta.color">
               {{ resource.basename() }}
               <q-icon v-if="!resource.connected()" right name="mdi-lan-disconnect" color="warning" />
 
-              <q-avatar v-for="(icon, key) in extendsIcons" :key="key" :icon="icon" :color="meta.color" text-color="white" size="24px" class="gt-sm q-mr-xs" />
+              <q-avatar v-for="(icon, key) in extendsIcons" :key="key" :icon="icon" :color="meta.color" text-color="white" size="24px" class="gt-xs q-mr-xs" />
 
             </q-item-label>
             <q-item-label caption>{{ meta.title }}</q-item-label>
           </q-item-section>
-          <q-item-section side>
+          <q-item-section side top>
             <q-btn
               flat
-              :dense="$q.screen.lt.sm"
-              label="settings"
+              :label="$q.screen.lt.md ? '' : 'settings'"
               color="faded"
               icon="settings"
               @click="$router.push('/resource/' + resource.id())"
@@ -218,7 +217,6 @@ export default {
       var types = this.resource.types()
       for (var i in types) {
         var t = types[i]
-        console.log(t)
         if (t==currentType || t=='interfaces/Sensor') continue
         if (t=='resources/Device') break
         var m = this.$ethingUI.getRaw(t)

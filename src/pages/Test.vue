@@ -10,9 +10,11 @@
       multiple
     />
 
-    <ResourceCreateModal
-      value
-    />
+    <form-schema :schema="schema" v-model="model" @error="error = $event"/>
+
+    <div>
+      error: {{ error}}
+    </div>
 
   </q-page>
 </template>
@@ -36,23 +38,53 @@ export default {
       resourceFilter: [],
       templ: 'toto',
       schema: {
-      "type": "object",
-      "properties": {
-        "name": {
-          "type": "string",
-          "minLength": 1
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "textarea": {
+            "type": "string",
+            '$component': "textarea",
+            "minLength": 1
+          },
+          "resources": {
+            "type": "array",
+            '$component': "ething.resource",
+            'items': {
+
+            },
+            "minItems": 1
+          },
+          "oneOf": {
+            "oneOf": [{
+              type: 'object',
+              'properties': {
+                'type': {
+                  'title': 'resources',
+                  'const': 'resources'
+                },
+                'value': {
+                  "type": "array",
+                  '$component': "ething.resource",
+                  'items': {
+
+                  },
+                  "minItems": 1
+                }
+              },
+              'required': ['type', 'value'],
+              'additionalProperties': false
+            }],
+            '$inline': true
+          }
         },
-        "type": {
-          "type": "string",
-          '$component': "textarea",
-          "minLength": 1
-        }
+        "required": [
+          "name"
+        ],
+        "description": "print some debug information"
       },
-      "required": [
-        "name"
-      ],
-      "description": "print some debug information"
-    },
 model: {
   "name": "Debug Node",
   /*"output": {

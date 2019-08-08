@@ -1,8 +1,9 @@
 <template>
   <q-page class="page page-width-md">
 
-    <div class="row justify-between page-block">
-      <q-btn color="primary" label="Create" icon="add" flat @click="create" />
+    <div class="row justify-between page-block" style="background: transparent;">
+      <q-space/>
+      <q-btn class="bg-white" color="primary" label="Create" icon="add" flat @click="create" />
     </div>
 
     <div v-if="flows.length" class="page-block">

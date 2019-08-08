@@ -435,6 +435,12 @@ export default {
       if (flow) {
         this.resource.set(flow).catch((err) => {
           console.error(err);
+          this.$q.notify({
+            icon: 'mdi-alert-circle',
+            color: 'negative',
+            message: 'Flow error: ' + String(err),
+            timeout: 3000
+          })
         })
       }
     }, 500),

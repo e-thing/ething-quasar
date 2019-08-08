@@ -275,7 +275,7 @@ var FormComponent = {
       var v = this.inline
       if (v==='') v = true // prop without value : <... inline />
       if (typeof this.schema['$inline'] !== 'undefined')
-        v = typeof this.schema['$inline']
+        v = this.schema['$inline']
       if (v==='inherit') {
         var parent = this.parent()
         return parent ? parent.inlined : false
@@ -316,10 +316,13 @@ var FormComponent = {
         return 'Field is required'
       }
       if (typeof this.$v.c_value.minLength != 'undefined' && !this.$v.c_value.minLength) {
-        return 'must have minimum ' + this.$v.c_value.$params.minLength.min + ' characters'
+        if (this.$v.c_value.$params.minLength.min == 1) return 'must not be empty'
+        var n = this.c_schema.type === 'array' ? 'items' : 'characters'
+        return 'must have minimum ' + this.$v.c_value.$params.minLength.min + ' ' + n
       }
       if (typeof this.$v.c_value.maxLength != 'undefined' && !this.$v.c_value.maxLength) {
-        return 'must have maximum ' + this.$v.c_value.$params.maxLength.max + ' characters'
+        var n = this.c_schema.type === 'array' ? 'items' : 'characters'
+        return 'must have maximum ' + this.$v.c_value.$params.maxLength.max + ' ' + n
       }
       if (typeof this.$v.c_value.minValue != 'undefined' && !this.$v.c_value.minValue) {
         return 'must be greater than or equal to ' + this.$v.c_value.$params.minValue.min
@@ -476,7 +479,7 @@ var FormComponent = {
     _is (id) {
       return this.schema.id === id
     },
-    
+
     // dependencies
     _install_dep (node, callback) {
       node.$on('input', val => {

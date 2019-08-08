@@ -14,6 +14,9 @@ export default {
         setColor (resource, hue, saturation) {
           return resource.execute('setColor', {hue, saturation})
         },
+        setState (resource, state) {
+          return resource.execute('setState', state)
+        }
       },
       title: 'RGBW light',
       description: 'control the light',

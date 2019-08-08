@@ -135,7 +135,8 @@ export default {
     	}
 
     	function hasParent(resource){
-    		return !!resource.createdBy();
+        var createdById = resource.createdBy()
+    		return createdById && self.$ething.arbo.get(createdById);
     	}
 
     	var level = 0;

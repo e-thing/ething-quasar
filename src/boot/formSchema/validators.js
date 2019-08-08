@@ -4,6 +4,17 @@ export var regex = (pattern) =>
   withParams({type: 'regex', pattern}, value =>
     !req(value) || (new RegExp(pattern)).test(value))
 
+export var minLengthStrict = (length) =>
+  withParams(
+    { type: 'minLength', min: length },
+    (value) => {
+      var l;
+      if (!value) l = 0
+      else l = len(value)
+      return l >= length
+    }
+  )
+
 /*
 export var required = () => {
   return withParams({ type: 'required' }, (value) => {

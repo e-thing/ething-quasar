@@ -1,26 +1,34 @@
 <template>
   <q-page class="page page-width-md">
 
-    <div class="page-block q-pa-xl">
-      <div class="q-my-md q-mb-xl text-h4 text-primary">
-        <q-icon :name="$ethingUI.get(resource).icon" class="q-mr-sm"/>
-        <small class="text-faded">settings:</small> {{ resource.basename() }}
-      </div>
+    <q-card class="page-block" flat>
 
-      <resource-editor ref="form" :resource="resource" @error="formError=$event"/>
+      <q-card-section>
+        <div class="text-h4 text-faded">
+          <q-icon name="settings"/> settings
+        </div>
+        <div class="text-h6 text-primary q-ml-xl ellipsis">
+          {{ resource.basename() }}
+        </div>
+      </q-card-section>
 
-      <q-banner
-          v-if="error"
-          class="bg-red text-white q-mb-xl"
-      >
-        <q-icon left name="mdi-alert"/> {{ String(error) }}
-      </q-banner>
+      <q-card-section>
+        <resource-editor ref="form" :resource="resource" @error="formError=$event"/>
+      </q-card-section>
 
-      <div>
+      <q-card-section v-if="error">
+        <q-banner
+            class="bg-red text-white"
+        >
+          <q-icon left name="mdi-alert"/> {{ String(error) }}
+        </q-banner>
+      </q-card-section>
+
+      <q-card-section>
           <q-btn :loading="loading" :disable="formError" color="primary" icon="done" label="valid" @click="handler"/>
           <q-btn color="negative" class="q-ml-sm" icon="clear" label="cancel" flat @click="onCancel"/>
-      </div>
-    </div>
+      </q-card-section>
+    </q-card>
   </q-page>
 </template>
 
@@ -53,6 +61,9 @@ export default {
         }
       }
       return r
+    },
+    meta () {
+      return this.$ethingUI.get(this.resource)
     }
   },
 
