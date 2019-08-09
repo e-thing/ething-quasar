@@ -12,7 +12,7 @@
 
       <q-banner
           v-if="error"
-          class="bg-red text-white q-mb-xl"
+          class="bg-negative text-white q-mb-xl"
       >
         <q-icon left name="mdi-alert"/> {{ String(error) }}
       </q-banner>

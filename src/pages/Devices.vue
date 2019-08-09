@@ -1,15 +1,15 @@
 <template>
   <q-page class="page page-width-lg">
 
-    <div class="row justify-between page-block" style="background: transparent;">
+    <div class="row page-block" style="background: transparent;">
 
-      <div>
-        <q-btn class="q-mr-xs bg-white" flat label="All" :text-color="category==='' ? 'primary' : 'faded'" @click="category = ''"/>
-        <q-btn class="q-mr-xs bg-white" flat :text-color="category==='sensor' ? 'primary' : 'faded'" @click="category = 'sensor'">
+      <div class="q-gutter-x-xs">
+        <q-btn class="bg-white" flat label="All" :text-color="category==='' ? 'primary' : 'faded'" @click="category = ''"/>
+        <q-btn class="bg-white" flat :text-color="category==='sensor' ? 'primary' : 'faded'" @click="category = 'sensor'">
           <q-icon name="mdi-thermometer"/>
           <span class="gt-sm q-ml-xs">Sensor</span>
         </q-btn>
-        <q-btn class="q-mr-xs bg-white" flat :text-color="category==='switch' ? 'primary' : 'faded'" @click="category = 'switch'">
+        <q-btn class="bg-white" flat :text-color="category==='switch' ? 'primary' : 'faded'" @click="category = 'switch'">
           <q-icon name="mdi-lightbulb"/>
           <span class="gt-sm q-ml-xs">Switch/Light</span>
         </q-btn>
@@ -19,8 +19,10 @@
         </q-btn>
       </div>
 
-      <div class="row">
+      <q-space/>
 
+      <div class="row q-gutter-x-xs">
+        <q-btn flat dense class="bg-white" :text-color="showActivity ? 'primary' : 'faded'" icon="mdi-bell" @click="showActivity=!showActivity"/>
         <q-btn-dropdown class="bg-white" flat text-color="primary" :label="$q.screen.gt.xs ? 'create' : null" icon="add" dense>
           <q-list>
             <template v-for="cat in categories">
@@ -37,10 +39,13 @@
       </div>
     </div>
 
-    <div v-if="deviceFiltered.length" class="page-block">
-      <q-list>
+    <div v-if="deviceFiltered.length" class="page-block row items-start" style="background: transparent;">
+      <q-list class="col bg-white" :class="showActivity ? 'gt-sm q-mr-md' : ''">
           <resource-q-item v-for="(item, index) in deviceFiltered" :key="index" :resource="item.device" :level="item.level" no-parent />
       </q-list>
+
+      <resource-activity v-if="showActivity" class="col-xs col-md-auto bg-white q-px-md" :source="deviceFiltered.map(item=>item.device)" />
+
     </div>
 
     <div v-else class="absolute-center text-center">
@@ -57,15 +62,16 @@
 </template>
 
 <script>
-import EThing from 'ething-js'
 import ResourceQItem from '../components/ResourceQItem'
+import ResourceActivity from '../components/ResourceActivity'
 
 
 export default {
   name: 'PageDevices',
 
   components: {
-    ResourceQItem
+    ResourceQItem,
+    ResourceActivity
   },
 
   data () {
@@ -112,7 +118,8 @@ export default {
     return {
       categories: orderedCategories,
       filter: '',
-      category: ''
+      category: '',
+      showActivity: false
     }
   },
 
@@ -130,7 +137,7 @@ export default {
 
       function getChildren(resource){
     		return self.$ething.arbo.find(function(r){
-    			return r.createdBy() === resource.id() && (r instanceof EThing.Device)
+    			return r.createdBy() === resource.id() && (r instanceof self.$ething.Device)
     		});
     	}
 

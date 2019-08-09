@@ -17,7 +17,7 @@
       <q-item-label caption v-if="showLocation" class="lt-sm">location: {{ resource.location() }}</q-item-label>
       <q-item-label caption v-if="showSize">{{ $ethingUI.utils.sizeToString(resource.size()) }}</q-item-label>
       <q-item-label caption v-if="showLength">{{ resource.length() }} rows</q-item-label>
-      <q-item-label caption v-if="showError" color="negative"><q-icon name="mdi-alert" /> {{ resource.attr('error') }}</q-item-label>
+      <q-item-label caption v-if="showError" class="text-negative"><q-icon name="mdi-alert" /> {{ resource.attr('error') }}</q-item-label>
     </q-item-section>
     <!--<q-item-section side v-if="Object.keys(data).length>0" class="data gt-sm ellipsis">
       {{ $ethingUI.utils.describe(data) }}

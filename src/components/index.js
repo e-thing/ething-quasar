@@ -13,6 +13,7 @@ import Widget from './Widget'
 import ResourceObservable from './ResourceObservable'
 import widgets from './widgets'
 import FlowNodes from './FlowNodes'
+import ResourceActivity from './ResourceActivity'
 
 export {
     widgets,
@@ -27,5 +28,6 @@ export {
     ResourceQItem,
     ResourceSelect,
     Widget,
-    ResourceObservable
+    ResourceObservable,
+    ResourceActivity
 }

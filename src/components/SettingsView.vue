@@ -20,7 +20,7 @@
 
       <q-banner
           v-if="saveError"
-          class="bg-red text-white page-block"
+          class="bg-negative text-white page-block"
       >
         <q-icon left name="mdi-alert"/> {{ String(saveError) }}
       </q-banner>

@@ -180,7 +180,7 @@
         <q-card-section>
           <q-banner
               v-if="add.error"
-              class="bg-red text-white"
+              class="bg-negative text-white"
           >
             <q-icon left name="mdi-alert"/> {{ String(add.error) }}
           </q-banner>

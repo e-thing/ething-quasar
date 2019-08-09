@@ -1,4 +1,6 @@
-
+/*
+remplace "hello %name%" by "hello foobar"
+*/
 import { date, format } from 'quasar'
 
 

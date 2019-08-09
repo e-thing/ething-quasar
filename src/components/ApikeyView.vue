@@ -55,7 +55,7 @@
 
       <q-banner
           v-if="serverError"
-          class="bg-red text-white q-mb-xl"
+          class="bg-negative text-white q-mb-xl"
       >
         <q-icon left name="mdi-alert"/> {{ String(serverError) }}
       </q-banner>

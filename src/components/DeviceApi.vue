@@ -19,7 +19,7 @@
 
           <q-card-section v-if="operation.error">
             <q-banner
-                class="bg-red text-white"
+                class="bg-negative text-white"
             >
               <q-icon left name="mdi-alert"/> {{ String(operation.error) }}
             </q-banner>

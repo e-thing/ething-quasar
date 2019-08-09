@@ -1,16 +1,18 @@
 <template>
   <q-page class="page page-width-md">
 
-    <div class="row justify-between page-block" style="background: transparent;">
-      <div>
-        <q-btn class="q-mr-xs bg-white" label="All" flat :color="category==='' ? 'primary' : 'faded'" @click="category = ''"/>
-        <q-btn v-for="cat in categories" :key="cat.name" class="q-mr-xs bg-white" flat :color="category===cat.name ? 'primary' : 'faded'" @click="category = cat.name">
+    <div class="row page-block" style="background: transparent;">
+      <div class="q-gutter-x-xs">
+        <q-btn class="bg-white" label="All" flat :color="category==='' ? 'primary' : 'faded'" @click="category = ''"/>
+        <q-btn v-for="cat in categories" :key="cat.name" class="bg-white" flat :color="category===cat.name ? 'primary' : 'faded'" @click="category = cat.name">
           <q-icon :name="cat.icon"/>
           <span class="gt-sm q-ml-xs">{{ cat.label }}</span>
         </q-btn>
       </div>
 
-      <div class="row">
+      <q-space/>
+
+      <div class="row q-gutter-x-xs">
         <q-btn-dropdown class="bg-white" color="primary" label="Create" icon="add" flat dense >
           <q-list>
             <q-item v-close-popup clickable @click="create('resources/File')">

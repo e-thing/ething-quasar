@@ -14,6 +14,7 @@ import settings from './settings.js'
 import storage from './storage.js'
 import info from './info.js'
 import plugins from './plugins.js'
+import activity from './activity.js'
 
 
 // necessary for older browsers
@@ -110,7 +111,8 @@ EThingUI.install = ({ app, router, Vue, store }) => {
     settings,
     storage,
     info,
-    plugins
+    plugins,
+    activity
   ]
 
   pp.forEach(p => {
@@ -416,6 +418,8 @@ EThingUI.install = ({ app, router, Vue, store }) => {
         EThingUI.authRefreshTimer = setInterval(() => {
           EThingUI.authRefresh()
         }, AUTH_REFRESH_INTERVAL)
+
+        EThingUI.emit('ui.loaded');
 
       }).catch( err => {
         console.error(err)

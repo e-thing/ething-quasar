@@ -33,8 +33,7 @@ module.exports = function (ctx) {
       'material-icons' // optional, you are not bound to it
     ],
 
-    framework: 'all', // --- includes everything; for dev only!
-    /*framework: {
+    framework: {
       // iconSet: 'ionicons-v4',
       // lang: 'de', // Quasar language
 
@@ -42,29 +41,92 @@ module.exports = function (ctx) {
 
       components: [
         'QLayout',
-        'QHeader',
-        'QDrawer',
         'QPageContainer',
         'QPage',
-        'QToolbar',
-        'QToolbarTitle',
+        'QHeader',
+        'QFooter',
+        'QDrawer',
+        'QAvatar',
+        'QBadge',
+        'QBanner',
         'QBtn',
+        'QBtnGroup',
+        'QBtnDropdown',
+        'QCard',
+        'QCardSection',
+        'QCardActions',
+        'QChip',
+        'QCircularProgress',
+        'QColor',
+        'QDialog',
+        'QExpansionItem',
+        'QInput',
+        'QSelect',
+        'QRadio',
+        'QCheckbox',
+        'QToggle',
+        'QBtnToggle',
+        'QOptionGroup',
+        'QSlider',
+        'QRange',
+        'QTime',
+        'QDate',
         'QIcon',
+        'QImg',
+        'QInnerLoading',
+        'QKnob',
         'QList',
         'QItem',
         'QItemSection',
-        'QItemLabel'
+        'QItemLabel',
+        'QMenu',
+        'QResizeObserver',
+        'QScrollObserver',
+        'QPagination',
+        'QPopupProxy',
+        'QScrollArea',
+        'QSeparator',
+        'QSpace',
+        'QSpinner',
+        'QSpinnerOval',
+        'QSpinnerPie',
+        'QSplitter',
+        'QTable',
+        'QTh',
+        'QTr',
+        'QTd',
+        'QTabs',
+        'QTab',
+        'QRouteTab',
+        'QTabPanels',
+        'QTabPanel',
+        'QTimeline',
+        'QTimelineEntry',
+        'QToolbar',
+        'QToolbarTitle',
+        'QTooltip',
       ],
 
       directives: [
-        'Ripple'
+        'ClosePopup',
+        'Ripple',
+        'TouchHold',
+        'TouchPan',
+        'TouchSwipe',
       ],
 
       // Quasar plugins
       plugins: [
-        'Notify'
+        'AddressbarColor',
+        'AppFullscreen',
+        'BottomSheet',
+        'Dialog',
+        'Loading',
+        'LocalStorage',
+        'SessionStorage',
+        'Notify',
       ]
-    },*/
+    },
 
     supportIE: false,
 

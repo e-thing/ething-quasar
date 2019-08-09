@@ -59,7 +59,7 @@
 
       <!-- error -->
       <div class="page-block" v-if="resource.attr('error')">
-        <q-banner class="bg-red text-white"><q-icon left name="mdi-alert"/> {{ resource.attr('error') }}</q-banner>
+        <q-banner class="bg-negative text-white"><q-icon left name="mdi-alert"/> {{ resource.attr('error') }}</q-banner>
       </div>
 
       <!-- disconnected -->
@@ -68,7 +68,7 @@
       </div>
 
       <!-- description -->
-      <div class="page-block q-pa-md test-faded" v-if="resource.description()">
+      <div class="page-block q-pa-md text-faded" v-if="resource.description()">
         {{ resource.description() }}
       </div>
 
@@ -80,6 +80,17 @@
         </div>
         <div class="bloc-content" :class="widget.devicePage.padding ? '' : 'bloc-content-no-padding'">
           <widget :resource="resource" :component="widget.component" title="" footer="" v-bind="widget.attributes" :minHeight="widget.minHeight" :minWidth="widget.minWidth" color="#027be3"/>
+        </div>
+      </div>
+
+      <!-- activity -->
+      <div class="page-block">
+        <div class="bloc-title">
+          <q-icon name="mdi-bell"/>
+          <span>Activity</span>
+        </div>
+        <div class="bloc-content" style="max-height: 400px;overflow: auto;">
+          <resource-activity :source="activitySource" />
         </div>
       </div>
 
@@ -154,6 +165,7 @@ import DeviceApi from '../components/DeviceApi'
 import ResourceQItem from '../components/ResourceQItem'
 import ResourceBatteryChip from '../components/ResourceBatteryChip'
 import Widget from '../components/Widget'
+import ResourceActivity from '../components/ResourceActivity'
 
 export default {
   name: 'PageDevice',
@@ -163,6 +175,7 @@ export default {
     ResourceQItem,
     ResourceBatteryChip,
     Widget,
+    ResourceActivity,
   },
 
   data () {
@@ -224,6 +237,20 @@ export default {
           extendsIcons.push(m.icon)
         }
       }
+    },
+
+    deepChildren (items, resource, filter) {
+      this.$ething.arbo.find(r => {
+        if (r.createdBy() === resource.id()) {
+          if (!filter || filter(r)) {
+            if (items.indexOf(r) === -1) {
+              items.push(r)
+              // the children too
+              this.deepChildren(items, r, filter)
+            }
+          }
+        }
+      })
     }
   },
 
@@ -250,6 +277,12 @@ export default {
       return this.$ething.arbo.find(r => {
         return r.createdBy() === this.resource.id()
       })
+    },
+
+    activitySource () {
+      var items = [this.resource]
+      this.deepChildren(items, this.resource, r => r instanceof this.$ething.Device)
+      return items
     },
 
     data () {
