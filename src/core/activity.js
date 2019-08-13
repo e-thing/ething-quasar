@@ -1,7 +1,7 @@
 import EThing from 'ething-js'
 
 const blackList = [
-  'ResourceUpdated'
+  'signals/ResourceUpdated'
 ]
 
 const activityHistoryLength = 50
@@ -23,6 +23,7 @@ export default ({EThingUI, Vue}) => {
     var type = evt.type
 
     if (!evt.originalEvent) return // skip internal event
+    console.log(type)
     if (blackList.indexOf(type) !== -1) return // skip
 
     if (evt.originalEvent.resource) {
