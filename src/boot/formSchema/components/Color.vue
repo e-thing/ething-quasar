@@ -1,21 +1,23 @@
 <template>
   <form-schema-layout class="form-schema-color">
-    <q-input
-      filled
-      v-model="c_value"
+    <q-field
       :error="!!error"
       hide-bottom-space
-      :style="{'border-bottom': '4px solid '+c_value}"
       dense
+      @click.native="isDialogOpen = true"
     >
+      <template v-slot:control>
+        {{c_value}}
+      </template>
       <template v-slot:append>
-        <q-icon name="colorize" class="cursor-pointer">
-          <q-popup-proxy transition-show="scale" transition-hide="scale">
-            <q-color v-model="c_value" :format-model="c_schema.$format || 'hex'" />
-          </q-popup-proxy>
+        <div style="width: 24px; height: 24px; border-radius: 50%; border: 1px solid grey;" :style="{'background-color': c_value}" class="cursor-pointer">&nbsp;</div>
+        <q-icon right name="colorize" class="cursor-pointer">
+          <q-dialog v-model="isDialogOpen" transition-show="scale" transition-hide="scale" square>
+            <q-color v-model="c_value" :format-model="c_schema.$format || 'hex'" class="no-border-radius"/>
+          </q-dialog>
         </q-icon>
       </template>
-    </q-input>
+    </q-field>
   </form-schema-layout>
 </template>
 
@@ -31,6 +33,12 @@ export default {
   name: 'FormSchemaColor',
 
   mixins: [Input],
+
+  data () {
+    return {
+      isDialogOpen: false
+    }
+  },
 
   methods: {
     cast (model) {

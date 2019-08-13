@@ -19,9 +19,7 @@ export default {
     },
 
     location: {
-      get: function (resource) {
-        return resource.attr('location') // necessary for ething.js <= v0.1.19
-      }
+      '$hints': ['living room', 'kitchen', 'garden', 'dining room', 'bathroom', 'room', 'room #2', 'room #3', 'room #4', 'outdoor', 'entrance hall', 'study', 'toilet', 'garage']
     }
 
   },

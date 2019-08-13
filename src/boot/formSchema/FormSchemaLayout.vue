@@ -2,7 +2,7 @@
   <div class="form-schema-layout" :style="{display: inlined ? 'inline' : 'block'}">
     <small
       style="display: block;"
-      v-if="(forceDescription || !inlined) && schema.description"
+      v-if="(forceDescription || !inlined || forceDescriptionParent) && schema.description"
       class="form-schema-description"
     >
       <q-markdown>{{ schema.description.trim() }}</q-markdown>
@@ -30,6 +30,10 @@ export default {
   computed: {
     inlined () {
       return this.$parent.inlined
+    },
+
+    forceDescriptionParent () {
+      return this.$parent.forceDescription
     },
 
     schema () {

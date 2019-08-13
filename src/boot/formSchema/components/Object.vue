@@ -19,7 +19,7 @@
 
           <q-toggle class="q-ml-sm" :value="item.enable" v-if="item.schema.$optional" @input="onEnableChange(item, $event)"/>
         </div>
-        <form-schema v-if="item.enable" :required="item.required" :inline="inlined" :schema="item.schema" :value="item.model" :level="level+1" @input="onChildValueChange(item, $event)" @error="onChildErrorChange(item, $event)"/>
+        <form-schema v-if="item.enable" :required="item.required" :inline="inlined" :force-description="!inlined" :schema="item.schema" :value="item.model" :level="level+1" @input="onChildValueChange(item, $event)" @error="onChildErrorChange(item, $event)"/>
       </div>
     </template>
 

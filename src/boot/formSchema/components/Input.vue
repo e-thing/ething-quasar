@@ -1,6 +1,19 @@
 <template>
   <form-schema-layout class="form-schema-input">
-    <q-input
+    <!--<q-select
+      v-if="c_schema['$hints'] && c_schema.type === 'string'"
+      :value="c_value"
+      @input="c_value = $event"
+      use-input
+      input-debounce="0"
+      @new-value="__createValue"
+      :options="c_schema['$hints']"
+      :placeholder="c_schema['$placeholder']"
+      hide-bottom-space
+      dense
+      :error="!!error"
+    />-->
+    <combobox
       :type="inputType"
       :value="c_value"
       @input="c_value = __cast_input_val($event)"
@@ -9,6 +22,7 @@
       :placeholder="c_schema['$placeholder']"
       hide-bottom-space
       dense
+      :items="c_schema['$hints']"
     />
   </form-schema-layout>
 </template>
@@ -18,16 +32,21 @@
 import { FormComponent } from '../core'
 import { minLength, maxLength, email, minValue, maxValue } from 'vuelidate/lib/validators'
 import { regex } from '../validators'
+import Combobox from '../../../components/Combobox'
+
 
 /*
 options
 $placeholder: string
+$hints: string[]
 */
 
 const customRequired = (v) => v !== undefined && v !== null
 
 export default {
   name: 'FormSchemaInput',
+
+  components: {Combobox},
 
   mixins: [FormComponent],
 
@@ -72,7 +91,29 @@ export default {
     __cast_input_val (val) {
       if (this.inputType === 'number') val = Number(val)
       return val
-    }
+    },
+
+    __createValue (val, done) {
+      // Calling done(var) when new-value-mode is not set or "add", or done(var, "add") adds "var" content to the model
+      // and it resets the input textbox to empty string
+      // ----
+      // Calling done(var) when new-value-mode is "add-unique", or done(var, "add-unique") adds "var" content to the model
+      // only if is not already set
+      // and it resets the input textbox to empty string
+      // ----
+      // Calling done(var) when new-value-mode is "toggle", or done(var, "toggle") toggles the model with "var" content
+      // (adds to model if not already in the model, removes from model if already has it)
+      // and it resets the input textbox to empty string
+      // ----
+      // If "var" content is undefined/null, then it doesn't tampers with the model
+      // and only resets the input textbox to empty string
+
+      if (val.length > 0) {
+        if (!this.c_schema['$hints'].includes(val)) {
+          done(val, 'add-unique')
+        }
+      }
+    },
   },
 
   computed: {

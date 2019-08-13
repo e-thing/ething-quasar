@@ -34,20 +34,34 @@ export function dashboardWidgetSchemaDefaults (widget, resource) {
         default: resource ? '%name%' : (widget.title || (widget.schema && widget.schema.title) || '')
       },
       color: {
-        type: 'string',
-        '$component': 'color',
-        '$optional': true,
+        oneOf:[{
+          const: null,
+          title: 'inherit'
+        }, {
+          type: 'string',
+          '$component': 'color',
+          default: '#027be3',
+          title: 'color'
+        }],
         description: 'The color of the widget',
-        default: '#027be3'
+        default: null,
+        '$inline': true
       },
       bgColor: {
+        oneOf:[{
+          const: null,
+          title: 'inherit'
+        }, {
+          type: 'string',
+          '$format': 'hexa',
+          '$component': 'color',
+          default: '#ffffffff',
+          title: 'color'
+        }],
         title: 'background color',
-        type: 'string',
-        '$component': 'color',
-        '$optional': true,
-        '$format': 'hexa',
         description: 'The color of the widget\'s background',
-        default: '#ffffffff'
+        default: null,
+        '$inline': true
       },
     }
   }

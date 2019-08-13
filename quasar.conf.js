@@ -60,6 +60,7 @@ module.exports = function (ctx) {
         'QColor',
         'QDialog',
         'QExpansionItem',
+        'QField',
         'QInput',
         'QSelect',
         'QRadio',

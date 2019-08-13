@@ -44,6 +44,38 @@ export default {
             "type": "string",
             "minLength": 1
           },
+          widgetsBackgroundColor: {
+            oneOf:[{
+              const: null,
+              title: 'default'
+            }, {
+              title: 'color',
+              type: 'string',
+              '$format': 'hexa',
+              '$component': 'color',
+              default: '#ffffffff'
+            }],
+            title: 'widget background color',
+            description: 'The default color of the widget\'s background',
+            default: '#ffffffff',
+            '$inline': true
+          },
+          "datetime": {
+            "type": "string",
+            "format": "datetime"
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "time": {
+            "type": "string",
+            "format": "time"
+          },
+          "color": {
+            "type": "string",
+            "format": "color"
+          },
           "textarea": {
             "type": "string",
             '$component': "textarea",

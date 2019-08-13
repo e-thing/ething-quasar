@@ -76,7 +76,9 @@ function checkRule(component, schema, test) {
   if (typeof rule === 'function') {
     try {
       return rule(schema)
-    } catch(e) {}
+    } catch(e) {
+      console.error(e)
+    }
   }
 }
 
@@ -185,6 +187,8 @@ var FormComponent = {
     FormSchemaLayout
   },
 
+  inheritAttrs: false,
+
   props: {
     inline: {
       default: "inherit"
@@ -200,6 +204,7 @@ var FormComponent = {
       type: Number,
       default: 0
     },
+    forceDescription: Boolean
   },
 
   data () {
@@ -250,6 +255,16 @@ var FormComponent = {
         } else {*/
           this.$v.c_value.$touch()
         //}
+      },
+      immediate: true
+    },
+    c_schema: {
+      handler(value, oldValue) {
+        if (typeof this.c_value === 'undefined') {
+          if (typeof value.default !== 'undefined') {
+            this.c_value = value.default
+          }
+        }
       },
       immediate: true
     },
@@ -503,7 +518,7 @@ var FormComponent = {
 
     var skipTouch = false
 
-    if (typeof this.c_value === 'undefined') {
+    /*if (typeof this.c_value === 'undefined') {
       var def = undefined;
       if (typeof this.c_schema.default !== 'undefined') {
         def = this.c_schema.default
@@ -516,7 +531,7 @@ var FormComponent = {
         this.c_value = def
         // this.$v.c_value.$touch() will be triggered when setting c_value
       }
-    }
+    }*/
 
     if (!skipTouch) {
       this.$v.c_value.$touch()

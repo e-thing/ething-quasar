@@ -14,6 +14,7 @@ import ResourceObservable from './ResourceObservable'
 import widgets from './widgets'
 import FlowNodes from './FlowNodes'
 import ResourceActivity from './ResourceActivity'
+import Combobox from './Combobox'
 
 export {
     widgets,
@@ -29,5 +30,6 @@ export {
     ResourceSelect,
     Widget,
     ResourceObservable,
-    ResourceActivity
+    ResourceActivity,
+    Combobox
 }

@@ -91,6 +91,7 @@
           :use-css-transforms="true"
           :key="iDashboard"
           @click.native.self="bgClick"
+          v-touch-hold="handleHold"
         >
             <grid-item v-for="(layoutItem) in currentDashboard.layout" :key="layoutItem.i"
                :x="layoutItem.x"
@@ -278,6 +279,10 @@ export default {
   },
 
   methods: {
+    handleHold ({ evt, ...info }) {
+      this.editing = !this.editing
+    },
+
     bgClick (evt) {
       var ts = Date.now()
 

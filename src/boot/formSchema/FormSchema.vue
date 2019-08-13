@@ -9,6 +9,8 @@ export default {
     value:{}
   },
 
+  inheritAttrs: false,
+
   render: function (createElement) {
 
     return makeForm(createElement, Object.assign({value:this.value}, this.$attrs), {

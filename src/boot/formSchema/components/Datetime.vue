@@ -1,28 +1,25 @@
 <template>
   <form-schema-layout class="form-schema-datetime">
-    <q-input
-      filled
-      v-model="_date"
+    <q-field
       :error="!!error"
       hide-bottom-space
       dense
+      @click.native="isDialogOpen = true"
     >
-      <template v-slot:prepend v-if="showDate">
-        <q-icon name="event" class="cursor-pointer">
-          <q-popup-proxy transition-show="scale" transition-hide="scale">
-            <q-date v-model="_date" mask="YYYY-MM-DD HH:mm" ></q-date>
-          </q-popup-proxy>
+      <template v-slot:control>
+        {{c_value}}
+      </template>
+      <template v-slot:append>
+        <q-icon :name="showDate ? 'event' : 'access_time'" class="cursor-pointer">
+          <q-dialog v-model="isDialogOpen" transition-show="scale" transition-hide="scale" square>
+            <div class="row items-stretch" :style="{'max-width': __width, 'width': __width}">
+              <q-date v-if="showDate" class="col-xs-12 no-shadow no-border-radius" :class="__both ? 'col-sm-6' : ''" v-model="_date" mask="YYYY-MM-DD HH:mm" ></q-date>
+              <q-time v-if="showTime" class="col-xs-12 no-shadow no-border-radius" :class="__both ? 'col-sm-6' : ''" v-model="_date" mask="YYYY-MM-DD HH:mm" format24h ></q-time>
+            </div>
+          </q-dialog>
         </q-icon>
       </template>
-
-      <template v-slot:append v-if="showTime">
-        <q-icon name="access_time" class="cursor-pointer">
-          <q-popup-proxy transition-show="scale" transition-hide="scale">
-            <q-time v-model="_date" mask="YYYY-MM-DD HH:mm" format24h ></q-time>
-          </q-popup-proxy>
-        </q-icon>
-      </template>
-    </q-input>
+    </q-field>
   </form-schema-layout>
 </template>
 
@@ -34,6 +31,12 @@ export default {
   name: 'FormSchemaDatetime',
 
   mixins: [FormComponent],
+
+  data () {
+    return {
+      isDialogOpen: false
+    }
+  },
 
   computed: {
     showDate () {
@@ -51,11 +54,17 @@ export default {
       set: function (val) {
         this.c_value = val
       }
+    },
+    __both () {
+      return this.showDate && this.showTime
+    },
+    __width () {
+      return this.__both && !this.$q.screen.xs ? '600px' : '300px'
     }
   },
 
   rule (schema) {
-    return schema.type === 'string' && ['date-time', 'date', 'time'].indexof(schema.format) !== -1
+    return schema.type === 'string' && ['date-time', 'datetime', 'date', 'time'].indexOf(schema.format) !== -1
   }
 
 }

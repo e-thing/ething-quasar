@@ -3,15 +3,15 @@
 
     <div :class="inlined ? 'row' : ''">
       <q-select
-        v-model="subtypeindex"
-        :options="selectOptions"
+        v-model="typeModel"
+        :options="items"
         :class="inlined?(subschema ? 'col-auto' : 'col-12'):''"
         emit-value
-        :display-value="subtype || 'none'"
         hide-bottom-space
         dense
+        :display-value="currentItem.label || 'none'"
       />
-      <form-schema :class="inlined?'col':''" :inline="inlined" v-if="subschema" :level="level+1" :schema="subschema" required :value="subvalue" @input="subvalue = $event" @error="$emit('error',$event)"/>
+      <form-schema :class="inlined?'col':''" :inline="inlined" v-if="subschema" :level="level+1" :schema="subschema" required v-model="valueModel" @error="$emit('error',$event)"/>
     </div>
 
   </form-schema-layout>
@@ -22,6 +22,14 @@
 import { FormComponent } from '../core'
 
 
+const customRequired = function (v) {
+  return v !== undefined
+}
+
+const noRequired = function (v) {
+  return true
+}
+
 export default {
   name: 'FormSchemaOneof',
 
@@ -29,26 +37,140 @@ export default {
 
   data () {
     return {
-      localIndex: 0
+      //typeModel: 0
     }
   },
 
   computed: {
 
     items () {
-      var schemas = this.c_schema.oneOf || []
+      var oneOfSchemas = this.c_schema.oneOf || []
 
-      return schemas.map( (s, i, arr) => {
+      return oneOfSchemas.map( (s, i, arr) => {
         var len = arr.length
-        var type = s.properties.type.const
+        var valueTest = null;
+        var valueGetter = null;
+        var valueSetter = null;
+        var schemaGetter = null;
+        var typeModelChange = null;
+
+        if (typeof s.const !== 'undefined') {
+          valueTest = val => val === s.const
+          typeModelChange = () => {
+            this.c_value = s.const
+          }
+          schemaGetter = (schema) => {
+            return null
+          }
+        } else if (s.properties && s.properties.type && typeof s.properties.type.const !== 'undefined') {
+          /*
+            schema: {
+              properties: {
+                type: {
+                  const: 'foo'
+                },
+                value: {
+                  type: 'string'
+                }
+              }
+            }
+
+            value = {
+              type: 'foo',
+              value: 'bar'
+            }
+          }
+          */
+          valueTest = val => (typeof val === 'object' && val !== null && val.type === s.properties.type.const)
+          valueGetter = val => {
+            if (val) return val.value
+          }
+          valueSetter = val => {
+            var subtype = this.currentItem.schema.properties.type.const
+            if (this.c_value && this.c_value.type === subtype) {
+              this.$set(this.c_value, 'value', val)
+            } else {
+              this.c_value = {
+                type: subtype,
+                value: val
+              }
+            }
+          }
+          schemaGetter = (schema) => {
+            return schema.properties.value
+          }
+          typeModelChange = () => {
+            this.c_value = {
+              type: s.properties.type.const,
+              value: s.properties.value.default
+            }
+          }
+        }
+
         return {
             label: String(this.getLabel(this.c_schema, s, i, len)),
+            value: i,
             schema: s,
             icon: this.getIcon(this.c_schema, s, i, len),
-            type
+            valueTest,
+            valueGetter,
+            valueSetter,
+            schemaGetter,
+            typeModelChange
         }
       })
     },
+
+    currentItem () {
+      return this.items[this.typeModel] || {}
+    },
+
+    valueModel: {
+      get () {
+        var item = this.currentItem
+        if (item.valueGetter) return item.valueGetter(this.c_value)
+        return this.c_value
+      },
+      set (val) {
+        var item = this.currentItem
+        if (item.valueSetter) {
+          item.valueSetter(val)
+        } else {
+          this.c_value = val
+        }
+      }
+    },
+
+    typeModel: {
+      get () {
+        var items = this.items;
+        var value = this.c_value;
+        var defItem = 0;
+
+        for(var i in items) {
+          var item = items[i];
+          if (item.valueTest) {
+            if (item.valueTest(value)) {
+              return i
+            }
+          } else {
+            defItem = i
+          }
+
+        }
+
+        return defItem
+      },
+      set (val) {
+        var item = this.items[val] || {}
+        if (item.typeModelChange) {
+          item.typeModelChange()
+        } else {
+          this.c_value = item.schema.default
+        }
+      }
+    },
+
 
     selectOptions () {
       return this.items.map((s, index) => {
@@ -60,49 +182,14 @@ export default {
       })
     },
 
-    subvalue: {
-      get () {
-        if (this.c_value) return this.c_value.value
-      },
-      set (val) {
-        if (this.c_value)
-          this.$set(this.c_value, 'value', val)
-        else
-          this.c_value = {
-            type: this.subtype,
-            value: val
-          }
-      }
-    },
-
-    subtype: {
-      get () {
-        if (this.c_value) return this.c_value.type
-      },
-      set (val) {
-        this.c_value = {
-          type: val
-        }
-      }
-    },
-
-    subtypeindex: {
-      get () {
-        var type = this.subtype
-        for(var i in this.items) {
-          if (this.items[i].type === type){
-            return parseInt(i)
-          }
-        }
-      },
-      set (index) {
-        this.subtype = this.items[index].type
-      }
-    },
-
     subschema () {
-      if (typeof this.subtypeindex === 'undefined') return
-      return this.items[this.subtypeindex].schema.properties.value
+      if (typeof this.typeModel === 'undefined') return
+      var item = this.items[this.typeModel]
+      if (item.schemaGetter) {
+        return item.schemaGetter(item.schema)
+      } else {
+        return item.schema
+      }
     },
 
   },
@@ -116,14 +203,13 @@ export default {
     }
   },
 
+  validations () {
+    return {
+      c_value: this.required ? { required: customRequired } : { required: noRequired }
+    }
+  },
+
   methods: {
-    getDefault () {
-      try {
-        return {
-          type: this.items[0].type
-        }
-      } catch (e) {}
-    },
     getLabel (schema, itemSchema, index, len) {
       if (typeof schema['$labels'] !== 'undefined') {
         var labels = schema['$labels']
@@ -135,7 +221,13 @@ export default {
         }
       }
 
-      return itemSchema.title || itemSchema.properties.type.title || itemSchema.properties.type.const
+      if (itemSchema.title) return itemSchema.title
+      if (itemSchema.properties && itemSchema.properties.type) {
+        if (itemSchema.properties.type.title) return itemSchema.properties.type.title
+        if (itemSchema.properties.type.const) return itemSchema.properties.type.const
+      }
+
+      return 'schema #' + index
     },
     getIcon (schema, itemSchema, index, len) {
       if (typeof schema['$icons'] !== 'undefined') {
@@ -149,18 +241,15 @@ export default {
       }
 
       if (typeof itemSchema['$icon'] !== 'undefined') return itemSchema['$icon']
-      if (typeof itemSchema.properties.type['$icon'] !== 'undefined') return itemSchema.properties.type['$icon']
+
+      if (itemSchema.properties && itemSchema.properties.type) {
+        if (typeof itemSchema.properties.type['$icon'] !== 'undefined') return itemSchema.properties.type['$icon']
+      }
     }
   },
 
   rule (schema) {
-    if (Array.isArray(schema.oneOf)) {
-      var pass=true
-      schema.oneOf.forEach(s => {
-        if (!(s.properties && s.properties.type && s.properties.type.const)) pass=false
-      })
-      if (pass) return true
-    }
+    return Array.isArray(schema.oneOf)
   }
 
 }
