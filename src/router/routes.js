@@ -67,7 +67,7 @@ const routes = [
       {
         path: 'create/:type',
         name: 'create',
-        component: () => import('pages/Create'),
+        component: () => import('pages/Resource'),
         meta: {
           back: true
         }

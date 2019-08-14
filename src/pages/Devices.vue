@@ -40,9 +40,12 @@
     </div>
 
     <div v-if="deviceFiltered.length" class="page-block row items-start" style="background: transparent;">
-      <q-list class="col bg-white" :class="showActivity ? 'gt-sm q-mr-md' : ''">
-          <resource-q-item v-for="(item, index) in deviceFiltered" :key="index" :resource="item.device" :level="item.level" no-parent />
-      </q-list>
+
+      <resource-list
+        :resources="deviceFiltered"
+        tree
+        class="col bg-white" :class="showActivity ? 'gt-sm q-mr-md' : ''"
+      />
 
       <resource-activity v-if="showActivity" class="col-xs col-md-auto bg-white q-px-md" :source="deviceFiltered.map(item=>item.device)" />
 
@@ -62,7 +65,7 @@
 </template>
 
 <script>
-import ResourceQItem from '../components/ResourceQItem'
+import ResourceList from '../components/ResourceList'
 import ResourceActivity from '../components/ResourceActivity'
 
 
@@ -70,7 +73,7 @@ export default {
   name: 'PageDevices',
 
   components: {
-    ResourceQItem,
+    ResourceList,
     ResourceActivity
   },
 
@@ -117,7 +120,6 @@ export default {
 
     return {
       categories: orderedCategories,
-      filter: '',
       category: '',
       showActivity: false
     }
@@ -130,82 +132,22 @@ export default {
       })
     },
 
-    listOrdered () {
-
-      var list = []
-      var self = this
-
-      function getChildren(resource){
-    		return self.$ething.arbo.find(function(r){
-    			return r.createdBy() === resource.id() && (r instanceof self.$ething.Device)
-    		});
-    	}
-
-    	function hasParent(resource){
-        var createdById = resource.createdBy()
-    		return createdById && self.$ething.arbo.get(createdById);
-    	}
-
-    	var level = 0;
-
-      function create(resource) {
-        return {
-          device: resource,
-          level,
-          indent: level * 20
-        }
-      }
-
-      function order(resource) {
-        var list = [create(resource)]
-
-        level++;
-    		getChildren(resource).map(function(r){
-    			list = list.concat(order(r))
-    		});
-    		level--;
-
-        return list
-      }
-
-      this.devices.filter(function(r){
-  			return !hasParent(r)
-      }).forEach(function(r){
-        list = list.concat(order(r))
-      })
-
-      return list
-    },
-
     deviceFiltered () {
-      if (this.category || this.filter) {
-        var devices = this.devices
-        if (this.category) {
-          switch (this.category) {
-            case 'sensor':
-              devices = devices.filter(r => r.isTypeof('interfaces/Sensor'))
-              break;
-            case 'switch':
-              devices = devices.filter(r => r.isTypeof('interfaces/Switch'))
-              break;
-            case 'camera':
-              devices = devices.filter(r => r.isTypeof('interfaces/Camera'))
-              break;
-          }
+      var devices = this.devices
+      if (this.category) {
+        switch (this.category) {
+          case 'sensor':
+            devices = devices.filter(r => r.isTypeof('interfaces/Sensor'))
+            break;
+          case 'switch':
+            devices = devices.filter(r => r.isTypeof('interfaces/Switch'))
+            break;
+          case 'camera':
+            devices = devices.filter(r => r.isTypeof('interfaces/Camera'))
+            break;
         }
-        if (this.filter) {
-          devices = this.applyFilter(devices)
-        }
-
-        return devices.map(r => {
-          return {
-            device: r,
-            level: 0
-          }
-        })
-      } else {
-        return this.listOrdered
       }
+      return devices
     },
 
   },
@@ -220,15 +162,6 @@ export default {
         }
       })
     },
-
-    applyFilter (devices) {
-      if (this.filter) {
-        var re = new RegExp(this.filter)
-        devices = devices.filter(r => re.test(r.name()) || re.test(r.id()))
-      }
-
-      return devices
-    }
 
   }
 }

@@ -100,10 +100,13 @@ export default {
             return schema.properties.value
           }
           typeModelChange = () => {
-            this.c_value = {
-              type: s.properties.type.const,
-              value: s.properties.value.default
+            var v = {
+              type: s.properties.type.const
             }
+            if (s.properties.value) {
+              v.value = s.properties.value.default
+            }
+            this.c_value = v
           }
         }
 

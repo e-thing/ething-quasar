@@ -1,5 +1,5 @@
 <template>
-  <form-schema-layout class="form-schema-object" :class="{indent: level}"">
+  <form-schema-layout class="form-schema-object" :class="{indent: level}">
 
     <template v-if="items.length>0">
       <div
@@ -182,15 +182,15 @@ export default {
 <style lang="stylus" scoped>
 
 
-verticalMargin = 16px
-pad-width = 20px
+verticalMargin = $space-y-base
+pad-width = $space-base
 
 .indent
   margin-left: pad-width
 
 .form-schema-object-item
-  margin-top verticalMargin
-  margin-bottom verticalMargin
+  &:not(:last-child)
+    margin-bottom verticalMargin
 
   &.form-schema-object-item-required
     & > .form-schema-object-item-title:after

@@ -1,10 +1,17 @@
 <template>
-  <div>
-    <slot></slot>
+  <div class="resource-editor">
 
-    <q-markdown v-if="!!meta.description">{{ meta.description.trim() }}</q-markdown>
+    <div v-if="$slots.default">
+      <slot></slot>
+    </div>
 
-    <form-schema :schema="schema" v-model="model" @error="inputError = $event"/>
+    <div v-if="!!meta.description">
+      <q-markdown>{{ meta.description.trim() }}</q-markdown>
+    </div>
+
+    <div>
+      <form-schema :schema="schema" v-model="model" @error="inputError = $event"/>
+    </div>
 
     <q-inner-loading class="text-center" :showing="!ready">
       <div class="q-pa-lg text-primary">loading...</div>
@@ -55,16 +62,10 @@ export default {
             return Promise.reject('form error')
           }
 
-          var def = {}
           var res = null
 
           if (this.create) {
-            var baseType = this.type.split('/').pop()
-            if (typeof EThing[baseType] !== 'undefined') {
-              res = EThing[baseType].create(Object.assign(def, this.model))
-            } else {
-              res = EThing.Device.create(this.type, Object.assign(def, this.model))
-            }
+            res = EThing.Resource.create(Object.assign({type: this.type}, this.model))
           } else {
             res = this.resource.set(Object.assign(def, this.model))
           }
@@ -217,3 +218,11 @@ export default {
 
 }
 </script>
+
+<style lang="stylus" scoped>
+
+.resource-editor > div:not(:last-child) {
+  padding-bottom: $space-y-base
+}
+
+</style>

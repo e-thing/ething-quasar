@@ -23,7 +23,6 @@ export default ({EThingUI, Vue}) => {
     var type = evt.type
 
     if (!evt.originalEvent) return // skip internal event
-    console.log(type)
     if (blackList.indexOf(type) !== -1) return // skip
 
     if (evt.originalEvent.resource) {

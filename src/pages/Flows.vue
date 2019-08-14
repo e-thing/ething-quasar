@@ -7,9 +7,7 @@
     </div>
 
     <div v-if="flows.length" class="page-block">
-      <q-list>
-        <resource-q-item v-for="flow in flows" :key="flow.id()" :resource="flow" />
-      </q-list>
+      <resource-list :resources="flows" />
     </div>
 
     <div v-else class="absolute-center text-center">
@@ -26,13 +24,13 @@
 </template>
 
 <script>
-import ResourceQItem from '../components/ResourceQItem'
+import ResourceList from '../components/ResourceList'
 
 export default {
   name: 'PageFlows',
 
   components: {
-    ResourceQItem
+    ResourceList
   },
 
   computed: {

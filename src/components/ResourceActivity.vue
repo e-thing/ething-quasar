@@ -9,7 +9,7 @@
       >
         <template v-slot:title>
           <div class="text-secondary text-subtitle1"><q-icon v-if="item.icon" :name="item.icon"/> {{ item.title }}</div>
-          <div v-if="multiple" class="text-purple text-subtitle2">
+          <div v-if="multiple" class="text-purple text-subtitle2 cursor-pointer" @click="openResource(item.resource)">
             {{ item.resource.name() }}
           </div>
         </template>
@@ -33,7 +33,7 @@ export default {
   name: 'ResourceActivity',
 
   props: {
-    source: {},
+    source: {}, // either be a resource, a resource id, an array of resources, an array of resources ids
     historyLength: {
       type: Number,
       default: 20
@@ -98,7 +98,9 @@ export default {
   },
 
   methods: {
-
+    openResource (resource) {
+      this.$ethingUI.open(resource)
+    }
   },
 
 }

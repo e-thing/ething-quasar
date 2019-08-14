@@ -8,8 +8,9 @@
     @show="$emit('show', $event)"
     @escape-key="$emit('cancel')"
     @dismiss="$emit('cancel')"
+    :maximized="__size==100"
   >
-    <div class="column bg-white" :style="Object.assign({}, widthCss, heightCss)">
+    <div class="column bg-white" :style="dimCss">
 
       <div class="col-auto bg-primary text-white q-py-sm q-px-md title">
         <div class="row items-center">
@@ -109,6 +110,17 @@
 
 <script>
 
+var sizes = {
+  //      xs   sm   md   lg   xl
+  'xs': [100, 100, 100, 100, 100],
+  'sm': [ 70,  80, 100, 100, 100],
+  'md': [ 60,  70,  80,  90, 100],
+  'lg': [ 50,  60,  70,  80,  90],
+  'xl': [ 25,  40,  50,  70,  90],
+}
+
+var sizeNames = ['xs', 'sm', 'md', 'lg', 'xl']
+
 export default {
     name: 'Modal',
 
@@ -160,40 +172,27 @@ export default {
     },
 
     computed: {
-      heightCss () {
-        var height;
 
-        if ( this.size == 'xs') {
-          height = '40vh'
-        } else if ( this.size == 'sm') {
-          height = '50vh'
-        } else if ( this.size == 'md') {
-          height = '70vh'
-        } else if ( this.size == 'lg') {
-          height = '80vh'
-        } else if ( this.size == 'xl') {
-          height = '90vh'
+      __size () {
+        for (var s in sizes) {
+          if (this.$q.screen[s]) {
+            var i = sizeNames.indexOf(this.size)
+            return i!==-1 ? sizes[s][i] : 100
+          }
         }
-
-        return {height}
+        return 100
       },
-      widthCss () {
-        var width;
 
-        if ( this.size == 'xs') {
-          width = '30vw'
-        } else if ( this.size == 'sm') {
-          width = '40vw'
-        } else if ( this.size == 'md') {
-          width = '50vw'
-        } else if ( this.size == 'lg') {
-          width = '70vw'
-        } else if ( this.size == 'xl') {
-          width = '90vw'
+      dimCss () {
+        if (this.__size!=100) {
+          return {
+            height: this.__size+'%',
+            maxHeight: this.__size+'vh',
+            width: this.__size+'%',
+            maxWidth: this.__size+'vw'
+          }
         }
-
-        return {width, maxWidth: width}
-      }
+      },
     },
 
     methods: {

@@ -40,13 +40,7 @@
       </div>
     </div>
 
-    <div v-if="resources.length" class="page-block">
-      <q-list>
-
-        <resource-q-item v-for="resource in resources" :key="resource.id()" :resource="resource" />
-
-      </q-list>
-    </div>
+    <resource-list v-if="resources.length" class="page-block" :resources="resources" />
 
     <div v-else class="absolute-center text-center">
       <p>
@@ -63,6 +57,7 @@
 
 <script>
 import ResourceQItem from '../components/ResourceQItem'
+import ResourceList from '../components/ResourceList'
 
 var categories = [{
   name: 'table',
@@ -98,7 +93,8 @@ export default {
   name: 'PageData',
 
   components: {
-    ResourceQItem
+    ResourceQItem,
+    ResourceList
   },
 
   data () {

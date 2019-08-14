@@ -31,7 +31,7 @@
       </q-item>
     </template>
 
-    <template v-slot:append v-if="!disableCreate && computedCreateTypes.length==0">
+    <template v-slot:append v-if="!disableCreate && computedCreateTypes.length!=0">
       <q-icon name="add" class="cursor-pointer" @click="openCreateModal" />
     </template>
   </q-select>

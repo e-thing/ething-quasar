@@ -19,12 +19,6 @@
                 <q-item-section avatar>
                   <q-icon name="mdi-pin" />
                 </q-item-section>
-                <q-item-section>pin resource</q-item-section>
-              </q-item>
-              <q-item v-close-popup clickable @click="pinWidgetModal = true">
-                <q-item-section avatar>
-                  <q-icon name="mdi-pin" />
-                </q-item-section>
                 <q-item-section>pin widget</q-item-section>
               </q-item>
               <q-item v-close-popup tag="label">
@@ -54,8 +48,7 @@
             >
           </p>
           <p class="text-faded">No widgets</p>
-          <q-btn icon="mdi-pin" label="pin resource" color="secondary" @click="pinResourceModal = true"/>
-          <q-btn icon="mdi-pin" label="pin widget" color="secondary" @click="pinWidgetModal = true" class="q-ml-md"/>
+          <q-btn icon="mdi-pin" label="pin widget" color="secondary" @click="pinResourceModal = true"/>
         </div>
 
         <div v-else-if="smallScreen && !$q.platform.is.desktop && !$q.platform.is.electron && !$q.platform.is.chromeExt"
@@ -122,9 +115,7 @@
       </keep-alive>
     </div>
 
-    <resource-pin-form v-model="pinResourceModal" :pinned="pinnedResources" :maximized="smallScreen" @done="pin"/>
-
-    <widget-pin-form v-model="pinWidgetModal" :maximized="smallScreen" @done="pin"/>
+    <widget-chooser v-model="pinResourceModal" :pinned="pinnedResources" @done="pin"/>
 
     <modal :maximized="smallScreen" v-model="widgetEdit.modal" title="Edit" icon="edit" :valid-btn-disable="widgetEdit.error" @valid="widgetEditDone">
 
@@ -150,8 +141,7 @@ import EThing from 'ething-js'
 import VueGridLayout from 'vue-grid-layout'
 import Widget from '../components/Widget'
 import { debounce, extend } from 'quasar'
-import ResourcePinForm from '../components/ResourcePinForm'
-import WidgetPinForm from '../components/WidgetPinForm'
+import WidgetChooser from '../components/WidgetChooser'
 import {extend as extendSchema} from '../utils/schema'
 import {dashboardWidgetSchemaDefaults} from '../core/widget'
 
@@ -170,8 +160,7 @@ export default {
     GridLayout,
     GridItem,
     Widget,
-    ResourcePinForm,
-    WidgetPinForm
+    WidgetChooser
   },
 
   data () {
@@ -195,7 +184,6 @@ export default {
         },
         idCnt: 1,
         pinResourceModal: false,
-        pinWidgetModal: false,
         editing: false,
         smallScreen,
 

@@ -51,7 +51,12 @@ export default {
       }
     },
     createTypes () {
+      if (!this.__r_schema['$onlyTypes'] && !this.__r_schema['$must_throw']) {
+        return ['resources/Resource']
+      }
+
       var r = []
+
       if (this.__r_schema['$onlyTypes']) {
         r = r.concat(this.__r_schema['$onlyTypes'])
       }
@@ -59,11 +64,12 @@ export default {
         // find all class that emits the signal
         this.$ethingUI.iterate('resources', (resourceClsName) => {
           var resourceCls = this.$ethingUI.get(resourceClsName)
-          if (resourceCls.signals.indexOf(this.__r_schema['$must_throw']) !== -1) {
+          if (resourceCls.signals && resourceCls.signals.indexOf(this.__r_schema['$must_throw']) !== -1) {
             r.push(resourceClsName)
           }
         })
       }
+
       return r
     }
   },

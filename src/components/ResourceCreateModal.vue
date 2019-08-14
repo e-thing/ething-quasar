@@ -13,49 +13,65 @@
 
     @cancel="onCancel"
 
+    no-content-padding
+
+    size="lg"
+
   >
+    <q-card flat>
 
-    <q-select
-     v-if="items.length>1"
-     v-model="selectedType"
-     :options="items"
-     class="q-mb-xl"
-     emit-value
-
-    >
-      <template v-slot:selected>
-        <div v-if="selectedType">
-          <q-avatar :icon="selectedClass.icon" :color="selectedClass.color" text-color="white" size="24px" class="q-mr-sm"/>
-          <span>{{ selectedClass.title }}</span>
-        </div>
-        <div v-else>select a resource</div>
-      </template>
-
-      <template v-slot:option="scope">
-        <q-item
-          v-bind="scope.itemProps"
-          v-on="scope.itemEvents"
+      <q-card-section v-if="items.length==0">
+        <q-banner
+            class="bg-warning text-white"
         >
-          <q-item-section avatar>
-            <q-avatar :color="scope.opt.color" text-color="white" :icon="scope.opt.icon" />
-          </q-item-section>
-          <q-item-section>
-            <q-item-label>{{ scope.opt.label }}</q-item-label>
-            <q-item-label caption>{{ scope.opt.sublabel }}</q-item-label>
-          </q-item-section>
-        </q-item>
-      </template>
-    </q-select>
+          <q-icon left name="mdi-alert"/> Oops. No resource can be created !
+        </q-banner>
+      </q-card-section>
 
-    <resource-editor v-if="selectedType" ref="form" :resource="selectedType" :key="selectedType" @error="formError=$event"/>
+      <q-card-section>
+        <q-select
+         v-if="items.length>1"
+         v-model="selectedType"
+         :options="items"
+         emit-value
+        >
+          <template v-slot:selected>
+            <div v-if="selectedType">
+              <q-avatar :icon="selectedClass.icon" :color="selectedClass.color" text-color="white" size="24px" class="q-mr-sm"/>
+              <span>{{ selectedClass.title }}</span>
+            </div>
+            <div v-else>select a type</div>
+          </template>
 
-    <q-banner
-        v-if="error"
-        class="bg-negative text-white q-mb-xl"
-    >
-      <q-icon left name="mdi-alert"/> {{ String(error) }}
-    </q-banner>
+          <template v-slot:option="scope">
+            <q-item
+              v-bind="scope.itemProps"
+              v-on="scope.itemEvents"
+            >
+              <q-item-section avatar>
+                <q-avatar :color="scope.opt.color" text-color="white" :icon="scope.opt.icon" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label>{{ scope.opt.label }}</q-item-label>
+                <q-item-label caption>{{ scope.opt.sublabel }}</q-item-label>
+              </q-item-section>
+            </q-item>
+          </template>
+        </q-select>
+      </q-card-section>
 
+      <q-card-section>
+        <resource-editor v-if="selectedType" ref="form" :resource="selectedType" :key="selectedType" @error="formError=$event"/>
+      </q-card-section>
+
+      <q-card-section v-if="error">
+        <q-banner
+            class="bg-negative text-white"
+        >
+          <q-icon left name="mdi-alert"/> {{ String(error) }}
+        </q-banner>
+      </q-card-section>
+    </q-card>
   </modal>
 </template>
 
@@ -74,12 +90,7 @@ export default {
 
     props: {
       value: Boolean,
-      types: {
-        type: Array,
-        default () {
-          return ['resources/Resource']
-        }
-      }
+      types: Array
     },
 
     data () {
@@ -95,16 +106,18 @@ export default {
 
       items () {
         var r = []
+        var types = this.types || []
+        if (types.length == 0) types = ['resources/Resource']
 
         this.$ethingUI.iterate('resources', (resourceClsName) => {
           var resourceCls = this.$ethingUI.get(resourceClsName)
           if (!resourceCls.virtual && !resourceCls.disableCreation) {
             var append = false
-            if (this.types.indexOf(resourceClsName) !== -1) {
+            if (types.indexOf(resourceClsName) !== -1) {
               append = true
             } else {
-              for (var i in this.types) {
-                if (this.$ethingUI.isSubclass(resourceCls, this.types[i])) {
+              for (var i in types) {
+                if (this.$ethingUI.isSubclass(resourceCls, types[i])) {
                   append = true
                   break
                 }
