@@ -753,7 +753,7 @@ export default {
         this.table = resource
 
         //resource.on('updated', this.onTableUpdate)
-        resource.on('TableDataAdded', this.onTableDataAdded)
+        resource.on('signals/TableDataAdded', this.onTableDataAdded)
 
         var createdBy = this.$ething.arbo.get(resource.createdBy())
         if (createdBy) {

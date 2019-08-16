@@ -238,27 +238,11 @@ export default {
         return r.createdBy() === this.resource.id()
       })
 
-      var items = []
-
-      if (children.length) {
-        items.push({label: 'Remove also the children resources', value: 'removeChildren', color: 'secondary'})
-      }
-
-      return this.$q.dialog({
-        title: 'Remove',
-        message: 'Do you really want to remove definitely the ' + this.resource.type() + ' "' + this.resource.name() + '" ?',
-        options: {
-          type: 'checkbox',
-          model: [],
-          items
-        },
-        ok: 'Remove',
-        cancel: 'Cancel'
-      }).onOk((data) => {
-        this.resource.remove(data.indexOf('removeChildren') !== -1).then( () => {
+      if (confirm('Do you really want to remove definitely the ' + (this.meta.title || 'resource') + ' "' + this.resource.name() + '" ?')) {
+        this.resource.remove().then( () => {
           this.$q.notify('"' + name + '" removed !')
         })
-      })
+      }
     },
 
     chart () {
