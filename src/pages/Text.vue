@@ -116,7 +116,7 @@ export default {
               this.contentModifiedNotification = Notify.create({
                 message: 'The content of this file has changed in the server and differ from your current version !',
                 timeout: 50000,
-                type: 'negative',
+                color: 'negative',
               })
             } else {
               // reload the content

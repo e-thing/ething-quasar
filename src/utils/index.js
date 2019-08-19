@@ -25,6 +25,12 @@ export function generateId(length) {
 }
 
 
+export function sanitizeHTML (str) {
+	var temp = document.createElement('div')
+	temp.textContent = str
+	return temp.innerHTML
+}
+
 
 /**
  * Get the raw type string of a value e.g. [object Object]

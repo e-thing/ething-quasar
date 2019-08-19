@@ -2,49 +2,54 @@
   <div class="page page-width-lg">
     <div v-if="loading===false">
 
-      <div class="page-block page-block-transparent">
-        <q-btn icon="add" label="new API key" rounded color="secondary" @click="create()"/>
+      <div class="page-block page-block-padding">
+        Control your EThing instance via the <a href="https://ething.readthedocs.io/en/latest/http_api.html" target="_blank">HTTP API</a>.
       </div>
 
-      <div v-if="apikeys.length > 0" class="page-block page-block-padding">
+      <div class="page-block page-block-transparent">
+        <q-btn icon="add" label="API key" color="secondary" @click="create()"/>
+      </div>
 
-        <div class="item row items-center q-gutter-x-sm">
-          <div class="name col-xs-2 col-sm-2 col-md-2 text-secondary ellipsis">
-            name
-          </div>
-          <div class="date col-xs-0 col-sm-0 col-md-2 text-secondary ellipsis">
-            date
-          </div>
-          <div class="key col col-sm-5 col-md-5 col-lg-5 text-secondary">
-            value
-          </div>
-          <div class="scope col gt-xs text-secondary">
-            scope
-          </div>
-        </div>
-
-        <div class="item row items-center q-gutter-x-sm q-mt-md" v-for="apikey in apikeys" :key="apikey.id">
-          <div class="date col-xs-2 col-sm-2 col-md-2 text-faded ellipsis">
-            {{ apikey.name }}
-          </div>
-          <div class="date col-xs-0 col-sm-0 col-md-2 text-faded ellipsis">
-            {{ $ethingUI.utils.dateToString(apikey.modifiedDate) }}
-          </div>
-          <div class="key col col-sm-5 col-md-5 col-lg-5">
-            {{ apikey.value }}
-          </div>
-          <div class="scope col gt-xs text-faded ellipsis">
-            <div v-for="scope in splitScopes(apikey.scope)">
-              {{ scope }}
+      <div class="page-block page-block-padding">
+        <template v-if="apikeys.length > 0">
+          <div class="item row items-center q-gutter-x-sm">
+            <div class="name col-xs-2 col-sm-2 col-md-2 text-secondary ellipsis">
+              name
+            </div>
+            <div class="date col-xs-0 col-sm-0 col-md-2 text-secondary ellipsis">
+              date
+            </div>
+            <div class="key col col-sm-5 col-md-5 col-lg-5 text-secondary">
+              value
+            </div>
+            <div class="scope col gt-xs text-secondary">
+              scope
             </div>
           </div>
-          <div class="controls col-auto">
-            <q-btn icon="settings" round flat dense color="faded" @click="edit(apikey)"/>
-            <q-btn icon="delete" round flat dense color="negative" @click="remove(apikey)"/>
+
+          <div class="item row items-center q-gutter-x-sm q-mt-md" v-for="apikey in apikeys" :key="apikey.id">
+            <div class="date col-xs-2 col-sm-2 col-md-2 text-faded ellipsis">
+              {{ apikey.name }}
+            </div>
+            <div class="date col-xs-0 col-sm-0 col-md-2 text-faded ellipsis">
+              {{ $ethingUI.utils.dateToString(apikey.modifiedDate) }}
+            </div>
+            <div class="key col col-sm-5 col-md-5 col-lg-5">
+              {{ apikey.value }}
+            </div>
+            <div class="scope col gt-xs text-faded ellipsis">
+              <div v-for="scope in splitScopes(apikey.scope)">
+                {{ scope }}
+              </div>
+            </div>
+            <div class="controls col-auto">
+              <q-btn icon="settings" round flat dense color="faded" @click="edit(apikey)"/>
+              <q-btn icon="delete" round flat dense color="negative" @click="remove(apikey)"/>
+            </div>
           </div>
-        </div>
+        </template>
+        <div v-else class="text-faded text-center q-py-lg">No API keys</div>
       </div>
-      <div v-else class="text-faded text-center q-py-lg">No API keys</div>
     </div>
     <div v-else>loading ...</div>
 

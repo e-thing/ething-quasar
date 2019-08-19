@@ -4,7 +4,7 @@
 
       <div class="page-block page-block-padding">
 
-        <div class="text-h6">General</div>
+        <div class="text-h6 text-secondary">General</div>
 
         <form-schema :schema="$ethingUI.get('Config')" v-model="settings['global']" @error="error = $event" class="q-my-md"/>
 
@@ -12,7 +12,7 @@
 
       <div v-for="(plugin, name) in plugins" :key="name" v-if="typeof plugin.schema === 'object'" class="page-block page-block-padding">
 
-        <div class="text-h6">{{ name }}</div>
+        <div class="text-h6 text-secondary">{{ name }}</div>
 
         <form-schema :schema="plugin.schema" v-model="settings[name]" @error="plugin.error = $event" class="q-my-md"/>
 

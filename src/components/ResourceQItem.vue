@@ -4,25 +4,26 @@
     <q-item-section avatar>
       <q-avatar :icon="meta.icon" text-color="white" :color="meta.color" />
     </q-item-section>
-    <q-item-section>
+    <q-item-section avatar>
       <q-item-label>
         <span class="vertical-middle text-black">{{ resource.basename() }}</span>
         <small v-if="showParent" class="parent text-faded vertical-bottom on-right" :class="readonly ? '' : 'cursor-pointer'" @click="clickCreatedBy">{{ createdBy.basename() }}</small>
         <q-icon v-if="showConnected && !resource.connected()" class="vertical-middle on-right" name="mdi-lan-disconnect" color="warning" />
         <q-icon v-if="resource.public()" class="vertical-middle on-right" name="share" color="warning" />
       </q-item-label>
-      <q-item-label caption v-if="showType">{{ meta.title }}</q-item-label>
+      <q-item-label caption v-if="showType" class="text-no-wrap">{{ meta.title }}</q-item-label>
       <template v-if="!dense">
-        <q-item-label caption>{{ $ethingUI.utils.dateToString(date, 'never') }}</q-item-label>
+        <q-item-label caption class="text-no-wrap">{{ $ethingUI.utils.dateToString(date, 'never') }}</q-item-label>
         <q-item-label caption v-if="showBattery" class="lt-sm">battery: {{ resource.battery() }}%</q-item-label>
         <q-item-label caption v-if="showLocation" class="lt-sm">location: {{ resource.location() }}</q-item-label>
         <q-item-label caption v-if="showSize">{{ $ethingUI.utils.sizeToString(resource.size()) }}</q-item-label>
         <q-item-label caption v-if="showLength">{{ resource.length() }} rows</q-item-label>
-        <q-item-label caption v-if="showError" class="text-negative"><q-icon name="mdi-alert" /> {{ resource.attr('error') }}</q-item-label>
+        <q-item-label caption v-if="showError" class="text-negative ellipsis"><q-icon name="mdi-alert" /> {{ resource.attr('error') }}</q-item-label>
       </template>
     </q-item-section>
+    <q-item-section/>
     <q-item-section side v-if="!dense">
-      <div>
+      <div class="row justify-end">
         <q-chip dense class="gt-sm" outline square color="secondary" v-for="(value, key) in data" :key="key">{{ key }}: {{ value }}</q-chip>
         <q-chip v-if="showLocation" dense outline square color="secondary" icon="location_on" class="gt-xs">
           {{ resource.location() }}

@@ -10,7 +10,7 @@
         :style="{display: inlined ? 'inline' : 'block'}"
       >
         <div
-          class="form-schema-object-item-title"
+          class="form-schema-object-item-title text-subtitle2"
           :style="{display: inlined ? 'inline' : 'block'}"
           v-if="!item.schema.$hideLabel"
         >

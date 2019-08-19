@@ -56,9 +56,9 @@ export default {
   },
 
   mounted () {
-    this.$nextTick(() => {
-        this.$refs.cm.refresh()
-    })
+    setTimeout(() => {
+        if(this.$refs.cm) this.$refs.cm.refresh()
+    }, 400)
   }
 }
 

@@ -15,6 +15,7 @@ import storage from './storage.js'
 import info from './info.js'
 import plugins from './plugins.js'
 import activity from './activity.js'
+import notification from './notification.js'
 
 
 // necessary for older browsers
@@ -116,7 +117,8 @@ EThingUI.install = ({ app, router, Vue, store }) => {
     storage,
     info,
     plugins,
-    activity
+    activity,
+    notification
   ]
 
   pp.forEach(p => {
@@ -308,16 +310,16 @@ EThingUI.install = ({ app, router, Vue, store }) => {
       EThingUI.initSockets()
 
       EThingUI.notifSocket.on('notification', function(evt) {
-        console.log('[app] notification received', evt)
+        //console.log('[app] notification received', evt)
         Notify.create({
-          type: 'info',
+          color: 'info',
           message: evt.msg,
-          detail: evt.subject,
           position: 'bottom-right',
           timeout: 15000,
           actions: [
             {
-              label: 'Close',
+              icon: 'close',
+              color: 'white',
               handler: () => {}
             }
           ],

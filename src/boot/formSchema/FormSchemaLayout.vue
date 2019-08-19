@@ -1,12 +1,12 @@
 <template>
   <div class="form-schema-layout" :style="{display: inlined ? 'inline' : 'block'}">
-    <small
+    <span
       style="display: block;"
       v-if="(forceDescription || !inlined || forceDescriptionParent) && schema.description"
-      class="form-schema-description"
+      class="form-schema-description text-caption q-my-sm"
     >
       <q-markdown>{{ schema.description.trim() }}</q-markdown>
-    </small>
+    </span>
     <slot></slot>
     <small
       style="display: block;"
