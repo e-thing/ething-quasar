@@ -65,6 +65,7 @@ export default ({EThingUI, Vue}) => {
       timeout: 10
       title: null
     */
+    console.log(evt)
     var data = Object.assign({}, evt.data)
     data.timeout *= 1000
     notify(data)
