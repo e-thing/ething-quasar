@@ -4,7 +4,6 @@
       <q-toolbar
         color="primary"
       >
-
         <q-btn class="xs" flat round dense icon="menu" @click="leftDrawerOpen = !leftDrawerOpen" aria-label="Toggle menu on left side" />
 
         <q-btn v-if="back" flat round dense icon="keyboard_backspace" @click="$router.go(-1)" aria-label="back" />
@@ -13,16 +12,49 @@
           EThing
         </q-toolbar-title>
 
-        <q-btn class="gt-xs" flat label="Dashboard" @click="$router.push('/dashboard')" />
-        <q-btn class="gt-xs" flat label="Devices" @click="$router.push('/devices')" />
-        <q-btn class="gt-xs" flat label="Data" @click="$router.push('/data')" />
-        <q-btn class="gt-xs" flat label="Flows" @click="$router.push('/flows')" />
+        <q-btn class="gt-xs" flat stretch label="Dashboard" @click="$router.push('/dashboard')" />
+        <q-btn class="gt-xs" flat stretch label="Devices" @click="$router.push('/devices')" />
+        <q-btn class="gt-xs" flat stretch label="Data" @click="$router.push('/data')" />
+        <q-btn class="gt-xs" flat stretch label="Flows" @click="$router.push('/flows')" />
 
-        <q-toolbar-title class="gt-xs"/>
+        <q-space />
 
-        <q-btn v-if="refreshEnabled" class="gt-xs" flat icon="refresh" aria-label="refresh" @click="refresh"/>
-        <q-btn class="gt-xs" flat icon="settings" aria-label="Settings" @click="$router.push('/settings')"/>
-        <q-btn v-if="!$ethingUI.autoLogin" class="gt-xs" flat icon="exit_to_app" aria-label="Logout" @click="logout" />
+        <q-btn v-if="refreshEnabled" stretch class="gt-xs" flat icon="refresh" aria-label="refresh" @click="refresh"/>
+        <q-btn flat icon="mdi-bell" stretch>
+          <q-badge v-if="persistentNotifications.length>0" color="red" floating style="top: 4px;right: 3px;">{{ persistentNotifications.length }}</q-badge>
+          <q-menu anchor="bottom right" self="top right" max-width="350px" square content-class="no-shadow">
+            <q-list separator style="min-width: 350px;" dark class="bg-primary text-white">
+
+              <template v-if="persistentNotifications.length>0">
+                <q-item-label header class="bg-grey-8">Notifications</q-item-label>
+                <q-item
+                  v-for="(notification, index) in persistentNotifications"
+                  :key="index"
+                  clickable
+                  @click="notification.open()"
+                  v-close-popup
+                  :class="notification.color ? 'bg-'+notification.color : 'bg-secondary'"
+                >
+                  <q-item-section>
+                    <q-item-label>
+                      <q-icon :name="notification.icon || 'mdi-android-messages'" class="q-mr-sm"/> {{ notification.title || notification.mode }}
+                    </q-item-label>
+                    <q-item-label caption>{{ notification.message }}</q-item-label>
+                  </q-item-section>
+                  <q-item-section side>
+                    <q-btn round flat icon="close" @click.prevent.stop="notification.dismiss()"/>
+                  </q-item-section>
+                </q-item>
+              </template>
+
+              <q-item-label v-else header v-close-popup class="bg-grey-8">No notifications</q-item-label>
+
+
+            </q-list>
+          </q-menu>
+        </q-btn>
+        <q-btn class="gt-xs" flat stretch icon="settings" aria-label="Settings" @click="$router.push('/settings')"/>
+        <q-btn v-if="!$ethingUI.autoLogin" class="gt-xs" flat stretch icon="exit_to_app" aria-label="Logout" @click="logout" />
 
       </q-toolbar>
 
@@ -32,6 +64,7 @@
       v-model="leftDrawerOpen"
       bordered
       content-class="bg-grey-2"
+      overlay
     >
       <q-list
         inset-delimiter
@@ -107,7 +140,8 @@ export default {
   name: 'LayoutDefault',
   data () {
     return {
-      leftDrawerOpen: false // this.$q.platform.is.desktop
+      leftDrawerOpen: false, // this.$q.platform.is.desktop
+      persistentNotifications: this.$ethingUI.persistentNotifications
     }
   },
   computed: {

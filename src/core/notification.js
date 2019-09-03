@@ -19,38 +19,124 @@ export default ({EThingUI, Vue}) => {
     },
   }
 
+  var _cache = {}
+
+  var persistentNotifications = []
+
+  // make reactive !
+  var vm =  new Vue({
+    data: {
+      persistentNotifications: persistentNotifications
+    }
+  })
+
   function notify (props) {
 
-    var message='', html=false, mode='info', timeout=15000
-
-    if (typeof props === 'string') {
-      message = props
-    } else {
-      if (props.mode) mode = props.mode
-      message = props.message
-      if (typeof props.timeout !== 'undefined') timeout=props.timeout
-      if (props.title) {
-        html = true
-        message = '<div class="text-h6">'+ this.$ethingUI.utils.sanitizeHTML(props.title) +'</div>' + this.$ethingUI.utils.sanitizeHTML(message)
-      }
+    var notification = {
+      message: '',
+      title: null,
+      mode: 'info',
+      timeout: 15000,
+      id: null
     }
 
-    Notify.create(Object.assign({
-      /* default */
-      position: 'bottom-right',
-      textColor: 'white',
-      actions: [
-        {
-          icon: 'close',
-          color: 'white',
-          handler: () => {}
+    if (typeof props === 'string') {
+      notification.message = props
+    } else {
+      Object.assign(notification, props)
+    }
+
+    var id = notification.id;
+
+    if (id && _cache[id]) {
+      // remove any previous notification
+      _cache[id].dismiss()
+      delete _cache[id]
+    }
+
+    if (typeof notification.open === 'undefined') {
+
+      notification.open = () => {
+        if (notification.source) {
+          var resource = EThing.arbo.get(notification.source)
+          if (resource) {
+            EThingUI.open(resource)
+          }
         }
-      ],
-    }, options[mode] || {}, {
-      message,
-      html,
-      timeout
-    }))
+      }
+
+    }
+
+    if (notification.message) {
+
+      var persistant = notification.timeout == 0, dismiss = null;
+
+      if (persistant) {
+
+        dismiss = () => {
+          var i = persistentNotifications.indexOf(notification)
+          if (i!== -1) {
+            persistentNotifications.splice(i, 1)
+          }
+          if (id) {
+            EThing.request({
+              method: 'DELETE',
+              url: 'notifications/' + id
+            })
+          }
+        }
+
+        notification = Object.assign({}, options[notification.mode] || {}, notification)
+
+        persistentNotifications.push(notification)
+
+      } else {
+
+        var html = false, message = notification.message;
+
+        if (notification.title) {
+          html = true
+          message = '<div class="text-h6">'+ EThingUI.utils.sanitizeHTML(notification.title) +'</div>' + EThingUI.utils.sanitizeHTML(message)
+        }
+
+        var _dismiss = Notify.create(Object.assign({
+          /* default */
+          position: 'bottom-right',
+          textColor: 'white',
+          actions: [
+            {
+              icon: 'close',
+              color: 'white',
+              handler: () => {}
+            }
+          ],
+        }, options[notification.mode] || {}, {
+          message,
+          html,
+          timeout: notification.timeout
+        }))
+
+        dismiss = () => {
+          _dismiss()
+          if (id) {
+            EThing.request({
+              method: 'DELETE',
+              url: 'notifications/' + id
+            })
+          }
+        }
+      }
+
+      if (id) {
+        _cache[id] = notification
+      }
+
+      notification.dismiss = dismiss
+
+      return notification
+
+    }
+
   }
 
   function eventHandler (evt) {
@@ -65,15 +151,34 @@ export default ({EThingUI, Vue}) => {
       timeout: 10
       title: null
     */
-    console.log(evt)
     var data = Object.assign({}, evt.data)
     data.timeout *= 1000
     notify(data)
 
   }
 
+  function init () {
+    EThing.request({
+      url: 'notifications',
+      dataType: 'json',
+    }).then((notifications) => {
+      // only persistent
+      notifications.forEach(n => {
+        if (n.timeout === 0) {
+          notify(n)
+        }
+      })
+
+    })
+  }
+
   EThing.on('signals/NotificationSent', eventHandler)
 
-  EThingUI.notify = notify
+  EThingUI.on('ui.server.connected', init);
+
+  Object.assign(EThingUI, {
+    notify,
+    persistentNotifications
+  })
 
 }
