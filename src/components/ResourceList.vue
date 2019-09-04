@@ -4,6 +4,8 @@
       v-for="(item, index) in __items"
     >
       <slot name="resource-item" v-bind:item="item">
+        <q-separator v-if="index>0 && item.level==0"/>
+
         <resource-q-item
           :resource="item.resource"
           :level="item.level"

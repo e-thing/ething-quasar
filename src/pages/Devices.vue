@@ -47,7 +47,7 @@
         class="col bg-white" :class="showActivity ? 'gt-sm q-mr-md' : ''"
       />
 
-      <resource-activity v-if="showActivity" class="col-xs col-md-auto bg-white q-px-md" :source="deviceFiltered.map(item=>item.device)" />
+      <resource-activity v-if="showActivity" class="col-xs col-md-auto bg-white q-px-md" :source="deviceFiltered" />
 
     </div>
 

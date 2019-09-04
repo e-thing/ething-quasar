@@ -28,6 +28,7 @@ export default ({EThingUI, Vue}) => {
     if (evt.originalEvent.resource) {
       var rid = evt.originalEvent.resource.id
       var resource = EThing.arbo.get(rid)
+      
       if (resource) {
         if (!activityData[rid]) {
           activityData[rid] = []

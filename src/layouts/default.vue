@@ -22,35 +22,30 @@
         <q-btn v-if="refreshEnabled" stretch class="gt-xs" flat icon="refresh" aria-label="refresh" @click="refresh"/>
         <q-btn flat icon="mdi-bell" stretch>
           <q-badge v-if="persistentNotifications.length>0" color="red" floating style="top: 4px;right: 3px;">{{ persistentNotifications.length }}</q-badge>
-          <q-menu anchor="bottom right" self="top right" max-width="350px" square content-class="no-shadow">
-            <q-list separator style="min-width: 350px;" dark class="bg-primary text-white">
-
-              <template v-if="persistentNotifications.length>0">
-                <q-item-label header class="bg-grey-8">Notifications</q-item-label>
-                <q-item
-                  v-for="(notification, index) in persistentNotifications"
-                  :key="index"
-                  clickable
-                  @click="notification.open()"
-                  v-close-popup
-                  :class="notification.color ? 'bg-'+notification.color : 'bg-secondary'"
-                >
-                  <q-item-section>
-                    <q-item-label>
-                      <q-icon :name="notification.icon || 'mdi-android-messages'" class="q-mr-sm"/> {{ notification.title || notification.mode }}
-                    </q-item-label>
-                    <q-item-label caption>{{ notification.message }}</q-item-label>
-                  </q-item-section>
-                  <q-item-section side>
-                    <q-btn round flat icon="close" @click.prevent.stop="notification.dismiss()"/>
-                  </q-item-section>
-                </q-item>
-              </template>
-
-              <q-item-label v-else header v-close-popup class="bg-grey-8">No notifications</q-item-label>
-
-
-            </q-list>
+          <q-menu anchor="bottom right" self="top right" max-width="370px" square content-class="no-shadow bg-transparent">
+            <div class="bg-grey-8 text-grey-5 q-pa-md text-subtitle2">{{ persistentNotifications.length>0 ? 'Notifications' : 'No notifications' }}</div>
+            <q-scroll-area style="height: 50vh; min-width: 350px;" v-close-popup v-if="persistentNotifications.length>0">
+              <q-list separator dark class="bg-primary text-white">
+                  <q-item
+                    v-for="(notification, index) in persistentNotifications"
+                    :key="index"
+                    clickable
+                    @click="notification.open()"
+                    v-close-popup
+                    :class="notification.color ? 'bg-'+notification.color : 'bg-secondary'"
+                  >
+                    <q-item-section>
+                      <q-item-label>
+                        <q-icon :name="notification.icon || 'mdi-android-messages'" class="q-mr-sm"/> {{ notification.title || notification.mode }}
+                      </q-item-label>
+                      <q-item-label caption>{{ notification.message }}</q-item-label>
+                    </q-item-section>
+                    <q-item-section side>
+                      <q-btn round flat icon="close" @click.prevent.stop="notification.remove()"/>
+                    </q-item-section>
+                  </q-item>
+              </q-list>
+            </q-scroll-area>
           </q-menu>
         </q-btn>
         <q-btn class="gt-xs" flat stretch icon="settings" aria-label="Settings" @click="$router.push('/settings')"/>
@@ -62,55 +57,63 @@
 
     <q-drawer
       v-model="leftDrawerOpen"
-      bordered
       content-class="bg-grey-2"
       overlay
     >
-      <q-list
-        inset-delimiter
-      >
-        <q-item-label header>Menu</q-item-label>
-        <q-item clickable @click="$router.push('/dashboard')" v-ripple>
-          <q-item-section avatar>
-            <q-icon name="dashboard" />
-          </q-item-section>
-          <q-item-section>Dashboard</q-item-section>
-        </q-item>
-        <q-item clickable @click="$router.push('/devices')" v-ripple>
-          <q-item-section avatar>
-            <q-icon name="devices" />
-          </q-item-section>
-          <q-item-section>Devices</q-item-section>
-        </q-item>
-        <q-item clickable @click="$router.push('/data')" v-ripple>
-          <q-item-section avatar>
-            <q-icon name="mdi-database" />
-          </q-item-section>
-          <q-item-section>Data</q-item-section>
-        </q-item>
-        <q-item clickable @click="$router.push('/flows')" v-ripple>
-          <q-item-section avatar>
-            <q-icon name="mdi-ray-start-arrow" />
-          </q-item-section>
-          <q-item-section>Flows</q-item-section>
-        </q-item>
+      <div class="absolute-top bg-primary q-px-md q-py-lg row items-center q-gutter-md">
+        <q-avatar size="56px" class="bg-white col-auto">
+          <img src="statics/app-logo-128x128.png">
+        </q-avatar>
+        <div class="text-h4 text-white col">EThing</div>
+      </div>
 
-        <q-separator />
+      <q-scroll-area style="height: calc(100% - 120px); margin-top: 120px">
+        <q-list
+          inset-delimiter
+        >
+          <q-item-label header>Menu</q-item-label>
+          <q-item clickable @click="$router.push('/dashboard')" v-ripple>
+            <q-item-section avatar>
+              <q-icon name="dashboard" />
+            </q-item-section>
+            <q-item-section>Dashboard</q-item-section>
+          </q-item>
+          <q-item clickable @click="$router.push('/devices')" v-ripple>
+            <q-item-section avatar>
+              <q-icon name="devices" />
+            </q-item-section>
+            <q-item-section>Devices</q-item-section>
+          </q-item>
+          <q-item clickable @click="$router.push('/data')" v-ripple>
+            <q-item-section avatar>
+              <q-icon name="mdi-database" />
+            </q-item-section>
+            <q-item-section>Data</q-item-section>
+          </q-item>
+          <q-item clickable @click="$router.push('/flows')" v-ripple>
+            <q-item-section avatar>
+              <q-icon name="mdi-ray-start-arrow" />
+            </q-item-section>
+            <q-item-section>Flows</q-item-section>
+          </q-item>
 
-        <q-item clickable @click="$router.push('/settings')" v-ripple>
-          <q-item-section avatar>
-            <q-icon name="settings" />
-          </q-item-section>
-          <q-item-section>Settings</q-item-section>
-        </q-item>
-        <q-item v-if="!$ethingUI.autoLogin" clickable @click="logout" v-ripple>
-          <q-item-section avatar>
-            <q-icon name="exit_to_app" />
-          </q-item-section>
-          <q-item-section>Logout</q-item-section>
-        </q-item>
+          <q-separator />
 
-      </q-list>
+          <q-item clickable @click="$router.push('/settings')" v-ripple>
+            <q-item-section avatar>
+              <q-icon name="settings" />
+            </q-item-section>
+            <q-item-section>Settings</q-item-section>
+          </q-item>
+          <q-item v-if="!$ethingUI.autoLogin" clickable @click="logout" v-ripple>
+            <q-item-section avatar>
+              <q-icon name="exit_to_app" />
+            </q-item-section>
+            <q-item-section>Logout</q-item-section>
+          </q-item>
+
+        </q-list>
+      </q-scroll-area>
     </q-drawer>
 
     <q-page-container>

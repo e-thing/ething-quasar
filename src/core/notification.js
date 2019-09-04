@@ -78,12 +78,6 @@ export default ({EThingUI, Vue}) => {
           if (i!== -1) {
             persistentNotifications.splice(i, 1)
           }
-          if (id) {
-            EThing.request({
-              method: 'DELETE',
-              url: 'notifications/' + id
-            })
-          }
         }
 
         notification = Object.assign({}, options[notification.mode] || {}, notification)
@@ -99,7 +93,7 @@ export default ({EThingUI, Vue}) => {
           message = '<div class="text-h6">'+ EThingUI.utils.sanitizeHTML(notification.title) +'</div>' + EThingUI.utils.sanitizeHTML(message)
         }
 
-        var _dismiss = Notify.create(Object.assign({
+        dismiss = Notify.create(Object.assign({
           /* default */
           position: 'bottom-right',
           textColor: 'white',
@@ -107,7 +101,9 @@ export default ({EThingUI, Vue}) => {
             {
               icon: 'close',
               color: 'white',
-              handler: () => {}
+              handler: () => {
+                notification.remove()
+              }
             }
           ],
         }, options[notification.mode] || {}, {
@@ -115,16 +111,6 @@ export default ({EThingUI, Vue}) => {
           html,
           timeout: notification.timeout
         }))
-
-        dismiss = () => {
-          _dismiss()
-          if (id) {
-            EThing.request({
-              method: 'DELETE',
-              url: 'notifications/' + id
-            })
-          }
-        }
       }
 
       if (id) {
@@ -132,6 +118,16 @@ export default ({EThingUI, Vue}) => {
       }
 
       notification.dismiss = dismiss
+
+      notification.remove = () => {
+        dismiss()
+        if (id) {
+          EThing.request({
+            method: 'DELETE',
+            url: 'notifications/' + id
+          })
+        }
+      }
 
       return notification
 

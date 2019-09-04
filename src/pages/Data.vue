@@ -13,7 +13,7 @@
       <q-space/>
 
       <div class="row q-gutter-x-xs">
-        <q-btn-dropdown class="bg-white" color="primary" label="Create" icon="add" flat dense >
+        <q-btn-dropdown class="bg-white" color="primary" :label="$q.screen.gt.xs ? 'Create' : ''" icon="add" flat dense >
           <q-list>
             <q-item v-close-popup clickable @click="create('resources/File')">
               <q-item-section avatar>
