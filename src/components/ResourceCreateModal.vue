@@ -95,6 +95,7 @@ export default {
 
     data () {
         return {
+          selectedModel: undefined,
           selectedType: undefined,
           loading: false,
           error: false,
@@ -105,32 +106,10 @@ export default {
     computed: {
 
       items () {
-        var r = []
         var types = this.types || []
         if (types.length == 0) types = ['resources/Resource']
 
-        this.$ethingUI.iterate('resources', (resourceClsName) => {
-          var resourceCls = this.$ethingUI.get(resourceClsName)
-          if (!resourceCls.virtual && !resourceCls.disableCreation) {
-            var append = false
-            if (types.indexOf(resourceClsName) !== -1) {
-              append = true
-            } else {
-              for (var i in types) {
-                if (this.$ethingUI.isSubclass(resourceCls, types[i])) {
-                  append = true
-                  break
-                }
-              }
-            }
-
-            if (append) {
-              r.push(resourceCls)
-            }
-          }
-        })
-
-        return r.map(m => {
+        return this.$ethingUI.getSubclass(types).filter(cls => !cls.virtual && !cls.disableCreation).map(m => {
           var t = m._type
 
           var cat = t.split('/')
@@ -156,6 +135,20 @@ export default {
         return this.selectedType ? this.$ethingUI.get(this.selectedType) : undefined
       }
 
+    },
+
+    watch: {
+      selectedModel (val) {
+        this.selectedType = val
+      },
+      items: {
+        handler (val) {
+          if (val.length === 1 && !this.selectedType) {
+            this.selectedType = val[0].value
+          }
+        },
+        immediate: true
+      }
     },
 
     methods: {

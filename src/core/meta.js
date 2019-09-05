@@ -540,6 +540,7 @@ export default {
         }
       },
 
+      // returns uncompiled class metadata
       getRaw: function (type) {
         try {
           return getFromPath(this.definitions, normType(type))
@@ -551,6 +552,7 @@ export default {
         return get (this.definitions, type)
       },
 
+      // return true if type is a subclass of base.
       isSubclass: function (type, base) {
         base = normType(base)
         if (type instanceof EThing.Resource && type.isTypeof(base)) {
@@ -560,6 +562,35 @@ export default {
         if (type === base) return true
         var m = this.get(type)
         return m && m._dep && m._dep.indexOf(base) !== -1
+      },
+
+      // list all subclass of a list of types
+      getSubclass: function (basetypes) {
+        if (!Array.isArray(basetypes)) basetypes = [basetypes]
+        var clsList = []
+        if (basetypes.length == 0) return clsList
+
+        this.iterate(clsName => {
+          var cls = this.get(clsName)
+          var append = false
+
+          if (basetypes.indexOf(clsName) !== -1) {
+            append = true
+          } else {
+            for (var i in basetypes) {
+              if (this.isSubclass(cls, basetypes[i])) {
+                append = true
+                break
+              }
+            }
+          }
+
+          if (append) {
+            clsList.push(cls)
+          }
+        })
+
+        return clsList
       },
 
       // extend the definition of a given type

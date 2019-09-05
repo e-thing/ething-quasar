@@ -45,6 +45,7 @@
         :resources="deviceFiltered"
         tree
         class="col bg-white" :class="showActivity ? 'gt-sm q-mr-md' : ''"
+        no-sort no-search
       />
 
       <resource-activity v-if="showActivity" class="col-xs col-md-auto bg-white q-px-md" :source="deviceFiltered" />

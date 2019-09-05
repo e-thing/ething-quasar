@@ -7,12 +7,10 @@ var createModal = function(props) {
 
     const
       ok = data => {
-        console.log('ok')
         resolve(data)
         vm.$destroy()
       },
       cancel = reason => {
-        console.log('cancel', reason)
         reject(reason || new Error())
         vm.$destroy()
       }

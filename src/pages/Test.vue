@@ -1,6 +1,19 @@
 <template>
   <q-page padding>
 
+    <q-toggle v-model="dense" label="dense"/>
+    <q-toggle v-model="readonly" label="read only"/>
+    <q-toggle v-model="tree" label="tree"/>
+
+    <resource-list
+      :categories="['resources/Device', 'resources/File', 'resources/Table', 'resources/Flow', 'interfaces/Sensor', 'interfaces/Thermometer']"
+      class="bg-white"
+      :dense="dense"
+      :readonly="readonly"
+      :tree="tree"
+      create-modal
+    />
+
     <resource-select
       v-model="resourceFilter"
       clearable
@@ -21,6 +34,7 @@
 
 <script>
 import ResourceSelect from '../components/ResourceSelect'
+import ResourceList from '../components/ResourceList'
 import ResourceCreateModal from '../components/ResourceCreateModal'
 
 export default {
@@ -35,6 +49,9 @@ export default {
 
 
     return {
+      dense: false,
+      readonly: false,
+      tree:  false,
       resourceFilter: [],
       templ: 'toto',
       schema: {
