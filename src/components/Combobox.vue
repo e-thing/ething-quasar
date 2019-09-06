@@ -16,7 +16,7 @@
               <div>{{ emptyMessage }}</div>
               <q-btn flat color="faded" icon="refresh" label="refresh" size="sm" @click="__async()" v-if="__isAsync"/>
             </div>
-            <q-list separator v-else>
+            <q-list separator dense v-else>
               <q-item
                 v-close-popup
                 clickable
@@ -26,7 +26,7 @@
                 :class="{selected: item.value===__value}"
               >
                 <slot name="item-content" v-bind:item="item">
-                  {{ item.label || item.value }}
+                  <q-item-section>{{ item.label || item.value }}</q-item-section>
                 </slot>
               </q-item>
               <q-btn flat color="faded" icon="refresh" label="refresh" size="sm" @click="__async()" v-if="__isAsync"/>

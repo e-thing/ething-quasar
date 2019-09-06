@@ -67,7 +67,7 @@ export default {
           if (this.create) {
             res = EThing.Resource.create(Object.assign({type: this.type}, this.model))
           } else {
-            res = this.resource.set(Object.assign(def, this.model))
+            res = this.resource.set(Object.assign({}, this.model))
           }
 
           return res

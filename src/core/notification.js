@@ -54,14 +54,18 @@ export default ({EThingUI, Vue}) => {
       delete _cache[id]
     }
 
+    if (notification.source) {
+      var resource = EThing.arbo.get(notification.source)
+      if (resource) {
+        notification.resource = resource
+      }
+    }
+
     if (typeof notification.open === 'undefined') {
 
       notification.open = () => {
-        if (notification.source) {
-          var resource = EThing.arbo.get(notification.source)
-          if (resource) {
-            EThingUI.open(resource)
-          }
+        if (notification.resource) {
+          EThingUI.open(notification.resource)
         }
       }
 

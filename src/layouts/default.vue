@@ -37,6 +37,7 @@
                     <q-item-section>
                       <q-item-label>
                         <q-icon :name="notification.icon || 'mdi-android-messages'" class="q-mr-sm"/> {{ notification.title || notification.mode }}
+                        <span v-if="notification.resource" class="text-italic"> - {{ notification.resource.basename() }}</span>
                       </q-item-label>
                       <q-item-label caption>{{ notification.message }}</q-item-label>
                     </q-item-section>

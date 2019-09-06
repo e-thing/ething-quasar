@@ -1,6 +1,6 @@
 <template>
   <q-chip dense :icon="batteryIcon" v-bind="attrs" v-if="typeof battery === 'number'">
-    {{ battery }}%
+    {{ round(battery) }}%
   </q-chip>
 </template>
 
@@ -45,6 +45,12 @@ export default {
       return attrs
     },
 
+  },
+
+  methods: {
+    round (val) {
+      return Math.round(val)
+    }
   }
 
 
