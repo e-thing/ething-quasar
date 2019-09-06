@@ -3,6 +3,7 @@
     v-model="__value"
     v-bind="$attrs"
     :class="elementId"
+    debounce="500"
   >
     <template v-slot:append v-if="__enabled">
       <q-icon :name="isMenuOpen ? 'arrow_drop_up' : 'arrow_drop_down'" class="cursor-pointer">

@@ -9,6 +9,7 @@
       :rows="c_schema['$rows']"
       hide-bottom-space
       dense
+      debounce="500"
     />
   </form-schema-layout>
 </template>

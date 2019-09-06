@@ -9,7 +9,7 @@
         readonly
         :color="color"
         show-value
-        :size="this.knobSize + 'px'"
+        :size="knobSize + 'px'"
         :thickness="0.1"
         track-color="grey-3"
       >

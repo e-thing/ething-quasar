@@ -3,18 +3,20 @@
     <q-resize-observer @resize="updateLayout" />
     <div class="absolute-center">
       <q-knob
-        show-value
         class="q-knob--no-shadow"
+        show-value
         :value="value"
-        :min="min"
-        :max="max"
-        :size="knobSize + 'px'"
         :disable="writing"
-        :color="color"
-        @change="setLevel"
+        :min="0"
+        :max="100"
+        :size="knobSize + 'px'"
+        :thickness="thickness"
+        @change="__execute('setLevel', $event)"
+        color="grey-5"
+        center-color="transparent"
         track-color="grey-2"
       >
-        {{value}} <small class="unit" style="filter: brightness(90%);">{{unit}}</small>
+        <q-avatar :style="{backgroundColor: state ? color : '#bdbdbd'}" text-color="white" @click.stop="__execute('setState', !state)" font-size="30%" :size="knobSize*(1-thickness)+2 + 'px'">{{ state ? 'ON' : 'OFF' }}</q-avatar>
       </q-knob>
     </div>
   </div>
@@ -26,7 +28,7 @@ import WResource from './WResource'
 
 
 export default {
-    name: 'WDimmable',
+    name: 'WDimmableRelay',
 
     mixins: [WResource],
 
@@ -35,36 +37,30 @@ export default {
         type: String,
         default: '%'
       },
-      min: {
-        type: Number,
-        default: 0
-      },
-      max: {
-        type: Number,
-        default: 100
-      },
-      attr: String,
-      set: Function,
     },
 
     data () {
       return {
         writing: false,
+        thickness: 0.25,
         knobSize: 32
       }
     },
 
     computed: {
       value () {
-        return this.resource.attr(this.attr)
+        return this.resource.attr('level')
+      },
+      state () {
+        return this.resource.attr('state')
       }
     },
 
     methods: {
 
-      setLevel (value) {
+      __execute (fn, data) {
         this.writing = true
-        Promise.resolve(this.set(this.resource, value)).catch(err => {
+        Promise.resolve(this.resource.execute(fn, data)).catch(err => {
           this.setError(err)
         }).finally(() => {
           this.writing = false

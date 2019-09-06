@@ -7,12 +7,19 @@
       :error="!!error"
       hide-bottom-space
       dense
+      debounce="500"
+      :placeholder="c_schema['$placeholder']"
     />
   </form-schema-layout>
 </template>
 
 <script>
 import Input from './Input'
+
+/*
+options
+$placeholder: string
+*/
 
 export default {
   name: 'FormSchemaPassword',

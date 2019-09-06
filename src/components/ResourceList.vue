@@ -1,7 +1,7 @@
 <template>
-  <div>
+  <div class="column">
 
-    <div v-if="__showHeader" class="row q-py-sm" :class="headerClass" :style="headerStyle">
+    <div v-if="__showHeader" class="col-auto row q-py-sm" :class="headerClass" :style="headerStyle">
 
       <template v-if="__categories">
         <q-btn v-if="!hideAll" flat label="All" :text-color="typeof category_!=='number' ? 'primary' : 'light'" @click="category_ = null" :dense="$q.screen.lt.lg"/>
@@ -24,7 +24,7 @@
 
       <slot name="header-right"></slot>
 
-      <q-input v-if="!noSearch" dense outlined v-model="search_" input-class="text-right">
+      <q-input v-if="__showSearch" dense outlined v-model="search_" input-class="text-right" debounce="500">
         <template v-slot:append>
           <q-icon v-if="search_ === ''" name="search" />
           <q-icon v-else name="clear" class="cursor-pointer" @click="search_ = ''" />
@@ -48,42 +48,53 @@
       </q-btn-dropdown>
 
       <template v-if="!readonly && __createSelectOptions.length>0">
-        <q-btn v-if="__createSelectOptionsSingle" flat text-color="primary" :label="$q.screen.gt.xs ? 'create' : null" icon="add" @click="create(__createSelectOptions[0].items[0].type)"/>
-        <q-btn-dropdown v-else flat text-color="primary" :label="$q.screen.gt.xs ? 'create' : null" icon="add" :dense="$q.screen.lt.lg">
-          <q-list>
+        <q-btn flat text-color="primary" :label="$q.screen.gt.xs ? 'create' : null" icon="add" @click="__createClick()"/>
+        <modal v-model="showCreatePopup_" valid-btn-hide title="Add resource" no-content-padding size='sm'>
+          <q-list separator>
             <template v-for="cat in __createSelectOptions">
-              <q-item-label header>{{ cat.name }}</q-item-label>
-              <q-item v-close-popup v-for="item in cat.items" :key="item.type" clickable @click="create(item.type)">
+              <q-item-label header v-if="__createSelectOptions.length>1">{{ cat.name }}</q-item-label>
+              <q-item v-close-popup v-for="(item, index) in cat.items" :key="index" clickable @click="item.click()">
                 <q-item-section avatar>
-                  <q-icon :name="item.cls.icon" :color="item.cls.color"/>
+                  <q-icon :name="item.icon" :color="item.color"/>
                 </q-item-section>
-                <q-item-section>{{ item.label }}</q-item-section>
+                <q-item-section>
+                  <q-item-label>{{ item.label }}</q-item-label>
+                  <q-item-label v-if="item.description" caption lines="2">{{ item.description }}</q-item-label>
+                </q-item-section>
               </q-item>
             </template>
           </q-list>
-        </q-btn-dropdown>
+        </modal>
       </template>
 
     </div>
+    <template v-if="__items.length>0">
+      <q-list class="col scroll" :class="contentClass" :style="contentStyle">
+        <template
+          v-for="(item, index) in __items"
+        >
+          <slot name="resource-item" v-bind:item="item">
+            <q-separator v-if="index>0 && item.level==0"/>
 
-    <q-list :class="contentClass" :style="contentStyle">
-      <template
-        v-for="(item, index) in __items"
-      >
-        <slot name="resource-item" v-bind:item="item">
-          <q-separator v-if="index>0 && item.level==0"/>
-
-          <resource-q-item
-            :resource="item.resource"
-            :level="item.level"
-            :no-parent="item.level>0"
-            :readonly="readonly"
-            :dense="dense"
-            @click="itemClick(item)"
-          />
-        </slot>
-      </template>
-    </q-list>
+            <resource-q-item
+              :resource="item.resource"
+              :level="item.level"
+              :no-parent="item.level>0"
+              :readonly="readonly"
+              :dense="dense"
+              @click="itemClick(item)"
+              :class="itemClass"
+              :style="itemStyle"
+            />
+          </slot>
+        </template>
+      </q-list>
+    </template>
+    <div v-else class="col relative-position" style="min-height: 50px;">
+      <div class="absolute-center text-caption text-faded">
+        {{ emptyMessage }}
+      </div>
+    </div>
   </div>
 </template>
 
@@ -129,11 +140,17 @@ export default {
 
       showHiddenFiles: Boolean,
 
+      emptyMessage: {
+        type: String,
+        default: 'No resources found'
+      },
+
       headerClass: {},
       headerStyle: {},
       contentClass: {},
       contentStyle: {},
-
+      itemClass: {},
+      itemStyle: {},
     },
 
     data () {
@@ -151,14 +168,19 @@ export default {
             fn (a, b) {
               return b.modifiedDate() - a.modifiedDate()
             }
-          }]
+          }],
+          showCreatePopup_: false
         }
     },
 
     computed: {
 
       __showHeader () {
-        return this.__categories || this.$slots['header-left'] || this.$slots['header-right'] || !this.noSearch || !this.noSort || (!this.readonly && this.__createSelectOptions.length>0)
+        return this.__categories || this.$slots['header-left'] || this.$slots['header-right'] || this.__showSearch || !this.noSort || (!this.readonly && this.__createSelectOptions.length>0)
+      },
+
+      __showSearch () {
+        return !this.noSearch && this.$q.screen.gt.sm
       },
 
       __resources () {
@@ -196,13 +218,17 @@ export default {
       },
 
       __createSelectOptions () {
-        var clsList = this.$ethingUI.getSubclass(this.__createTypes || []).filter(cls => !cls.virtual && !cls.disableCreation)
+
+        var baseCls = (this.__createTypes || []).filter(t => typeof t === 'string')
+        var extra = (this.__createTypes || []).filter(t => typeof t === 'object' && t !== null)
+        var clsList = this.$ethingUI.getSubclass(baseCls).filter(cls => !cls.virtual && !cls.disableCreation)
+        var defaultCategory = 'other'
 
         // order by categories
         var categories = {}
 
         clsList.forEach(cls => {
-          var path = (cls.category || 'other').split('.')
+          var path = (cls.category || defaultCategory).split('.')
           var label = cls.title || cls.split('/').pop()
           var category = path[0]
 
@@ -213,16 +239,30 @@ export default {
           }
 
           categories[category].items.push({
-            type: cls._type,
             label,
-            cls
+            color: cls.color,
+            icon: cls.icon,
+            description: cls.description,
+            click: () => {
+              this.create(cls._type)
+            }
           })
         })
 
-        var other = categories['other']
+        extra.forEach(obj => {
+          var category = obj.category || defaultCategory
+          if (!categories[category]) {
+            categories[category] = {
+              items: []
+            }
+          }
+          categories[category].items.push(obj)
+        })
+
+        var other = categories[defaultCategory]
         var orderedCategories = []
 
-        delete categories['other']
+        delete categories[defaultCategory]
 
         for(var category in categories){
           orderedCategories.push(Object.assign({
@@ -232,18 +272,14 @@ export default {
 
         if (other) {
           orderedCategories.push(Object.assign({
-            name: 'other'
+            name: defaultCategory
           }, other))
         }
 
         return orderedCategories
       },
 
-      __createSelectOptionsSingle () {
-        return this.__createSelectOptions.length == 1 && this.__createSelectOptions[0].items.length == 1
-      },
-
-      __items () {
+      __filteredResources () {
         var resources = this.__resources;
 
         if (this.__selectedCategory) {
@@ -257,7 +293,7 @@ export default {
         if (this.search_) {
           var re_filter = new RegExp(this.search_, 'i')
           resources = resources.filter(r => {
-            return re_filter.test(r.name()) || re_filter.test(r.type()) || re_filter.test(r.description())
+            return re_filter.test(r.name()) || re_filter.test(r.type()) || re_filter.test(r.description()) || re_filter.test(r.attr('location'))
           })
         }
 
@@ -265,10 +301,18 @@ export default {
           resources.sort(this.sortItems[this.sort_].fn)
         }
 
+        return resources
+      },
+
+      __checksum () {
+        return this.__filteredResources.map(r => r.id()).join(' ')
+      },
+
+      __items () {
         if (this.tree) {
-          return this.makeTree(resources)
+          return this.makeTree(this.__filteredResources)
         } else {
-          return resources.map(r => {
+          return this.__filteredResources.map(r => {
             return {
               resource: r,
               level: 0
@@ -318,6 +362,12 @@ export default {
       category_: {
         handler (value) {
           this.$emit('update:category', value)
+        },
+        immediate: true
+      },
+      __checksum: {
+        handler (value, oldValue) {
+          this.$emit('changed', this.__filteredResources.slice(0))
         },
         immediate: true
       }
@@ -395,6 +445,14 @@ export default {
           })
         }
       },
+
+      __createClick () {
+        if (this.__createSelectOptions.length == 1 && this.__createSelectOptions[0].items.length == 1) {
+          this.__createSelectOptions[0].items[0].click()
+        } else {
+          this.showCreatePopup_ = true
+        }
+      }
 
     }
 

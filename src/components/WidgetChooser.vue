@@ -13,30 +13,31 @@
     no-content-padding
   >
 
-    <div class="row items-stretch">
+    <div class="items-stretch fit" :class="$q.screen.gt.sm ? 'row' : 'column'">
       <q-tabs
         v-model="widgetType"
         class="col-auto text-teal"
-        vertical
+        :vertical="$q.screen.gt.sm"
+        align="left"
       >
         <q-tab name="resource" icon="mail" label="Resource" />
         <q-tab name="global" icon="alarm" label="Global" />
       </q-tabs>
 
-      <q-card flat class="col">
+      <q-card flat class="col scroll fit">
 
         <!-- resource select -->
         <q-card-section v-if="widgetType==='resource'">
 
 
           <div class="text-h6 q-mb-md">
-            Select the resource to pin
+            <q-icon name="mdi-chevron-double-right"/> Select the resource to pin
             <q-separator/>
           </div>
 
           <div v-if="resources.length">
 
-            <resource-select v-model="resource" :filter="resourceFilter" borderless/>
+            <resource-select v-model="resource" :filter="resourceFilter" filled/>
 
           </div>
 
@@ -51,10 +52,9 @@
           </q-banner>
         </q-card-section>
 
-
-        <q-card-section v-if="widgets && Object.keys(widgets).length > 1">
-          <div class="text-h6 q-mb-md">
-            Choose the widget type
+        <q-card-section v-if="widgets && Object.keys(widgets).length > 0">
+          <div class="text-h6 q-my-md">
+            <q-icon name="mdi-chevron-double-right"/> Choose the widget type
             <q-separator/>
           </div>
 
@@ -67,8 +67,8 @@
         </q-card-section>
 
         <q-card-section v-if="widgetOptions">
-          <div class="text-h6 q-mb-md">
-            Options
+          <div class="text-h6 q-my-md">
+            <q-icon name="mdi-chevron-double-right"/> Configure the widget
             <q-separator/>
           </div>
 
@@ -130,6 +130,10 @@ export default {
   },
 
   computed: {
+
+    resourceId () {
+      return this.resource ? this.resource.id() : null
+    },
 
     widgets () {
       var widgetsMap = {}
@@ -199,25 +203,16 @@ export default {
 
   },
 
+  watch: {
+    resourceId (val) {
+      if (val) this.widgetId = this.widgetNames[0].value // default
+    }
+  },
+
   methods: {
 
     resourceFilter (r) {
       return this.resources.indexOf(r) !== -1
-    },
-
-    select (resource) {
-      this.resource = resource
-      this.options = {}
-      this.optionsError = false
-      this.widgetId = this.widgetNames[0].value // default
-
-      if (Object.keys(this.widgets).length === 1 && !this.widgetOptions) {
-        this.done()
-      }
-    },
-
-    resetList () {
-      this.resource = null
     },
 
     done () {
@@ -237,19 +232,12 @@ export default {
           })
         }
 
-        this.resetList()
+        this.resource = null
 
         this.$refs.modal.hide()
       }
 
     },
-
-    filter (filterName) {
-      if (this.currentFilter !== filterName) {
-        this.currentFilter = filterName
-        this.resetList()
-      }
-    }
 
   }
 

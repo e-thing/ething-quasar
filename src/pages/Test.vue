@@ -4,6 +4,7 @@
     <q-toggle v-model="dense" label="dense"/>
     <q-toggle v-model="readonly" label="read only"/>
     <q-toggle v-model="tree" label="tree"/>
+    <q-toggle v-model="heightfixed" label="heightfixed"/>
 
     <resource-list
       :categories="['resources/Device', 'resources/File', 'resources/Table', 'resources/Flow', 'interfaces/Sensor', 'interfaces/Thermometer']"
@@ -12,6 +13,7 @@
       :readonly="readonly"
       :tree="tree"
       create-modal
+      :style="heightfixed ? {height: '450px'} : null"
     />
 
     <resource-select
@@ -52,6 +54,7 @@ export default {
       dense: false,
       readonly: false,
       tree:  false,
+      heightfixed: false,
       resourceFilter: [],
       templ: 'toto',
       schema: {

@@ -10,6 +10,7 @@ import WDeviceMultiLabel from './WDeviceMultiLabel'
 import WDeviceKnob from './WDeviceKnob'
 import WCamera from './WCamera'
 import WDimmable from './WDimmable'
+import WDimmableRelay from './WDimmableRelay'
 import WGenericSensor from './WGenericSensor'
 import WClock from './WClock'
 import WFlow from './WFlow'
@@ -31,6 +32,7 @@ export default {
   WDeviceKnob,
   WCamera,
   WDimmable,
+  WDimmableRelay,
   WGenericSensor,
   WRGBLight,
   WDeviceSensor,

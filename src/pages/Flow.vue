@@ -439,7 +439,7 @@ export default {
             icon: 'mdi-alert-circle',
             color: 'negative',
             message: 'Flow error: ' + String(err),
-            timeout: 3000
+            timeout: 10000
           })
         })
       }
@@ -1052,6 +1052,8 @@ export default {
 
   mounted () {
 
+    var loaded = false;
+
     // setup some defaults for jsPlumb.
     var instance = this.instance = jsPlumb.getInstance({
       // default drag options
@@ -1087,8 +1089,10 @@ export default {
         // listen for new connections; initialise them the same way we initialise the connections at startup.
         instance.bind("connection", (connInfo, originalEvent) => {
             init(connInfo.connection);
-            this.dirty = true
-            this.save()
+            if (loaded) {
+              this.dirty = true
+              this.save()
+            }
         });
 
         //
@@ -1103,6 +1107,7 @@ export default {
         });
 
         this.load(() => {
+          loaded = true
           this.start_debug()
         })
 

@@ -21,11 +21,13 @@
         </div>
       </div>
 
-      <div class="col scroll">
+      <div class="col scroll relative-position">
 
-        <div :class="noContentPadding ? '' : 'q-pa-md'">
+        <div :class="__contentClass">
           <slot></slot>
         </div>
+
+        <q-space/>
 
         <div class="q-py-sm q-px-md buttons row items-center" v-if="!noButtons && scroll">
 
@@ -172,6 +174,13 @@ export default {
     },
 
     computed: {
+
+      __contentClass () {
+        var cls = []
+        if (!this.noContentPadding) cls.push('q-pa-md')
+        if (!this.scroll) cls.push('absolute fit')
+        return cls.join(' ')
+      },
 
       __size () {
         for (var s in sizes) {
