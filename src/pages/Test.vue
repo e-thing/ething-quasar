@@ -1,6 +1,45 @@
 <template>
   <q-page padding>
 
+    <q-toggle v-model="werror" label="error"/>
+    <q-toggle v-model="winline" label="inline"/>
+    <q-input v-model.number="wMinHeight" label="min-height" type="number" class="q-mx-md inline"/>
+    <q-input v-model.number="wMinWidth" label="min-width" type="number" class="q-mx-md inline"/>
+
+    <widget
+      ref="widget" style="border: 1px solid black;" bg-color="white"
+      :min-height="wMinHeight"
+      :min-width="wMinWidth"
+      title="title"
+      footer="footer"
+      :inline="winline"
+    >
+      <template v-slot:overlay>
+        <div class="absolute-center">overlay</div>
+      </template>
+      <template v-slot:content>
+        <!--<div v-for="i in 50">line {{i}}</div>-->
+        <div class="absolute-center">content</div>
+      </template>
+    </widget>
+
+    <widget
+      ref="widget" style="border: 1px solid black;" bg-color="white"
+      :min-height="wMinHeight"
+      :min-width="wMinWidth"
+      title="title"
+      footer="footer"
+      :inline="winline"
+    >
+      <template v-slot:overlay>
+        <div class="absolute-center">overlay</div>
+      </template>
+      <template v-slot:content>
+        <div v-for="i in 20">line {{i}}</div>
+        <div class="absolute-center">content</div>
+      </template>
+    </widget>
+
     <q-toggle v-model="dense" label="dense"/>
     <q-toggle v-model="readonly" label="read only"/>
     <q-toggle v-model="tree" label="tree"/>
@@ -48,9 +87,11 @@ export default {
 
   data () {
 
-
-
     return {
+      winline: false,
+      wMinHeight: 128,
+      wMinWidth: 128,
+      werror: false,
       dense: false,
       readonly: false,
       tree:  false,
@@ -186,6 +227,13 @@ model: {
       inline: false
     }
 
+  },
+
+  watch: {
+    werror (val) {
+      if (val) this.$refs.widget.setError('error: foobar')
+      else this.$refs.widget.setError(null)
+    }
   },
 
   methods: {
