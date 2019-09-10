@@ -2,7 +2,7 @@
   <q-page >
 
     <div class="page-fit">
-      <chart :preferences="resource" expended class="page-block"/>
+      <chart :preferences="resource" expended class="page-block relative-position"/>
     </div>
 
   </q-page>

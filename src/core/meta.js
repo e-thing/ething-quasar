@@ -121,10 +121,10 @@ var mergeStrategies = {
   widgets (parent, child, node) {
     return mapMerge (parent, child, node, (p, c, n) => {
       if (!p) {
-        if (!c.title) {
+        if (!c.title && node) {
           c.title = node.title
         }
-        if (!c.icon) {
+        if (!c.icon && node) {
           c.icon = node.icon
         }
         return c
@@ -136,6 +136,8 @@ var mergeStrategies = {
       keys.forEach(k => {
         if (k==='component') {
           merged[k] = vueComponentMerge(p[k], c[k])
+        } else if (k==='attributes') {
+          merged[k] = functionMerge(p[k], c[k])
         } else {
           merged[k] = defaultMerge(p[k], c[k])
         }

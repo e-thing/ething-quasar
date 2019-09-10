@@ -58,12 +58,21 @@
             <q-separator/>
           </div>
 
-          <q-option-group
-            color="secondary"
-            type="radio"
-            v-model="widgetId"
-            :options="widgetNames"
-          />
+          <q-list>
+            <q-item tag="label" v-ripple v-for="item in widgetNames">
+              <q-item-section side top>
+                <q-radio v-model="widgetId" :val="item.value" />
+              </q-item-section>
+
+              <q-item-section>
+                <q-item-label>{{ item.label }}</q-item-label>
+                <q-item-label caption>
+                  {{ item.description }}
+                </q-item-label>
+              </q-item-section>
+            </q-item>
+          </q-list>
+
         </q-card-section>
 
         <q-card-section v-if="widgetOptions">
@@ -164,14 +173,11 @@ export default {
         var label = widget.title || widget.schema.title || widget.schema.label
         var description = widget.description || widget.schema.description
 
-        if (description) {
-          label += ' ('+description+')'
-        }
-
         return {
           zIndex: widget.zIndex,
           label,
-          value: k
+          value: k,
+          description
         }
       })
 

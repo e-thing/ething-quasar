@@ -1,4 +1,4 @@
-import { date, format } from 'quasar'
+import { date, format, colors } from 'quasar'
 import EThing from 'ething-js'
 import FileSaver from 'file-saver'
 import VisibilityObserver from './VisibilityObserver'
@@ -97,11 +97,13 @@ export function sizeToString (s) {
 }
 
 export function colorNameToHex (colorStr) {
-    var a = document.createElement('div');
-    a.style.color = colorStr;
-    var colors = window.getComputedStyle( document.body.appendChild(a) ).color.match(/\d+/g).map(function(a){ return parseInt(a,10); });
-    document.body.removeChild(a);
-    return (colors.length >= 3) ? '#' + (((1 << 24) + (colors[0] << 16) + (colors[1] << 8) + colors[2]).toString(16).substr(1)) : colorStr;
+  var qColor = colors.getBrand(colorStr)
+  if (qColor) return qColor
+  var a = document.createElement('div');
+  a.style.color = colorStr;
+  var colors_ = window.getComputedStyle( document.body.appendChild(a) ).color.match(/\d+/g).map(function(a){ return parseInt(a,10); });
+  document.body.removeChild(a);
+  return (colors_.length >= 3) ? '#' + (((1 << 24) + (colors_[0] << 16) + (colors_[1] << 8) + colors_[2]).toString(16).substr(1)) : colorStr;
 }
 
 /**

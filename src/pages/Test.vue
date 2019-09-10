@@ -5,40 +5,57 @@
     <q-toggle v-model="winline" label="inline"/>
     <q-input v-model.number="wMinHeight" label="min-height" type="number" class="q-mx-md inline"/>
     <q-input v-model.number="wMinWidth" label="min-width" type="number" class="q-mx-md inline"/>
+    <q-input v-model.number="fontSize" label="fontSize" type="number" class="q-mx-md inline"/>
+    <q-toggle v-model="wdark" label="dark"/>
 
-    <widget
-      ref="widget" style="border: 1px solid black;" bg-color="white"
-      :min-height="wMinHeight"
-      :min-width="wMinWidth"
-      title="title"
-      footer="footer"
-      :inline="winline"
-    >
-      <template v-slot:overlay>
-        <div class="absolute-center">overlay</div>
-      </template>
-      <template v-slot:content>
+    <div :style="{fontSize: fontSize+'px'}">
+      <widget
+        ref="widget" style="border: 1px solid black;" bg-color="white"
+        :min-height="wMinHeight"
+        :min-width="wMinWidth"
+        :inline="winline"
+        :color="wdark ? 'white': 'primary'"
+        :bg-color="wdark ? 'primary': 'white'"
+        :component="component"
+
+        title="kitchen"
+        value="15"
+        unit="°C"
+        icon="mdi-thermometer"
+      >
         <!--<div v-for="i in 50">line {{i}}</div>-->
-        <div class="absolute-center">content</div>
-      </template>
-    </widget>
+        <!--<div class="absolute-center">content</div>-->
+      </widget>
 
-    <widget
-      ref="widget" style="border: 1px solid black;" bg-color="white"
-      :min-height="wMinHeight"
-      :min-width="wMinWidth"
-      title="title"
-      footer="footer"
-      :inline="winline"
-    >
-      <template v-slot:overlay>
-        <div class="absolute-center">overlay</div>
-      </template>
-      <template v-slot:content>
-        <div v-for="i in 20">line {{i}}</div>
-        <div class="absolute-center">content</div>
-      </template>
-    </widget>
+      <widget
+        ref="widget" style="border: 1px solid black;" bg-color="white"
+        :min-height="wMinHeight"
+        :min-width="wMinWidth"
+        :inline="winline"
+        :color="wdark ? 'white': 'primary'"
+        :bg-color="wdark ? 'primary': 'white'"
+        :component="component2"
+
+        title="temperature"
+        value="15"
+        unit="°C"
+        icon="mdi-thermometer"
+      >
+      </widget>
+
+      <widget
+        ref="widget" style="border: 1px solid black;" bg-color="white"
+        :min-height="wMinHeight"
+        :min-width="wMinWidth"
+        :inline="winline"
+        :color="wdark ? 'white': 'primary'"
+        :bg-color="wdark ? 'primary': 'white'"
+        :component="component3"
+
+        :items="[{icon:'mdi-thermometer', label:'temperature', value: 15, unit:'°C'}, {icon:'mdi-water', label:'humidity', value: 45, unit:'%'}]"
+      >
+      </widget>
+    </div>
 
     <q-toggle v-model="dense" label="dense"/>
     <q-toggle v-model="readonly" label="read only"/>
@@ -77,17 +94,25 @@
 import ResourceSelect from '../components/ResourceSelect'
 import ResourceList from '../components/ResourceList'
 import ResourceCreateModal from '../components/ResourceCreateModal'
+import WLabel from '../components/widgets/base/Label'
+import WKnob from '../components/widgets/base/Knob'
+import WMultiLabel from '../components/widgets/base/MultiLabel'
 
 export default {
   name: 'PageTest',
 
   components: {
-    ResourceCreateModal
+    ResourceCreateModal,
   },
 
   data () {
 
     return {
+      wdark: false,
+      fontSize: 16,
+      component: WLabel,
+      component2: WKnob,
+      component3: WMultiLabel,
       winline: false,
       wMinHeight: 128,
       wMinWidth: 128,

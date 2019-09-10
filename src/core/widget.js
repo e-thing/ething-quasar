@@ -7,9 +7,10 @@ export var widgets = {}
 // defaults
 export var widgetDefaults = {
   component: null,
-  attributes: {},
+  attributes: (options, resource) => {},
   zIndex: 0, // kind of a priority. Allow to order the widgets list.
   title: '',
+  defaultTitle: '%name%', // can also be a function (attributes) => string
   description: '',
   icon: '',
   minWidth: 0,
@@ -26,12 +27,23 @@ export var widgetDefaults = {
 export function dashboardWidgetSchemaDefaults (widget, resource) {
   return {
     type: 'object',
-    required: ['title'],
     properties: {
       title: {
+        oneOf:[{
+          const: '$default',
+          title: 'default'
+        }, {
+          const: '$disabled',
+          title: 'disabled'
+        }, {
+          title: 'custom',
+          type: 'string',
+          minLength: 1,
+        }],
         type: 'string',
         minLength: 0,
-        default: resource ? '%name%' : (widget.title || (widget.schema && widget.schema.title) || '')
+        default: resource ? '$default' : '$disabled',
+        '$inline': true
       },
       color: {
         oneOf:[{

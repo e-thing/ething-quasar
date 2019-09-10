@@ -62,12 +62,14 @@
                 <q-btn flat icon="delete" color="negative" @click="removeItem(layoutItem)"/>
               </q-btn-group>
             </div>
-            <widget :ref="'widget_' + layoutItem.i" :key="layoutItem.key" class="absolute fit"
+            <widget :key="layoutItem.key" class="absolute fit"
               :component="layoutItem.widget.component"
               :min-height="layoutItem.widget.minHeight"
               v-bind="computeAttr(layoutItem)"
             >
-              <q-btn label="remove" size="sm" flat icon="delete" slot="error-after" @click="removeItem(layoutItem)"/>
+              <template v-slot:error-after>
+                <q-btn label="remove" size="sm" flat icon="delete" @click="removeItem(layoutItem)"/>
+              </template>
             </widget>
           </div>
         </div>
@@ -104,11 +106,13 @@
                     <q-btn flat icon="delete" color="negative" @click="removeItem(layoutItem)"/>
                   </q-btn-group>
                 </div>
-                <widget :ref="'widget_' + layoutItem.i" :key="layoutItem.key" class="absolute fit"
+                <widget :key="layoutItem.key" class="absolute fit"
                   :component="layoutItem.widget.component"
                   v-bind="computeAttr(layoutItem)"
                 >
-                  <q-btn label="remove" size="sm" flat icon="delete" slot="error-after" @click="removeItem(layoutItem)"/>
+                  <template v-slot:error-after>
+                    <q-btn label="remove" size="sm" flat icon="delete" @click="removeItem(layoutItem)"/>
+                  </template>
                 </widget>
             </grid-item>
         </grid-layout>
@@ -558,15 +562,51 @@ export default {
     },
 
     computeAttr (layoutItem) {
-      var attributes = extend(true, {}, layoutItem.widget.attributes, layoutItem.item.options)
-      if (layoutItem.resource) {
-        attributes.resource = layoutItem.resource // override widget id by instance
+      var widget = layoutItem.widget
+      var options = extend(true, {}, layoutItem.item.options)
+      var resource = layoutItem.resource
+
+      if (resource) {
+        options.resource = resource // override widget id by instance
       }
+
+      var attributes = extend(true, options, widget.attributes(options, resource))
+
       if (!attributes.bgColor) {
         attributes.bgColor = this.currentDashboard.options.widgetsBackgroundColor
       }
       if (!attributes.color) {
         attributes.color = this.currentDashboard.options.widgetsColor
+      }
+      if (attributes.title) {
+        var title = attributes.title
+        if (title == '$disabled') {
+          delete attributes.title
+        } else {
+          if (title == '$default') {
+            title = widget.defaultTitle
+            if (!title) {
+              title = resource ? '%name%' : ((widget.title || (widget.schema && widget.schema.title) || ''))
+            }
+            if (typeof title === 'function') {
+              title = title(attributes)
+            }
+          }
+          attributes.title = this.$ethingUI.utils.parse(title || '', (propName) => {
+            if (propName === 'createdBy') {
+              return this.$ething.arbo.get(resource.createdBy()).name()
+            } else {
+              var objPtr = resource[propName];
+              if (typeof objPtr === 'function') {
+                return objPtr.call(resource)
+              } else if (typeof objPtr !== 'undefined') {
+                return objPtr
+              } else {
+                return resource.attr(propName)
+              }
+            }
+          })
+        }
       }
       return attributes
     },

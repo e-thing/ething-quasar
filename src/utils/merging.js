@@ -51,8 +51,8 @@ export function functionMerge (parent, child, extra, mergeFn) {
 
   return function () {
     var args = Array.prototype.slice.call(arguments)
-    var pRes = parent.apply(this, args)
-    var cRes = child.apply(this, args)
+    var pRes = typeof parent === 'function' ? parent.apply(this, args) : parent
+    var cRes = typeof child === 'function' ? child.apply(this, args) : child
     return mergeFn(
       pRes,
       cRes,

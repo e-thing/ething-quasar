@@ -17,7 +17,7 @@ import WFlow from './WFlow'
 import WFlowNode from './WFlowNode'
 import WRGBLight from './WRGBLight'
 import WDeviceSensor from './WDeviceSensor'
-
+import base from './base'
 
 export default {
   WWidget,
@@ -39,5 +39,7 @@ export default {
 
   WClock,
   WFlow,
-  WFlowNode
+  WFlowNode,
+
+  base
 }

@@ -12,7 +12,7 @@ export default {
 
     props: {
       sensorName: String,
-      widgetType: String
+      widgetType: {}
     },
 
     computed: {

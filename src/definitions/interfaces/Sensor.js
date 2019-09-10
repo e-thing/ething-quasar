@@ -1,6 +1,12 @@
 import SensorsListView from '../../components/SensorsListView'
 import WDeviceSensor from '../../components/widgets/WDeviceSensor'
+import WLabel from '../../components/widgets/base/Label'
+import WKnob from '../../components/widgets/base/Knob'
+import WChart from '../../components/widgets/WChart'
 import EThingUI from '../../core'
+import EThing from 'ething-js'
+import { extend } from 'quasar'
+
 
 export default {
 
@@ -43,14 +49,8 @@ export default {
 
     if (sensorAttributes.length>0) {
 
-      var labelWidget = {
-        in: 'dashboard',
-        component: WDeviceSensor,
-        title: 'label',
-        description: 'show the current value of the sensor in a label',
-        attributes: {
-          widgetType: 'WDeviceLabel'
-        },
+      var base = {
+        attributes: {},
         schema: {
           properties: {},
           required: []
@@ -58,23 +58,56 @@ export default {
       }
 
       if (sensorAttributes.length>1) {
-        labelWidget.schema.properties.sensorName = {
+        base.defaultTitle = (attributes) => {
+          return '%name% - ' + attributes.sensorName
+        }
+
+        base.schema.properties.sensorName = {
           title: 'sensor',
           enum: sensorAttributes,
           default: sensorAttributes[0],
+          id: 'sensor.widget.sensorName'
         }
-        labelWidget.schema.required.push('sensorName')
+        base.schema.required.push('sensorName')
       } else {
-        labelWidget.attributes.sensorName = sensorAttributes[0]
+        base.attributes.sensorName = sensorAttributes[0]
       }
 
-      var qnobWidget = {
+      var labelWidget = extend(true, {}, base, {
         in: 'dashboard',
-        component: WDeviceSensor,
+        component: WLabel,
+        title: 'label',
+        description: 'show the current value of the sensor in a label',
+        attributes (options) {
+          var sensorName = options.sensorName || sensorAttributes[0]
+          var sensorProps = props[sensorName]
+
+          return {
+            icon: sensorProps.icon,
+            unit: sensorProps.unit,
+            value () {
+              return resource.attr(sensorName)
+            }
+          }
+        },
+      })
+
+      var qnobWidget = extend(true, {}, base, {
+        in: 'dashboard',
+        component: WKnob,
         title: 'qnob',
         description: 'show the current value of the sensor',
-        attributes: {
-          widgetType: 'WDeviceKnob'
+        attributes (options) {
+          var sensorName = options.sensorName || sensorAttributes[0]
+          var sensorProps = props[sensorName]
+
+          return {
+            icon: sensorProps.icon,
+            unit: sensorProps.unit,
+            value () {
+              return resource.attr(sensorName)
+            }
+          }
         },
         schema: {
           properties: {
@@ -91,17 +124,9 @@ export default {
           },
           required: []
         }
-      }
+      })
 
       if (sensorAttributes.length>1) {
-        qnobWidget.schema.properties.sensorName = {
-          title: 'sensor',
-          enum: sensorAttributes,
-          default: sensorAttributes[0],
-          id: 'sensor.widget.sensorName'
-        }
-        qnobWidget.schema.required.push('sensorName')
-
         qnobWidget.schema.properties.min.$dependencies = {
           'sensor.widget.sensorName': function (sensorName, self, node) {
             var min = EThingUI.get(resource).properties[sensorName].minimum || 0
@@ -115,10 +140,7 @@ export default {
             self.$set(self.parent().c_schema.properties.max, 'default', max)
           },
         }
-
       } else {
-        qnobWidget.attributes.sensorName = sensorAttributes[0]
-
         qnobWidget.schema.properties.min.default = props[sensorAttributes[0]].minimum || 0
 
         var max = props[sensorAttributes[0]].maximum
@@ -127,13 +149,25 @@ export default {
         }
       }
 
-      var graphWidget = {
+      var graphWidget = extend(true, {}, base, {
         in: 'dashboard',
-        component: WDeviceSensor,
+        component: WChart,
         title: 'chart',
         description: 'plot the value of the sensor',
-        attributes: {
-          widgetType: 'WChart'
+        attributes (options) {
+          var sensorName = options.sensorName || sensorAttributes[0]
+          var sensorProps = props[sensorName]
+
+          // the resource is the table
+          var table = null
+          var tables = EThing.arbo.find(r => r.createdBy() == resource.id() && r.name() == sensorName)
+          if (tables.length > 0) {
+            table = tables[0]
+          }
+
+          return {
+            resource: table,
+          }
         },
         schema: {
           properties: {
@@ -147,24 +181,13 @@ export default {
           },
           required: []
         }
-      }
-
-      if (sensorAttributes.length>1) {
-        graphWidget.schema.properties.sensorName = {
-          title: 'sensor',
-          enum: sensorAttributes,
-          default: sensorAttributes[0],
-        }
-        graphWidget.schema.required.push('sensorName')
-      } else {
-        graphWidget.attributes.sensorName = sensorAttributes[0]
-      }
+      })
 
       return {
         widgets: {
           'sensor.label': labelWidget,
           'sensor.qnob' : qnobWidget,
-          'sensor.graph' : graphWidget
+          'sensor.graph' : graphWidget,
         }
       }
     }

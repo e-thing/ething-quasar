@@ -691,6 +691,7 @@ export default {
     onTableDataAdded (evt) {
       var data = evt.data
       var chart = this.chart()
+      if (!chart) return
       for (var key in data) {
         if (key === 'id' || key === 'date') continue
         var sid = 's-' + this.table.id() + '-' + key
@@ -817,7 +818,6 @@ border-width = 3px
   padding-left 10px
 
 .expended
-  position:relative;
   width: 100%;
   height: 100%;
 
