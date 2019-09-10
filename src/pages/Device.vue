@@ -79,7 +79,7 @@
           <span>{{ widget.title }}</span>
         </div>
         <div class="bloc-content" :class="widget.devicePage.padding ? '' : 'bloc-content-no-padding'">
-          <widget :resource="resource" :component="widget.component" v-bind="widget.attributes" :minHeight="widget.minHeight" :minWidth="widget.minWidth" color="primary"/>
+          <widget :resource="resource" :widget="widget" color="primary" bgColor="white"/>
         </div>
       </div>
 

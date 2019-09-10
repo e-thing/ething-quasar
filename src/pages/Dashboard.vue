@@ -65,7 +65,6 @@
             <widget :key="layoutItem.key" class="absolute fit"
               :resource="layoutItem.resource"
               :widget="layoutItem.widget"
-              :min-height="layoutItem.widget.minHeight"
               v-bind="computeOptions(layoutItem)"
             >
               <template v-slot:error-after>

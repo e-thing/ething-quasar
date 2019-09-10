@@ -16,8 +16,7 @@ import WClock from './WClock'
 import WFlow from './WFlow'
 import WFlowNode from './WFlowNode'
 import WRGBLight from './WRGBLight'
-import WDeviceSensor from './WDeviceSensor'
-import base from './base'
+import generic from './generic'
 
 export default {
   WWidget,
@@ -35,11 +34,10 @@ export default {
   WDimmableRelay,
   WGenericSensor,
   WRGBLight,
-  WDeviceSensor,
 
   WClock,
   WFlow,
   WFlowNode,
 
-  base
+  generic
 }

@@ -13,8 +13,8 @@ export var widgetDefaults = {
   defaultTitle: '%name%', // can also be a function (attributes) => string
   description: '',
   icon: '',
-  minWidth: 0,
-  minHeight: 0,
+  minWidth: 32,
+  minHeight: 32,
   schema: {
     type: 'object'
   },

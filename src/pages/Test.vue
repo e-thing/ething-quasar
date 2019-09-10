@@ -10,51 +10,21 @@
 
     <div :style="{fontSize: fontSize+'px'}">
       <widget
-        ref="widget" style="border: 1px solid black;" bg-color="white"
+        ref="widget" bg-color="white"
+        class="q-mt-sm"
         :min-height="wMinHeight"
         :min-width="wMinWidth"
         :inline="winline"
         :color="wdark ? 'white': 'primary'"
         :bg-color="wdark ? 'primary': 'white'"
-        :component="component"
+
+        v-for="(widget, index) in widgets" :key="index"
 
         title="kitchen"
-        value="15"
-        unit="°C"
-        icon="mdi-thermometer"
-      >
-        <!--<div v-for="i in 50">line {{i}}</div>-->
-        <!--<div class="absolute-center">content</div>-->
-      </widget>
 
-      <widget
-        ref="widget" style="border: 1px solid black;" bg-color="white"
-        :min-height="wMinHeight"
-        :min-width="wMinWidth"
-        :inline="winline"
-        :color="wdark ? 'white': 'primary'"
-        :bg-color="wdark ? 'primary': 'white'"
-        :component="component2"
+        :widget="widget"
+      />
 
-        title="temperature"
-        value="15"
-        unit="°C"
-        icon="mdi-thermometer"
-      >
-      </widget>
-
-      <widget
-        ref="widget" style="border: 1px solid black;" bg-color="white"
-        :min-height="wMinHeight"
-        :min-width="wMinWidth"
-        :inline="winline"
-        :color="wdark ? 'white': 'primary'"
-        :bg-color="wdark ? 'primary': 'white'"
-        :component="component3"
-
-        :items="[{icon:'mdi-thermometer', label:'temperature', value: 15, unit:'°C'}, {icon:'mdi-water', label:'humidity', value: 45, unit:'%'}]"
-      >
-      </widget>
     </div>
 
     <q-toggle v-model="dense" label="dense"/>
@@ -94,9 +64,9 @@
 import ResourceSelect from '../components/ResourceSelect'
 import ResourceList from '../components/ResourceList'
 import ResourceCreateModal from '../components/ResourceCreateModal'
-import WLabel from '../components/widgets/base/Label'
-import WKnob from '../components/widgets/base/Knob'
-import WMultiLabel from '../components/widgets/base/MultiLabel'
+import WLabel from '../components/widgets/generic/Label'
+import WKnob from '../components/widgets/generic/Knob'
+import WMultiLabel from '../components/widgets/generic/MultiLabel'
 
 export default {
   name: 'PageTest',
@@ -110,9 +80,32 @@ export default {
     return {
       wdark: false,
       fontSize: 16,
-      component: WLabel,
-      component2: WKnob,
-      component3: WMultiLabel,
+      widgets: [{
+        component: WLabel,
+        attributes () {
+          return {
+            value: "15",
+            unit: "°C",
+            icon: "mdi-thermometer"
+          }
+        }
+      },{
+        component: WKnob,
+        attributes () {
+          return {
+            value: "15",
+            unit: "°C",
+            icon: "mdi-thermometer"
+          }
+        }
+      },{
+        component: WMultiLabel,
+        attributes () {
+          return {
+            items: [{icon:'mdi-thermometer', label:'temperature', value: 15, unit:'°C'}, {icon:'mdi-water', label:'humidity', value: 45, unit:'%'}]
+          }
+        }
+      }],
       winline: false,
       wMinHeight: 128,
       wMinWidth: 128,

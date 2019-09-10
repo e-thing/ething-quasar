@@ -58,8 +58,14 @@ export default {
       // options
       title: String,
       footer: String,
-      color: String,
-      bgColor: String,
+      color: {
+        type: String,
+        default: 'primary'
+      },
+      bgColor: {
+        type: String,
+        default: 'white'
+      },
 
     },
     data() {

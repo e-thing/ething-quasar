@@ -59,7 +59,7 @@
           </div>
 
           <q-list>
-            <q-item tag="label" v-ripple v-for="item in widgetNames">
+            <q-item tag="label" v-ripple v-for="item in widgetNames" :key="item.value">
               <q-item-section side top>
                 <q-radio v-model="widgetId" :val="item.value" />
               </q-item-section>

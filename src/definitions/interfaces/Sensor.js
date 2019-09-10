@@ -1,7 +1,6 @@
 import SensorsListView from '../../components/SensorsListView'
-import WDeviceSensor from '../../components/widgets/WDeviceSensor'
-import WLabel from '../../components/widgets/base/Label'
-import WKnob from '../../components/widgets/base/Knob'
+import WLabel from '../../components/widgets/generic/Label'
+import WKnob from '../../components/widgets/generic/Knob'
 import WChart from '../../components/widgets/WChart'
 import EThingUI from '../../core'
 import EThing from 'ething-js'
@@ -38,12 +37,15 @@ export default {
   },
 
   dynamic (resource) {
-    var sensorAttributes = []
+    var sensorAttributes = [], sensorHistoryAttributes = []
     var props = EThingUI.get(resource.types()).properties
     for (var propName in props) {
       var prop = props[propName]
       if (prop.sensor) {
         sensorAttributes.push(propName)
+        if (prop.history) {
+          sensorHistoryAttributes.push(propName)
+        }
       }
     }
 
@@ -149,46 +151,63 @@ export default {
         }
       }
 
-      var graphWidget = extend(true, {}, base, {
-        in: 'dashboard',
-        component: WChart,
-        title: 'chart',
-        description: 'plot the value of the sensor',
-        attributes (options) {
-          var sensorName = options.sensorName || sensorAttributes[0]
-          var sensorProps = props[sensorName]
+      var widgets = {
+        'sensor.label': labelWidget,
+        'sensor.qnob' : qnobWidget,
+      }
 
-          // the resource is the table
-          var table = null
-          var tables = EThing.arbo.find(r => r.createdBy() == resource.id() && r.name() == sensorName)
-          if (tables.length > 0) {
-            table = tables[0]
-          }
+      if (sensorHistoryAttributes.length>0) {
+        var graphWidget = extend(true, {}, base, {
+          in: 'dashboard',
+          component: WChart,
+          title: 'chart',
+          description: 'plot the value of the sensor',
+          attributes (options) {
+            var sensorName = options.sensorName || sensorAttributes[0]
+            var sensorProps = props[sensorName]
 
-          return {
-            resource: table,
-          }
-        },
-        schema: {
-          properties: {
-            history: {
-              description: 'the past data to plot',
-              type: 'number',
-              enum: [3600, 3600*6, 3600*12, 86400, 86400*2, 86400*7, 'all'],
-              '$labels': ['1 hour', '6 hours', '12 hours', '1 day', '2 days', '1 week', 'all'],
-              default: 86400
+            // the resource is the table
+            var table = null
+            if (sensorProps.history) {
+              var tables = EThing.arbo.find(r => r.createdBy() == resource.id() && r.name() == sensorName)
+              if (tables.length > 0) {
+                table = tables[0]
+              }
+            }
+
+            return {
+              resource: table,
             }
           },
-          required: []
+          schema: {
+            properties: {
+              history: {
+                description: 'the past data to plot',
+                type: 'number',
+                enum: [3600, 3600*6, 3600*12, 86400, 86400*2, 86400*7, 'all'],
+                '$labels': ['1 hour', '6 hours', '12 hours', '1 day', '2 days', '1 week', 'all'],
+                default: 86400
+              }
+            },
+            required: []
+          }
+        })
+
+        if (sensorHistoryAttributes.length>1) {
+          Object.assign(graphWidget.schema.properties.sensorName, {
+            enum: sensorHistoryAttributes,
+            default: sensorHistoryAttributes[0]
+          })
+        } else {
+          delete graphWidget.schema.properties.sensorName
+          graphWidget.attributes.sensorName = sensorHistoryAttributes[0]
         }
-      })
+
+        widgets['sensor.graph'] = graphWidget
+      }
 
       return {
-        widgets: {
-          'sensor.label': labelWidget,
-          'sensor.qnob' : qnobWidget,
-          'sensor.graph' : graphWidget,
-        }
+        widgets
       }
     }
   },

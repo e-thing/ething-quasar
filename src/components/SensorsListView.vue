@@ -1,20 +1,21 @@
 <template>
   <div class="container">
-    <div class="row items-stretch" v-for="(attr, name, index) in sensorAttributes" :key="name" :class="index>0 ? 'q-mt-sm' : ''">
+    <div v-for="i in 100">
+line {{ i }}
+    </div>
+    <!--<div class="row items-stretch" v-for="(item, index) in __sensors" :key="item.name" :class="index>0 ? 'q-mt-sm' : ''">
 
       <widget class="col-sm-auto col-xs-12"
-        component="WDeviceSensor"
         :resource="resource"
-        v-bind="attr.widget"
+        v-bind="item.attrs"
       />
 
       <div class="gt-xs col q-ml-sm relative-position bg-white" style="height: 220px">
-
-        <widget class="absolute fit" component="WDeviceSensor" :resource="resource" widgetType="WChart" v-bind="attr.widget" v-if="!!attr.chart" />
+        <widget class="absolute fit" :resource="resource" v-bind="item.chart" v-if="!!item.chart" />
         <small v-else class="absolute-center text-light">No data</small>
       </div>
 
-    </div>
+    </div>-->
   </div>
 </template>
 
@@ -33,37 +34,46 @@ export default {
     },
 
     computed: {
-      sensorAttributes () {
-        var attrs = {}
+      __sensors () {
+        var sensors = []
         var props = this.$ethingUI.get(this.resource).properties
-        for (var propName in props) {
+        for (let propName in props) {
           var prop = props[propName]
           if (prop.sensor) {
+            var title = prop.title || propName
             var wattr = {
-              title: prop.title || propName,
+              title,
               minHeight: 220,
               minWidth: 220,
               sensorName: propName,
-              color: '#027be3',
-              bgColor: '#ffffff'
+              widget: 'sensor.label',
+            }, chart = null;
+
+            if (prop.type === 'number' && typeof prop.minimum == 'number' && typeof prop.maximum == 'number') {
+              wattr.widget = 'sensor.qnob'
+              wattr.min = prop.minimum
+              wattr.max = prop.maximum
             }
 
-            attrs[propName] = {
-              widget: wattr,
-              chart: prop.history
+            if (prop.history) {
+              chart = {
+                title,
+                sensorName: propName,
+                widget: 'sensor.graph',
+              }
             }
+
+            sensors.push({
+              name: propName,
+              attrs: wattr,
+              chart
+            })
           }
         }
 
-        return attrs
+        return sensors
       },
     },
-
-
-
-    methods: {
-
-    }
 
 }
 </script>
