@@ -1,9 +1,9 @@
 <template>
   <div class="widget column" :class="{'widget-err': __hasError, 'inline': inline}" :style="__style">
 
-    <div class="col-auto title" v-if="!dense && (title || $slots.title)">
+    <div class="col-auto title" v-if="!dense && (__title || $slots.title)">
       <slot name="title">
-        <div class="text-center ellipsis">{{ title }}</div>
+        <div class="text-center ellipsis">{{ __title }}</div>
       </slot>
     </div>
 
@@ -19,14 +19,14 @@
       </div>
       <div :style="{visibility: __hasError ? 'hidden' : 'visible'}" class="absolute fit widget-content">
         <slot>
-          <component :is="component" v-bind="__attrs" @error="error=$event"/>
+          <component :is="__widget.component" v-bind="__attrs" @error="error=$event"/>
         </slot>
       </div>
     </div>
 
-    <div class="col-auto footer" v-if="!dense && (footer || $slots.footer)">
+    <div class="col-auto footer" v-if="!dense && (__footer || $slots.footer)">
       <slot name="footer">
-        <div class="text-center ellipsis">{{ footer }}</div>
+        <div class="text-center ellipsis">{{ __footer }}</div>
       </slot>
     </div>
 
@@ -35,6 +35,7 @@
 
 <script>
 import { widgets } from '../core/widget'
+import { extend } from 'quasar'
 
 
 export default {
@@ -45,15 +46,21 @@ export default {
     inheritAttrs: false,
 
     props: {
-      component: {},
+      widget: {}, // widget conf object, a widget type (only for global widget) or a widget id (resource must be given)
+
+      resource: {},
+
       minWidth: Number,
       minHeight: Number,
-      color: String,
-      bgColor: String,
       inline: Boolean,
+      dense: Boolean,
+
+      // options
       title: String,
       footer: String,
-      dense: Boolean,
+      color: String,
+      bgColor: String,
+
     },
     data() {
       return {
@@ -61,6 +68,103 @@ export default {
       };
     },
     computed: {
+      __widget () {
+        var widget = this.widget
+
+        if (typeof widget === 'string') {
+          if (this.resource) {
+            // widget id
+            widget = this.$ethingUI.get(this.resource).widgets[widget]
+            if (!widget) {
+              var errStr = 'widget "' + item.widgetId + '" not found for the resource ' + resource.name()
+              console.error(errStr)
+              this.setError(errStr)
+              widget = {}
+            }
+          } else {
+            // widget Type
+            widget = this.$ethingUI.findWidget(widget)
+            if (!widget) {
+              var errStr = 'unknown widget type: ' + widget
+              console.error(errStr)
+              this.setError(errStr)
+              widget = {}
+            }
+          }
+        }
+
+        this.setError(null)
+
+        return widget
+      },
+
+      __attrs () {
+        var widget = this.__widget
+
+        var options = extend(true, {
+          color: this.__color,
+          bgColor: this.__bgColor
+        }, this.$attrs)
+
+        var resource = this.resource
+
+        if (resource) {
+          options.resource = resource // override widget id by instance
+        }
+
+        var attributes = extend(true, options, widget.attributes(options, resource))
+
+        return attributes
+      },
+
+      __title () {
+        if (this.title) {
+          var title = this.title
+          if (title == '$disabled') {
+            return
+          } else {
+            if (title == '$default') {
+              title = this.__widget.defaultTitle
+              if (!title) {
+                title = resource ? '%name%' : ((this.__widget.title || (this.__widget.schema && this.__widget.schema.title) || ''))
+              }
+              if (typeof title === 'function') {
+                title = title(this.__attrs)
+              }
+            }
+            title = this.$ethingUI.utils.parse(title || '', (propName) => {
+              if (propName === 'createdBy') {
+                return this.$ething.arbo.get(this.resource.createdBy()).name()
+              } else {
+                var objPtr = this.resource[propName];
+                if (typeof objPtr === 'function') {
+                  return objPtr.call(this.resource)
+                } else if (typeof objPtr !== 'undefined') {
+                  return objPtr
+                } else {
+                  return this.resource.attr(propName)
+                }
+              }
+            })
+          }
+          return title
+        }
+      },
+
+      __footer () {
+        return this.footer
+      },
+
+      __minWidth () {
+        if (this.minWidth) return this.minWidth
+        return this.__widget.minWidth
+      },
+
+      __minHeight () {
+        if (this.minHeight) return this.minHeight
+        return this.__widget.minHeight
+      },
+
       __style () {
         var style = {}
 
@@ -71,14 +175,14 @@ export default {
           style['color'] = this.__color
         }
 
-        if (this.minWidth) {
-          style.minWidth = this.minWidth + 'px'
+        if (this.__minWidth) {
+          style.minWidth = this.__minWidth + 'px'
           if (this.inline) {
             style.width = style.minWidth
           }
         }
-        if (this.minHeight) {
-          style.minHeight = this.minHeight + 'px'
+        if (this.__minHeight) {
+          style.minHeight = this.__minHeight + 'px'
           style.height = this.inline ? style.minHeight : '1px'
         }
 
@@ -92,19 +196,6 @@ export default {
       },
       __bgColor () {
         return this.bgColor ? this.$ethingUI.utils.colorNameToHex(this.bgColor) : undefined
-      },
-      __attrs () {
-        var attrs = {}
-        if (this.__color) {
-          attrs.color = this.__color
-        }
-        if (this.__bgColor) {
-          attrs.bgColor = this.__bgColor
-        }
-        return Object.assign(attrs, this.$attrs)
-      },
-      __resource () {
-        return this.$attrs['resource']
       },
     },
 

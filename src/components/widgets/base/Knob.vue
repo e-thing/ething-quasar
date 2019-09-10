@@ -101,8 +101,8 @@ export default {
         var knobSize = Math.min(size.width, size.height)
         this.knobSize = knobSize + 'px'
         var innerSize = knobSize * (1-this.thickness)
-        var lineHeight = 1. // ratio between text and innerSize
-        var g = 2 // big = 200%
+        var lineHeight = 1.2 // ratio between text and innerSize
+        var g = 1.5 // big = 200%
         var coeff = g
         if (this.icon) coeff += 1
         if (this.unit) coeff += 1
@@ -139,6 +139,6 @@ export default {
     filter: brightness(110%);
   }
   .big {
-    font-size: 200%;
+    font-size: 150%;
   }
 </style>

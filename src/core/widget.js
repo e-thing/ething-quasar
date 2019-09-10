@@ -53,7 +53,7 @@ export function dashboardWidgetSchemaDefaults (widget, resource) {
           type: 'string',
           '$component': 'color',
           default: '#027be3',
-          title: 'color'
+          title: 'custom'
         }],
         description: 'The color of the widget',
         default: null,
@@ -68,7 +68,7 @@ export function dashboardWidgetSchemaDefaults (widget, resource) {
           '$format': 'hexa',
           '$component': 'color',
           default: '#ffffffff',
-          title: 'color'
+          title: 'custom'
         }],
         title: 'background color',
         description: 'The color of the widget\'s background',

@@ -63,9 +63,10 @@
               </q-btn-group>
             </div>
             <widget :key="layoutItem.key" class="absolute fit"
-              :component="layoutItem.widget.component"
+              :resource="layoutItem.resource"
+              :widget="layoutItem.widget"
               :min-height="layoutItem.widget.minHeight"
-              v-bind="computeAttr(layoutItem)"
+              v-bind="computeOptions(layoutItem)"
             >
               <template v-slot:error-after>
                 <q-btn label="remove" size="sm" flat icon="delete" @click="removeItem(layoutItem)"/>
@@ -107,8 +108,9 @@
                   </q-btn-group>
                 </div>
                 <widget :key="layoutItem.key" class="absolute fit"
-                  :component="layoutItem.widget.component"
-                  v-bind="computeAttr(layoutItem)"
+                  :resource="layoutItem.resource"
+                  :widget="layoutItem.widget"
+                  v-bind="computeOptions(layoutItem)"
                 >
                   <template v-slot:error-after>
                     <q-btn label="remove" size="sm" flat icon="delete" @click="removeItem(layoutItem)"/>
@@ -251,23 +253,6 @@ export default {
         return style
       }
     },
-
-    /*widgetStyle () {
-      if (this.currentDashboard) {
-        var style = {}
-        var options = this.currentDashboard.options
-
-        if (options.widgetsBackgroundColor) {
-    			style['background-color'] = options.widgetsBackgroundColor
-        }
-
-        if (options.widgetsColor) {
-          style['color'] = options.widgetsColor
-        }
-
-        return style
-      }
-    },*/
   },
 
   methods: {
@@ -561,54 +546,17 @@ export default {
       }
     },
 
-    computeAttr (layoutItem) {
-      var widget = layoutItem.widget
+    computeOptions (layoutItem) {
       var options = extend(true, {}, layoutItem.item.options)
-      var resource = layoutItem.resource
 
-      if (resource) {
-        options.resource = resource // override widget id by instance
+      if (!options.bgColor) {
+        options.bgColor = this.currentDashboard.options.widgetsBackgroundColor
+      }
+      if (!options.color) {
+        options.color = this.currentDashboard.options.widgetsColor
       }
 
-      var attributes = extend(true, options, widget.attributes(options, resource))
-
-      if (!attributes.bgColor) {
-        attributes.bgColor = this.currentDashboard.options.widgetsBackgroundColor
-      }
-      if (!attributes.color) {
-        attributes.color = this.currentDashboard.options.widgetsColor
-      }
-      if (attributes.title) {
-        var title = attributes.title
-        if (title == '$disabled') {
-          delete attributes.title
-        } else {
-          if (title == '$default') {
-            title = widget.defaultTitle
-            if (!title) {
-              title = resource ? '%name%' : ((widget.title || (widget.schema && widget.schema.title) || ''))
-            }
-            if (typeof title === 'function') {
-              title = title(attributes)
-            }
-          }
-          attributes.title = this.$ethingUI.utils.parse(title || '', (propName) => {
-            if (propName === 'createdBy') {
-              return this.$ething.arbo.get(resource.createdBy()).name()
-            } else {
-              var objPtr = resource[propName];
-              if (typeof objPtr === 'function') {
-                return objPtr.call(resource)
-              } else if (typeof objPtr !== 'undefined') {
-                return objPtr
-              } else {
-                return resource.attr(propName)
-              }
-            }
-          })
-        }
-      }
-      return attributes
+      return options
     },
 
     save: debounce( function(){
