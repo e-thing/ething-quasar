@@ -6,7 +6,6 @@ import Light from './Light'
 import Dimmer from './Dimmer'
 import Dimmable from './Dimmable'
 import Camera from './Camera'
-import Anemometer from './Anemometer'
 import DoorSensor from './DoorSensor'
 import DimmableRelay from './DimmableRelay'
 import DimmableLight from './DimmableLight'
@@ -21,7 +20,6 @@ export default {
   Dimmer,
   Dimmable,
   Camera,
-  Anemometer,
   DoorSensor,
   DimmableRelay,
   DimmableLight,

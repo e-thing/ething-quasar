@@ -4,7 +4,7 @@
 
 <script>
 import Chart from '../Chart'
-import WResource from './WResource'
+import Base from './Base'
 
 export default {
     name: 'WChart',
@@ -13,7 +13,7 @@ export default {
       Chart
     },
 
-    mixins: [WResource],
+    mixins: [Base],
 
     props: {
       history: {

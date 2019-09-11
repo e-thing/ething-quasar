@@ -1,11 +1,13 @@
 // widgets module
 import { extend } from 'quasar'
+import {defaultMerge,mapMerge,functionMerge,vueComponentMerge} from '../utils/merging'
+
 
 // global widgets map
 export var widgets = {}
 
 // defaults
-export var widgetDefaults = {
+export const widgetDefaults = {
   component: null,
   attributes: (options, resource) => {},
   zIndex: 0, // kind of a priority. Allow to order the widgets list.
@@ -18,10 +20,24 @@ export var widgetDefaults = {
   schema: {
     type: 'object'
   },
-  devicePage: { // options specific to devicePage
-    padding: true
-  },
-  in: ['dashboard'],
+}
+
+export function widgetMerge (p, c, n) {
+  if (!p) return c
+  if (!c) return p
+
+  var keys = Object.keys(p).concat(Object.keys(c)).filter((v, i, a) => a.indexOf(v) === i);
+  var merged = {}
+  keys.forEach(k => {
+    if (k==='component') {
+      merged[k] = vueComponentMerge(p[k], c[k])
+    } else if (k==='attributes') {
+      merged[k] = functionMerge(p[k], c[k])
+    } else {
+      merged[k] = defaultMerge(p[k], c[k])
+    }
+  })
+  return merged
 }
 
 export function dashboardWidgetSchemaDefaults (widget, resource) {
@@ -86,7 +102,7 @@ export function findWidget (id) {
   }
 }
 
-// register a widget
+// register a global widget
 export function registerWidget (id, widget) {
   if (!widget.component) {
     throw new Error('No component attribute set in the widget definition')
@@ -96,7 +112,7 @@ export function registerWidget (id, widget) {
   var c = widget.component
   delete widget.component
 
-  widgets[id] = extend(true, {}, widgetDefaults, widget)
+  widgets[id] = widgetMerge(widgetDefaults, widget)
 
   widgets[id].component = c
 

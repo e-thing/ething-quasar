@@ -1,26 +1,37 @@
 <template>
-  <div class="fit column no-wrap text-center q-pt-xs q-gutter-y-xs">
+  <div class="fit column no-wrap text-center q-pt-xs q-gutter-y-xs q-pl-xs q-gutter-x-xs">
     <div class="col-auto" v-if="label">{{ label }}</div>
     <div class="col relative-position">
       <q-resize-observer @resize="updateLayout" />
       <q-knob
         ref="knob"
+        class="q-knob--no-shadow"
         :value="__valueNumber"
         :min="min"
         :max="max"
-        readonly
+        :readonly="__readonly"
         :color="color"
         show-value
         :size="knobSize"
         :thickness="thickness"
         track-color="track-color-custom"
+        @change="__change"
+        :disable="writing"
       >
         <slot>
-          <div class="text-center" :style="{fontSize}">
+          <div v-if="!__centerButton" class="text-center" :style="{fontSize}">
             <q-icon v-if="icon" :name="icon" class="light" style="vertical-align: text-bottom;"/>
             <div class="big">{{ __value }}</div>
             <div class="light" v-if="unit">{{unit}}</div>
           </div>
+          <q-avatar v-else
+            :style="__buttonStyle"
+            @click.stop="__toggle"
+            font-size="30%"
+            :size="buttonSize"
+          >
+            {{ __state ? buttonLabelOn : buttonLabelOff }}
+          </q-avatar>
         </slot>
       </q-knob>
     </div>
@@ -28,7 +39,7 @@
 </template>
 
 <script>
-import Base from '../WWidget'
+import Base from '../Base'
 import { colors } from 'quasar'
 
 
@@ -49,22 +60,41 @@ export default {
         type: Number,
         default: 100
       },
-      attr: String,
       thickness: {
         type: Number,
         default: 0.2
       },
       value: {},
+      set: Function,
+
+      buttonValue: {},
+      buttonSet: Function,
+
+      buttonLabelOn: {
+        type: String,
+        default: 'On'
+      },
+      buttonLabelOff: {
+        type: String,
+        default: 'Off'
+      }
     },
 
     data () {
       return {
-        knobSize: '32px',
-        fontSize: '16px'
+        knobSize: '64px',
+        fontSize: '16px',
+        writing: false
       }
     },
 
     computed: {
+      __readonly () {
+        return !this.set
+      },
+      __centerButton () {
+        return !!this.buttonSet
+      },
       __value () {
         var value = this.value;
         if (typeof value == 'function') {
@@ -82,6 +112,26 @@ export default {
         var value = this.__value
         if (typeof value === 'string') value = parseInt(value)
         return (typeof value === 'number' && !Number.isNaN(value)) ? value : 0
+      },
+
+      __buttonStyle () {
+        return {
+          backgroundColor: this.__state ? this.color : '#bdbdbd',
+          color: this.__state ? this.bgColor : 'white',
+        }
+      },
+
+      __state () {
+        var state = this.buttonValue;
+        if (typeof state == 'function') {
+          try {
+            state = state()
+          } catch (err) {
+            console.error(err)
+            state = false
+          }
+        }
+        return !!state
       }
     },
 
@@ -101,6 +151,7 @@ export default {
         var knobSize = Math.min(size.width, size.height)
         this.knobSize = knobSize + 'px'
         var innerSize = knobSize * (1-this.thickness)
+        this.buttonSize = (innerSize-8) + 'px'
         var lineHeight = 1.2 // ratio between text and innerSize
         var g = 1.5 // big = 200%
         var coeff = g
@@ -116,7 +167,7 @@ export default {
         var trackEl = knobEl.$el.querySelector('.text-track-color-custom')
         if (!trackEl) return
 
-        var trackColor
+        var trackColor;
 
         if (/^#ffffff/.test(this.color) || this.color == 'white') {
           // add transparency
@@ -128,6 +179,26 @@ export default {
 
         trackEl.style.color = trackColor
 
+      },
+      __change (value) {
+        if (this.set) {
+          this.writing = true
+          Promise.resolve(this.set(value)).catch(err => {
+            this.setError(err)
+          }).finally(() => {
+            this.writing = false
+          })
+        }
+      },
+      __toggle () {
+        if (this.buttonSet) {
+          this.writing = true
+          Promise.resolve(this.buttonSet(!this.__state)).catch(err => {
+            this.setError(err)
+          }).finally(() => {
+            this.writing = false
+          })
+        }
       }
     }
 
@@ -141,4 +212,10 @@ export default {
   .big {
     font-size: 150%;
   }
+</style>
+
+<style>
+.q-knob--no-shadow:focus:before {
+  box-shadow: none !important;
+}
 </style>

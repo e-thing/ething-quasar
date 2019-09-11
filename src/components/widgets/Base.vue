@@ -11,7 +11,8 @@ export default {
     },
     bgColor: {
       type: String,
-    }
+    },
+    resource: {}
   },
 
   methods: {

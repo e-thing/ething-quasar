@@ -6,14 +6,14 @@ import Vue from 'vue'
 import * as formSchemaCore from '../boot/formSchema/core'
 import { extend } from 'quasar'
 import { linearize } from 'c3-linearization'
-import {widgetDefaults} from './widget'
+import {widgetDefaults, widgetMerge} from './widget'
 import {merge,defaultMerge,arrayUniqueMerge,noMerge,mapMerge,functionMerge,vueComponentMerge} from '../utils/merging'
 import localDefinitions from '../definitions'
 
 
 // list all information about a registered class (Resources, flow nodes, signals, ...).
 // some of these attributes are read only, others can be customized.
-var defaults = {
+const defaults = {
   /**
   * COMMON
   **/
@@ -32,7 +32,7 @@ var defaults = {
   properties: {},
   // READ-ONLY: is this class is abstract  ?
   virtual: false,
-  // a function(function) => {} that returns some specific definition attributes according to the instance
+  // a function(resource) => {} that returns some specific definition attributes according to the resource instance
   /*
   {
     color: 'green',
@@ -58,24 +58,26 @@ var defaults = {
   **/
   // READ-ONLY: list the signals this resource can emit
   signals: [],
-  // a map of resource widgets
+
+  // a map of widgets, the keys represent the widgets id
   // widgets are used to display a resource data/attributes...
-  // widgets are displayed in the dashboard (any resources) and/or in the device page (only for device).
+  // widgets are displayed in the dashboard.
   /*
     {
-      in: ['dashboard', 'devicePage'], // where this widget is displayed
       component: <VueComponent>,
+      title: '...', // the name of the widget
+      description: '...', // a description of this widget
       icon: '...',
-      attributes: {}, // attributes to pass to the component (may be overwritten by the model generated from the schema)
-      minWidth: 45, // px
-      minHeight: 45, // px
-      zIndex: 0, // specify the order
+      attributes: (options, resource) => {}, // extra attributes to pass to the component
+      minWidth: 45, // px, the minimum width accepted by this widget
+      minHeight: 45, // px, the minimum height accepted by this widget
+      zIndex: 0, // kind of a priority. Allow to order the widgets list.
 
-      // specific to 'devicePage'
-      title: '...',
+      defaultTitle: '...' || (attributes) => '...', // a template (eg. '%name%') or a function to generate the default widget's title. If empty, the title will be disabled.
 
-      // specific to 'dashboard'
-      schema: {},
+      schema: {}, // JSON schema for generating options
+
+      disable: false // set to true if you want to disable this widget (may be useful when overriding)
 
     }
   */
@@ -102,12 +104,54 @@ var defaults = {
   */
   data (resource) {},
 
+  // a map of components, the keys represent the components id
+  // board components are displayed in the device's page.
+  /*
+    {
+      component: <VueComponent>,
+      title: '...',
+      icon: '...',
+      attributes: (resource) => {}, // extra attributes to pass to the component
+      zIndex: 0, // kind of a priority. Allow to order the components list.
+      disable: false // set to true if you want to disable this item
+    }
+  */
+  board: {},
+
   /**
   * FLOW NODE
   **/
   // the flow node Vue component
   node: null,
 
+}
+
+
+const boardItemDefaults = {
+  component: null,
+  attributes: (resource) => {},
+  zIndex: 0, // kind of a priority. Allow to order the widgets list.
+  title: '',
+  icon: '',
+}
+
+
+function boardItemMerge(p, c, n) {
+  if (!p) return c
+  if (!c) return p
+
+  var keys = Object.keys(p).concat(Object.keys(c)).filter((v, i, a) => a.indexOf(v) === i);
+  var merged = {}
+  keys.forEach(k => {
+    if (k==='component') {
+      merged[k] = vueComponentMerge(p[k], c[k])
+    } else if (k==='attributes') {
+      merged[k] = functionMerge(p[k], c[k])
+    } else {
+      merged[k] = defaultMerge(p[k], c[k])
+    }
+  })
+  return merged
 }
 
 
@@ -119,35 +163,15 @@ var mergeStrategies = {
 
   signals: arrayUniqueMerge,
   widgets (parent, child, node) {
-    return mapMerge (parent, child, node, (p, c, n) => {
-      if (!p) {
-        if (!c.title && node) {
-          c.title = node.title
-        }
-        if (!c.icon && node) {
-          c.icon = node.icon
-        }
-        return c
-      }
-      if (!c) return p
-
-      var keys = Object.keys(p).concat(Object.keys(c)).filter((v, i, a) => a.indexOf(v) === i);
-      var merged = {}
-      keys.forEach(k => {
-        if (k==='component') {
-          merged[k] = vueComponentMerge(p[k], c[k])
-        } else if (k==='attributes') {
-          merged[k] = functionMerge(p[k], c[k])
-        } else {
-          merged[k] = defaultMerge(p[k], c[k])
-        }
-      })
-      return merged
-    })
+    return mapMerge (parent, child, node, widgetMerge)
   },
 
   methods: mapMerge,
   data: functionMerge,
+
+  board (parent, child, node) {
+    return mapMerge (parent, child, node, boardItemMerge)
+  },
 
 }
 
@@ -266,9 +290,6 @@ function reshape(node) {
           node.widgets[id] = {}
         }
       }
-      if (typeof widget.in === 'string') {
-        widget.in = [widget.in]
-      }
     }
   }
 
@@ -352,7 +373,11 @@ function normalize (obj, resource) {
   }
 
   for (var id in obj.widgets) {
-    obj.widgets[id] = Object.assign({}, widgetDefaults, obj.widgets[id])
+    obj.widgets[id] = widgetMerge(widgetDefaults, obj.widgets[id])
+  }
+
+  for (var id in obj.board) {
+    obj.board[id] = Object.assign({}, boardItemDefaults, obj.board[id])
   }
 
   delete obj.dynamic
@@ -366,6 +391,14 @@ function normalize (obj, resource) {
     var originalDataFn = obj.data
     obj.data = function () {
       return originalDataFn ? originalDataFn.call(this, resource) : {}
+    }
+
+    for (var id in obj.board) {
+      let boardItem = obj.board[id]
+      let originalBoardAttrsFn = boardItem.attributes
+      boardItem.attributes = function () {
+        return originalBoardAttrsFn ? originalBoardAttrsFn.call(this, resource) : {}
+      }
     }
 
     obj._resource = resource

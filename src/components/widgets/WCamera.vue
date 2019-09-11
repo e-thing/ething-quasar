@@ -4,7 +4,7 @@
 
 <script>
 import ImageViewer from '../ImageViewer'
-import WResource from './WResource'
+import Base from './Base'
 
 export default {
     name: 'WCamera',
@@ -42,10 +42,7 @@ export default {
         clearInterval(this.timerId)
     },
 
-    mixins: [WResource],
+    mixins: [Base],
 
 }
 </script>
-
-<style scoped>
-</style>

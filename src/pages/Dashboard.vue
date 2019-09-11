@@ -496,7 +496,7 @@ export default {
           var resourceMeta = this.$ethingUI.get(resource)
           widget = resourceMeta.widgets[item.widgetId]
           if (!widget) {
-            console.error('[dashboard] widget "' + item.widgetId + '" not found for the resource ' + resource.id())
+            console.error('[dashboard] widget "' + item.widgetId + '" not found for the resource ' + resource.name())
             return
           }
         } else {

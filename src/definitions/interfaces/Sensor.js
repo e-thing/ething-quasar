@@ -2,6 +2,7 @@ import SensorsListView from '../../components/SensorsListView'
 import WLabel from '../../components/widgets/generic/Label'
 import WKnob from '../../components/widgets/generic/Knob'
 import WChart from '../../components/widgets/WChart'
+import WMultiLabel from '../../components/widgets/generic/MultiLabel'
 import EThingUI from '../../core'
 import EThing from 'ething-js'
 import { extend } from 'quasar'
@@ -9,16 +10,12 @@ import { extend } from 'quasar'
 
 export default {
 
-  widgets: {
+  board: {
     'sensor.main': {
-      in: 'devicePage',
       component: SensorsListView,
       title: 'Sensors',
-      devicePage: {
-        padding: false
-      }
-    },
-
+      icon: 'mdi-access-point'
+    }
   },
 
   data (resource) {
@@ -37,7 +34,7 @@ export default {
   },
 
   dynamic (resource) {
-    var sensorAttributes = [], sensorHistoryAttributes = []
+    var sensorAttributes = [], sensorHistoryAttributes = [], sensorNumericAttributes = []
     var props = EThingUI.get(resource.types()).properties
     for (var propName in props) {
       var prop = props[propName]
@@ -45,6 +42,9 @@ export default {
         sensorAttributes.push(propName)
         if (prop.history) {
           sensorHistoryAttributes.push(propName)
+        }
+        if (prop.type == 'number' || prop.type == 'integer') {
+          sensorNumericAttributes.push(propName)
         }
       }
     }
@@ -61,7 +61,8 @@ export default {
 
       if (sensorAttributes.length>1) {
         base.defaultTitle = (attributes) => {
-          return '%name% - ' + attributes.sensorName
+          var sensorName = attributes.sensorName
+          return '%name% - ' + props[sensorName].title
         }
 
         base.schema.properties.sensorName = {
@@ -71,12 +72,9 @@ export default {
           id: 'sensor.widget.sensorName'
         }
         base.schema.required.push('sensorName')
-      } else {
-        base.attributes.sensorName = sensorAttributes[0]
       }
 
       var labelWidget = extend(true, {}, base, {
-        in: 'dashboard',
         component: WLabel,
         title: 'label',
         description: 'show the current value of the sensor in a label',
@@ -85,6 +83,7 @@ export default {
           var sensorProps = props[sensorName]
 
           return {
+            sensorName,
             icon: sensorProps.icon,
             unit: sensorProps.unit,
             value () {
@@ -93,77 +92,113 @@ export default {
           }
         },
       })
-
-      var qnobWidget = extend(true, {}, base, {
-        in: 'dashboard',
-        component: WKnob,
-        title: 'qnob',
-        description: 'show the current value of the sensor',
-        attributes (options) {
-          var sensorName = options.sensorName || sensorAttributes[0]
-          var sensorProps = props[sensorName]
-
-          return {
-            icon: sensorProps.icon,
-            unit: sensorProps.unit,
-            value () {
-              return resource.attr(sensorName)
-            }
-          }
-        },
-        schema: {
-          properties: {
-            min: {
-              title: 'minimum',
-              type: 'number',
-              default: 0
-            },
-            max: {
-              title: 'maximum',
-              type: 'number',
-              default: 100
-            },
-          },
-          required: []
-        }
-      })
-
-      if (sensorAttributes.length>1) {
-        qnobWidget.schema.properties.min.$dependencies = {
-          'sensor.widget.sensorName': function (sensorName, self, node) {
-            var min = EThingUI.get(resource).properties[sensorName].minimum || 0
-            self.$set(self.parent().c_schema.properties.min, 'default', min)
-          },
-        }
-        qnobWidget.schema.properties.max.$dependencies = {
-          'sensor.widget.sensorName': function (sensorName, self, node) {
-            var max = EThingUI.get(resource).properties[sensorName].maximum
-            if (typeof max != 'number') max = 100
-            self.$set(self.parent().c_schema.properties.max, 'default', max)
-          },
-        }
-      } else {
-        qnobWidget.schema.properties.min.default = props[sensorAttributes[0]].minimum || 0
-
-        var max = props[sensorAttributes[0]].maximum
-        if (typeof max == 'number') {
-          qnobWidget.schema.properties.max.default = max
-        }
-      }
 
       var widgets = {
         'sensor.label': labelWidget,
-        'sensor.qnob' : qnobWidget,
+      }
+
+      if (sensorAttributes.length>1) {
+        // multiple sensors
+        var multiLabelWidget = {
+          component: WMultiLabel,
+          title: 'all',
+          description: 'show the current value of all available sensors',
+          attributes (options) {
+            return {
+              items: sensorAttributes.map(sensorName => {
+                var prop = props[sensorName]
+
+                return {
+                  label: prop.title,
+                  unit: prop.unit,
+                  icon: prop.icon,
+                  value () {
+                    return resource.attr(sensorName)
+                  }
+                }
+              })
+            }
+          },
+        }
+
+        widgets['sensor.all'] = multiLabelWidget
+      }
+
+      if (sensorNumericAttributes.length>0) {
+        var knobWidget = extend(true, {}, base, {
+          component: WKnob,
+          title: 'qnob',
+          description: 'show the current value of the sensor',
+          attributes (options) {
+            var sensorName = options.sensorName || sensorNumericAttributes[0]
+            var sensorProps = props[sensorName]
+
+            return {
+              sensorName,
+              icon: sensorProps.icon,
+              unit: sensorProps.unit,
+              value () {
+                return resource.attr(sensorName)
+              }
+            }
+          },
+          schema: {
+            properties: {
+              min: {
+                title: 'minimum',
+                type: 'number',
+                default: 0
+              },
+              max: {
+                title: 'maximum',
+                type: 'number',
+                default: 100
+              },
+            },
+            required: []
+          }
+        })
+
+        if (knobWidget.schema.properties.sensorName) {
+          knobWidget.schema.properties.min.$dependencies = {
+            'sensor.widget.sensorName': function (sensorName, self, node) {
+              var min = props[sensorName].minimum || 0
+              self.$set(self.parent().c_schema.properties.min, 'default', min)
+            },
+          }
+          knobWidget.schema.properties.max.$dependencies = {
+            'sensor.widget.sensorName': function (sensorName, self, node) {
+              var max = props[sensorName].maximum
+              if (typeof max != 'number') max = 100
+              self.$set(self.parent().c_schema.properties.max, 'default', max)
+            },
+          }
+        } else {
+          knobWidget.schema.properties.min.default = props[sensorNumericAttributes[0]].minimum || 0
+
+          var max = props[sensorNumericAttributes[0]].maximum
+          if (typeof max == 'number') {
+            knobWidget.schema.properties.max.default = max
+          }
+        }
+
+        if (knobWidget.schema.properties.sensorName) {
+          Object.assign(knobWidget.schema.properties.sensorName, {
+            enum: sensorNumericAttributes,
+            default: sensorNumericAttributes[0]
+          })
+        }
+
+        widgets['sensor.knob'] = knobWidget
       }
 
       if (sensorHistoryAttributes.length>0) {
         var graphWidget = extend(true, {}, base, {
-          in: 'dashboard',
           component: WChart,
           title: 'chart',
           description: 'plot the value of the sensor',
           attributes (options) {
-            var sensorName = options.sensorName || sensorAttributes[0]
+            var sensorName = options.sensorName || sensorHistoryAttributes[0]
             var sensorProps = props[sensorName]
 
             // the resource is the table
@@ -176,6 +211,7 @@ export default {
             }
 
             return {
+              sensorName,
               resource: table,
             }
           },
@@ -193,14 +229,11 @@ export default {
           }
         })
 
-        if (sensorHistoryAttributes.length>1) {
+        if (graphWidget.schema.properties.sensorName) {
           Object.assign(graphWidget.schema.properties.sensorName, {
             enum: sensorHistoryAttributes,
             default: sensorHistoryAttributes[0]
           })
-        } else {
-          delete graphWidget.schema.properties.sensorName
-          graphWidget.attributes.sensorName = sensorHistoryAttributes[0]
         }
 
         widgets['sensor.graph'] = graphWidget

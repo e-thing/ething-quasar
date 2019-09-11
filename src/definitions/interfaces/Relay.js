@@ -1,24 +1,18 @@
-import WSwitch from '../../components/widgets/WSwitch'
+import WSwitch from '../../components/widgets/generic/Switch'
 
 export default {
 
-  data (resource) {
-    return {
-      'state': resource.attr('state') ? 'on' : 'off'
-    }
-  },
-
   widgets: {
-    'switch.state': {
-      in: ['dashboard'],
-    },
     'relay.switch': {
-      in: ['dashboard', 'devicePage'],
       component: WSwitch,
-      attributes: {
-        attr: 'state',
-        set (resource, value) {
-          return resource.execute('setState', value)
+      attributes (options, resource) {
+        return {
+          value () {
+            return resource.attr('state')
+          },
+          set (value) {
+            return resource.execute('setState', value)
+          }
         }
       },
       title: 'switch',

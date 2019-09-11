@@ -23,9 +23,10 @@ export default {
 
   widgets: {
     'chart': {
+      title: 'chart',
+      description: 'plot the data',
       component: WChart,
       schema: {
-        title: 'chart',
         properties: {
           history: {
             description: 'the past data to plot',

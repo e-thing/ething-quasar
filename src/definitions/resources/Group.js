@@ -5,17 +5,11 @@ export default {
 
   color: 'cyan-6',
 
-  widgets (group) {
-    return {
-      'group.list': {
-        in: 'devicePage',
-        component: ListGroupItems,
-        title: 'Items',
-        devicePage: {
-          padding: false
-        }
-      },
-    }
+  board: {
+    'group.list': {
+      component: ListGroupItems,
+      title: 'Items',
+    },
   }
 
 }

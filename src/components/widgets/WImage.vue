@@ -4,7 +4,7 @@
 
 <script>
 import ImageViewer from '../ImageViewer'
-import WResource from './WResource'
+import Base from './Base'
 
 export default {
     name: 'WImage',
@@ -13,7 +13,7 @@ export default {
       ImageViewer
     },
 
-    mixins: [WResource],
+    mixins: [Base],
 
 }
 </script>

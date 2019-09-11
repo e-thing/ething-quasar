@@ -1,4 +1,4 @@
-import WDimmable from '../../components/widgets/WDimmable'
+import WKnob from '../../components/widgets/generic/Knob'
 
 export default {
 
@@ -10,15 +10,21 @@ export default {
 
   widgets: {
     'dimmable.dimmer': {
-      in: ['dashboard', 'devicePage'],
-      component: WDimmable,
-      attributes: {
-        attr: 'level',
-        set (resource, value) {
-          return resource.execute('setLevel', value)
+      component: WKnob,
+      attributes (options, resource) {
+        return {
+          value () {
+            return resource.attr('level')
+          },
+          set (val) {
+            return resource.execute('setLevel', val)
+          },
+          unit: '%',
+          min: 0,
+          max: 100
         }
       },
-      label: 'Dimmer',
+      title: 'Dimmer',
       description: 'adjust the level',
       minWidth: 160,
       minHeight: 160

@@ -1,26 +1,22 @@
-import WDeviceLabel from '../../components/widgets/WDeviceLabel'
+import WLabel from '../../components/widgets/generic/Label'
 
 export default {
 
   data (resource) {
     return {
-      'state': resource.attr('state') ? 'on' : 'off'
+      'state': resource.attr('state') ? 'On' : 'Off'
     }
   },
 
   widgets: {
     'switch.state': {
-      in: ['dashboard', 'devicePage'],
-      component: WDeviceLabel,
-      attributes: {
-        attr: 'state',
-        map: [{
-          key: true,
-          value: 'On'
-        },{
-          key: false,
-          value: 'Off'
-        }]
+      component: WLabel,
+      attributes (options, resource) {
+        return {
+          value () {
+            return resource.attr('state') ? 'On' : 'Off'
+          }
+        }
       },
       title: 'state',
       description: 'show the state of the switch',

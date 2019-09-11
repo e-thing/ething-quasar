@@ -1,4 +1,3 @@
-//import WDeviceMultiLabel from '../../components/widgets/WDeviceMultiLabel'
 
 export default {
 
@@ -8,27 +7,21 @@ export default {
     }
   },
 
-  /*widgets: {
-    'door.state': {
-      in: ['dashboard'],
-      component: WDeviceMultiLabel,
-      attributes: {
-        items: [{
-          attr: 'state',
-          map: [{
-            key: true,
-            value: 'opened'
-          },{
-            key: false,
-            value: 'closed'
-          }]
-        }]
-      },
-      title: 'state',
-      description: 'show the door state',
-      minWidth: 100,
-      minHeight: 100
+  widgets: {
+    'sensor.label': {
+      attributes (options, resource) {
+        return {
+          value () {
+            var val = resource.attr('state')
+            return val ? 'opened' : 'closed'
+          },
+          icon () {
+            var val = resource.attr('state')
+            return val ? 'mdi-door-open' : 'mdi-door-closed'
+          },
+        }
+      }
     }
-  }*/
+  }
 
 }

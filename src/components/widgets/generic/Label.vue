@@ -3,7 +3,7 @@
     <span v-if="__label && !horizontal" class="col-auto">{{ __label }}</span>
     <div class="col column justify-center" :style="{fontSize}">
       <q-resize-observer @resize="updateLayout" />
-      <div class="col-auto">
+      <div class="col-auto text-no-wrap">
         <q-icon v-if="__icon" :name="__icon" class="light big" style="vertical-align: text-bottom;"/>
         <span v-if="__label && horizontal" class="q-mr-sm light">{{ __label }}</span>
         <span class="text-bold big">{{ __value }}</span>
@@ -14,7 +14,7 @@
 </template>
 
 <script>
-import Base from '../WWidget'
+import Base from '../Base'
 
 export default {
     name: 'WLabel',
@@ -68,9 +68,13 @@ export default {
         var height = size.height
         var lineHeight = 1.5
         var g = 2 // big = 200 %
-        var fontSize = height / (lineHeight * 1. * g)
+        var coef = g
+        if (!this.horizontal && this.__label) coef += 1
+        var fontSizeH = height / (lineHeight * 1. * coef)
 
-        this.fontSize = Math.floor(fontSize)+'px'
+        var fontSizeW = size.width / (this.horizontal && this.__label ? 20 : 10)
+
+        this.fontSize = Math.floor(Math.min(fontSizeH, fontSizeW))+'px'
       }
     }
 

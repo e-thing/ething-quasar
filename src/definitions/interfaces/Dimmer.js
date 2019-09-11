@@ -1,5 +1,5 @@
-import WDeviceLabel from '../../components/widgets/WDeviceLabel'
-import WDeviceKnob from '../../components/widgets/WDeviceKnob'
+import WLabel from '../../components/widgets/generic/Label'
+import WKnob from '../../components/widgets/generic/Knob'
 
 export default {
 
@@ -11,11 +11,14 @@ export default {
 
   widgets: {
     'dimmer.label': {
-      in: ['dashboard'],
-      component: WDeviceLabel,
-      attributes: {
-        attr: 'level',
-        unit: '%'
+      component: WLabel,
+      attributes (options, resource) {
+        return {
+          value () {
+            return resource.attr('level')
+          },
+          unit: '%'
+        }
       },
       title: 'level',
       description: 'show the level as a label',
@@ -23,18 +26,21 @@ export default {
       minHeight: 100
     },
     'dimmer.knob': {
-      in: ['dashboard', 'devicePage'],
-      component: WDeviceKnob,
-      attributes: {
-        attr: 'level',
-        unit: '%',
-        min: 0,
-        max: 100
+      component: WKnob,
+      attributes (options, resource) {
+        return {
+          value () {
+            return resource.attr('level')
+          },
+          unit: '%',
+          min: 0,
+          max: 100
+        }
       },
       title: 'level',
       description: 'show the level in a knob component',
       minWidth: 160,
-      minHeight: 180
+      minHeight: 160
     }
   }
 

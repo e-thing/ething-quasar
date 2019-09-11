@@ -1,21 +1,20 @@
 <template>
   <div class="container">
-    <div v-for="i in 100">
-line {{ i }}
-    </div>
-    <!--<div class="row items-stretch" v-for="(item, index) in __sensors" :key="item.name" :class="index>0 ? 'q-mt-sm' : ''">
+    <div class="row items-stretch" v-for="(item, index) in __sensors" :key="item.name" :class="index>0 ? 'q-mt-sm' : ''">
 
-      <widget class="col-sm-auto col-xs-12"
-        :resource="resource"
-        v-bind="item.attrs"
-      />
+      <div class="col-sm-auto col-xs-12" :style="{height: '220px', width: $q.screen.xs ? '' : '220px'}" >
+        <widget
+          :resource="resource"
+          v-bind="item.attrs"
+        />
+      </div>
 
       <div class="gt-xs col q-ml-sm relative-position bg-white" style="height: 220px">
-        <widget class="absolute fit" :resource="resource" v-bind="item.chart" v-if="!!item.chart" />
+        <widget :resource="resource" v-bind="item.chart" v-if="!!item.chart" />
         <small v-else class="absolute-center text-light">No data</small>
       </div>
 
-    </div>-->
+    </div>
   </div>
 </template>
 

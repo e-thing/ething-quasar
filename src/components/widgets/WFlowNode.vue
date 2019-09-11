@@ -4,14 +4,14 @@
 
 <script>
 
-import WResource from './WResource'
+import Base from './Base'
 import FlowNode from '../FlowNode'
 
 
 export default {
     name: 'WFlowNode',
 
-    extends: WResource,
+    extends: Base,
 
     components: {
         FlowNode

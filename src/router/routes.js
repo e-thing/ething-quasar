@@ -9,7 +9,7 @@ const routes = [
         redirect: 'dashboard',
       },
       {
-        path: 'data/:path*',
+        path: 'data',
         name: 'data',
         component: () => import('pages/Data')
       },
@@ -94,7 +94,7 @@ const routes = [
         component: () => import('pages/Flows')
       },
       {
-        path: 'test',
+        path: 'test/:id*',
         component: () => import('pages/Test')
       }
     ]

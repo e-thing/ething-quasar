@@ -73,8 +73,6 @@
 export default {
     name: 'WWeatherForecast',
 
-    //mixins: [WResource],
-
     props: {
 
     },

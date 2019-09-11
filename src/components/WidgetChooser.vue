@@ -65,7 +65,7 @@
               </q-item-section>
 
               <q-item-section>
-                <q-item-label>{{ item.label }}</q-item-label>
+                <q-item-label>{{ item.label }} <q-icon v-if="item.icon" :name="item.icon"/></q-item-label>
                 <q-item-label caption>
                   {{ item.description }}
                 </q-item-label>
@@ -151,7 +151,6 @@ export default {
         var widgets = this.$ethingUI.get(this.resource).widgets || {}
         Object.keys(widgets).map(k => {
           var widget = widgets[k]
-          if (widget.in.indexOf('dashboard') === -1) return
           widgetsMap[k] = widget
         })
         return widgetsMap
@@ -170,11 +169,12 @@ export default {
       var options = Object.keys(widgets).map(k => {
         var widget = widgets[k]
         var schema = widget.schema
-        var label = widget.title || widget.schema.title || widget.schema.label
-        var description = widget.description || widget.schema.description
+        var label = widget.title
+        var description = widget.description
 
         return {
           zIndex: widget.zIndex,
+          icon: widget.icon,
           label,
           value: k,
           description
@@ -200,7 +200,7 @@ export default {
     },
 
     resources () {
-      return this.$ething.arbo.find((r) => Object.values(this.$ethingUI.get(r).widgets).filter(w => w.in.indexOf('dashboard')!==-1).length)
+      return this.$ething.arbo.find((r) => Object.values(this.$ethingUI.get(r).widgets).filter(w => !w.disable).length)
     },
 
     filteredResources () {

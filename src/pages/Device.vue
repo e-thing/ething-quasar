@@ -73,13 +73,13 @@
       </div>
 
       <!-- components -->
-      <div class="page-block" v-for="(widget, key) in widgets" :key="key" v-if="widgets">
-        <div class="bloc-title" v-if="widget.title">
-          <q-icon :name="widget.icon" v-if="widget.icon"/>
-          <span>{{ widget.title }}</span>
+      <div class="page-block" v-for="(item, index) in boardItems" :key="index" v-if="boardItems.length>0">
+        <div class="bloc-title" v-if="item.title">
+          <q-icon :name="item.icon || 'mdi-brightness-1'"/>
+          <span>{{ item.title }}</span>
         </div>
-        <div class="bloc-content" :class="widget.devicePage.padding ? '' : 'bloc-content-no-padding'">
-          <widget :resource="resource" :widget="widget" color="primary" bgColor="white"/>
+        <div class="bloc-content bloc-content-no-padding">
+          <component :is="item.component" :resource="resource" v-bind="item.attributes()"/>
         </div>
       </div>
 
@@ -146,7 +146,7 @@
       <!-- api -->
       <div class="page-block" v-if="Object.keys(staticMeta.methods).length">
         <div class="bloc-title">
-          <q-icon name="mdi-database" />
+          <q-icon name="mdi-console" />
           <span>Commands</span>
         </div>
         <div class="bloc-content bloc-content-no-padding">
@@ -182,7 +182,7 @@ export default {
 
     return {
       showDetailledAttributes: false,
-      widgets: [],
+      boardItems: [],
       _resourceId: null,
       isSensor: false,
       staticMeta: {},
@@ -207,22 +207,15 @@ export default {
 
       this.isSensor = this.$ethingUI.isSubclass(this.resource, 'interfaces/Sensor')
 
-      var w = []
       var staticMeta = this.staticMeta = this.$ethingUI.get(this.resource)
-      var widgets = staticMeta.widgets
-      for(var id in widgets) {
-        var widget = widgets[id]
-        if (widget.in.indexOf('devicePage') !== -1) {
-          w.push(widget)
-        }
-      }
+      var boardItemsList = Object.values(staticMeta.board).filter(w => !w.disable)
 
       // re order by zIndex
-      w.sort(function(a, b) {
+      boardItemsList.sort(function(a, b) {
           return b.zIndex - a.zIndex;
       });
 
-      this.widgets = w || null
+      this.boardItems = boardItemsList
 
       // extends
       var currentType = this.resource.type()

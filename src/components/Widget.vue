@@ -1,7 +1,7 @@
 <template>
-  <div class="widget column" :class="{'widget-err': __hasError, 'inline': inline}" :style="__style">
+  <div class="widget column" :class="{'widget-err': __hasError, 'fit': !inline, 'inline': inline}" :style="__style">
 
-    <div class="col-auto title" v-if="!dense && (__title || $slots.title)">
+    <div class="col-auto title full-width" v-if="!dense && (__title || $slots.title)">
       <slot name="title">
         <div class="text-center ellipsis">{{ __title }}</div>
       </slot>
@@ -24,7 +24,7 @@
       </div>
     </div>
 
-    <div class="col-auto footer" v-if="!dense && (__footer || $slots.footer)">
+    <div class="col-auto footer full-width" v-if="!dense && (__footer || $slots.footer)">
       <slot name="footer">
         <div class="text-center ellipsis">{{ __footer }}</div>
       </slot>
@@ -50,8 +50,6 @@ export default {
 
       resource: {},
 
-      minWidth: Number,
-      minHeight: Number,
       inline: Boolean,
       dense: Boolean,
 
@@ -73,6 +71,7 @@ export default {
         error: false,
       };
     },
+
     computed: {
       __widget () {
         var widget = this.widget
@@ -162,12 +161,10 @@ export default {
       },
 
       __minWidth () {
-        if (this.minWidth) return this.minWidth
         return this.__widget.minWidth
       },
 
       __minHeight () {
-        if (this.minHeight) return this.minHeight
         return this.__widget.minHeight
       },
 
@@ -181,15 +178,15 @@ export default {
           style['color'] = this.__color
         }
 
-        if (this.__minWidth) {
-          style.minWidth = this.__minWidth + 'px'
-          if (this.inline) {
+        if (this.inline) {
+          if (this.__minWidth) {
+            style.minWidth = this.__minWidth + 'px'
             style.width = style.minWidth
           }
-        }
-        if (this.__minHeight) {
-          style.minHeight = this.__minHeight + 'px'
-          style.height = this.inline ? style.minHeight : '1px'
+          if (this.__minHeight) {
+            style.minHeight = this.__minHeight + 'px'
+            style.height = style.minHeight
+          }
         }
 
         return style
@@ -221,7 +218,7 @@ export default {
   &.widget-err
     /* border 1px solid $negative */
     background-color $negative !important
-    color white
+    color white !important
 
 
 </style>

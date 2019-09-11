@@ -19,7 +19,7 @@
 
 
 <script>
-import WResource from './WResource'
+import Base from './Base'
 import { colors } from 'quasar'
 
 const { hexToRgb, rgbToHsv, hsvToRgb, rgbToHex } = colors
@@ -27,7 +27,7 @@ const { hexToRgb, rgbToHsv, hsvToRgb, rgbToHex } = colors
 export default {
     name: 'WRGBLight',
 
-    mixins: [WResource],
+    mixins: [Base],
 
     props: {
       setBrightness: Function,

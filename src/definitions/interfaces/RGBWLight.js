@@ -1,12 +1,10 @@
 import WRGBLight from '../../components/widgets/WRGBLight'
-import WDimmableRelay from '../../components/widgets/WDimmableRelay'
 
 
 export default {
 
   widgets: {
-    'default': {
-      in: ['dashboard', 'devicePage'],
+    'light.rgb': {
       icon: 'mdi-lightbulb',
       component: WRGBLight,
       attributes: {
@@ -25,23 +23,6 @@ export default {
       minWidth: 160,
       minHeight: 200
     },
-    'relay.switch': {
-      in: ['dashboard']
-    },
-    'switch.state': {
-      in: ['dashboard']
-    },
-    'dimmable.dimmer': {
-      in: [], // clear
-    },
-    'light.dimmer': {
-      in: ['dashboard'],
-      component: WDimmableRelay,
-      label: 'Dimmer',
-      description: 'adjust the level',
-      minWidth: 160,
-      minHeight: 160
-    }
   }
 
 }

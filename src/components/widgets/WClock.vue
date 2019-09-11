@@ -12,7 +12,7 @@
 </template>
 
 <script>
-import WWidget from './WWidget'
+import Base from './Base'
 import {registerWidget} from '../../core/widget'
 
 const weekdays = [
@@ -29,7 +29,7 @@ function pad(n, width, z) {
 var c = {
     name: 'WClock',
 
-    mixins: [WWidget],
+    mixins: [Base],
 
     props: {
       // todo: timezone
