@@ -92,10 +92,6 @@ const routes = [
         path: 'flows',
         name: 'flows',
         component: () => import('pages/Flows')
-      },
-      {
-        path: 'test/:id*',
-        component: () => import('pages/Test')
       }
     ]
   },
@@ -106,6 +102,13 @@ const routes = [
     component: () => import('pages/Login')
   },
 ]
+
+if (process.env.DEV) {
+  routes[0].children.push({
+    path: 'test/:id*',
+    component: () => import('pages/Test')
+  })
+}
 
 // Always leave this as last one
 if (process.env.MODE !== 'ssr') {

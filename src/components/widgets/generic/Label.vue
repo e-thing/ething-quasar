@@ -22,9 +22,9 @@ export default {
     mixins: [Base],
 
     props: {
-      label: String,
-      unit: String,
-      icon: String,
+      label: {},
+      unit: {},
+      icon: {},
       value: {},
       horizontal: Boolean
     },
@@ -55,7 +55,7 @@ export default {
         var value = prop;
         if (typeof value == 'function') {
           try {
-            value = value.call(this, this)
+            value = value.call(this)
           } catch (err) {
             console.error(err)
             value = undefined

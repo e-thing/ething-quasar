@@ -6,7 +6,7 @@ import Vue from 'vue'
 import * as formSchemaCore from '../boot/formSchema/core'
 import { extend } from 'quasar'
 import { linearize } from 'c3-linearization'
-import {widgetDefaults, widgetMerge} from './widget'
+import {widgetMerge} from './widget'
 import {merge,defaultMerge,arrayUniqueMerge,noMerge,mapMerge,functionMerge,vueComponentMerge} from '../utils/merging'
 import localDefinitions from '../definitions'
 
@@ -85,7 +85,9 @@ const defaults = {
 
     }
   */
-  widgets: {},
+  widgets (resource) {
+    return {}
+  },
   // set to true, if you don't want to allow the user to create a new resource through the interface.
   disableCreation: false,
   // a function(resource, actionName) => <Vue route> that is called when the user try to open this resource.
@@ -120,7 +122,9 @@ const defaults = {
       disable: false // set to true if you want to disable this item
     }
   */
-  components: {},
+  components (resource) {
+    return {}
+  },
 
   /**
   * FLOW NODE
@@ -131,18 +135,22 @@ const defaults = {
 }
 
 
-const boardItemDefaults = {
+const componentDefaults = {
   component: null,
-  attributes: (resource) => {},
+  attributes: (resource) => {
+    return {
+      resource
+    }
+  },
   zIndex: 0, // kind of a priority. Allow to order the widgets list.
   title: '',
   icon: '',
 }
 
 
-function boardItemMerge(p, c, n) {
-  if (!p) return c
-  if (!c) return p
+function componentMerge(p, c, n) {
+  if (!p) p = componentDefaults
+  if (!c) c = {}
 
   var keys = Object.keys(p).concat(Object.keys(c)).filter((v, i, a) => a.indexOf(v) === i);
   var merged = {}
@@ -166,8 +174,11 @@ var mergeStrategies = {
   dynamic: false, // remove from merging
 
   signals: arrayUniqueMerge,
+
   widgets (parent, child, node) {
-    return mapMerge (parent, child, node, widgetMerge)
+    return functionMerge(parent, child, node, (p, c, e) => {
+      return mapMerge (p, c, e, widgetMerge)
+    })
   },
 
   cacheControl: functionMerge,
@@ -176,13 +187,12 @@ var mergeStrategies = {
   data: functionMerge,
 
   components (parent, child, node) {
-    return mapMerge (parent, child, node, boardItemMerge)
+    return functionMerge(parent, child, node, (p, c, e) => {
+      return mapMerge (p, c, e, componentMerge)
+    })
   },
 
 }
-
-
-var instanceAttributes = ['widgets']
 
 
 function getFromPath (obj, path, createIfNotFound) {
@@ -283,7 +293,7 @@ function resolveAllOf (node) {
 
 function reshape(node) {
 
-  if (typeof node['widgets'] !== 'undefined') {
+  /*if (typeof node['widgets'] !== 'undefined') {
     for (var id in node.widgets) {
       var widget = node.widgets[id]
       if (typeof widget.component === 'string') {
@@ -297,13 +307,13 @@ function reshape(node) {
         }
       }
     }
-  }
+  }*/
 
   return node
 }
 
 function compile(mro, definitions, resource) {
-  var compiled = {}
+  var compiled = extend(true, {}, defaults)
   if (!mro) return compiled
   var mro_ = mro.slice().reverse()
   var dynamic = false
@@ -324,12 +334,6 @@ function compile(mro, definitions, resource) {
           extend(true, child, dyn_m)
         }
       }
-
-      instanceAttributes.forEach(attr => {
-        if (typeof child[attr] === 'function') {
-          child[attr] = child[attr].call(child, resource)
-        }
-      })
     }
 
     // reshape before merging
@@ -359,7 +363,7 @@ function mergeClass (parent, child) {
 
 function normalize (obj, resource) {
 
-  obj = extend(true, {}, defaults, obj)
+  //var obj = extend(true, {}, defaults, obj)
 
   for (let k in obj.properties) {
     let p = obj.properties[k]
@@ -378,12 +382,29 @@ function normalize (obj, resource) {
     }
   }
 
-  for (var id in obj.widgets) {
-    obj.widgets[id] = widgetMerge(widgetDefaults, obj.widgets[id])
+  var originalWidgetsFn = obj.widgets
+  obj.widgets = function (resource) {
+    let widgets = originalWidgetsFn.call(this, resource)
+    for (var id in widgets) {
+      let originalWidgetAttrsFn = widgets[id].attributes
+      widgets[id].attributes = function (options) {
+        return originalWidgetAttrsFn ? originalWidgetAttrsFn.call(this, options, resource) : {}
+      }
+    }
+    return widgets
   }
 
-  for (var id in obj.components) {
-    obj.components[id] = Object.assign({}, boardItemDefaults, obj.components[id])
+  var originalComponentsFn = obj.components
+  obj.components = function (resource) {
+    var components = originalComponentsFn.call(this, resource)
+    for (var id in components) {
+      let originalComponentAttrsFn = components[id].attributes
+      components[id].attributes = function () {
+        return originalComponentAttrsFn ? originalComponentAttrsFn.call(this, resource) : {}
+      }
+    }
+
+    return components
   }
 
   delete obj.dynamic
@@ -399,13 +420,9 @@ function normalize (obj, resource) {
       return originalDataFn ? originalDataFn.call(this, resource) : {}
     }
 
-    for (var id in obj.components) {
-      let boardItem = obj.components[id]
-      let originalBoardAttrsFn = boardItem.attributes
-      boardItem.attributes = function () {
-        return originalBoardAttrsFn ? originalBoardAttrsFn.call(this, resource) : {}
-      }
-    }
+    obj.widgets = obj.widgets(resource)
+
+    obj.components = obj.components(resource)
 
     obj._resource = resource
   }

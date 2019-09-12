@@ -81,7 +81,7 @@ export default {
             // widget id
             widget = this.$ethingUI.get(this.resource).widgets[widget]
             if (!widget) {
-              var errStr = 'widget "' + item.widgetId + '" not found for the resource ' + resource.name()
+              var errStr = 'widget "' + widget + '" not found for the resource ' + this.resource.name()
               console.error(errStr)
               this.setError(errStr)
               widget = {}
@@ -111,15 +111,7 @@ export default {
           bgColor: this.__bgColor
         }, this.$attrs)
 
-        var resource = this.resource
-
-        if (resource) {
-          options.resource = resource // override widget id by instance
-        }
-
-        var attributes = extend(true, options, widget.attributes(options, resource))
-
-        return attributes
+        return widget.attributes(options)
       },
 
       __title () {

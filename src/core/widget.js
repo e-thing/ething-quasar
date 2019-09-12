@@ -9,7 +9,12 @@ export var widgets = {}
 // defaults
 export const widgetDefaults = {
   component: null,
-  attributes: (options, resource) => {},
+  attributes: (options, resource) => {
+    return {
+      ...options,
+      resource
+    }
+  },
   zIndex: 0, // kind of a priority. Allow to order the widgets list.
   title: '',
   defaultTitle: '%name%', // can also be a function (attributes) => string
@@ -23,8 +28,8 @@ export const widgetDefaults = {
 }
 
 export function widgetMerge (p, c, n) {
-  if (!p) return c
-  if (!c) return p
+  if (!p) p = widgetDefaults
+  if (!c) c = {}
 
   var keys = Object.keys(p).concat(Object.keys(c)).filter((v, i, a) => a.indexOf(v) === i);
   var merged = {}

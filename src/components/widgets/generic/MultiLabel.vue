@@ -3,14 +3,14 @@
     <template v-for="(item, index) in items">
       <div class="col-auto item row">
         <div class="col-auto" v-if="__hasIcons">
-          <q-icon v-if="item.icon" :name="item.icon" style="vertical-align: baseline;" left/>
+          <q-icon v-if="__getProp(item, 'icon')" :name="__getProp(item, 'icon')" style="vertical-align: baseline;" left/>
           <q-icon v-else name="mdi-minus" style="vertical-align: baseline; visibility: hidden;" left/>
         </div>
-        <div class="col ellipsis" v-if="item.label">
-          <span>{{ item.label }}</span>
+        <div class="col ellipsis" v-if="__getProp(item, 'label')">
+          <span>{{ __getProp(item, 'label') }}</span>
         </div>
-        <span class="text-bold col-auto">{{ __value(item) }}</span>
-        <span v-if="item.unit" class="col-auto">{{ item.unit }}</span>
+        <span class="text-bold col-auto">{{ __getProp(item, 'value') }}</span>
+        <span v-if="__getProp(item, 'unit')" class="col-auto">{{ __getProp(item, 'unit') }}</span>
       </div>
     </template>
   </div>
@@ -32,7 +32,7 @@ export default {
       __hasIcons () {
         for (var i in this.items) {
           var item = this.items[i]
-          if (item.icon) return true
+          if (this.__getProp(item, 'icon')) return true
         }
       }
     },
@@ -49,7 +49,19 @@ export default {
           }
         }
         return value
-      }
+      },
+      __getProp (item, prop) {
+        var value = item[prop];
+        if (typeof value == 'function') {
+          try {
+            value = value.call(this)
+          } catch (err) {
+            console.error(err)
+            value = undefined
+          }
+        }
+        return value
+      },
     },
 
 }

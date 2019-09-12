@@ -33,7 +33,33 @@ export default {
     return d
   },
 
-  dynamic (resource) {
+  badges (resource) {
+    var d = {}
+    var props = EThingUI.get(resource).properties
+    for (var propName in props) {
+      var prop = props[propName]
+      if (prop.sensor) {
+        d[propName] = {
+          component: 'q-badge',
+          attributes () {
+            var label = resource.attr(propName) + (prop.unit || '')
+            var icon = prop.icon
+            if (!icon) {
+              label = prop.title + ': ' + label
+            }
+            return {
+              label,
+              icon
+            }
+          }
+        }
+      }
+    }
+    return d
+  },
+
+  widgets (resource) {
+    var widgets = {}
     var sensorAttributes = [], sensorHistoryAttributes = [], sensorNumericAttributes = []
     var props = EThingUI.get(resource.types()).properties
     for (var propName in props) {
@@ -93,9 +119,7 @@ export default {
         },
       })
 
-      var widgets = {
-        'sensor.label': labelWidget,
-      }
+      widgets['sensor.label'] = labelWidget
 
       if (sensorAttributes.length>1) {
         // multiple sensors
@@ -197,7 +221,7 @@ export default {
           component: WChart,
           title: 'chart',
           description: 'plot the value of the sensor',
-          attributes (options) {
+          attributes (options, res) {
             var sensorName = options.sensorName || sensorHistoryAttributes[0]
             var sensorProps = props[sensorName]
 
@@ -239,10 +263,9 @@ export default {
         widgets['sensor.graph'] = graphWidget
       }
 
-      return {
-        widgets
-      }
+
     }
+    return widgets
   },
 
 }

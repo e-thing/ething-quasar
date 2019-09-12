@@ -1,6 +1,6 @@
 <template>
   <div class="fit column no-wrap text-center q-pt-xs q-gutter-y-xs q-pl-xs q-gutter-x-xs">
-    <div class="col-auto" v-if="label">{{ label }}</div>
+    <div class="col-auto" v-if="__label">{{ __label }}</div>
     <div class="col relative-position">
       <q-resize-observer @resize="updateLayout" />
       <q-knob
@@ -20,9 +20,9 @@
       >
         <slot>
           <div v-if="!__centerButton" class="text-center" :style="{fontSize}">
-            <q-icon v-if="icon" :name="icon" class="light" style="vertical-align: text-bottom;"/>
+            <q-icon v-if="__icon" :name="__icon" class="light" style="vertical-align: text-bottom;"/>
             <div class="big">{{ __value }}</div>
-            <div class="light" v-if="unit">{{unit}}</div>
+            <div class="light" v-if="__unit">{{__unit}}</div>
           </div>
           <q-avatar v-else
             :style="__buttonStyle"
@@ -49,9 +49,9 @@ export default {
     mixins: [Base],
 
     props: {
-      label: String,
-      unit: String,
-      icon: String,
+      label: {},
+      unit: {},
+      icon: {},
       min: {
         type: Number,
         default: 0
@@ -95,19 +95,18 @@ export default {
       __centerButton () {
         return !!this.buttonSet
       },
-      __value () {
-        var value = this.value;
-        if (typeof value == 'function') {
-          try {
-            value = value()
-          } catch (err) {
-            console.error(err)
-            value = '?'
-          }
-        }
-        return value
+      __label () {
+        return this.__getProp(this.label)
       },
-
+      __unit () {
+        return this.__getProp(this.unit)
+      },
+      __icon () {
+        return this.__getProp(this.icon)
+      },
+      __value () {
+        return this.__getProp(this.value)
+      },
       __valueNumber () {
         var value = this.__value
         if (typeof value === 'string') value = parseInt(value)
@@ -125,7 +124,7 @@ export default {
         var state = this.buttonValue;
         if (typeof state == 'function') {
           try {
-            state = state()
+            state = state.call(this)
           } catch (err) {
             console.error(err)
             state = false
@@ -146,6 +145,19 @@ export default {
     },
 
     methods: {
+      __getProp (prop) {
+        var value = prop;
+        if (typeof value == 'function') {
+          try {
+            value = value.call(this)
+          } catch (err) {
+            console.error(err)
+            value = undefined
+          }
+        }
+        return value
+      },
+
       updateLayout (size) {
         //var knobSize = parseInt(Math.min(size.width, size.height) / 1.5)
         var knobSize = Math.min(size.width, size.height)
@@ -155,8 +167,8 @@ export default {
         var lineHeight = 1.2 // ratio between text and innerSize
         var g = 1.5 // big = 200%
         var coeff = g
-        if (this.icon) coeff += 1
-        if (this.unit) coeff += 1
+        if (this.__icon) coeff += 1
+        if (this.__unit) coeff += 1
         var fontSize = innerSize / (coeff * lineHeight)
         this.fontSize = Math.floor(fontSize) + 'px'
       },

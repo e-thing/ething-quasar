@@ -73,13 +73,13 @@
       </div>
 
       <!-- components -->
-      <div class="page-block" v-for="(item, index) in boardItems" :key="index" v-if="boardItems.length>0">
+      <div class="page-block" v-for="(item, index) in componentsItems" :key="index" v-if="componentsItems.length>0">
         <div class="bloc-title" v-if="item.title">
           <q-icon :name="item.icon || 'mdi-brightness-1'"/>
           <span>{{ item.title }}</span>
         </div>
         <div class="bloc-content bloc-content-no-padding">
-          <component :is="item.component" :resource="resource" v-bind="item.attributes()"/>
+          <component :is="item.component" v-bind="item.attributes()"/>
         </div>
       </div>
 
@@ -182,7 +182,7 @@ export default {
 
     return {
       showDetailledAttributes: false,
-      boardItems: [],
+      componentsItems: [],
       _resourceId: null,
       isSensor: false,
       staticMeta: {},
@@ -208,14 +208,14 @@ export default {
       this.isSensor = this.$ethingUI.isSubclass(this.resource, 'interfaces/Sensor')
 
       var staticMeta = this.staticMeta = this.$ethingUI.get(this.resource)
-      var boardItemsList = Object.values(staticMeta.components).filter(w => !w.disable)
+      var componentsItemsList = Object.values(staticMeta.components).filter(w => !w.disable)
 
       // re order by zIndex
-      boardItemsList.sort(function(a, b) {
+      componentsItemsList.sort(function(a, b) {
           return b.zIndex - a.zIndex;
       });
 
-      this.boardItems = boardItemsList
+      this.componentsItems = componentsItemsList
 
       // extends
       var currentType = this.resource.type()

@@ -43,8 +43,18 @@ export function defaultMerge (parent, child) {
 }
 
 export function functionMerge (parent, child, extra, mergeFn) {
-  if (!parent) return child
-  if (!child) return parent
+  if (typeof child !== 'function') {
+    let _child = child
+    child = function () {
+      return _child
+    }
+  }
+  if (typeof parent !== 'function') {
+    let _parent = parent
+    parent = function () {
+      return _parent
+    }
+  }
 
   // result merge fn
   mergeFn = mergeFn || defaultMerge
