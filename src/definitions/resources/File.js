@@ -21,6 +21,10 @@ export default {
     },
   },
 
+  cacheControl(resource, modifiedAttributes) {
+    return modifiedAttributes.indexOf('name') === -1
+  },
+
   dynamic (resource) {
     var icon, widgets = {}
 

@@ -5,7 +5,7 @@ export default {
 
   color: 'cyan-6',
 
-  board: {
+  components: {
     'group.list': {
       component: ListGroupItems,
       title: 'Items',

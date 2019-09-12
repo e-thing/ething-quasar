@@ -10,7 +10,7 @@ import { extend } from 'quasar'
 
 export default {
 
-  board: {
+  components: {
     'sensor.main': {
       component: SensorsListView,
       title: 'Sensors',

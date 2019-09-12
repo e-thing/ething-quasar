@@ -47,6 +47,10 @@ const defaults = {
   */
   dynamic: null,
 
+  cacheControl(resource, modifiedAttributes) {
+    return modifiedAttributes.indexOf('extends') === -1
+  },
+
   /**
   * SPECIFIC
   **/
@@ -105,7 +109,7 @@ const defaults = {
   data (resource) {},
 
   // a map of components, the keys represent the components id
-  // board components are displayed in the device's page.
+  // components components are displayed in the device's page.
   /*
     {
       component: <VueComponent>,
@@ -116,7 +120,7 @@ const defaults = {
       disable: false // set to true if you want to disable this item
     }
   */
-  board: {},
+  components: {},
 
   /**
   * FLOW NODE
@@ -166,10 +170,12 @@ var mergeStrategies = {
     return mapMerge (parent, child, node, widgetMerge)
   },
 
+  cacheControl: functionMerge,
+
   methods: mapMerge,
   data: functionMerge,
 
-  board (parent, child, node) {
+  components (parent, child, node) {
     return mapMerge (parent, child, node, boardItemMerge)
   },
 
@@ -376,8 +382,8 @@ function normalize (obj, resource) {
     obj.widgets[id] = widgetMerge(widgetDefaults, obj.widgets[id])
   }
 
-  for (var id in obj.board) {
-    obj.board[id] = Object.assign({}, boardItemDefaults, obj.board[id])
+  for (var id in obj.components) {
+    obj.components[id] = Object.assign({}, boardItemDefaults, obj.components[id])
   }
 
   delete obj.dynamic
@@ -393,8 +399,8 @@ function normalize (obj, resource) {
       return originalDataFn ? originalDataFn.call(this, resource) : {}
     }
 
-    for (var id in obj.board) {
-      let boardItem = obj.board[id]
+    for (var id in obj.components) {
+      let boardItem = obj.components[id]
       let originalBoardAttrsFn = boardItem.attributes
       boardItem.attributes = function () {
         return originalBoardAttrsFn ? originalBoardAttrsFn.call(this, resource) : {}
@@ -408,6 +414,20 @@ function normalize (obj, resource) {
 }
 
 var cached_meta_types = {}
+
+
+function cacheControl (resource, modifiedAttributes) {
+  var id = resource.id()
+  if (id in cached_meta_types) {
+    var cache = cached_meta_types[id]
+
+    if (!cache.cacheControl(resource, modifiedAttributes)) {
+      // remove the cache
+      console.log('[meta:cacheControl] remove cache for resource', resource.name())
+      delete cached_meta_types[id]
+    }
+  }
+}
 
 
 function get (definitions, type) {
@@ -430,9 +450,9 @@ function get (definitions, type) {
   if (resource) {
     if (id in cached_meta_types) {
       var cache = cached_meta_types[id]
-      if (!cache._cacheEtag || resource.attr('modifiedDate') == cache._cacheEtag) {
+      //if (!cache._cacheEtag || resource.attr('modifiedDate') == cache._cacheEtag) {
         return cache
-      }
+      //}
     }
   } else if (!isList) {
     if (type in cached_meta_types) {
@@ -442,8 +462,10 @@ function get (definitions, type) {
 
   // compile
   if (resource) {
+    //console.log('[meta] compile resource', resource.name())
     m = compile(resource.attr('extends'), definitions, resource)
   } else {
+    //console.log('[meta] compile', type)
     if (isList) {
       m = compile(type, definitions)
     } else {
@@ -539,6 +561,11 @@ function normType (something) {
 
 export default {
   install ({ EThingUI }) {
+
+    EThing.on('ething.resource.updated', (evt, resource, updatedKeys) => {
+      cacheControl(resource, updatedKeys)
+    })
+
     Object.assign(EThingUI, {
 
       mergeClass,

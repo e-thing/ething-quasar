@@ -208,7 +208,7 @@ export default {
       this.isSensor = this.$ethingUI.isSubclass(this.resource, 'interfaces/Sensor')
 
       var staticMeta = this.staticMeta = this.$ethingUI.get(this.resource)
-      var boardItemsList = Object.values(staticMeta.board).filter(w => !w.disable)
+      var boardItemsList = Object.values(staticMeta.components).filter(w => !w.disable)
 
       // re order by zIndex
       boardItemsList.sort(function(a, b) {
