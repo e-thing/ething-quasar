@@ -1,5 +1,5 @@
 <template>
-  <div class="widget column" :class="{'widget-err': __hasError, 'fit': !inline, 'inline': inline}" :style="__style">
+  <div class="widget column" :class="{'widget-err': __hasError}" :style="__style">
 
     <div class="col-auto title full-width" v-if="!dense && (__title || $slots.title)">
       <slot name="title">
@@ -50,8 +50,17 @@ export default {
 
       resource: {},
 
-      inline: Boolean,
       dense: Boolean,
+
+      height: {
+        type: String,
+        default: '100%'
+      },
+
+      width: {
+        type: String,
+        default: '100%'
+      },
 
       // options
       title: String,
@@ -79,18 +88,20 @@ export default {
         if (typeof widget === 'string') {
           if (this.resource) {
             // widget id
-            widget = this.$ethingUI.get(this.resource).widgets[widget]
+            var widgetId = widget
+            widget = this.$ethingUI.get(this.resource).widgets[widgetId]
             if (!widget) {
-              var errStr = 'widget "' + widget + '" not found for the resource ' + this.resource.name()
+              var errStr = 'widget "' + widgetId + '" not found for the resource ' + this.resource.name()
               console.error(errStr)
               this.setError(errStr)
               widget = {}
             }
           } else {
             // widget Type
-            widget = this.$ethingUI.findWidget(widget)
+            var widgetType = widget
+            widget = this.$ethingUI.findWidget(widgetType)
             if (!widget) {
-              var errStr = 'unknown widget type: ' + widget
+              var errStr = 'unknown widget type: ' + widgetType
               console.error(errStr)
               this.setError(errStr)
               widget = {}
@@ -123,7 +134,7 @@ export default {
             if (title == '$default') {
               title = this.__widget.defaultTitle
               if (!title) {
-                title = resource ? '%name%' : ((this.__widget.title || (this.__widget.schema && this.__widget.schema.title) || ''))
+                title = this.resource ? '%name%' : ((this.__widget.title || (this.__widget.schema && this.__widget.schema.title) || ''))
               }
               if (typeof title === 'function') {
                 title = title(this.__attrs)
@@ -170,15 +181,12 @@ export default {
           style['color'] = this.__color
         }
 
-        if (this.inline) {
-          if (this.__minWidth) {
-            style.minWidth = this.__minWidth + 'px'
-            style.width = style.minWidth
-          }
-          if (this.__minHeight) {
-            style.minHeight = this.__minHeight + 'px'
-            style.height = style.minHeight
-          }
+        if (this.width) {
+          style.width = this.width
+        }
+
+        if (this.height) {
+          style.height = this.height
         }
 
         return style

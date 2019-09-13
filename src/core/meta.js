@@ -47,14 +47,14 @@ const defaults = {
   */
   dynamic: null,
 
-  cacheControl(resource, modifiedAttributes) {
+  cacheValidity(resource, modifiedAttributes) {
     return modifiedAttributes.indexOf('extends') === -1
   },
 
   /**
   * SPECIFIC
   **/
-  // [string] only for devices and flow nodes. The category (eg: 'foo.bar': foo is the category, bar is the subcategory ).
+  // string:  only for devices and flow nodes. The category (eg: 'foo.bar': foo is the category, bar is the subcategory ).
   category: '',
 
   /**
@@ -63,7 +63,7 @@ const defaults = {
   // READ-ONLY: list the signals this resource can emit
   signals: [],
 
-  // a map of widgets, the keys represent the widgets id
+  // a function that returns a map of widgets, the keys represent the widgets id
   // widgets are used to display a resource data/attributes...
   // widgets are displayed in the dashboard.
   /*
@@ -72,7 +72,7 @@ const defaults = {
       title: '...', // the name of the widget
       description: '...', // a description of this widget
       icon: '...',
-      attributes: (options, resource) => {}, // extra attributes to pass to the component
+      attributes (options) {}, // attributes to pass to the component
       minWidth: 45, // px, the minimum width accepted by this widget
       minHeight: 45, // px, the minimum height accepted by this widget
       zIndex: 0, // kind of a priority. Allow to order the widgets list.
@@ -93,31 +93,34 @@ const defaults = {
   // a function(resource, actionName) => <Vue route> that is called when the user try to open this resource.
   open: null,
 
+  // a function that returns a map of badges, the keys represent the widgets id
+  // badges are small component (mainly q-chip) used to display a resource's attributes
+  /*
+    {
+      component: <VueComponent>,
+      attributes () {}, // attributes to pass to the component
+      zIndex: 0, // kind of a priority. Allow to order the widgets list.
+      disable: false // set to true if you want to disable this badge (may be useful when overriding)
+    }
+  */
+  badges (resource) {
+    return {}
+  },
+
   /**
   * DEVICE
   **/
   // READ-ONLY: list the available methods
   methods: {},
-  // device only: a function(resource) => {} that return some device infomation to show on the devices page
-  /*
-  {
-    data (resource) {
-      return {
-        'temperature': resource.attr('temperature') + '°C'
-      }
-    },
-  }
-  */
-  data (resource) {},
 
-  // a map of components, the keys represent the components id
+  // a function that returns a map of components, the keys represent the components id
   // components components are displayed in the device's page.
   /*
     {
       component: <VueComponent>,
       title: '...',
       icon: '...',
-      attributes: (resource) => {}, // extra attributes to pass to the component
+      attributes () {}, // attributes to pass to the component
       zIndex: 0, // kind of a priority. Allow to order the components list.
       disable: false // set to true if you want to disable this item
     }
@@ -135,32 +138,66 @@ const defaults = {
 }
 
 
-const componentDefaults = {
-  component: null,
-  attributes: (resource) => {
-    return {
-      resource
-    }
-  },
-  zIndex: 0, // kind of a priority. Allow to order the widgets list.
-  title: '',
-  icon: '',
+function componentDefaults (resource) {
+  return {
+    component: null,
+    attributes () {
+      return {
+        resource
+      }
+    },
+    zIndex: 0, // kind of a priority.
+    title: '',
+    icon: '',
+  }
 }
 
 
-function componentMerge(p, c, n) {
-  if (!p) p = componentDefaults
+function componentMerge(p, c, ctx) {
+  if (!p) p = componentDefaults(ctx.args[0]) // ctx.args[0] => resource
   if (!c) c = {}
 
   var keys = Object.keys(p).concat(Object.keys(c)).filter((v, i, a) => a.indexOf(v) === i);
   var merged = {}
   keys.forEach(k => {
     if (k==='component') {
-      merged[k] = vueComponentMerge(p[k], c[k])
+      merged[k] = vueComponentMerge(p[k], c[k], ctx)
     } else if (k==='attributes') {
-      merged[k] = functionMerge(p[k], c[k])
+      merged[k] = functionMerge(p[k], c[k], ctx)
     } else {
-      merged[k] = defaultMerge(p[k], c[k])
+      merged[k] = defaultMerge(p[k], c[k], ctx)
+    }
+  })
+  return merged
+}
+
+
+function badgeDefaults (resource) {
+  return {
+    component: null,
+    attributes () {
+      return {
+        resource
+      }
+    },
+    zIndex: 0, // kind of a priority.
+  }
+}
+
+
+function badgeMerge(p, c, ctx) {
+  if (!p) p = badgeDefaults(ctx.args[0]) // ctx.args[0] => resource
+  if (!c) c = {}
+
+  var keys = Object.keys(p).concat(Object.keys(c)).filter((v, i, a) => a.indexOf(v) === i);
+  var merged = {}
+  keys.forEach(k => {
+    if (k==='component') {
+      merged[k] = vueComponentMerge(p[k], c[k], ctx)
+    } else if (k==='attributes') {
+      merged[k] = functionMerge(p[k], c[k], ctx)
+    } else {
+      merged[k] = defaultMerge(p[k], c[k], ctx)
     }
   })
   return merged
@@ -175,20 +212,26 @@ var mergeStrategies = {
 
   signals: arrayUniqueMerge,
 
-  widgets (parent, child, node) {
-    return functionMerge(parent, child, node, (p, c, e) => {
-      return mapMerge (p, c, e, widgetMerge)
+  widgets (parent, child, ctx) {
+    return functionMerge(parent, child, ctx, (p, c, ctx) => {
+      return mapMerge (p, c, ctx, widgetMerge)
     })
   },
 
-  cacheControl: functionMerge,
+  cacheValidity: functionMerge,
 
   methods: mapMerge,
   data: functionMerge,
 
-  components (parent, child, node) {
-    return functionMerge(parent, child, node, (p, c, e) => {
-      return mapMerge (p, c, e, componentMerge)
+  components (parent, child, ctx) {
+    return functionMerge(parent, child, ctx, (p, c, ctx) => {
+      return mapMerge (p, c, ctx, componentMerge)
+    })
+  },
+
+  badges (parent, child, ctx) {
+    return functionMerge(parent, child, ctx, (p, c, ctx) => {
+      return mapMerge (p, c, ctx, badgeMerge)
     })
   },
 
@@ -358,7 +401,7 @@ function compile(mro, definitions, resource) {
 }
 
 function mergeClass (parent, child) {
-  return merge(parent, child, mergeStrategies, defaultMerge, child)
+  return merge(parent, child, mergeStrategies, defaultMerge)
 }
 
 function normalize (obj, resource) {
@@ -382,30 +425,21 @@ function normalize (obj, resource) {
     }
   }
 
-  var originalWidgetsFn = obj.widgets
-  obj.widgets = function (resource) {
-    let widgets = originalWidgetsFn.call(this, resource)
-    for (var id in widgets) {
-      let originalWidgetAttrsFn = widgets[id].attributes
-      widgets[id].attributes = function (options) {
-        return originalWidgetAttrsFn ? originalWidgetAttrsFn.call(this, options, resource) : {}
-      }
+  // remove disabled items
+  ['badges', 'components', 'widgets'].forEach(k => {
+    let originalFn = obj[k]
+    obj[k] = function () {
+      var res = originalFn.apply(this, arguments)
+      return Object.keys(res).reduce(function(r, e) {
+        var val = res[e]
+        if (!val.disable) {
+          val._id = e
+          r[e] = val
+        }
+        return r
+      }, {})
     }
-    return widgets
-  }
-
-  var originalComponentsFn = obj.components
-  obj.components = function (resource) {
-    var components = originalComponentsFn.call(this, resource)
-    for (var id in components) {
-      let originalComponentAttrsFn = components[id].attributes
-      components[id].attributes = function () {
-        return originalComponentAttrsFn ? originalComponentAttrsFn.call(this, resource) : {}
-      }
-    }
-
-    return components
-  }
+  })
 
   delete obj.dynamic
 
@@ -415,14 +449,11 @@ function normalize (obj, resource) {
       return originalOpenFn.call(this, resource, more)
     }
 
-    var originalDataFn = obj.data
-    obj.data = function () {
-      return originalDataFn ? originalDataFn.call(this, resource) : {}
-    }
-
     obj.widgets = obj.widgets(resource)
 
     obj.components = obj.components(resource)
+
+    obj.badges = obj.badges(resource)
 
     obj._resource = resource
   }
@@ -433,14 +464,14 @@ function normalize (obj, resource) {
 var cached_meta_types = {}
 
 
-function cacheControl (resource, modifiedAttributes) {
+function cacheValidity (resource, modifiedAttributes) {
   var id = resource.id()
   if (id in cached_meta_types) {
     var cache = cached_meta_types[id]
 
-    if (!cache.cacheControl(resource, modifiedAttributes)) {
+    if (!cache.cacheValidity(resource, modifiedAttributes)) {
       // remove the cache
-      console.log('[meta:cacheControl] remove cache for resource', resource.name())
+      console.log('[meta:cacheValidity] remove cache for resource', resource.name())
       delete cached_meta_types[id]
     }
   }
@@ -580,7 +611,7 @@ export default {
   install ({ EThingUI }) {
 
     EThing.on('ething.resource.updated', (evt, resource, updatedKeys) => {
-      cacheControl(resource, updatedKeys)
+      cacheValidity(resource, updatedKeys)
     })
 
     Object.assign(EThingUI, {

@@ -7,39 +7,41 @@ import {defaultMerge,mapMerge,functionMerge,vueComponentMerge} from '../utils/me
 export var widgets = {}
 
 // defaults
-export const widgetDefaults = {
-  component: null,
-  attributes: (options, resource) => {
-    return {
-      ...options,
-      resource
-    }
-  },
-  zIndex: 0, // kind of a priority. Allow to order the widgets list.
-  title: '',
-  defaultTitle: '%name%', // can also be a function (attributes) => string
-  description: '',
-  icon: '',
-  minWidth: 32,
-  minHeight: 32,
-  schema: {
-    type: 'object'
-  },
+export function widgetDefaults (resource) {
+  return {
+    component: null,
+    attributes (options) {
+      return {
+        ...options,
+        resource
+      }
+    },
+    zIndex: 0, // kind of a priority. Allow to order the widgets list.
+    title: '',
+    defaultTitle: '%name%', // can also be a function (attributes) => string
+    description: '',
+    icon: '',
+    minWidth: 32,
+    minHeight: 32,
+    schema: {
+      type: 'object'
+    },
+  }
 }
 
-export function widgetMerge (p, c, n) {
-  if (!p) p = widgetDefaults
+export function widgetMerge (p, c, ctx) {
+  if (!p) p = widgetDefaults(ctx.args[0])
   if (!c) c = {}
 
   var keys = Object.keys(p).concat(Object.keys(c)).filter((v, i, a) => a.indexOf(v) === i);
   var merged = {}
   keys.forEach(k => {
     if (k==='component') {
-      merged[k] = vueComponentMerge(p[k], c[k])
+      merged[k] = vueComponentMerge(p[k], c[k], ctx)
     } else if (k==='attributes') {
-      merged[k] = functionMerge(p[k], c[k])
+      merged[k] = functionMerge(p[k], c[k], ctx)
     } else {
-      merged[k] = defaultMerge(p[k], c[k])
+      merged[k] = defaultMerge(p[k], c[k], ctx)
     }
   })
   return merged

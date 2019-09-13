@@ -9,7 +9,6 @@
         @click="__set(true)"
         flat
         :size="__value ? '150%' : '80%'"
-        color="white"
         :style="__value ? __activeStyle : {}"
       />
     </div>
@@ -61,16 +60,7 @@ export default {
 
     computed: {
       __value () {
-        var value = this.value;
-        if (typeof value == 'function') {
-          try {
-            value = value()
-          } catch (err) {
-            console.error(err)
-            value = false
-          }
-        }
-        return !!value
+        return !!this.value
       },
       __activeStyle () {
         return {

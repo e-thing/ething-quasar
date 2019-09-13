@@ -5,7 +5,6 @@ import DeviceApi from './DeviceApi'
 import FlowNode from './FlowNode'
 import ImageViewer from './ImageViewer'
 import Modal from './Modal'
-import ResourceBatteryChip from './ResourceBatteryChip'
 import ResourceEditor from './ResourceEditor'
 import ResourceQItem from './ResourceQItem'
 import ResourceSelect from './ResourceSelect'
@@ -25,7 +24,6 @@ export {
     FlowNode,
     ImageViewer,
     Modal,
-    ResourceBatteryChip,
     ResourceEditor,
     ResourceQItem,
     ResourceSelect,

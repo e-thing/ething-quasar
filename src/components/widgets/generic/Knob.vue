@@ -1,6 +1,6 @@
 <template>
   <div class="fit column no-wrap text-center q-pt-xs q-gutter-y-xs q-pl-xs q-gutter-x-xs">
-    <div class="col-auto" v-if="__label">{{ __label }}</div>
+    <div class="col-auto" v-if="label">{{ label }}</div>
     <div class="col relative-position">
       <q-resize-observer @resize="updateLayout" />
       <q-knob
@@ -20,9 +20,9 @@
       >
         <slot>
           <div v-if="!__centerButton" class="text-center" :style="{fontSize}">
-            <q-icon v-if="__icon" :name="__icon" class="light" style="vertical-align: text-bottom;"/>
-            <div class="big">{{ __value }}</div>
-            <div class="light" v-if="__unit">{{__unit}}</div>
+            <q-icon v-if="icon" :name="icon" class="light" style="vertical-align: text-bottom;"/>
+            <div class="big">{{ value }}</div>
+            <div class="light" v-if="unit">{{unit}}</div>
           </div>
           <q-avatar v-else
             :style="__buttonStyle"
@@ -49,9 +49,9 @@ export default {
     mixins: [Base],
 
     props: {
-      label: {},
-      unit: {},
-      icon: {},
+      label: String,
+      unit: String,
+      icon: String,
       min: {
         type: Number,
         default: 0
@@ -84,6 +84,7 @@ export default {
       return {
         knobSize: '64px',
         fontSize: '16px',
+        buttonSize: '56px',
         writing: false
       }
     },
@@ -95,20 +96,8 @@ export default {
       __centerButton () {
         return !!this.buttonSet
       },
-      __label () {
-        return this.__getProp(this.label)
-      },
-      __unit () {
-        return this.__getProp(this.unit)
-      },
-      __icon () {
-        return this.__getProp(this.icon)
-      },
-      __value () {
-        return this.__getProp(this.value)
-      },
       __valueNumber () {
-        var value = this.__value
+        var value = this.value
         if (typeof value === 'string') value = parseInt(value)
         return (typeof value === 'number' && !Number.isNaN(value)) ? value : 0
       },
@@ -121,16 +110,7 @@ export default {
       },
 
       __state () {
-        var state = this.buttonValue;
-        if (typeof state == 'function') {
-          try {
-            state = state.call(this)
-          } catch (err) {
-            console.error(err)
-            state = false
-          }
-        }
-        return !!state
+        return !!this.buttonValue;
       }
     },
 
@@ -145,18 +125,6 @@ export default {
     },
 
     methods: {
-      __getProp (prop) {
-        var value = prop;
-        if (typeof value == 'function') {
-          try {
-            value = value.call(this)
-          } catch (err) {
-            console.error(err)
-            value = undefined
-          }
-        }
-        return value
-      },
 
       updateLayout (size) {
         //var knobSize = parseInt(Math.min(size.width, size.height) / 1.5)
@@ -166,9 +134,7 @@ export default {
         this.buttonSize = (innerSize-8) + 'px'
         var lineHeight = 1.2 // ratio between text and innerSize
         var g = 1.5 // big = 200%
-        var coeff = g
-        if (this.__icon) coeff += 1
-        if (this.__unit) coeff += 1
+        var coeff = g + 1 + 1
         var fontSize = innerSize / (coeff * lineHeight)
         this.fontSize = Math.floor(fontSize) + 'px'
       },

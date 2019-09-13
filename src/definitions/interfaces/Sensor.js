@@ -18,38 +18,33 @@ export default {
     }
   },
 
-  data (resource) {
-    var d = {}
-    var props = EThingUI.get(resource).properties
-    for (var propName in props) {
-      var prop = props[propName]
-      if (prop.sensor) {
-        var val = resource.attr(propName)
-        if (typeof val != 'undefined' && val !== null) {
-          d[prop.title || propName] = val + (prop.unit || '')
-        }
-      }
-    }
-    return d
-  },
-
   badges (resource) {
     var d = {}
-    var props = EThingUI.get(resource).properties
-    for (var propName in props) {
-      var prop = props[propName]
+    var props = this.properties
+    for (let propName in props) {
+      let prop = props[propName]
       if (prop.sensor) {
         d[propName] = {
-          component: 'q-badge',
+          component: 'q-chip',
           attributes () {
-            var label = resource.attr(propName) + (prop.unit || '')
+            var val = resource.attr(propName), hide = false
+            if (typeof val == 'undefined' || val === null) {
+              val = '?'
+              hide = true
+            }
+            var label = val + (prop.unit || '')
             var icon = prop.icon
             if (!icon) {
               label = prop.title + ': ' + label
             }
             return {
               label,
-              icon
+              icon,
+              outline: true,
+              square: true,
+              dense: true,
+              color: "secondary",
+              style: hide ? 'display: none;' : ''
             }
           }
         }
@@ -61,7 +56,7 @@ export default {
   widgets (resource) {
     var widgets = {}
     var sensorAttributes = [], sensorHistoryAttributes = [], sensorNumericAttributes = []
-    var props = EThingUI.get(resource.types()).properties
+    var props = this.properties
     for (var propName in props) {
       var prop = props[propName]
       if (prop.sensor) {
@@ -78,7 +73,6 @@ export default {
     if (sensorAttributes.length>0) {
 
       var base = {
-        attributes: {},
         schema: {
           properties: {},
           required: []
@@ -112,9 +106,7 @@ export default {
             sensorName,
             icon: sensorProps.icon,
             unit: sensorProps.unit,
-            value () {
-              return resource.attr(sensorName)
-            }
+            value: resource.attr(sensorName)
           }
         },
       })
@@ -136,9 +128,7 @@ export default {
                   label: prop.title,
                   unit: prop.unit,
                   icon: prop.icon,
-                  value () {
-                    return resource.attr(sensorName)
-                  }
+                  value: resource.attr(sensorName)
                 }
               })
             }
@@ -161,9 +151,7 @@ export default {
               sensorName,
               icon: sensorProps.icon,
               unit: sensorProps.unit,
-              value () {
-                return resource.attr(sensorName)
-              }
+              value: resource.attr(sensorName)
             }
           },
           schema: {
@@ -221,7 +209,7 @@ export default {
           component: WChart,
           title: 'chart',
           description: 'plot the value of the sensor',
-          attributes (options, res) {
+          attributes (options) {
             var sensorName = options.sensorName || sensorHistoryAttributes[0]
             var sensorProps = props[sensorName]
 

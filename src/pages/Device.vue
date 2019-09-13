@@ -41,14 +41,14 @@
         <q-item :inset-level="1">
           <q-item-section>
             <div>
-              <q-chip dense square icon="access_time" class="q-ma-none q-mr-sm">
+              <q-chip dense square icon="access_time" outline color="secondary">
                 {{ $ethingUI.utils.dateToString(resource.lastSeenDate(), 'never') }}
               </q-chip>
-              <resource-battery-chip :resource="resource" class="vertical-middle q-ma-none q-mr-sm" square/>
-              <q-chip dense square icon="location_on" v-if="resource.location()" class="q-ma-none q-mr-sm">
-                {{ resource.location() }}
-              </q-chip>
-
+              <component
+                :is="badge.component"
+                v-bind="badge.attributes()"
+                v-for="(badge, index) in badges" :key="index"
+              />
             </div>
           </q-item-section>
         </q-item>
@@ -163,7 +163,6 @@
 
 import DeviceApi from '../components/DeviceApi'
 import ResourceQItem from '../components/ResourceQItem'
-import ResourceBatteryChip from '../components/ResourceBatteryChip'
 import Widget from '../components/Widget'
 import ResourceActivity from '../components/ResourceActivity'
 
@@ -173,7 +172,6 @@ export default {
   components: {
     DeviceApi,
     ResourceQItem,
-    ResourceBatteryChip,
     Widget,
     ResourceActivity,
   },
@@ -264,6 +262,15 @@ export default {
 
     meta () {
       return this.$ethingUI.get(this.resource)
+    },
+
+    badges () {
+      var badges = Object.values(this.meta.badges)
+      // re order by zIndex
+      badges.sort(function(a, b) {
+          return b.zIndex - a.zIndex;
+      });
+      return badges
     },
 
     children () {

@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <div class="row items-stretch" v-for="(item, index) in __sensors" :key="item.name" :class="index>0 ? 'q-mt-sm' : ''">
+    <div class="row items-stretch" v-for="(item, index) in __sensors" :key="item.name" :class="index>0 ? 'q-mt-xs' : ''">
 
       <div class="col-sm-auto col-xs-12" :style="{height: '220px', width: $q.screen.xs ? '' : '220px'}" >
         <widget
@@ -9,7 +9,7 @@
         />
       </div>
 
-      <div class="gt-xs col q-ml-sm relative-position bg-white" style="height: 220px">
+      <div class="gt-xs col q-ml-xs relative-position bg-white" style="height: 220px">
         <widget :resource="resource" v-bind="item.chart" v-if="!!item.chart" />
         <small v-else class="absolute-center text-light">No data</small>
       </div>
@@ -49,7 +49,7 @@ export default {
             }, chart = null;
 
             if (prop.type === 'number' && typeof prop.minimum == 'number' && typeof prop.maximum == 'number') {
-              wattr.widget = 'sensor.qnob'
+              wattr.widget = 'sensor.knob'
               wattr.min = prop.minimum
               wattr.max = prop.maximum
             }

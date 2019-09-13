@@ -1,24 +1,27 @@
 
 export default {
 
-  data (resource) {
+  badges (resource) {
     return {
-      'state': resource.attr('state') ? 'opened' : 'closed'
+      'state': {
+        attributes () {
+          return {
+            label: resource.attr('state') ? 'opened' : 'closed'
+          }
+        },
+      },
     }
   },
 
-  widgets: {
-    'sensor.label': {
-      attributes (options, resource) {
-        return {
-          value () {
-            var val = resource.attr('state')
-            return val ? 'opened' : 'closed'
-          },
-          icon () {
-            var val = resource.attr('state')
-            return val ? 'mdi-door-open' : 'mdi-door-closed'
-          },
+  widgets (resource) {
+    return {
+      'sensor.label': {
+        attributes (options) {
+          var val = resource.attr('state')
+          return {
+            value: val ? 'opened' : 'closed',
+            icon: val ? 'mdi-door-open' : 'mdi-door-closed'
+          }
         }
       }
     }

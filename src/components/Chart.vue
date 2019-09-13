@@ -501,7 +501,7 @@ export default {
                     }
                 },
                 series: {
-                    animation: false
+                    animation: false,
                 }
             },
             series: [],
@@ -576,7 +576,9 @@ export default {
                   // is it a boolean stream ?
                   var logicStream = true
                   for (var i in data) {
-                    var v = data[i][1]
+                    var p = data[i]
+                    if (!p) continue
+                    var v = p[1]
                     if (v!=0 && v!=1) {
                       logicStream = false
                       break

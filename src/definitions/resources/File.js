@@ -21,7 +21,7 @@ export default {
     },
   },
 
-  cacheControl(resource, modifiedAttributes) {
+  cacheValidity(resource, modifiedAttributes) {
     return modifiedAttributes.indexOf('name') === -1
   },
 

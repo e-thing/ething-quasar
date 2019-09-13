@@ -24,11 +24,12 @@
     <q-item-section/>
     <q-item-section side v-if="!dense">
       <div class="row justify-end">
-        <q-chip dense class="gt-sm" outline square color="secondary" v-for="(value, key) in data" :key="key">{{ key }}: {{ value }}</q-chip>
-        <q-chip v-if="showLocation" dense outline square color="secondary" icon="location_on" class="gt-xs">
-          {{ resource.location() }}
-        </q-chip>
-        <resource-battery-chip outline square color="secondary" v-if="showBattery" class="gt-xs" :resource="resource" />
+        <component
+          :is="badge.component"
+          class="gt-sm"
+          v-bind="badge.attributes()"
+          v-for="(badge, index) in badges" :key="index"
+        />
       </div>
     </q-item-section>
     <q-item-section side v-if="!readonly">
@@ -46,14 +47,9 @@
 </template>
 
 <script>
-import ResourceBatteryChip from './ResourceBatteryChip'
 
 export default {
   name: 'ResourceQItem',
-
-  components: {
-    ResourceBatteryChip
-  },
 
   props: {
     resource: {},
@@ -128,6 +124,15 @@ export default {
 
     meta () {
       return this.$ethingUI.get(this.resource)
+    },
+
+    badges () {
+      var badges = Object.values(this.meta.badges)
+      // re order by zIndex
+      badges.sort(function(a, b) {
+          return b.zIndex - a.zIndex;
+      });
+      return badges
     },
 
     data () {

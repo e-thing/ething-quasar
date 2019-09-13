@@ -173,7 +173,7 @@ export default {
     var windowHeight = window.innerHeight;
     var windowWidth = window.innerWidth;
 
-    var minWidth = 680; // in px, below this threshold, switch to small screen layout (ie, no grid)
+    var minWidth = 1024; // in px, below this threshold, switch to small screen layout (ie, no grid)
 
     var smallScreen = windowWidth < minWidth
 

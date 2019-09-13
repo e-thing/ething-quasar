@@ -2,7 +2,7 @@ import { extend } from 'quasar'
 import {isPlainObject, isDefined, isEmptyObject, isVueComponent} from '.'
 
 
-export function merge(parent, child, strategies, defaultStrategy, extra) {
+export function merge(parent, child, strategies, defaultStrategy, ctx) {
   strategies = strategies || {}
 
   var keys = Object.keys(parent).concat(Object.keys(child)).filter((v, i, a) => a.indexOf(v) === i);
@@ -10,14 +10,14 @@ export function merge(parent, child, strategies, defaultStrategy, extra) {
   keys.forEach(key => {
     var fn_merge = typeof strategies[key] !== 'undefined' ? strategies[key] : defaultStrategy
     if (fn_merge) {
-      parent[key] = fn_merge(parent[key], child[key], extra)
+      parent[key] = fn_merge(parent[key], child[key], ctx)
     }
   })
 
   return parent
 }
 
-export function mergeMultiple (list, strategies, defaultStrategy, extra) {
+export function mergeMultiple (list, strategies, defaultStrategy, ctx) {
 
   // ensure that there are at least 2 items
   if (!list.length) list.push({})
@@ -25,7 +25,7 @@ export function mergeMultiple (list, strategies, defaultStrategy, extra) {
 
   var parent = list.shift()
   list.forEach(child => {
-    parent = merge(parent, child, strategies, defaultStrategy, extra)
+    parent = merge(parent, child, strategies, defaultStrategy, ctx)
   })
   return parent
 }
@@ -42,7 +42,7 @@ export function defaultMerge (parent, child) {
   return child
 }
 
-export function functionMerge (parent, child, extra, mergeFn) {
+export function functionMerge (parent, child, ctx, mergeFn) {
   if (typeof child !== 'function') {
     let _child = child
     child = function () {
@@ -61,22 +61,24 @@ export function functionMerge (parent, child, extra, mergeFn) {
 
   return function () {
     var args = Array.prototype.slice.call(arguments)
+    ctx = ctx || {}
+    ctx.args = args
     var pRes = typeof parent === 'function' ? parent.apply(this, args) : parent
     var cRes = typeof child === 'function' ? child.apply(this, args) : child
     return mergeFn(
       pRes,
       cRes,
-      extra
+      ctx
     )
   }
 }
 
-export function noMerge (parent, child, extra, defaultValue) {
+export function noMerge (parent, child, ctx, defaultValue) {
   if (typeof child === 'undefined') return defaultValue
   return child
 }
 
-export function mapMerge (parent, child, extra, mergeFn) {
+export function mapMerge (parent, child, ctx, mergeFn) {
   if (!parent) parent = {}
   if (!child) child = {}
 
@@ -86,12 +88,12 @@ export function mapMerge (parent, child, extra, mergeFn) {
   var keys = Object.keys(parent).concat(Object.keys(child)).filter((v, i, a) => a.indexOf(v) === i);
   var merged = {}
   keys.forEach(k => {
-    merged[k] = mergeFn(parent[k], child[k], extra)
+    merged[k] = mergeFn(parent[k], child[k], ctx)
   })
   return merged
 }
 
-export function arrayMerge (parent, child, extra, unique) {
+export function arrayMerge (parent, child, ctx, unique) {
   if (!parent) return child
   if (!child) return parent
 
@@ -107,7 +109,7 @@ export function arrayMerge (parent, child, extra, unique) {
 export var arrayUniqueMerge = (p, c, e) => arrayMerge(p, c, e, true)
 
 
-export function vueComponentMerge (parent, child, extra) {
+export function vueComponentMerge (parent, child, ctx) {
   if (!parent) return child
   if (!child || isEmptyObject(child)) return parent
 
