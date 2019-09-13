@@ -68,25 +68,62 @@
       </template>
 
     </div>
-    <template v-if="__items.length>0">
+    <template v-if="__filteredResources.length>0">
       <q-list class="col scroll" :class="contentClass" :style="contentStyle">
-        <template
-          v-for="(item, index) in __items"
-        >
-          <slot name="resource-item" v-bind:item="item">
-            <q-separator v-if="index>0 && item.level==0"/>
 
-            <resource-q-item
-              :resource="item.resource"
-              :level="item.level"
-              :no-parent="item.level>0"
-              :readonly="readonly"
-              :dense="dense"
-              @click="itemClick(item)"
-              :class="itemClass"
-              :style="itemStyle"
-            />
-          </slot>
+        <template v-if="!__subTypes">
+          <template
+            v-for="(item, index) in __toItems(__filteredResources)"
+          >
+            <slot name="resource-item" v-bind:item="item">
+              <q-separator v-if="index>0 && item.level==0"/>
+
+              <resource-q-item
+                :resource="item.resource"
+                :level="item.level"
+                :no-parent="item.level>0"
+                :readonly="readonly"
+                :dense="dense"
+                @click="itemClick(item)"
+                :class="itemClass"
+                :style="itemStyle"
+              />
+            </slot>
+          </template>
+        </template>
+        <template v-else>
+          <template
+            v-for="(cat, pIndex) in __subTypes"
+          >
+            <q-separator v-if="pIndex>0" />
+
+            <q-expansion-item
+              :icon="cat.icon"
+              :label="cat.label + ' (' + __organizeResources[pIndex].length + ')'"
+              default-opened
+              header-class="text-faded"
+              :header-inset-level="cat.icon ? 0 : 1"
+            >
+              <template
+                v-for="(item, index) in __toItems(__organizeResources[pIndex])"
+              >
+                <slot name="resource-item" v-bind:item="item">
+                  <q-separator v-if="index>0 && item.level==0"/>
+
+                  <resource-q-item
+                    :resource="item.resource"
+                    :level="item.level"
+                    :no-parent="item.level>0"
+                    :readonly="readonly"
+                    :dense="dense"
+                    @click="itemClick(item)"
+                    :class="itemClass"
+                    :style="itemStyle"
+                  />
+                </slot>
+              </template>
+            </q-expansion-item>
+          </template>
         </template>
       </q-list>
     </template>
@@ -127,6 +164,21 @@ export default {
       categories: {},
       category: Number, // index
       hideAll: Boolean,
+
+      /*
+      categories: array
+      ['resources/Device', {
+        label: 'Files',
+        filter: 'resources/File'
+      }, {
+        label: 'Custom',
+        icon: 'mdi-file',
+        filter: function(resource) {
+          return true // or false
+        }
+      }]
+      */
+      organize: {},
 
       createTypes: {},
 
@@ -287,7 +339,7 @@ export default {
         }
 
         if (!this.showHiddenFiles) {
-          resources = resources.filter(r => !(r.basename().startsWith('.') && this.$ethingUI.isSubclass(r, 'resources/File')))
+          resources = resources.filter(r => !r.basename().startsWith('.'))
         }
 
         if (this.search_) {
@@ -304,49 +356,47 @@ export default {
         return resources
       },
 
+      __organizeResources () {
+        var subTypes = this.__subTypes
+        var res = Array.apply(null, Array(subTypes.length)).map(function () { return [] })
+
+        this.__resources.forEach(r => {
+          var found = false
+          subTypes.forEach((t,i) => {
+            if (t._others) {
+              if (!found) {
+                res[i].push(r)
+              }
+            } else if(t.filter(r)) {
+              found = true
+              res[i].push(r)
+            }
+          })
+        })
+
+        return res
+      },
+
       __checksum () {
         return this.__filteredResources.map(r => r.id()).join(' ')
       },
 
-      __items () {
-        if (this.tree) {
-          return this.makeTree(this.__filteredResources)
-        } else {
-          return this.__filteredResources.map(r => {
-            return {
-              resource: r,
-              level: 0
-            }
-          })
+      __categories () {
+        if (Array.isArray(this.categories)) {
+          return this.__formatCat(this.categories)
         }
       },
 
-      __categories () {
-        if (Array.isArray(this.categories)) {
-          return this.categories.map(catItem => {
-            if (typeof catItem === 'string') {
-              // type name
-              var cls = this.$ethingUI.get(catItem)
-              var label = cls.title
-              var icon = cls.icon
-              catItem = {
-                label,
-                icon,
-                filter: catItem
-              }
-            }
-            if (typeof catItem.filter === 'string') {
-              var type = catItem.filter
-              if (!catItem.label) {
-                catItem.label = this.$ethingUI.get(type).title
-              }
-              if (!catItem.label) {
-                catItem.icon = this.$ethingUI.get(type).icon
-              }
-              catItem.filter = (r) => this.$ethingUI.isSubclass(r, type)
-            }
-            return catItem
+      __subTypes () {
+        if (Array.isArray(this.organize)) {
+          var cats = this.__formatCat(this.organize)
+          cats.push({
+            label: 'others',
+            icon: null,
+            filter: null,
+            _others: true
           })
+          return cats
         }
       },
 
@@ -452,7 +502,47 @@ export default {
         } else {
           this.showCreatePopup_ = true
         }
-      }
+      },
+
+      __formatCat (categories) {
+        return categories.map(catItem => {
+          if (typeof catItem === 'string') {
+            // type name
+            var cls = this.$ethingUI.get(catItem)
+            var label = cls.title
+            var icon = cls.icon
+            catItem = {
+              label,
+              icon,
+              filter: catItem
+            }
+          }
+          if (typeof catItem.filter === 'string') {
+            var type = catItem.filter
+            if (!catItem.label) {
+              catItem.label = this.$ethingUI.get(type).title
+            }
+            if (!catItem.label) {
+              catItem.icon = this.$ethingUI.get(type).icon
+            }
+            catItem.filter = (r) => this.$ethingUI.isSubclass(r, type)
+          }
+          return catItem
+        })
+      },
+
+      __toItems (resources) {
+        if (this.tree) {
+          return this.makeTree(resources)
+        } else {
+          return resources.map(r => {
+            return {
+              resource: r,
+              level: 0
+            }
+          })
+        }
+      },
 
     }
 

@@ -4,12 +4,36 @@
    :options="options"
    :multiple="multiple"
    v-bind="$attrs"
-   emit-value
+   use-input
    @filter="filterFn"
-   :display-value="displayValue"
+   :input-debounce="filtering ? 300 : 0"
    items-aligned
    options-selected-class="text-deep-orange"
+   :virtual-scroll-slice-size="200"
+   :display-value="filtering ? 'filter: ' : 'No resource selected'"
   >
+    <template v-slot:no-option>
+      <q-item>
+        <q-item-section class="text-grey">
+          No resources
+        </q-item-section>
+      </q-item>
+    </template>
+
+    <template v-slot:selected-item="scope" v-if="selectedResources.length">
+      <q-chip
+        removable
+        dense
+        @remove="scope.removeAtIndex(scope.index)"
+        :tabindex="scope.tabindex"
+        :color="scope.opt.color"
+        text-color="white"
+        class="q-ml-none q-my-xs q-mr-xs"
+        :icon="scope.opt.icon"
+        :label="scope.opt.label"
+      />
+    </template>
+
     <template v-slot:option="scope">
       <q-item
         v-bind="scope.itemProps"
@@ -42,6 +66,15 @@ import EThing from 'ething-js'
 import {createModal} from '../utils'
 
 
+const sortMap = {
+  name (a, b) {
+    return a.name().localeCompare(b.name())
+  },
+  date (a, b) {
+    return b.modifiedDate() - a.modifiedDate()
+  }
+}
+
 export default {
     name: 'ResourceSelect',
 
@@ -54,12 +87,15 @@ export default {
       multiple: Boolean,
       disableCreate: Boolean,
       createTypes: Array,
+      showHiddenFiles: Boolean,
+      sort: {},
     },
 
     data () {
         return {
           options: this.compute_options(),
-          p_model: null
+          p_model: null,
+          filtering: false
         }
     },
 
@@ -67,15 +103,25 @@ export default {
 
       model: {
         get: function () {
-          var mids = this.selectedResources.map(r => r.id())
+          var mids = this.selectedResources.map(r => {
+            for (var i in this.options) {
+              if (this.options[i].value === r.id()) {
+                return this.options[i]
+              }
+            }
+          })
           return this.multiple ? mids : mids[0]
         },
         set: function (val) {
           var m;
-          if (this.multiple) {
-            m = this.useId ? val : val.map(id => this.$ething.arbo.get(id))
+          if (!val) {
+            m = this.multiple ? [] : null
           } else {
-            m = this.useId ? val : this.$ething.arbo.get(val)
+            if (this.multiple) {
+              m = this.useId ? val.map(opt => opt.value) : val.map(opt => opt.resource)
+            } else {
+              m = this.useId ? val.value : val.resource
+            }
           }
           this.$emit('input', m)
         }
@@ -109,11 +155,6 @@ export default {
           return []
         }
       },
-
-      displayValue () {
-        if (this.selectedResources.length==0) return 'none'
-        return this.selectedResources.map(r=>r.basename()).join(', ')
-      }
     },
 
     methods: {
@@ -134,7 +175,13 @@ export default {
         if (this.type) {
           types = this.type.split(/[ ;,]+/)
         }
-        return this.$ething.arbo.find( r => {
+        var resources = this.$ething.arbo.find( r => {
+
+          if (!this.showHiddenFiles) {
+            if (r.basename().startsWith('.')) {
+              return false
+            }
+          }
 
           if (notTypes) {
             for(var i in notTypes) {
@@ -161,10 +208,32 @@ export default {
 
           return true
         })
+
+        var sortFn = null
+        if (typeof this.sort === 'name') {
+          sortFn = sortMap[this.sort]
+        } else {
+          sortFn = this.sort
+        }
+        if (sortFn) {
+          resources.sort(sortFn)
+        }
+
+        return resources
       },
 
-      compute_options () {
-        return this.resources().map( r => {
+      compute_options (filterValue) {
+        var resources = this.resources()
+
+        if (filterValue) {
+          var re_filter = new RegExp(filterValue, 'i')
+          resources = resources.filter(r => {
+            return re_filter.test(r.name()) || re_filter.test(r.type()) || re_filter.test(r.description()) || re_filter.test(r.attr('location'))
+          })
+        }
+
+        return resources.map( r => {
+
           var createdByArr = []
           var p = r
           for (let i = 0; i<2; i++) {
@@ -186,15 +255,31 @@ export default {
             color: meta.color,
             title: meta.title,
             createBys: createdByArr,
+            resource: r
           }
         })
       },
 
       filterFn (val, update, abort) {
+        this.filtering = !!val
         update(() => {
-          this.options = this.compute_options()
+          this.options = this.compute_options(val)
         })
       },
+
+      /*filterFn (val, update) {
+        if (val === '') {
+          update(() => {
+            this.options = stringOptions
+          })
+          return
+        }
+
+        update(() => {
+          const needle = val.toLowerCase()
+          this.options = stringOptions.filter(v => v.toLowerCase().indexOf(needle) > -1)
+        })
+      }*/
 
     }
 

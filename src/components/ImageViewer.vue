@@ -24,7 +24,6 @@
       <q-circular-progress
         indeterminate
         size="48px"
-        color="white"
       />
     </div>
     <div v-show="error" class="absolute-center text-negative">

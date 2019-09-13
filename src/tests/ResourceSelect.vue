@@ -1,5 +1,8 @@
 <template>
   <div>
+    <div>
+      {{ resourceFilter.length }} resources selected
+    </div>
 
     <resource-select
       v-model="resourceFilter"

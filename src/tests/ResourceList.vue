@@ -7,7 +7,8 @@
     <q-toggle v-model="heightfixed" label="heightfixed"/>
 
     <resource-list
-      :categories="['resources/Device', 'resources/File', 'resources/Table', 'resources/Flow', 'interfaces/Sensor', 'interfaces/Thermometer']"
+      :categories="['resources/Device', 'resources/File', 'resources/Table', 'resources/Flow']"
+      :organize="['interfaces/Sensor', 'interfaces/Thermometer']"
       class="bg-white"
       :dense="dense"
       :readonly="readonly"
