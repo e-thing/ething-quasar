@@ -4,13 +4,14 @@
    :options="options"
    :multiple="multiple"
    v-bind="$attrs"
-   use-input
+   :use-input="enableFilter"
    @filter="filterFn"
    :input-debounce="filtering ? 300 : 0"
    items-aligned
    options-selected-class="text-deep-orange"
    :virtual-scroll-slice-size="200"
-   :display-value="filtering ? 'filter: ' : 'No resource selected'"
+   :placeholder="selectedResources.length ? 'search for a resource...' : 'Select a resource'"
+   stack-label
   >
     <template v-slot:no-option>
       <q-item>
@@ -89,6 +90,7 @@ export default {
       createTypes: Array,
       showHiddenFiles: Boolean,
       sort: {},
+      enableFilter: Boolean
     },
 
     data () {
@@ -210,11 +212,12 @@ export default {
         })
 
         var sortFn = null
-        if (typeof this.sort === 'name') {
+        if (typeof this.sort === 'string') {
           sortFn = sortMap[this.sort]
         } else {
           sortFn = this.sort
         }
+
         if (sortFn) {
           resources.sort(sortFn)
         }
