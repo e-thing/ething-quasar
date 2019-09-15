@@ -15,6 +15,7 @@ import FlowNodes from './FlowNodes'
 import ResourceActivity from './ResourceActivity'
 import Combobox from './Combobox'
 import ResourceList from './ResourceList'
+import ResourceCreateModal from './ResourceCreateModal'
 
 export {
     widgets,
@@ -31,5 +32,6 @@ export {
     ResourceObservable,
     ResourceActivity,
     Combobox,
-    ResourceList
+    ResourceList,
+    ResourceCreateModal
 }
