@@ -18,84 +18,89 @@
     size="lg"
 
   >
+    <template v-slot:buttons-right>
+      <q-btn v-if="!__singleEntry && selectedType" color="grey" flat icon="mdi-arrow-left" label="back" @click="selectedType=null"/>
+    </template>
     <q-card flat>
 
-      <q-card-section v-if="items.length==0">
+      <q-card-section v-if="!selectedType">
         <q-banner
+            v-if="__createSelectOptions.length==0"
             class="bg-warning text-white"
         >
           <q-icon left name="mdi-alert"/> Oops. No resource can be created !
         </q-banner>
-      </q-card-section>
-
-      <q-card-section>
-        <q-select
-         v-if="items.length>1"
-         v-model="selectedType"
-         :options="items"
-         emit-value
-        >
-          <template v-slot:selected>
-            <div v-if="selectedType">
-              <q-avatar :icon="selectedClass.icon" :color="selectedClass.color" text-color="white" size="24px" class="q-mr-sm"/>
-              <span>{{ selectedClass.title }}</span>
-            </div>
-            <div v-else>select a type</div>
-          </template>
-
-          <template v-slot:option="scope">
+        <q-list v-else>
+          <template v-for="cat in __createSelectOptions">
+            <q-item-label header v-if="__createSelectOptions.length>1">{{ cat.name }}</q-item-label>
             <q-item
-              v-bind="scope.itemProps"
-              v-on="scope.itemEvents"
+              v-for="(item, index) in cat.items"
+              :key="cat.name + index"
+              clickable
+              @click="item.click()"
+              :inset-level="item.icon ? 0 : 1"
             >
-              <q-item-section avatar>
-                <q-avatar :color="scope.opt.color" text-color="white" :icon="scope.opt.icon" />
+              <q-item-section avatar v-if="item.icon">
+                <q-icon :name="item.icon" :color="item.color"/>
               </q-item-section>
               <q-item-section>
-                <q-item-label>{{ scope.opt.label }}</q-item-label>
-                <q-item-label caption>{{ scope.opt.sublabel }}</q-item-label>
+                <q-item-label>{{ item.label }}</q-item-label>
+                <q-item-label v-if="item.description" caption lines="2">{{ item.description }}</q-item-label>
               </q-item-section>
             </q-item>
           </template>
-        </q-select>
+        </q-list>
       </q-card-section>
 
-      <q-card-section>
-        <resource-editor v-if="selectedType" ref="form" :resource="selectedType" :key="selectedType" @error="formError=$event"/>
-      </q-card-section>
+      <template v-else>
+        <q-card-section>
+          <resource-editor ref="form" :resource="selectedType" :key="selectedType" @error="formError=$event"/>
+        </q-card-section>
 
-      <q-card-section v-if="error">
-        <q-banner
-            class="bg-negative text-white"
-        >
-          <q-icon left name="mdi-alert"/> {{ String(error) }}
-        </q-banner>
-      </q-card-section>
+        <q-card-section v-if="error">
+          <q-banner
+              class="bg-negative text-white"
+          >
+            <q-icon left name="mdi-alert"/> {{ String(error) }}
+          </q-banner>
+        </q-card-section>
+      </template>
     </q-card>
   </modal>
 </template>
 
 <script>
 
-import ResourceEditor from './ResourceEditor'
-import Modal from './Modal'
-
 export default {
     name: 'ResourceCreateModal',
 
-    components: {
-      Modal,
-      ResourceEditor
-    },
-
     props: {
       value: Boolean,
-      types: Array
+
+      /*
+      [
+        'resources/device',
+        { // for custom entry
+          icon: 'quasar icon',
+          label: '...', // mandatory
+          color: 'quasar color',
+          description: '',
+          click () { // mandatory
+
+          }
+        }
+      ]
+      */
+      types: Array,
+      open: Boolean,
+      title: {
+        type: String,
+        default: 'Create'
+      }
     },
 
     data () {
         return {
-          selectedModel: undefined,
           selectedType: undefined,
           loading: false,
           error: false,
@@ -105,46 +110,103 @@ export default {
 
     computed: {
 
-      items () {
-        var types = this.types || []
-        if (types.length == 0) types = ['resources/Resource']
-
-        return this.$ethingUI.getSubclass(types).filter(cls => !cls.virtual && !cls.disableCreation).map(m => {
-          var t = m._type
-
-          var cat = t.split('/')
-          cat.pop()
-          cat = cat.join(' ')
-
-          return {
-            label: m.title,
-            icon: m.icon,
-            color: m.color,
-            sublabel: cat,
-            value: t
+      __createTypes () {
+        if (typeof this.types !== 'undefined') {
+          if (typeof this.types === 'string') {
+            return this.types.split(' ').filter(t => !!t)
+          } else {
+            return this.types
           }
+        } else {
+          return ['resources/Resource']
+        }
+      },
+
+      __createSelectOptions () {
+
+        var baseCls = (this.__createTypes || []).filter(t => typeof t === 'string')
+        var extra = (this.__createTypes || []).filter(t => typeof t === 'object' && t !== null)
+        var clsList = this.$ethingUI.getSubclass(baseCls).filter(cls => !cls.virtual && !cls.disableCreation)
+        var defaultCategory = 'other'
+
+        // order by categories
+        var categories = {}
+
+        clsList.forEach(cls => {
+          var path = (cls.category || defaultCategory).split('.')
+          var label = cls.title || cls.split('/').pop()
+          var category = path[0]
+
+          if (!categories[category]) {
+            categories[category] = {
+              items: []
+            }
+          }
+
+          categories[category].items.push({
+            label,
+            color: cls.color,
+            icon: cls.icon,
+            description: cls.description,
+            click: () => {
+              if (this.open) {
+                this.$router.push({
+                  name: 'create',
+                  params: {
+                    type: cls._type
+                  }
+                })
+              } else {
+                this.selectedType = cls._type
+              }
+            }
+          })
         })
+
+        extra.forEach(obj => {
+          if (typeof obj !== 'object' || obj===null || !obj.label || !obj.click) return
+          var category = obj.category || defaultCategory
+          if (!categories[category]) {
+            categories[category] = {
+              items: []
+            }
+          }
+          categories[category].items.push(Object.assign({
+            color: 'grey',
+          }, obj))
+        })
+
+        var other = categories[defaultCategory]
+        var orderedCategories = []
+
+        delete categories[defaultCategory]
+
+        for(var category in categories){
+          orderedCategories.push(Object.assign({
+            name: category
+          }, categories[category]))
+        }
+
+        if (other) {
+          orderedCategories.push(Object.assign({
+            name: defaultCategory
+          }, other))
+        }
+
+        return orderedCategories
       },
 
-      title () {
-        if (this.items.length==1) return 'create '+this.items[0].label
-        return 'create'
+      __singleEntry () {
+        return this.__createSelectOptions.length===1 && this.__createSelectOptions[0].items.length === 1 ? this.__createSelectOptions[0].items[0] : null
       },
-
-      selectedClass () {
-        return this.selectedType ? this.$ethingUI.get(this.selectedType) : undefined
-      }
 
     },
 
     watch: {
-      selectedModel (val) {
-        this.selectedType = val
-      },
-      items: {
+      __singleEntry: {
         handler (val) {
-          if (val.length === 1 && !this.selectedType) {
-            this.selectedType = val[0].value
+          if (val) {
+            val.click()
           }
         },
         immediate: true
