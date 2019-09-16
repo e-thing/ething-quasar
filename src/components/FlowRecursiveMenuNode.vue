@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <q-expansion-item v-for="(c, name) in root.children" :key="name" v-if="notEmpty(c)" :opened="opened">
+  <div class="no-scroll">
+    <q-expansion-item v-for="(c, name) in root.children" :key="name" v-if="notEmpty(c)" :opened="opened" expand-separator>
       <template slot="header">
         <q-item-section>
           {{ formatLabel(name) }}

@@ -82,7 +82,7 @@
                   />
 
                   <resource-select
-                    type="resources/Table"
+                    resources="resources/Table"
                     label="table"
                     v-model="curve.data.resource"
                     use-id

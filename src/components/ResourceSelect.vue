@@ -6,12 +6,12 @@
    v-bind="$attrs"
    :use-input="enableFilter"
    @filter="filterFn"
-   :input-debounce="filtering ? 300 : 0"
+   :input-debounce="search_ ? 300 : 0"
    items-aligned
    options-selected-class="text-deep-orange"
    :virtual-scroll-slice-size="200"
    :placeholder="selectedResources.length ? 'search for a resource...' : 'Select a resource'"
-   stack-label
+   :display-value="selectedResources.length ? '...' : 'Select a resource'"
   >
     <template v-slot:no-option>
       <q-item>
@@ -36,68 +36,60 @@
     </template>
 
     <template v-slot:option="scope">
+      <q-item-label
+        v-if="scope.opt.header"
+        header
+        v-show="scope.opt.resourcesLength>0"
+      >{{ scope.opt.label }} ({{ scope.opt.resourcesLength }})</q-item-label>
       <q-item
+        v-else
         v-bind="scope.itemProps"
         v-on="scope.itemEvents"
+        v-show="!scope.opt.hide"
       >
         <q-item-section avatar>
           <q-avatar :color="scope.opt.color" text-color="white" :icon="scope.opt.icon" />
         </q-item-section>
         <q-item-section>
-          <q-item-label>{{ scope.opt.label }}</q-item-label>
-          <q-item-label caption>{{ scope.opt.title }}</q-item-label>
-          <q-item-label v-if="!!scope.opt.createBys" caption>
-            <template v-for="createBy in scope.opt.createBys">
-              <q-icon name="keyboard_arrow_right"/>
-              <span>{{ createBy.basename() }}</span>
-            </template>
+          <q-item-label>
+            <span>{{ scope.opt.label }}</span>
+            <small v-if="scope.opt.createdBy" class="text-faded q-ml-sm">{{ scope.opt.createdBy.basename() }}</small>
           </q-item-label>
+          <q-item-label caption>{{ scope.opt.title }}</q-item-label>
         </q-item-section>
       </q-item>
     </template>
 
-    <template v-slot:append v-if="!disableCreate && computedCreateTypes.length!=0">
-      <q-icon name="add" class="cursor-pointer" @click="openCreateModal" />
+    <template v-slot:append v-if="!disableCreate && __createTypes.length!=0">
+      <q-icon name="add" class="cursor-pointer" @click.prevent.stop="showCreatePopup_=true" />
+      <resource-create-modal :types="__createTypes" v-model="showCreatePopup_"/>
     </template>
   </q-select>
 </template>
 
 <script>
-import EThing from 'ething-js'
-import {createModal} from '../utils'
+import ResourceListBase from './ResourceListBase'
 
-
-const sortMap = {
-  name (a, b) {
-    return a.name().localeCompare(b.name())
-  },
-  date (a, b) {
-    return b.modifiedDate() - a.modifiedDate()
-  }
-}
 
 export default {
     name: 'ResourceSelect',
 
+    mixins: [ResourceListBase],
+
     props: {
-      type: String,
-      notType: String,
-      filter: {},
       value: {},
       useId: Boolean,
       multiple: Boolean,
-      disableCreate: Boolean,
       createTypes: Array,
-      showHiddenFiles: Boolean,
-      sort: {},
-      enableFilter: Boolean
+      enableFilter: Boolean,
+      disableCreate: Boolean
     },
 
     data () {
         return {
-          options: this.compute_options(),
-          p_model: null,
-          filtering: false
+          options: [],
+          showCreatePopup_: false,
+          search__: ''
         }
     },
 
@@ -129,16 +121,6 @@ export default {
         }
       },
 
-      computedCreateTypes () {
-        if (this.createTypes) {
-          return this.createTypes
-        } else if (this.type) {
-          return this.type.split(/[ ;,]+/)
-        } else {
-          return ['resources/Resource']
-        }
-      },
-
       selectedResources () {
         if (this.multiple) {
           var v = []
@@ -160,131 +142,62 @@ export default {
     },
 
     methods: {
-      openCreateModal () {
-        createModal({
-          types: this.computedCreateTypes
-        })
-      },
 
-      resources () {
+      compute_options () {
+        var searchFilter = this.__makeSearchFilter(this.search__)
+        var options = []
 
-        var notTypes = null
-        var types = null
-
-        if (this.notType) {
-          notTypes = this.notType.split(/[ ;,]+/)
-        }
-        if (this.type) {
-          types = this.type.split(/[ ;,]+/)
-        }
-        var resources = this.$ething.arbo.find( r => {
-
-          if (!this.showHiddenFiles) {
-            if (r.basename().startsWith('.')) {
-              return false
-            }
-          }
-
-          if (notTypes) {
-            for(var i in notTypes) {
-              if (r.isTypeof(notTypes[i])) {
-                return false
-              }
-            }
-          }
-
-          if (types) {
-            var pok = false
-            for(var i in types) {
-              if (r.isTypeof(types[i])){
-                pok = true
-                break
-              }
-            }
-            if (!pok) return false
-          }
-
-          if (this.filter) {
-            return !!this.filter(r)
-          }
-
-          return true
-        })
-
-        var sortFn = null
-        if (typeof this.sort === 'string') {
-          sortFn = sortMap[this.sort]
-        } else {
-          sortFn = this.sort
-        }
-
-        if (sortFn) {
-          resources.sort(sortFn)
-        }
-
-        return resources
-      },
-
-      compute_options (filterValue) {
-        var resources = this.resources()
-
-        if (filterValue) {
-          var re_filter = new RegExp(filterValue, 'i')
-          resources = resources.filter(r => {
-            return re_filter.test(r.name()) || re_filter.test(r.type()) || re_filter.test(r.description()) || re_filter.test(r.attr('location'))
-          })
-        }
-
-        return resources.map( r => {
-
-          var createdByArr = []
-          var p = r
-          for (let i = 0; i<2; i++) {
-            var createdBy = p.createdBy() ? this.$ething.arbo.get(p.createdBy()) : null
-            if (createdBy) {
-              createdByArr.push(createdBy)
-              p = createdBy
-            } else {
-              break
-            }
-          }
+        var resourceProcess = r => {
 
           var meta = this.$ethingUI.get(r)
+          var createdBy = r.createdBy()
+          if (createdBy) {
+            createdBy = this.$ething.arbo.get(createdBy)
+          }
 
-          return {
+          options.push({
             label: r.name(),
             value: r.id(),
             icon: meta.icon,
             color: meta.color,
             title: meta.title,
-            createBys: createdByArr,
-            resource: r
-          }
-        })
+            createdBy,
+            resource: r,
+            hide: !searchFilter(r)
+          })
+        }
+
+        if (this.__groups.length) {
+          this.__groups.forEach(group => {
+            if (group.resources.length==0) return
+
+            // header
+            options.push({
+              label: group.label,
+              icon: group.icon,
+              disable: true,
+              header: true,
+              resourcesLength: group.resources.length
+            })
+
+            group.resources.forEach(resourceProcess)
+
+          })
+        } else {
+          this.__filteredResources.forEach(resourceProcess)
+        }
+
+        return options
       },
 
       filterFn (val, update, abort) {
-        this.filtering = !!val
+        this.search__ = val
         update(() => {
-          this.options = this.compute_options(val)
+          this.options = this.compute_options()
         })
       },
 
-      /*filterFn (val, update) {
-        if (val === '') {
-          update(() => {
-            this.options = stringOptions
-          })
-          return
-        }
-
-        update(() => {
-          const needle = val.toLowerCase()
-          this.options = stringOptions.filter(v => v.toLowerCase().indexOf(needle) > -1)
-        })
-      }*/
-
-    }
+    },
 
 
 }

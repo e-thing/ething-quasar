@@ -203,14 +203,17 @@ export default {
     },
 
     watch: {
-      __singleEntry: {
+      value: {
         handler (val) {
           if (val) {
-            val.click()
+            var singleEntry = this.__singleEntry
+            if (singleEntry) {
+              singleEntry.click()
+            }
           }
         },
         immediate: true
-      }
+      },
     },
 
     methods: {

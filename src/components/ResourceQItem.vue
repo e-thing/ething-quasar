@@ -28,6 +28,7 @@
           :is="badge.component"
           class="gt-sm"
           v-bind="badge.attributes()"
+          v-on="badge.listeners()"
           v-for="(badge, index) in badges" :key="index"
         />
       </div>

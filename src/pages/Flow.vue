@@ -10,9 +10,8 @@
       <div class="node-filter q-px-md q-py-sm">
         <resource-select
           v-model="resourceFilter"
-          clearable
+          default-sort="type"
           label="Resource Filter"
-          stack-label
           disable-create
           popup-content-style="width: 300px"
           borderless
@@ -21,7 +20,7 @@
 
       <q-list separator>
         <flow-recursive-menu-node :root="menu" @click="addNodeClick" :opened="resourceFilter!==null" :key="resourceFilter && resourceFilter.id()">
-          <div slot-scope="{node}" class="node node-menu" :style="{'background-color': node.color}">
+          <div slot-scope="{node}" class="node node-menu no-shadow" :style="{'background-color': node.color}">
             <div class="endpoint" v-if="node.inputs"></div>
             <q-icon v-if="node.icon" :name="node.icon" class="icon" />
             <div class="content">

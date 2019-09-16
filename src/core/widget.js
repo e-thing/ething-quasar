@@ -16,6 +16,9 @@ export function widgetDefaults (resource) {
         resource
       }
     },
+    listeners () {
+      return {}
+    },
     zIndex: 0, // kind of a priority. Allow to order the widgets list.
     title: '',
     defaultTitle: '%name%', // can also be a function (attributes) => string
@@ -38,7 +41,7 @@ export function widgetMerge (p, c, ctx) {
   keys.forEach(k => {
     if (k==='component') {
       merged[k] = vueComponentMerge(p[k], c[k], ctx)
-    } else if (k==='attributes') {
+    } else if (k==='attributes' || k==='listeners') {
       merged[k] = functionMerge(p[k], c[k], ctx)
     } else {
       merged[k] = defaultMerge(p[k], c[k], ctx)

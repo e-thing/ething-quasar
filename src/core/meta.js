@@ -47,8 +47,8 @@ const defaults = {
   */
   dynamic: null,
 
-  cacheValidity(resource, modifiedAttributes) {
-    return modifiedAttributes.indexOf('extends') === -1
+  cacheExpired(resource, modifiedAttributes) {
+    return modifiedAttributes.indexOf('extends') !== -1
   },
 
   /**
@@ -73,6 +73,7 @@ const defaults = {
       description: '...', // a description of this widget
       icon: '...',
       attributes (options) {}, // attributes to pass to the component
+      listeners () {}, // listeners to pass to the component
       minWidth: 45, // px, the minimum width accepted by this widget
       minHeight: 45, // px, the minimum height accepted by this widget
       zIndex: 0, // kind of a priority. Allow to order the widgets list.
@@ -99,6 +100,7 @@ const defaults = {
     {
       component: <VueComponent>,
       attributes () {}, // attributes to pass to the component
+      listeners () {}, // listeners to pass to the component
       zIndex: 0, // kind of a priority. Allow to order the widgets list.
       disable: false // set to true if you want to disable this badge (may be useful when overriding)
     }
@@ -121,6 +123,7 @@ const defaults = {
       title: '...',
       icon: '...',
       attributes () {}, // attributes to pass to the component
+      listeners () {}, // listeners to pass to the component
       zIndex: 0, // kind of a priority. Allow to order the components list.
       disable: false // set to true if you want to disable this item
     }
@@ -146,6 +149,9 @@ function componentDefaults (resource) {
         resource
       }
     },
+    listeners () {
+      return {}
+    },
     zIndex: 0, // kind of a priority.
     title: '',
     icon: '',
@@ -162,7 +168,7 @@ function componentMerge(p, c, ctx) {
   keys.forEach(k => {
     if (k==='component') {
       merged[k] = vueComponentMerge(p[k], c[k], ctx)
-    } else if (k==='attributes') {
+    } else if (k==='attributes' || k==='listeners') {
       merged[k] = functionMerge(p[k], c[k], ctx)
     } else {
       merged[k] = defaultMerge(p[k], c[k], ctx)
@@ -180,6 +186,9 @@ function badgeDefaults (resource) {
         resource
       }
     },
+    listeners () {
+      return {}
+    },
     zIndex: 0, // kind of a priority.
   }
 }
@@ -194,7 +203,7 @@ function badgeMerge(p, c, ctx) {
   keys.forEach(k => {
     if (k==='component') {
       merged[k] = vueComponentMerge(p[k], c[k], ctx)
-    } else if (k==='attributes') {
+    } else if (k==='attributes' || k==='listeners') {
       merged[k] = functionMerge(p[k], c[k], ctx)
     } else {
       merged[k] = defaultMerge(p[k], c[k], ctx)
@@ -218,7 +227,7 @@ var mergeStrategies = {
     })
   },
 
-  cacheValidity: functionMerge,
+  cacheExpired: functionMerge,
 
   methods: mapMerge,
   data: functionMerge,
@@ -464,14 +473,14 @@ function normalize (obj, resource) {
 var cached_meta_types = {}
 
 
-function cacheValidity (resource, modifiedAttributes) {
+function cacheCheck (resource, modifiedAttributes) {
   var id = resource.id()
   if (id in cached_meta_types) {
     var cache = cached_meta_types[id]
 
-    if (!cache.cacheValidity(resource, modifiedAttributes)) {
+    if (cache.cacheExpired(resource, modifiedAttributes)) {
       // remove the cache
-      console.log('[meta:cacheValidity] remove cache for resource', resource.name())
+      console.log('[meta:cacheCheck] remove cache for resource', resource.name())
       delete cached_meta_types[id]
     }
   }
@@ -611,7 +620,7 @@ export default {
   install ({ EThingUI }) {
 
     EThing.on('ething.resource.updated', (evt, resource, updatedKeys) => {
-      cacheValidity(resource, updatedKeys)
+      cacheCheck(resource, updatedKeys)
     })
 
     Object.assign(EThingUI, {

@@ -22,7 +22,15 @@
         <q-btn v-if="refreshEnabled" stretch class="gt-xs" flat icon="refresh" aria-label="refresh" @click="refresh"/>
         <q-btn flat icon="mdi-bell" stretch>
           <q-badge v-if="persistentNotifications.length>0" color="red" floating style="top: 4px;right: 3px;">{{ persistentNotifications.length }}</q-badge>
-          <q-menu anchor="bottom right" self="top right" max-width="370px" square content-class="no-shadow bg-transparent">
+          <q-menu
+            anchor="bottom right"
+            self="top right"
+            max-width="370px"
+            square
+            content-class="no-shadow bg-transparent"
+            transition-show="slide-down"
+            transition-hide="slide-up"
+          >
             <div class="bg-grey-8 text-grey-5 q-pa-md text-subtitle2">{{ persistentNotifications.length>0 ? 'Notifications' : 'No notifications' }}</div>
             <q-scroll-area style="height: 50vh; min-width: 350px;" v-close-popup v-if="persistentNotifications.length>0">
               <q-list separator dark class="bg-primary text-white">

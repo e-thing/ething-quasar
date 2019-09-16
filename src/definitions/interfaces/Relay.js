@@ -2,6 +2,27 @@ import WSwitch from '../../components/widgets/generic/Switch'
 
 export default {
 
+  badges (resource) {
+    return {
+      'state': {
+        attributes () {
+          return {
+            clickable: true,
+          }
+        },
+        listeners () {
+          return {
+            click (evt) {
+              evt.stopPropagation()
+              resource.execute('toggle')
+            }
+          }
+        },
+        zIndex: 10
+      },
+    }
+  },
+
   components (resource) {
     return {
       'relay.switch': {

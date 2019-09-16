@@ -31,7 +31,7 @@
         </template>
       </q-input>
 
-      <q-btn-dropdown v-if="!noSort" flat text-color="primary" :label="$q.screen.gt.xs ? (typeof sort_ === 'number' ? sortItems[sort_].label : 'sort') : null" icon="mdi-sort" :dense="$q.screen.lt.lg">
+      <q-btn-dropdown v-if="!noSort" flat text-color="primary" :label="$q.screen.gt.xs ? (__selectedSortItem ? __selectedSortItem.label : 'sort') : null" icon="mdi-sort" :dense="$q.screen.lt.lg">
         <q-list>
           <q-item
             sort_items
@@ -39,39 +39,25 @@
             :key="index"
             v-close-popup
             clickable
-            @click="sort_ = index"
-            :active="sort_ === index" active-class="text-orange"
+            @click="sort_ = item.name"
+            :active="item === __selectedSortItem" active-class="text-orange"
           >
             <q-item-section>{{ item.label }}</q-item-section>
           </q-item>
         </q-list>
       </q-btn-dropdown>
 
-      <template v-if="!readonly && __createSelectOptions.length>0">
-        <q-btn flat text-color="primary" :label="$q.screen.gt.xs ? 'create' : null" icon="add" @click="__createClick()"/>
-        <modal v-model="showCreatePopup_" valid-btn-hide title="Add resource" no-content-padding size='sm'>
-          <q-list separator>
-            <template v-for="cat in __createSelectOptions">
-              <q-item-label header v-if="__createSelectOptions.length>1">{{ cat.name }}</q-item-label>
-              <q-item v-close-popup v-for="(item, index) in cat.items" :key="index" clickable @click="item.click()">
-                <q-item-section avatar>
-                  <q-icon :name="item.icon" :color="item.color"/>
-                </q-item-section>
-                <q-item-section>
-                  <q-item-label>{{ item.label }}</q-item-label>
-                  <q-item-label v-if="item.description" caption lines="2">{{ item.description }}</q-item-label>
-                </q-item-section>
-              </q-item>
-            </template>
-          </q-list>
-        </modal>
+      <template v-if="!readonly && __createTypes.length>0">
+        <q-btn flat text-color="primary" :label="$q.screen.gt.xs ? 'create' : null" icon="add" @click="showCreatePopup_=true"/>
+        <resource-create-modal :types="__createTypes" v-model="showCreatePopup_" open/>
       </template>
 
     </div>
+
     <template v-if="__filteredResources.length>0">
       <q-list class="col scroll" :class="contentClass" :style="contentStyle">
 
-        <template v-if="!__subTypes">
+        <template v-if="__groups.length==0">
           <template
             v-for="(item, index) in __toItems(__filteredResources)"
           >
@@ -92,20 +78,22 @@
           </template>
         </template>
         <template v-else>
+          <!-- grouped -->
           <template
-            v-for="(cat, pIndex) in __subTypes"
+            v-for="(group, pIndex) in __groups"
           >
             <q-separator v-if="pIndex>0" />
 
             <q-expansion-item
-              :icon="cat.icon"
-              :label="cat.label + ' (' + __organizeResources[pIndex].length + ')'"
+              v-if="group.resources.length>0"
+              :icon="group.icon"
+              :label="group.label + ' (' + group.resources.length + ')'"
               default-opened
               header-class="text-faded"
-              :header-inset-level="cat.icon ? 0 : 1"
+              :header-inset-level="group.icon ? 0 : 1"
             >
               <template
-                v-for="(item, index) in __toItems(__organizeResources[pIndex])"
+                v-for="(item, index) in __toItems(group.resources)"
               >
                 <slot name="resource-item" v-bind:item="item">
                   <q-separator v-if="index>0 && item.level==0"/>
@@ -136,18 +124,15 @@
 </template>
 
 <script>
-import ResourceQItem from '../components/ResourceQItem'
+import ResourceListBase from './ResourceListBase'
 
 
 export default {
     name: 'ResourceList',
 
-    components: {
-      ResourceQItem
-    },
+    mixins: [ResourceListBase],
 
     props: {
-      resources: {},
       /*
       categories: array
       ['resources/Device', {
@@ -162,35 +147,13 @@ export default {
       }]
       */
       categories: {},
-      category: Number, // index
+      defaultCategory: Number, // index
       hideAll: Boolean,
 
-      /*
-      categories: array
-      ['resources/Device', {
-        label: 'Files',
-        filter: 'resources/File'
-      }, {
-        label: 'Custom',
-        icon: 'mdi-file',
-        filter: function(resource) {
-          return true // or false
-        }
-      }]
-      */
-      organize: {},
-
-      createTypes: {},
-
-      tree: Boolean,
       readonly: Boolean,
       dense: Boolean,
       noSort: Boolean,
       noSearch: Boolean,
-
-      createModal: Boolean,
-
-      showHiddenFiles: Boolean,
 
       emptyMessage: {
         type: String,
@@ -207,20 +170,7 @@ export default {
 
     data () {
         return {
-          category_: this.category, // index
-          sort_: null, // index
-          search_: '',
-          sortItems: [{
-            label: 'name',
-            fn (a, b) {
-              return a.name().localeCompare(b.name())
-            }
-          },{
-            label: 'date',
-            fn (a, b) {
-              return b.modifiedDate() - a.modifiedDate()
-            }
-          }],
+          category_: this.defaultCategory, // index
           showCreatePopup_: false
         }
     },
@@ -228,153 +178,11 @@ export default {
     computed: {
 
       __showHeader () {
-        return this.__categories || this.$slots['header-left'] || this.$slots['header-right'] || this.__showSearch || !this.noSort || (!this.readonly && this.__createSelectOptions.length>0)
+        return this.__categories || this.$slots['header-left'] || this.$slots['header-right'] || this.__showSearch || !this.noSort || (!this.readonly && this.__createTypes)
       },
 
       __showSearch () {
         return !this.noSearch && this.$q.screen.gt.sm
-      },
-
-      __resources () {
-        var resources = [];
-        if (typeof this.resources === 'function') {
-          resources = this.$ething.arbo.find(this.resources)
-        } else if (typeof this.resources === 'string') {
-          this.resources.split(' ').forEach(type => {
-            if (!type) return
-            resources = resources.concat(this.$ething.arbo.find(r => resources.indexOf(r) === -1 && this.$ethingUI.isSubclass(r, type)))
-          })
-        } else if (Array.isArray(this.resources)) {
-          resources = this.resources.map(r => {
-            if (typeof r === 'string') return this.$ething.arbo.get(r)
-            return r
-          })
-        } else if (typeof this.resources === 'undefined') {
-          resources = this.$ething.arbo.find(r => true)
-        }
-        return resources
-      },
-
-      __createTypes () {
-        if (typeof this.createTypes !== 'undefined') {
-          if (typeof this.createTypes === 'string') {
-            return this.createTypes.split(' ').filter(t => !!t)
-          } else {
-            return this.createTypes
-          }
-        } else if (typeof this.resources === 'string') {
-          return this.resources.split(' ').filter(type => !!type)
-        } else if (typeof this.resources === 'undefined') {
-          return ['resources/Resource']
-        }
-      },
-
-      __createSelectOptions () {
-
-        var baseCls = (this.__createTypes || []).filter(t => typeof t === 'string')
-        var extra = (this.__createTypes || []).filter(t => typeof t === 'object' && t !== null)
-        var clsList = this.$ethingUI.getSubclass(baseCls).filter(cls => !cls.virtual && !cls.disableCreation)
-        var defaultCategory = 'other'
-
-        // order by categories
-        var categories = {}
-
-        clsList.forEach(cls => {
-          var path = (cls.category || defaultCategory).split('.')
-          var label = cls.title || cls.split('/').pop()
-          var category = path[0]
-
-          if (!categories[category]) {
-            categories[category] = {
-              items: []
-            }
-          }
-
-          categories[category].items.push({
-            label,
-            color: cls.color,
-            icon: cls.icon,
-            description: cls.description,
-            click: () => {
-              this.create(cls._type)
-            }
-          })
-        })
-
-        extra.forEach(obj => {
-          var category = obj.category || defaultCategory
-          if (!categories[category]) {
-            categories[category] = {
-              items: []
-            }
-          }
-          categories[category].items.push(obj)
-        })
-
-        var other = categories[defaultCategory]
-        var orderedCategories = []
-
-        delete categories[defaultCategory]
-
-        for(var category in categories){
-          orderedCategories.push(Object.assign({
-            name: category
-          }, categories[category]))
-        }
-
-        if (other) {
-          orderedCategories.push(Object.assign({
-            name: defaultCategory
-          }, other))
-        }
-
-        return orderedCategories
-      },
-
-      __filteredResources () {
-        var resources = this.__resources;
-
-        if (this.__selectedCategory) {
-          resources = resources.filter(this.__selectedCategory.filter)
-        }
-
-        if (!this.showHiddenFiles) {
-          resources = resources.filter(r => !r.basename().startsWith('.'))
-        }
-
-        if (this.search_) {
-          var re_filter = new RegExp(this.search_, 'i')
-          resources = resources.filter(r => {
-            return re_filter.test(r.name()) || re_filter.test(r.type()) || re_filter.test(r.description()) || re_filter.test(r.attr('location'))
-          })
-        }
-
-        if (typeof this.sort_ === 'number') {
-          resources.sort(this.sortItems[this.sort_].fn)
-        }
-
-        return resources
-      },
-
-      __organizeResources () {
-        var subTypes = this.__subTypes
-        var res = Array.apply(null, Array(subTypes.length)).map(function () { return [] })
-
-        this.__resources.forEach(r => {
-          var found = false
-          subTypes.forEach((t,i) => {
-            if (t._others) {
-              if (!found) {
-                res[i].push(r)
-              }
-            } else if(t.filter(r)) {
-              found = true
-              res[i].push(r)
-            }
-          })
-        })
-
-        return res
       },
 
       __checksum () {
@@ -383,35 +191,21 @@ export default {
 
       __categories () {
         if (Array.isArray(this.categories)) {
-          return this.__formatCat(this.categories)
+          return this.__formatGroupList(this.categories)
         }
       },
-
-      __subTypes () {
-        if (Array.isArray(this.organize)) {
-          var cats = this.__formatCat(this.organize)
-          cats.push({
-            label: 'others',
-            icon: null,
-            filter: null,
-            _others: true
-          })
-          return cats
-        }
-      },
-
-      __selectedCategory () {
-        if (typeof this.category_ === 'number' && this.__categories) {
-          return this.__categories[this.category_]
-        }
-      }
 
     },
 
     watch: {
       category_: {
-        handler (value) {
-          this.$emit('update:category', value)
+        handler (index) {
+          if (typeof index === 'number' && this.__categories) {
+            this.filter_ = this.__categories[index].filter
+          } else {
+            this.filter_ = null
+          }
+          this.$emit('update:category', index)
         },
         immediate: true
       },
@@ -425,123 +219,8 @@ export default {
 
     methods: {
 
-      makeTree (resources) {
-
-        var list = []
-
-        var get = id => {
-          for(var i in resources) {
-            if(resources[i].id() == id) return resources[i]
-          }
-        }
-
-        var getChildren = resource => {
-      		return resources.filter(r => {
-      			return r.createdBy() === resource.id()
-      		});
-      	}
-
-      	var hasParent = resource => {
-          var createdById = resource.createdBy()
-      		return createdById && get(createdById);
-      	}
-
-      	var level = 0;
-
-        var create = resource => {
-          return {
-            resource,
-            level,
-          }
-        }
-
-        var order = resource => {
-          var list = [create(resource)]
-
-          level++;
-      		getChildren(resource).map( r => {
-      			list = list.concat(order(r))
-      		});
-      		level--;
-
-          return list
-        }
-
-        resources.filter(r => {
-    			return !hasParent(r)
-        }).forEach(r => {
-          list = list.concat(order(r))
-        })
-
-        return list
-      },
-
       itemClick (item) {
         this.$emit('click', item.resource)
-      },
-
-      create (type) {
-
-        if (this.createModal) {
-          this.$ethingUI.utils.createModal({
-            types: [type]
-          })
-        } else {
-          this.$router.push({
-            name: 'create',
-            params: {
-              type
-            }
-          })
-        }
-      },
-
-      __createClick () {
-        if (this.__createSelectOptions.length == 1 && this.__createSelectOptions[0].items.length == 1) {
-          this.__createSelectOptions[0].items[0].click()
-        } else {
-          this.showCreatePopup_ = true
-        }
-      },
-
-      __formatCat (categories) {
-        return categories.map(catItem => {
-          if (typeof catItem === 'string') {
-            // type name
-            var cls = this.$ethingUI.get(catItem)
-            var label = cls.title
-            var icon = cls.icon
-            catItem = {
-              label,
-              icon,
-              filter: catItem
-            }
-          }
-          if (typeof catItem.filter === 'string') {
-            var type = catItem.filter
-            if (!catItem.label) {
-              catItem.label = this.$ethingUI.get(type).title
-            }
-            if (!catItem.label) {
-              catItem.icon = this.$ethingUI.get(type).icon
-            }
-            catItem.filter = (r) => this.$ethingUI.isSubclass(r, type)
-          }
-          return catItem
-        })
-      },
-
-      __toItems (resources) {
-        if (this.tree) {
-          return this.makeTree(resources)
-        } else {
-          return resources.map(r => {
-            return {
-              resource: r,
-              level: 0
-            }
-          })
-        }
       },
 
     }

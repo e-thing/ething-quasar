@@ -63,6 +63,7 @@
               <component
                 :is="badge.component"
                 v-bind="badge.attributes()"
+                v-on="badge.listeners()"
                 v-for="(badge, index) in badges" :key="index"
               />
             </q-card-section>
@@ -84,6 +85,7 @@
               <component
                 :is="item.component"
                 v-bind="item.attributes()"
+                v-on="item.listeners()"
               />
             </q-card-section>
           </q-card>

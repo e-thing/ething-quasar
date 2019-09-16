@@ -3,7 +3,7 @@
     <resource-select
       :value="c_value"
       @input="c_value = $event"
-      :filter="computed_filter"
+      :resources="computed_filter"
       :multiple="multiple"
       use-id
       :create-types="createTypes"

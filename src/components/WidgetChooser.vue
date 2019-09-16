@@ -37,7 +37,7 @@
 
           <div v-if="resources.length">
 
-            <resource-select v-model="resource" :filter="resourceFilter" filled/>
+            <resource-select v-model="resource" :resources="resourceFilter" filled/>
 
           </div>
 

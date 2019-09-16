@@ -5,10 +5,12 @@
     <q-toggle v-model="readonly" label="read only"/>
     <q-toggle v-model="tree" label="tree"/>
     <q-toggle v-model="heightfixed" label="heightfixed"/>
+    <q-toggle v-model="categories" label="categories"/>
+    <q-toggle v-model="grouped" label="group"/>
 
     <resource-list
-      :categories="['resources/Device', 'resources/File', 'resources/Table', 'resources/Flow']"
-      :organize="['interfaces/Sensor', 'interfaces/Thermometer']"
+      :categories="categories ? ['resources/Device', 'resources/File', 'resources/Table', 'resources/Flow'] : null"
+      :groups="grouped ? ['interfaces/Sensor', 'interfaces/Thermometer'] : null"
       class="bg-white"
       :dense="dense"
       :readonly="readonly"
@@ -32,6 +34,8 @@ export default {
       readonly: false,
       tree:  false,
       heightfixed: false,
+      grouped: false,
+      categories: true
     }
 
   },

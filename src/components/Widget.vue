@@ -19,7 +19,7 @@
       </div>
       <div :style="{visibility: __hasError ? 'hidden' : 'visible'}" class="absolute fit widget-content">
         <slot>
-          <component :is="__widget.component" v-bind="__attrs" @error="error=$event"/>
+          <component :is="__widget.component" v-bind="__attrs" v-on="__widget.listeners()" @error="error=$event"/>
         </slot>
       </div>
     </div>

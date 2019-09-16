@@ -1,25 +1,25 @@
 <template>
   <div>
     <div>
-      {{ resourceFilter.length }} resources selected
+      {{ model.length }} resources selected
     </div>
 
     <div>
       <q-toggle v-model="clearable" label="clearable"/>
       <q-toggle v-model="useId" label="useId"/>
       <q-toggle v-model="createEnabled" label="createEnabled"/>
-      <q-toggle v-model="sort" label="sort"/>
       <q-toggle v-model="filter" label="filter"/>
+      <q-toggle v-model="grouped" label="group"/>
     </div>
 
     <resource-select
-      v-model="resourceFilter"
+      v-model="model"
+      :groups="grouped ? ['interfaces/Sensor', 'interfaces/Thermometer'] : null"
       :clearable="clearable"
-      label="Resource Filter"
+      label="Resource Select"
       multiple
       :useId="useId"
       :disableCreate="!createEnabled"
-      :sort="sort ? 'name': ''"
       :enableFilter="filter"
     />
 
@@ -34,12 +34,13 @@ export default {
   data () {
 
     return {
-      resourceFilter: [],
+      model: [],
       clearable: true,
       useId: false,
       createEnabled: true,
       sort: true,
-      filter: true
+      filter: true,
+      grouped: false,
     }
 
   },

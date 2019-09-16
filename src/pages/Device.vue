@@ -47,6 +47,7 @@
               <component
                 :is="badge.component"
                 v-bind="badge.attributes()"
+                v-on="badge.listeners()"
                 v-for="(badge, index) in badges" :key="index"
               />
             </div>
@@ -79,7 +80,7 @@
           <span>{{ item.title }}</span>
         </div>
         <div class="bloc-content bloc-content-no-padding">
-          <component :is="item.component" v-bind="item.attributes()"/>
+          <component :is="item.component" v-bind="item.attributes()" v-on="item.listeners()"/>
         </div>
       </div>
 

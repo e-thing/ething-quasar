@@ -21,8 +21,8 @@ export default {
     },
   },
 
-  cacheValidity(resource, modifiedAttributes) {
-    return modifiedAttributes.indexOf('name') === -1
+  cacheExpired(resource, modifiedAttributes) {
+    return modifiedAttributes.indexOf('name') !== -1
   },
 
   dynamic (resource) {
