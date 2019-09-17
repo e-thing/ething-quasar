@@ -10,6 +10,8 @@
 
     <div v-else-if="currentDashboard" class="page-fit page-fit-no-padding scroll column">
 
+      <q-resize-observer @resize="onPageResize" />
+
       <q-btn-group flat class="col-auto row items-center">
         <q-btn class="col-auto" flat icon="mdi-chevron-left" :disabled="iDashboard <= 0" @click="iDashboard = iDashboard - 1"/>
         <div class="col text-center">
@@ -40,7 +42,7 @@
       </q-btn-group>
 
       <keep-alive>
-        <div v-if="currentDashboard.layout.length==0" class="absolute-center text-center">
+        <div v-if="currentDashboard.items.length==0" class="absolute-center text-center">
           <p>
             <img
               src="~assets/sad.svg"
@@ -51,33 +53,10 @@
           <q-btn icon="mdi-pin" label="pin widget" color="secondary" @click="pinResourceModal = true"/>
         </div>
 
-        <div v-else-if="smallScreen && !$q.platform.is.desktop && !$q.platform.is.electron && !$q.platform.is.chromeExt"
-          class="smallScreenContainer col"
-          :key="iDashboard"
-        >
-          <div v-for="(layoutItem) in currentDashboard.layout" :key="layoutItem.i" :style="{height: (layoutItem.h * grid.rowHeight + (layoutItem.h-1) * grid.margin) + 'px'}">
-            <div v-show="editing" class="absolute fit widget-edit-layer">
-              <q-btn-group flat class="absolute-center">
-                <q-btn v-if="isEditable(layoutItem)" flat icon="settings" color="faded" @click="editItem(layoutItem)"/>
-                <q-btn flat icon="delete" color="negative" @click="removeItem(layoutItem)"/>
-              </q-btn-group>
-            </div>
-            <widget :key="layoutItem.key" class="absolute fit"
-              :resource="layoutItem.resource"
-              :widget="layoutItem.widget"
-              v-bind="computeOptions(layoutItem)"
-            >
-              <template v-slot:error-after>
-                <q-btn label="remove" size="sm" flat icon="delete" @click="removeItem(layoutItem)"/>
-              </template>
-            </widget>
-          </div>
-        </div>
-
         <grid-layout v-else
           class="col scroll"
-          :layout="currentDashboard.layout"
-          :col-num="currentDashboard.options.columnNb"
+          :layout.sync="currentDashboard.items"
+          :col-num="__columns"
           :row-height="grid.rowHeight"
           :is-draggable="draggable"
           :is-resizable="resizable"
@@ -87,17 +66,16 @@
           :key="iDashboard"
           @click.native.self="bgClick"
           v-touch-hold="handleHold"
+          @layout-updated="layoutUpdatedEvent"
         >
-            <grid-item v-for="(layoutItem) in currentDashboard.layout" :key="layoutItem.i"
+            <grid-item v-for="(layoutItem) in currentDashboard.items" :key="layoutItem.i"
                :x="layoutItem.x"
                :y="layoutItem.y"
                :w="layoutItem.w"
                :h="layoutItem.h"
                :i="layoutItem.i"
-               :minW="layoutItem.minW"
-               :minH="layoutItem.minH"
-               @resized="resizedEvent"
-               @moved="movedEvent"
+               :minW="layoutItem.minW || 1"
+               :minH="layoutItem.minH || 1"
                class="gditem"
             >
                 <div v-show="editing" class="absolute fit widget-edit-layer">
@@ -122,14 +100,14 @@
 
     <widget-chooser v-model="pinResourceModal" :pinned="pinnedResources" @done="pin"/>
 
-    <modal :maximized="smallScreen" v-model="widgetEdit.modal" title="Edit" icon="edit" :valid-btn-disable="widgetEdit.error" @valid="widgetEditDone">
+    <modal v-model="widgetEdit.modal" title="Edit" icon="edit" :valid-btn-disable="widgetEdit.error" @valid="widgetEditDone">
 
       <div class="text-h6 q-my-md">Options</div>
       <form-schema :key="widgetEdit.key" :schema="widgetEdit.schema" v-model="widgetEdit.model" @error="widgetEdit.error = $event"/>
 
     </modal>
 
-    <modal :maximized="smallScreen" v-model="dashboardEdit.modal" :title="dashboardEdit.create ? 'New dashboard' : 'Edit dashboard'" icon="edit" :valid-btn-disable="dashboardEdit.error" @valid="dashboardEditDone">
+    <modal v-model="dashboardEdit.modal" :title="dashboardEdit.create ? 'New dashboard' : 'Edit dashboard'" icon="edit" :valid-btn-disable="dashboardEdit.error" @valid="dashboardEditDone">
 
       <div class="text-h6 q-my-md">Options</div>
       <form-schema :key="dashboardEdit.key" :schema="dashboardEdit.schema" v-model="dashboardEdit.model" @error="dashboardEdit.error = $event"/>
@@ -145,7 +123,7 @@ import Vue from 'vue'
 import EThing from 'ething-js'
 import VueGridLayout from 'vue-grid-layout'
 import Widget from '../components/Widget'
-import { debounce, extend } from 'quasar'
+import { debounce, extend, uid } from 'quasar'
 import WidgetChooser from '../components/WidgetChooser'
 import {extend as extendSchema} from '../utils/schema'
 import {dashboardWidgetSchemaDefaults} from '../core/widget'
@@ -158,6 +136,18 @@ const LAYOUT_FILENAME = ".dashboard.json"
 
 const DBL_CLICK_DELAY  = 200
 
+const LAYOUTS = [{
+  columns: 2,
+  breakpoint: 0,
+},{
+  columns: 4,
+  breakpoint: 800,
+},{
+  columns: 8,
+  breakpoint: 1400,
+}]
+
+
 export default {
   name: 'PageDashboard',
 
@@ -169,28 +159,17 @@ export default {
   },
 
   data () {
-
-    var windowHeight = window.innerHeight;
-    var windowWidth = window.innerWidth;
-
-    var minWidth = 1024; // in px, below this threshold, switch to small screen layout (ie, no grid)
-
-    var smallScreen = windowWidth < minWidth
-
     return {
+        pageWidth: window.innerWidth,
         loading: false,
         iDashboard: 0,
         dashboards: [],
         grid: {
-          columnNb: 6, // default
-          rowHeight: 60, // in px
-          minWidth: minWidth,
+          rowHeight: 120, // in px
           margin: 10
         },
-        idCnt: 1,
         pinResourceModal: false,
         editing: false,
-        smallScreen,
 
         widgetEdit: {
           modal: false,
@@ -216,6 +195,16 @@ export default {
   },
 
   computed: {
+    __columns () {
+      var width = this.pageWidth
+      var columns = 2
+      for (var i in LAYOUTS) {
+        var breakpoint = LAYOUTS[i].breakpoint || 0
+        if (width < breakpoint) break
+        columns = LAYOUTS[i].columns
+      }
+      return columns
+    },
     resizable () {
       return this.editing
     },
@@ -223,7 +212,7 @@ export default {
       return this.editing
     },
     pinnedResources () {
-      return this.currentDashboard ? this.currentDashboard.layout.map(l => l.item.options.resource).filter(r => !!r) : []
+      return this.currentDashboard ? this.currentDashboard.items.map(l => l.item.options.resource).filter(r => !!r) : []
     },
     currentDashboard () {
       return this.dashboards[this.iDashboard]
@@ -254,7 +243,71 @@ export default {
     },
   },
 
+  watch: {
+    __columns: {
+      handler (colNb) {
+        this.loadLayout(colNb)
+      },
+      immediate: true
+    },
+    currentDashboard: {
+      handler (dashboard) {
+        if (dashboard) this.loadLayout(null, dashboard)
+      },
+      immediate: true
+    },
+  },
+
   methods: {
+    layoutUpdatedEvent: function(newLayout){
+      if (!this.editing) return
+      this.saveLayout()
+      this.save()
+    },
+
+    loadLayout (colNb, dashboard) {
+      colNb = colNb || this.__columns
+      dashboard = dashboard || this.currentDashboard
+      if (!dashboard) return
+      var layouts = dashboard.layouts || {}
+      var layout = layouts[colNb] || []
+      dashboard.items.forEach(item => {
+        var layoutItem = this.findItemInLayout(layout, item.i)
+        if (!layoutItem) {
+          // try to find in any other layout
+          for (var i in layouts) {
+            layoutItem = this.findItemInLayout(layouts[i], item.i)
+            if (layoutItem) break
+          }
+          if (!layoutItem) {
+            // default
+            layoutItem = {
+              x: 0,
+              y: 0,
+              w: 1,
+              h: 1
+            }
+          }
+        }
+        Object.assign(item, layoutItem)
+      })
+    },
+
+    saveLayout (colNb, dashboard) {
+      colNb = colNb || this.__columns
+      dashboard = dashboard || this.currentDashboard
+      if (!dashboard) return
+      dashboard.layouts[this.__columns] = dashboard.items.map(layoutItem => {
+        return {
+          i: layoutItem.i,
+          x: layoutItem.x,
+          y: layoutItem.y,
+          w: layoutItem.w,
+          h: layoutItem.h,
+        }
+      })
+    },
+
     handleHold ({ evt, ...info }) {
       this.editing = !this.editing
     },
@@ -290,9 +343,6 @@ export default {
       }
 
     },
-    mergeStyle (a, b) {
-      return Object.assign(a, b)
-    },
 
     nextOrAddDashboard () {
       if (this.iDashboard >= this.dashboards.length - 1) {
@@ -308,13 +358,6 @@ export default {
           title: {
             type: 'string',
             default: 'dashboard #' + this.dashboards.length
-          },
-          columnNb: {
-            title: 'column number',
-            type: 'integer',
-            minimum: 1,
-            maximum: 16,
-            default: this.grid.columnNb
           },
           backgroundColor: {
             title: 'background color',
@@ -344,7 +387,7 @@ export default {
             default: '#ffffffff'
           },
         },
-        required: ['title', 'columnNb']
+        required: ['title']
       }
 
       var model = create ? {} : this.currentDashboard.options
@@ -363,7 +406,8 @@ export default {
         if (this.dashboardEdit.create) {
           this.dashboards.push({
             options: this.dashboardEdit.model,
-            layout: []
+            items: [],
+            layouts: {}
           })
           this.iDashboard++
         } else {
@@ -374,24 +418,6 @@ export default {
 
         this.save()
       }
-    },
-
-    getLayoutItem (index) {
-      var layout = this.currentDashboard.layout
-      for (var i in layout) {
-        if (layout[i].i === index) {
-          return layout[i]
-        }
-      }
-    },
-
-    movedEvent (i, newX, newY) {
-      this.save()
-    },
-
-    resizedEvent (i, newH, newW, newHPx, newWPx) {
-
-      this.save()
     },
 
     file (callback) {
@@ -427,21 +453,18 @@ export default {
       }
 
       dashboards = dashboards.map((d, i) => {
-        var options = extend(true, {
-          title: 'dashboard #' + i,
-          columnNb: this.grid.columnNb,
-        }, d.options || {})
-
-        var layout = d.widgets || []
-        layout = layout.map(l => this.normalizeLayoutItem(l, options)).filter(l => !!l)
-
         return {
-          options,
-          layout
+          options: extend(true, {
+              title: 'dashboard #' + i,
+            }, d.options || {}),
+          items: (d.widgets || []).map(l => this.normalizeLayoutItem(l)).filter(l => !!l),
+          layouts: d.layouts || {}
         }
       })
 
       this.dashboards = dashboards
+
+
     },
 
     load: function() {
@@ -481,11 +504,7 @@ export default {
 
     },
 
-    normalizeLayoutItem (item, dashboardOptions) {
-
-      if (typeof dashboardOptions === 'undefined') {
-        dashboardOptions = this.currentDashboard.options
-      }
+    normalizeLayoutItem (item) {
 
       try {
         var widget = null;
@@ -509,34 +528,35 @@ export default {
 
         var minWidth = 1
         var minHeight = 1
-        if (widget.minWidth) {
+        /*if (widget.minWidth) {
           var columnNb = dashboardOptions.columnNb
           var widthUnit = Math.floor(this.grid.minWidth / columnNb)
           minWidth = Math.max(Math.min(Math.round(widget.minWidth / widthUnit), columnNb), 1)
         }
         if (widget.minHeight) {
           minHeight = Math.max(Math.round(widget.minHeight / this.grid.rowHeight), 1)
-        }
+        }*/
 
-        if (!item.w || item.w<minWidth) item.w = minWidth
+        /*if (!item.w || item.w<minWidth) item.w = minWidth
         if (!item.h || item.h<minHeight) item.h = minHeight
 
         if (!item.x) item.x = 0
-        if (!item.y) item.y = 0
+        if (!item.y) item.y = 0*/
         if (!item.options) item.options = {}
+        if (!item.i) item.i = uid()
 
         var layoutItem = {
           key: 0,
           widget,
           item,
           resource,
-          x: item.x,
-          y: item.y,
-          w: item.w,
-          h: item.h,
           minW: minWidth,
           minH: minHeight,
-          i: String(this.idCnt++),
+          i: item.i,
+          x: 0,
+          y: 0,
+          w: 1,
+          h: 1
         }
 
         return layoutItem
@@ -564,14 +584,8 @@ export default {
         var dashboards = this.dashboards.map(d => {
           return {
             options: d.options,
-            widgets: d.layout.map(layoutItem => {
-              return Object.assign(layoutItem.item, {
-                x: layoutItem.x,
-                y: layoutItem.y,
-                w: layoutItem.w,
-                h: layoutItem.h
-              })
-            })
+            widgets: d.items.map(layoutItem => layoutItem.item),
+            layouts: d.layouts
           }
         })
 
@@ -584,15 +598,12 @@ export default {
     addWidget (attr) {
       var l  = this.normalizeLayoutItem(attr)
       if (l)
-        this.currentDashboard.layout.push(l)
+        this.currentDashboard.items.push(l)
     },
 
     pin (info) {
-
       this.addWidget(info)
-
       this.save()
-
       this.pinResourceModal = false
     },
 
@@ -631,12 +642,24 @@ export default {
     },
 
     removeItem (layoutItem) {
-      var index = this.currentDashboard.layout.indexOf(layoutItem)
+      var index = this.currentDashboard.items.indexOf(layoutItem)
       if (index !== -1) {
-        this.currentDashboard.layout.splice(index, 1)
+        this.currentDashboard.items.splice(index, 1)
         this.save()
       }
     },
+
+    onPageResize (size) {
+      this.pageWidth = size.width
+    },
+
+    findItemInLayout (layout, i) {
+      for (var j in layout) {
+        if (layout[j].i === i) {
+          return layout[j]
+        }
+      }
+    }
 
   },
 
@@ -662,20 +685,6 @@ export default {
 
 .vue-grid-item {
     /*border: 1px solid #f4f4f4;*/
-}
-
-.smallScreenContainer > div {
-  width: 100%;
-  position: relative;
-  /*border: 1px solid #f4f4f4;*/
-}
-
-.smallScreenContainer > div:not(:first-child) {
-  margin-top: 10px;
-}
-
-.smallScreenContainer > div:last-child {
-  margin-bottom: 10px;
 }
 
 .widget-edit-layer {

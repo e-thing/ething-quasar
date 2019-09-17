@@ -29,6 +29,11 @@ export default {
           }
         }
 
+        // load local plugin (for dev purpose)
+        if (process.env.DEV) {
+          //pluginPromises.push(import('../../../ething/ething/plugins/OpenWeatherMap/js/src/index.js'))
+        }
+
         return Promise.all(pluginPromises)
       }
 

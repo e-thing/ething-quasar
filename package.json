@@ -31,7 +31,7 @@
     "socketio-wildcard": "^2.0.0",
     "vue-codemirror": "^4.0.5",
     "vue-drag-drop": "^1.1.4",
-    "vue-grid-layout": "^2.2.0",
+    "vue-grid-layout": "^2.3.6",
     "vue-highcharts": "0.0.10",
     "vue-i18n": "^8.0.0",
     "vue-touch-keyboard": "^0.3.0",

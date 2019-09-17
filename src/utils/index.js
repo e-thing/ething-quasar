@@ -10,7 +10,7 @@ export {VisibilityObserver}
 export {createModal}
 export {injectScript}
 export {parse}
-
+export let formatDate = date.formatDate
 
 
 export function generateId(length) {

@@ -145,6 +145,15 @@ module.exports = function (ctx) {
       // analyze: true,
       // extractCSS: false,
       extendWebpack (cfg) {
+        if (!cfg.resolve) {
+          cfg.resolve = {}
+        }
+        if (!cfg.resolve.alias) {
+          cfg.resolve.alias = {}
+        }
+
+        cfg.resolve.alias['ething-ui'] = 'src/core'
+
         // comment below to disable eslint
         /*cfg.module.rules.push({
           enforce: 'pre',

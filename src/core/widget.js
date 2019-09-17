@@ -8,14 +8,23 @@ export var widgets = {}
 
 // defaults
 export function widgetDefaults (resource) {
-  return {
-    component: null,
-    attributes (options) {
+  var attributes;
+  if (resource) {
+    attributes = function (options) {
       return {
         ...options,
         resource
       }
-    },
+    }
+  } else {
+    attributes = function (options) {
+      return options
+    }
+  }
+
+  return {
+    component: null,
+    attributes,
     listeners () {
       return {}
     },
@@ -122,7 +131,7 @@ export function registerWidget (id, widget) {
   var c = widget.component
   delete widget.component
 
-  widgets[id] = widgetMerge(widgetDefaults, widget)
+  widgets[id] = widgetMerge(widgetDefaults(), widget)
 
   widgets[id].component = c
 
