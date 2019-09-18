@@ -1,4 +1,4 @@
-import { date, format, colors } from 'quasar'
+import { date, format, colors, openURL } from 'quasar'
 import EThing from 'ething-js'
 import FileSaver from 'file-saver'
 import VisibilityObserver from './VisibilityObserver'
@@ -11,7 +11,7 @@ export {createModal}
 export {injectScript}
 export {parse}
 export let formatDate = date.formatDate
-
+export {openURL, date, format, colors}
 
 export function generateId(length) {
   length = length || 5
