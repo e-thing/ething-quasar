@@ -44,10 +44,8 @@
               <q-chip dense square icon="access_time" outline color="secondary">
                 {{ $ethingUI.utils.dateToString(resource.lastSeenDate(), 'never') }}
               </q-chip>
-              <component
-                :is="badge.component"
-                v-bind="badge.attributes()"
-                v-on="badge.listeners()"
+              <dynamic-component
+                :component="badge"
                 v-for="(badge, index) in badges" :key="index"
               />
             </div>
@@ -80,7 +78,7 @@
           <span>{{ item.title }}</span>
         </div>
         <div class="bloc-content bloc-content-no-padding">
-          <component :is="item.component" v-bind="item.attributes()" v-on="item.listeners()"/>
+          <dynamic-component :component="item"/>
         </div>
       </div>
 

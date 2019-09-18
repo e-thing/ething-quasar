@@ -55,6 +55,10 @@
         <q-card-section>
           location: {{ plugin.package.location }}
         </q-card-section>
+
+        <q-card-section v-if="plugin.description">
+          {{ plugin.description }}
+        </q-card-section>
       </q-card>
     </div>
 
@@ -77,6 +81,10 @@
           </div>
         </q-card-section>
 
+        <q-card-section v-if="plugin.description">
+          {{ plugin.description }}
+        </q-card-section>
+
       </q-card>
     </div>
 
@@ -95,13 +103,7 @@ export default {
 
     computed: {
       plugins () {
-        var plugins = []
-
-        for (var name in this.$ethingUI.plugins) {
-          plugins.push(Object.assign({
-            name
-          }, this.$ethingUI.plugins[name]))
-        }
+        var plugins = Object.values(this.$ethingUI.plugins)
 
         return plugins.filter(p => p.package)
       },

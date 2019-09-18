@@ -7,7 +7,7 @@ export default {
 
       // contains some information about the server
       info: {},
-      
+
       // store informations about loaded plugins
       plugins: {},
 
@@ -22,9 +22,11 @@ export default {
           dataType: 'json',
         })
 
-        return p.then(info => {
+        return p.then(data => {
           console.log('[meta] ething info loaded !')
-          Object.assign(this, info)
+          var loadedPlugins = data.plugins
+          delete data.plugins
+          Object.assign(this, data, {loadedPlugins})
         }).catch(err => {
           console.error('[meta] ething info error !')
         })

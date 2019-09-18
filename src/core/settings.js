@@ -3,10 +3,18 @@ import EThing from 'ething-js'
 
 export default ({EThingUI, Vue}) => {
 
+    var timerId = null;
 
-    EThing.on('ConfigUpdated', function(evt) {
-      console.log('[app] settings updated', evt)
-      EThingUI.settings = evt.data.config
+    EThing.on('signals/SettingsUpdated', function(evt) {
+      console.log('[app] settings updated')
+
+      if (timerId !== null) {
+        clearTimeout(timerId)
+      }
+      timerId = setTimeout(() => {
+        timerId = null
+        EThingUI.loadSettings()
+      }, 500)
     })
 
     Object.assign(EThingUI, {

@@ -24,11 +24,9 @@
     <q-item-section/>
     <q-item-section side v-if="!dense">
       <div class="row justify-end">
-        <component
-          :is="badge.component"
+        <dynamic-component
+          :component="badge"
           class="gt-sm"
-          v-bind="badge.attributes()"
-          v-on="badge.listeners()"
           v-for="(badge, index) in badges" :key="index"
         />
       </div>

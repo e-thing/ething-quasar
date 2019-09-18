@@ -7,6 +7,7 @@ import * as formSchemaCore from '../boot/formSchema/core'
 import { extend } from 'quasar'
 import { linearize } from 'c3-linearization'
 import {widgetMerge} from './widget'
+import {Plugin} from './plugins'
 import {merge,defaultMerge,arrayUniqueMerge,noMerge,mapMerge,functionMerge,vueComponentMerge} from '../utils/merging'
 import localDefinitions from '../definitions'
 
@@ -32,12 +33,12 @@ const defaults = {
   properties: {},
   // READ-ONLY: is this class is abstract  ?
   virtual: false,
-  // a function(resource) => {} that returns some specific definition attributes according to the resource instance
+  // a function(instance) => {} that returns some specific definition attributes according to the instance
   /*
   {
     color: 'green',
-    dynamic (resource) {
-      if (resource.size==0) {
+    dynamic (instance) {
+      if (instance.size==0) { // case of empty table
         return {
           color: 'red'
         }
@@ -47,8 +48,26 @@ const defaults = {
   */
   dynamic: null,
 
-  cacheExpired(resource, modifiedAttributes) {
-    return modifiedAttributes.indexOf('extends') !== -1
+  cacheExpired(instance, modifiedAttributes) {
+    // return true if the meta information must be recompiled
+    return false
+  },
+
+  // a function that returns a map of components, the keys represent the components id
+  // components components are displayed in the device's page.
+  /*
+    {
+      component: <VueComponent>,
+      title: '...',
+      icon: '...',
+      attributes () {}, // attributes to pass to the component
+      listeners () {}, // listeners to pass to the component
+      zIndex: 0, // kind of a priority. Allow to order the components list.
+      disable: false // set to true if you want to disable this item
+    }
+  */
+  components (instance) {
+    return {}
   },
 
   /**
@@ -115,23 +134,6 @@ const defaults = {
   // READ-ONLY: list the available methods
   methods: {},
 
-  // a function that returns a map of components, the keys represent the components id
-  // components components are displayed in the device's page.
-  /*
-    {
-      component: <VueComponent>,
-      title: '...',
-      icon: '...',
-      attributes () {}, // attributes to pass to the component
-      listeners () {}, // listeners to pass to the component
-      zIndex: 0, // kind of a priority. Allow to order the components list.
-      disable: false // set to true if you want to disable this item
-    }
-  */
-  components (resource) {
-    return {}
-  },
-
   /**
   * FLOW NODE
   **/
@@ -141,12 +143,12 @@ const defaults = {
 }
 
 
-function componentDefaults (resource) {
+function componentDefaults (instance) {
   return {
     component: null,
     attributes () {
       return {
-        resource
+        instance
       }
     },
     listeners () {
@@ -160,7 +162,7 @@ function componentDefaults (resource) {
 
 
 function componentMerge(p, c, ctx) {
-  if (!p) p = componentDefaults(ctx.args[0]) // ctx.args[0] => resource
+  if (!p) p = componentDefaults(ctx.args[0]) // ctx.args[0] => instance
   if (!c) c = {}
 
   var keys = Object.keys(p).concat(Object.keys(c)).filter((v, i, a) => a.indexOf(v) === i);
@@ -227,7 +229,11 @@ var mergeStrategies = {
     })
   },
 
-  cacheExpired: functionMerge,
+  cacheExpired (parent, child, ctx) {
+    return functionMerge(parent, child, ctx, (p, c, ctx) => {
+      return p || c
+    })
+  },
 
   methods: mapMerge,
   data: functionMerge,
@@ -364,7 +370,7 @@ function reshape(node) {
   return node
 }
 
-function compile(mro, definitions, resource) {
+function compile(mro, definitions, instance) {
   var compiled = extend(true, {}, defaults)
   if (!mro) return compiled
   var mro_ = mro.slice().reverse()
@@ -377,11 +383,11 @@ function compile(mro, definitions, resource) {
     // deep copy first
     child = extend(true, {}, child)
 
-    if (resource) {
+    if (instance) {
 
       if (child.dynamic) {
         dynamic = true
-        var dyn_m = child.dynamic.call(child, resource)
+        var dyn_m = child.dynamic.call(child, instance)
         if (dyn_m) {
           extend(true, child, dyn_m)
         }
@@ -401,10 +407,6 @@ function compile(mro, definitions, resource) {
 
   // add some compile info
   compiled._dep = mro
-  if (resource && dynamic) {
-    // if _cacheEtag is set, the cache will be invalid when the resource is updated
-    compiled._cacheEtag = resource.attr('modifiedDate')
-  }
 
   return compiled
 }
@@ -413,7 +415,9 @@ function mergeClass (parent, child) {
   return merge(parent, child, mergeStrategies, defaultMerge)
 }
 
-function normalize (obj, resource) {
+var jsonSchemaFields = ['type', 'title', 'properties', 'description', 'required', 'additionalProperties']
+
+function normalize (obj, instance) {
 
   //var obj = extend(true, {}, defaults, obj)
 
@@ -450,77 +454,88 @@ function normalize (obj, resource) {
     }
   })
 
+  var schema = {};
+  jsonSchemaFields.forEach(k => {
+    schema[k] = obj[k]
+  })
+
+  obj.schema = schema
+
   delete obj.dynamic
 
-  if (resource) {
+  if (instance) {
     var originalOpenFn = obj.open
     obj.open = function (more) {
-      return originalOpenFn.call(this, resource, more)
+      return originalOpenFn.call(this, instance, more)
     }
 
-    obj.widgets = obj.widgets(resource)
+    obj.widgets = obj.widgets(instance)
 
-    obj.components = obj.components(resource)
+    obj.components = obj.components(instance)
 
-    obj.badges = obj.badges(resource)
+    obj.badges = obj.badges(instance)
 
-    obj._resource = resource
+    obj._instance = instance
   }
 
   return obj
 }
 
-var cached_meta_types = {}
+
+var __cache = new Map()
 
 
-function cacheCheck (resource, modifiedAttributes) {
-  var id = resource.id()
-  if (id in cached_meta_types) {
-    var cache = cached_meta_types[id]
-
-    if (cache.cacheExpired(resource, modifiedAttributes)) {
+function cacheCheck (instance, modifiedAttributes) {
+  var cache = __cache.get(instance)
+  if (cache) {
+    if (cache.cacheExpired(instance, modifiedAttributes)) {
       // remove the cache
-      console.log('[meta:cacheCheck] remove cache for resource', resource.name())
-      delete cached_meta_types[id]
+      console.log('[meta:cacheCheck] remove cache for ', instance)
+      __cache.delete(instance)
     }
   }
 }
 
 
 function get (definitions, type) {
-  var resource = null, id = null, m = {}, isList = false;
+  var instance = null, m = {}, isList = false;
 
-  if (type instanceof EThing.Resource) {
-    resource = type
-    type = type.type()
-    id = resource.id()
-  } else if(typeof type === 'object' && type!== null && type._type) {
+  if(typeof type === 'object' && type!== null && type._type) {
     type = type._type
   } else if (Array.isArray(type)) {
     // compile a list of types (no cache)
     isList = true
-  } else if (typeof type !== 'string') {
-    throw 'type must be a string'
+  } else if (typeof type === 'string') {
+    // ok
+  } else {
+    instance = type
+    type = getInstanceType(instance)
   }
 
   // check in cache first
-  if (resource) {
-    if (id in cached_meta_types) {
-      var cache = cached_meta_types[id]
-      //if (!cache._cacheEtag || resource.attr('modifiedDate') == cache._cacheEtag) {
-        return cache
-      //}
+  if (instance) {
+    var cache = __cache.get(instance)
+    if (cache) {
+      return cache
     }
   } else if (!isList) {
-    if (type in cached_meta_types) {
-      return cached_meta_types[type]
+    var cache = __cache.get(type)
+    if (cache) {
+      return cache
     }
   }
 
   // compile
-  if (resource) {
-    //console.log('[meta] compile resource', resource.name())
-    m = compile(resource.attr('extends'), definitions, resource)
+  if (instance) {
+    //console.log('[meta] compile instance', instance)
+    if (instance instanceof EThing.Resource) {
+      // use extends for dynamic class
+      m = compile(instance.attr('extends'), definitions, instance)
+    } else {
+      // generic
+      m = getFromPath(definitions, type)
+      m = compile(m._mro || [], definitions, instance)
+    }
   } else {
     //console.log('[meta] compile', type)
     if (isList) {
@@ -532,13 +547,13 @@ function get (definitions, type) {
   }
 
   // normalize
-  m = normalize(m, resource)
+  m = normalize(m, instance)
 
   // store it in cache
-  if (resource) {
-    cached_meta_types[id] = m
+  if (instance) {
+    __cache.set(instance, m)
   } else if (!isList) {
-    cached_meta_types[type] = m
+    __cache.set(type, m)
   }
 
   return m
@@ -600,16 +615,25 @@ function importDefinitions (self, definitions) {
 
 }
 
+function getInstanceType (instance) {
+  if (instance instanceof EThing.Resource) {
+    return instance.type()
+  } else if(instance instanceof Plugin) {
+    return instance.type
+  } else {
+    throw Error('not a valid instance '+instance)
+  }
+}
 
 function normType (something) {
   if(typeof something === 'string') {
     return something
   } else if (something instanceof EThing.Resource) {
-    return something.type()
+    return getInstanceType(something)
   } else if(typeof something === 'object' && something!== null && something._type) {
     return something._type
-  } else if(typeof something === 'object' && something!== null && something._resource) {
-    return something._resource.type()
+  } else if(typeof something === 'object' && something!== null && something._instance) {
+    return getInstanceType(something._instance)
   } else {
     throw Error('invalid type: "'+something+'"')
   }
@@ -666,7 +690,7 @@ export default {
         } catch(e) {}
       },
 
-      // returns metadata of any type or resource
+      // returns metadata of any type or instance (resource, plugin ...)
       get: function (type) {
         return get (this.definitions, type)
       },
@@ -718,10 +742,9 @@ export default {
         var obj = getFromPath(this.definitions, type)
         extend(true, obj, definition)
         // remove from cache any dependencies
-        Object.keys(cached_meta_types).forEach(key => {
-          var n = cached_meta_types[key]
-          if (n._dep.indexOf(type) !== -1) {
-            delete cached_meta_types[key]
+        __cache.forEach((m, obj) => {
+          if (m._dep.indexOf(type) !== -1) {
+            __cache.delete(obj)
           }
         })
         return obj

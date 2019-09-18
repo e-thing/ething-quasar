@@ -29,5 +29,9 @@ export default {
       }
     },
 
-  }
+  },
+
+  cacheExpired(resource, modifiedAttributes) {
+    return modifiedAttributes.indexOf('extends') !== -1
+  },
 }

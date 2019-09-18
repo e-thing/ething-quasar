@@ -16,6 +16,7 @@ import ResourceActivity from './ResourceActivity'
 import Combobox from './Combobox'
 import ResourceList from './ResourceList'
 import ResourceCreateModal from './ResourceCreateModal'
+import DynamicComponent from './DynamicComponent'
 
 export {
     widgets,
@@ -33,5 +34,6 @@ export {
     ResourceActivity,
     Combobox,
     ResourceList,
-    ResourceCreateModal
+    ResourceCreateModal,
+    DynamicComponent,
 }
