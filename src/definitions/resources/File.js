@@ -1,6 +1,8 @@
 import { format, date } from 'quasar'
 import WChart from '../../components/widgets/WChart'
 import WImage from '../../components/widgets/WImage'
+import EThingUI from 'ething-ui'
+import EThing from 'ething-js'
 
 
 export default {
@@ -78,6 +80,23 @@ export default {
       return '/image/' + resource.id()
     } else {
       return '/text/' + resource.id()
+    }
+  },
+
+  actions (resource) {
+    return {
+      'download': {
+        label: 'Download',
+        icon: 'cloud_download',
+        click () {
+          EThing.request({
+            url: resource.getContentUrl(),
+            dataType: 'blob'
+          }).then((data) => {
+            EThingUI.utils.saveAs(data, resource.basename())
+          })
+        }
+      }
     }
   }
 }

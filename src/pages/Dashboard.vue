@@ -16,28 +16,14 @@
         <q-btn class="col-auto" flat icon="mdi-chevron-left" :disabled="iDashboard <= 0" @click="iDashboard = iDashboard - 1"/>
         <div class="col text-center">
           <q-btn-dropdown flat :label="currentDashboard.options.title">
-            <q-list>
-              <q-item v-close-popup clickable @click="pinResourceModal = true">
-                <q-item-section avatar>
-                  <q-icon name="mdi-pin" />
-                </q-item-section>
-                <q-item-section>pin widget</q-item-section>
-              </q-item>
-              <q-item v-close-popup tag="label">
-                <q-item-section side top>
-                  <q-checkbox v-model="editing" />
-                </q-item-section>
-                <q-item-section>edit</q-item-section>
-              </q-item>
-              <q-item v-close-popup clickable @click="editDashboard()">
-                <q-item-section avatar>
-                  <q-icon name="settings" />
-                </q-item-section>
-                <q-item-section>settings</q-item-section>
+            <q-list class="text-faded">
+              <q-item v-close-popup clickable @click="iDashboard = index" v-for="(dashboard, index) in dashboards" :key="index">
+                <q-item-section>{{ dashboard.options.title }}</q-item-section>
               </q-item>
             </q-list>
           </q-btn-dropdown>
         </div>
+        <q-btn class="col-auto" flat :icon="editing ? 'mdi-cancel' : 'mdi-pencil'" :label="editing ? 'cancel' : ''" v-show="!editing" @click="editing = !editing"/>
         <q-btn class="col-auto" flat :icon="iDashboard >= dashboards.length - 1 ? 'mdi-plus' : 'mdi-chevron-right'" @click="nextOrAddDashboard()"/>
       </q-btn-group>
 
@@ -54,13 +40,15 @@
         </div>
 
         <grid-layout v-else
+          ref="grid"
           class="col scroll"
           :layout.sync="currentDashboard.items"
           :col-num="__columns"
           :row-height="grid.rowHeight"
           :is-draggable="draggable"
           :is-resizable="resizable"
-          :vertical-compact="true"
+          :vertical-compact="false"
+          prevent-collision
           :margin="[grid.margin, grid.margin]"
           :use-css-transforms="true"
           :key="iDashboard"
@@ -77,9 +65,15 @@
                :minW="layoutItem.minW || 1"
                :minH="layoutItem.minH || 1"
                class="gditem"
+               drag-ignore-from="button"
+               drag-allow-from=".dragger"
             >
                 <div v-show="editing" class="absolute fit widget-edit-layer">
                   <q-btn-group flat class="absolute-center" >
+                    <!--<div class="dragger" style="padding: 4px 16px; font-size: 1.718em;">
+                      <q-icon name="mdi-cursor-move" color="faded"/>
+                    </div>-->
+                    <q-btn class="dragger" flat icon="mdi-cursor-move" color="faded" type="a"/>
                     <q-btn v-if="isEditable(layoutItem)" flat icon="settings" color="faded" @click="editItem(layoutItem)"/>
                     <q-btn flat icon="delete" color="negative" @click="removeItem(layoutItem)"/>
                   </q-btn-group>
@@ -96,6 +90,7 @@
             </grid-item>
         </grid-layout>
       </keep-alive>
+
     </div>
 
     <widget-chooser v-model="pinResourceModal" :pinned="pinnedResources" @done="pin"/>
@@ -113,6 +108,14 @@
       <form-schema :key="dashboardEdit.key" :schema="dashboardEdit.schema" v-model="dashboardEdit.model" @error="dashboardEdit.error = $event"/>
 
     </modal>
+
+    <q-page-sticky position="bottom-right" :offset="[36, 36]" v-show="editing">
+      <div class=" q-gutter-x-sm">
+        <q-btn rounded size="md" icon="mdi-cancel" color="primary" label="cancel" @click="editing = false"/>
+        <q-btn round size="md" icon="mdi-settings" color="primary" @click="editDashboard()"/>
+        <q-btn fab icon="add" color="primary" @click="pinResourceModal = true"/>
+      </div>
+    </q-page-sticky>
 
   </q-page>
 </template>
@@ -705,10 +708,11 @@ export default {
 
 <style>
 .vue-resizable-handle {
-  height: 0 !important;
-  width: 0 !important;
-  border-bottom: 40px solid #777777;
-  border-left: 40px solid transparent;
+  height: 40px !important;
+  width: 40px !important;
+  background: none !important;
+  border-bottom: 4px solid #ababab;
+  border-right: 4px solid #ababab;
   padding: 0 !important;
   z-index: 5 !important;
 }

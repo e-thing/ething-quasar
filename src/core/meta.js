@@ -82,7 +82,7 @@ const defaults = {
   // READ-ONLY: list the signals this resource can emit
   signals: [],
 
-  // a function that returns a map of widgets, the keys represent the widgets id
+  // a function that returns a map of widgets, the keys represent the widget id
   // widgets are used to display a resource data/attributes...
   // widgets are displayed in the dashboard.
   /*
@@ -108,10 +108,29 @@ const defaults = {
   widgets (resource) {
     return {}
   },
+
   // set to true, if you don't want to allow the user to create a new resource through the interface.
   disableCreation: false,
+
   // a function(resource, actionName) => <Vue route> that is called when the user try to open this resource.
   open: null,
+
+  // a function that returns a map of actions, the keys represent the action id
+  // actions are used to execute a specific funtion for a specific resource.
+  /*
+    {
+      label: '...', // the name of the action
+      color: '...', // a color from the quasar color palette
+      click () {
+        // the function to execute
+      },
+      zIndex: 0, // kind of a priority. Allow to order the actions list.
+      disable: false // set to true if you want to disable this action (may be useful when overriding)
+    }
+  */
+  actions (resource) {
+    return {}
+  },
 
   // a function that returns a map of badges, the keys represent the widgets id
   // badges are small component (mainly q-chip) used to display a resource's attributes
@@ -144,13 +163,30 @@ const defaults = {
 
 
 function componentDefaults (instance) {
-  return {
-    component: null,
-    attributes () {
+  var attributes;
+  if (instance instanceof EThing.Resource) {
+    attributes = function (options) {
+      return {
+        resource: instance
+      }
+    }
+  } else if (instance instanceof Plugin) {
+    attributes = function (options) {
+      return {
+        plugin: instance
+      }
+    }
+  } else {
+    attributes = function (options) {
       return {
         instance
       }
-    },
+    }
+  }
+
+  return {
+    component: null,
+    attributes,
     listeners () {
       return {}
     },
@@ -214,6 +250,23 @@ function badgeMerge(p, c, ctx) {
   return merged
 }
 
+function actionDefaults (resource) {
+  return {
+    label: '',
+    color: '',
+    click () {
+      // the function to execute
+    },
+    zIndex: 0,
+    disable: false
+  }
+}
+
+function actionMerge(p, c, ctx) {
+  if (!p) p = actionDefaults(ctx.args[0]) // ctx.args[0] => resource
+  if (!c) c = {}
+  return defaultMerge(p, c, ctx)
+}
 
 var mergeStrategies = {
   required: arrayUniqueMerge,
@@ -247,6 +300,12 @@ var mergeStrategies = {
   badges (parent, child, ctx) {
     return functionMerge(parent, child, ctx, (p, c, ctx) => {
       return mapMerge (p, c, ctx, badgeMerge)
+    })
+  },
+
+  actions (parent, child, ctx) {
+    return functionMerge(parent, child, ctx, (p, c, ctx) => {
+      return mapMerge (p, c, ctx, actionMerge)
     })
   },
 
@@ -439,7 +498,7 @@ function normalize (obj, instance) {
   }
 
   // remove disabled items
-  ['badges', 'components', 'widgets'].forEach(k => {
+  ['badges', 'components', 'widgets', 'actions'].forEach(k => {
     let originalFn = obj[k]
     obj[k] = function () {
       var res = originalFn.apply(this, arguments)
@@ -474,6 +533,11 @@ function normalize (obj, instance) {
     obj.components = obj.components(instance)
 
     obj.badges = obj.badges(instance)
+
+    var originalActionsFn = obj.actions
+    obj.actions = function () {
+      return originalActionsFn.call(this, instance)
+    }
 
     obj._instance = instance
   }

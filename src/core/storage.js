@@ -16,7 +16,7 @@ export default ({EThingUI, Vue}) => {
           var _storage = storage==='session' ? SessionStorage : LocalStorage
 
           if (key instanceof RegExp) {
-            var _all = _storage.get.all()
+            var _all = _storage.getAll ()
             var _res = {}
             for(var k in _all) {
               if (key.test(k)) {
@@ -25,9 +25,9 @@ export default ({EThingUI, Vue}) => {
             }
             return _res
           } else if (typeof key === 'string'){
-            return _storage.get.item(key)
+            return _storage.getItem(key)
           } else {
-            return _storage.get.all()
+            return _storage.getAll ()
           }
         },
         dbDelete (key, storage) {

@@ -1,5 +1,7 @@
-import { date } from 'quasar'
+import { date, Dialog } from 'quasar'
 import WChart from '../../components/widgets/WChart'
+import EThingUI from 'ething-ui'
+import EThing from 'ething-js'
 
 
 export default {
@@ -47,6 +49,46 @@ export default {
       return '/chart/' + resource.id()
     } else {
       return '/table/' + resource.id()
+    }
+  },
+
+  actions (resource) {
+    return {
+      'plot': {
+        label: 'Plot chart',
+        icon: 'mdi-chart-line',
+        click () {
+          EThingUI.router.push('/chart/' + resource.id())
+        }
+      },
+      'download': {
+        label: 'Download',
+        icon: 'cloud_download',
+        click () {
+          Dialog.create({
+            title: 'Download "' + resource.name() + '"',
+            message: 'Format: ',
+            options: {
+              type: 'radio',
+              model: 'csv',
+              items: [
+                {label: 'CSV', value: 'csv'},
+                {label: 'JSON', value: 'json_pretty'}
+              ]
+            },
+            cancel: true,
+            persistent: true,
+            color: 'secondary'
+          }).onOk(format => {
+            EThing.request({
+              url: resource.getContentUrl() + '?fmt=' + format,
+              dataType: 'blob'
+            }).then((data) => {
+              EThingUI.utils.saveAs(data, resource.basename() + '.' + (format=='json_pretty' ? 'json' : format))
+            })
+          })
+        }
+      }
     }
   }
 }

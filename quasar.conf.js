@@ -106,6 +106,9 @@ module.exports = function (ctx) {
         'QToolbar',
         'QToolbarTitle',
         'QTooltip',
+        'QPageSticky',
+        'QFab',
+        'QFabAction',
       ],
 
       directives: [

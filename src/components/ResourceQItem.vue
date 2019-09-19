@@ -34,9 +34,18 @@
     <q-item-section side v-if="!readonly">
       <div>
         <slot name="buttons-prepend"></slot>
-        <q-btn v-if="showFlowEnable" class="gt-xs" :icon="flowEnableIcon" flat dense :label="flowEnableLabel" :color="flowEnableColor" @click.stop="toggleFlowEnable()"/>
-        <q-btn v-if="showChart" class="gt-xs" icon="mdi-chart-line" round flat dense color="secondary" @click.stop="chart"/>
-        <q-btn v-if="showDownload" class="gt-xs" icon="cloud_download" round flat dense color="secondary" @click.stop="download"/>
+
+        <q-btn
+          v-for="(action, index) in actions" :key="index"
+          class="gt-xs"
+          :icon="action.icon"
+          :label="action.forceLabel ? action.label : null"
+          flat
+          dense
+          :color="action.color || 'secondary'"
+          @click.stop="action.click()"
+        />
+
         <q-btn class="gt-xs" icon="delete" round flat dense @click.stop="remove"/>
         <q-btn class="gt-xs" icon="settings" round flat dense @click.stop="settings"/>
         <q-btn class="lt-sm" icon="more_vert" round flat dense @click.stop="more"/>
@@ -109,18 +118,6 @@ export default {
       return this.resource instanceof this.$ething.Table
     },
 
-    showChart () {
-      return this.resource instanceof this.$ething.Table && this.resource.length()
-    },
-
-    showDownload () {
-      return this.resource instanceof this.$ething.File || this.resource instanceof this.$ething.Table
-    },
-
-    showFlowEnable () {
-      return this.$ethingUI.isSubclass(this.resource, 'resources/Flow')
-    },
-
     meta () {
       return this.$ethingUI.get(this.resource)
     },
@@ -134,20 +131,13 @@ export default {
       return badges
     },
 
-    data () {
-      return this.meta.data() || {}
-    },
-
-    flowEnableIcon () {
-      return this.resource.attr('enabled') ? 'stop' : 'mdi-play'
-    },
-
-    flowEnableLabel () {
-      return this.resource.attr('enabled') ? 'stop' : 'run'
-    },
-
-    flowEnableColor () {
-      return this.resource.attr('enabled') ?'negative' : 'secondary'
+    actions () {
+      var actions = Object.values(this.meta.actions())
+      // re order by zIndex
+      actions.sort(function(a, b) {
+          return b.zIndex - a.zIndex;
+      });
+      return actions
     },
 
   },
@@ -158,25 +148,6 @@ export default {
       return ['pad', 'pad-'+n]
     },
 
-    batteryIcon (level) {
-      if (level > 95) return 'mdi-battery'
-      if (level > 85) return 'mdi-battery-90'
-      if (level > 75) return 'mdi-battery-80'
-      if (level > 65) return 'mdi-battery-70'
-      if (level > 55) return 'mdi-battery-60'
-      if (level > 45) return 'mdi-battery-50'
-      if (level > 35) return 'mdi-battery-40'
-      if (level > 25) return 'mdi-battery-30'
-      if (level > 15) return 'mdi-battery-20'
-      if (level >= 0) return 'mdi-battery-alert'
-      return 'battery unknown'
-    },
-
-    batteryColor (level) {
-      if (level <= 15) return 'negative'
-      if (level <= 40) return 'warning'
-    },
-
     settings () {
       this.$router.push('/resource/' + this.resource.id())
     },
@@ -185,29 +156,18 @@ export default {
       var actions = []
       var handlers = {}
 
-      if (this.showFlowEnable) {
+      this.actions.forEach((action, index) => {
+        var id = 'custom'+index
         actions.push({
-          label: this.flowEnableLabel,
-          color: this.flowEnableColor,
-          icon: this.flowEnableIcon,
-          id: 'flowEnable'
+          label: action.label,
+          color: action.color,
+          icon: action.icon,
+          id
         })
-        handlers['flowEnable'] = () => {
-          return this.toggleFlowEnable()
+        handlers[id] = () => {
+          return action.click()
         }
-      }
-
-      if (this.showChart) {
-        actions.push({
-          label: 'Plot chart',
-          color: 'secondary',
-          icon: 'mdi-chart-line',
-          id: 'plotChart'
-        })
-        handlers['plotChart'] = () => {
-          return this.chart()
-        }
-      }
+      })
 
       actions.push({
         label: 'Delete',
@@ -250,45 +210,6 @@ export default {
       }
     },
 
-    chart () {
-      this.$router.push('/chart/' + this.resource.id())
-    },
-
-    download () {
-      if (this.resource instanceof this.$ething.File) {
-        this.$ething.request({
-          url: this.resource.getContentUrl(),
-          dataType: 'blob'
-        }).then((data) => {
-          this.$ethingUI.utils.saveAs(data, this.resource.basename())
-        })
-      } else if (this.resource instanceof this.$ething.Table) {
-
-        this.$q.dialog({
-          title: 'Download "' + this.resource.name() + '"',
-          message: 'Format: ',
-          options: {
-            type: 'radio',
-            model: 'csv',
-            items: [
-              {label: 'CSV', value: 'csv'},
-              {label: 'JSON', value: 'json_pretty'}
-            ]
-          },
-          cancel: true,
-          persistent: true,
-          color: 'secondary'
-        }).onOk(format => {
-          this.$ething.request({
-            url: this.resource.getContentUrl() + '?fmt=' + format,
-            dataType: 'blob'
-          }).then((data) => {
-            this.$ethingUI.utils.saveAs(data, this.resource.basename() + '.' + (format=='json_pretty' ? 'json' : format))
-          })
-        })
-      }
-    },
-
     click () {
       if (this.readonly) {
         this.$emit('click', this.resource)
@@ -303,12 +224,6 @@ export default {
         this.$ethingUI.open(this.createdBy)
       }
     },
-
-    toggleFlowEnable () {
-      this.resource.set({enabled: !this.resource.attr('enabled')}).catch((err) => {
-        console.error(err);
-      })
-    }
   }
 
 

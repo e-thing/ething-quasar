@@ -16,8 +16,8 @@ export default {
     },
   },
 
-  open (resource, more) {
-    return '/flow/' + resource.id()
+  open (flow, more) {
+    return '/flow/' + flow.id()
   },
 
   widgets (flow) {
@@ -43,6 +43,22 @@ export default {
               }
             }
           }
+        }
+      }
+    }
+  },
+
+  actions (resource) {
+    return {
+      'flowEnable': {
+        label: resource.attr('enabled') ? 'stop' : 'run',
+        forceLabel: true,
+        icon: resource.attr('enabled') ? 'stop' : 'mdi-play',
+        color: resource.attr('enabled') ?'negative' : 'secondary',
+        click () {
+          return resource.set({enabled: !resource.attr('enabled')}).catch((err) => {
+            console.error(err);
+          })
         }
       }
     }

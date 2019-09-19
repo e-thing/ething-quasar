@@ -123,6 +123,7 @@ export function findWidget (id) {
 
 // register a global widget
 export function registerWidget (id, widget) {
+
   if (!widget.component) {
     throw new Error('No component attribute set in the widget definition')
   }
