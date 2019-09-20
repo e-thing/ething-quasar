@@ -190,7 +190,7 @@ EThingUI.install = ({ app, router, Vue, store }) => {
 
     reset () {
       app.data.state = 'begin'
-      EThingUI.eventsSocket.close()
+      if (EThingUI.eventsSocket) EThingUI.eventsSocket.close()
       LocalStorage.remove('ething.auth.iat')
       if (this.authRefreshTimer) {
         clearInterval(this.authRefreshTimer)

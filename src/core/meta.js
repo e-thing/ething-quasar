@@ -82,6 +82,10 @@ const defaults = {
   // READ-ONLY: list the signals this resource can emit
   signals: [],
 
+  created (resource) {
+    // is executed once a resource has been created
+  },
+
   // a function that returns a map of widgets, the keys represent the widget id
   // widgets are used to display a resource data/attributes...
   // widgets are displayed in the dashboard.
@@ -539,6 +543,11 @@ function normalize (obj, instance) {
       return originalActionsFn.call(this, instance)
     }
 
+    var originalCreated = obj.created
+    obj.created = function () {
+      return originalCreated.call(this, instance)
+    }
+
     obj._instance = instance
   }
 
@@ -803,7 +812,7 @@ export default {
       // extend the definition of a given type
       extend: function (type, definition) {
         type = normType(type)
-        var obj = getFromPath(this.definitions, type)
+        var obj = getFromPath(this.definitions, type, true)
         extend(true, obj, definition)
         // remove from cache any dependencies
         __cache.forEach((m, obj) => {

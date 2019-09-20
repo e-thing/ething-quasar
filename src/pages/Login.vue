@@ -118,6 +118,7 @@ export default {
         } else {
           // Something happened in setting up the request that triggered an Error
           this.$q.notify('Error: ' + error.message)
+          console.error(error)
         }
 
       }).finally(() => {

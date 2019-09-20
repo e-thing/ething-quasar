@@ -65,7 +65,10 @@ export default {
           var res = null
 
           if (this.create) {
-            res = EThing.Resource.create(Object.assign({type: this.type}, this.model))
+            res = EThing.Resource.create(Object.assign({type: this.type}, this.model)).then(r => {
+              this.meta.created(r)
+              return r
+            })
           } else {
             res = this.resource.set(Object.assign({}, this.model))
           }

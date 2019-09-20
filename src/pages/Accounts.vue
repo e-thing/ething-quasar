@@ -3,7 +3,7 @@
 
     <resource-list
       class="page-block"
-      resources="resources/Flow"
+      resources="resources/Account"
     />
 
   </q-page>
@@ -12,7 +12,6 @@
 <script>
 
 export default {
-  name: 'PageFlows',
-
+  name: 'PageAccounts',
 }
 </script>

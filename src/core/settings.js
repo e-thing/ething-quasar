@@ -27,9 +27,9 @@ export default ({EThingUI, Vue}) => {
         loadSettings () {
           return EThing.settings.get().then(settings => {
 
-            this.settings = settings
+            Object.assign(this.settings, settings)
 
-            return settings
+            return this.settings
           })
         },
 

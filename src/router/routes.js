@@ -92,6 +92,11 @@ const routes = [
         path: 'flows',
         name: 'flows',
         component: () => import('pages/Flows')
+      },
+      {
+        path: 'accounts',
+        name: 'accounts',
+        component: () => import('pages/Accounts')
       }
     ]
   },

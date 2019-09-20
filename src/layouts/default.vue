@@ -16,6 +16,7 @@
         <q-btn class="gt-xs" flat stretch label="Devices" @click="$router.push('/devices')" />
         <q-btn class="gt-xs" flat stretch label="Data" @click="$router.push('/data')" />
         <q-btn class="gt-xs" flat stretch label="Flows" @click="$router.push('/flows')" />
+        <q-btn class="gt-xs" flat stretch label="Accounts" @click="$router.push('/accounts')" />
 
         <q-space />
 
@@ -104,6 +105,12 @@
               <q-icon name="mdi-ray-start-arrow" />
             </q-item-section>
             <q-item-section>Flows</q-item-section>
+          </q-item>
+          <q-item clickable @click="$router.push('/accounts')" v-ripple>
+            <q-item-section avatar>
+              <q-icon name="mdi-account" />
+            </q-item-section>
+            <q-item-section>Accounts</q-item-section>
           </q-item>
 
           <q-separator />
