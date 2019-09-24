@@ -2,6 +2,7 @@
 this module is responsible of downloading definitions from the ething server.
 */
 import EThing from 'ething-js'
+import EThingUI from 'ething-ui'
 import Vue from 'vue'
 import * as formSchemaCore from '../boot/formSchema/core'
 import { extend } from 'quasar'
@@ -116,8 +117,10 @@ const defaults = {
   // set to true, if you don't want to allow the user to create a new resource through the interface.
   disableCreation: false,
 
-  // a function(resource, actionName) => <Vue route> that is called when the user try to open this resource.
-  open: null,
+  // a function(resource, actionName) Is called when the user try to open this resource. The function may returns a <Vue route> (object or string).
+  open (resource) {
+    // return '...' // a <Vue route> string or object
+  },
 
   // a function that returns a map of actions, the keys represent the action id
   // actions are used to execute a specific funtion for a specific resource.
@@ -494,12 +497,13 @@ function normalize (obj, instance) {
     }
   }
 
-  if (typeof obj.open !== 'function') {
-    var originalOpen = obj.open
-    obj.open = function () {
-      return originalOpen
+  var originalOpen = obj.open;
+  obj.open = function (resource) {
+    var route = originalOpen.call(this, resource)
+    if (typeof route === 'string' || (typeof route === 'object' && route!==null)) {
+      EThingUI.router.push(route)
     }
-  }
+  };
 
   // remove disabled items
   ['badges', 'components', 'widgets', 'actions'].forEach(k => {
@@ -528,8 +532,8 @@ function normalize (obj, instance) {
 
   if (instance) {
     var originalOpenFn = obj.open
-    obj.open = function (more) {
-      return originalOpenFn.call(this, instance, more)
+    obj.open = function () {
+      return originalOpenFn.call(this, instance)
     }
 
     obj.widgets = obj.widgets(instance)

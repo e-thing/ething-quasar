@@ -34,6 +34,7 @@ const routes = [
       },
       {
         path: 'chart/:id',
+        name: 'chart',
         component: () => import('pages/Chart'),
         meta: {
           back: true
@@ -58,23 +59,25 @@ const routes = [
         }
       },
       {
+        path: 'resourceEdit/:id',
+        name: 'resourceEdit',
+        component: () => import('pages/ResourceEdit'),
+        meta: {
+          back: true
+        }
+      },
+      {
+        path: 'resourceEdit/:type',
+        name: 'resourceCreate',
+        component: () => import('pages/ResourceEdit'),
+        meta: {
+          back: true
+        }
+      },
+      {
         path: 'resource/:id',
-        component: () => import('pages/Resource'),
-        meta: {
-          back: true
-        }
-      },
-      {
-        path: 'create/:type',
-        name: 'create',
-        component: () => import('pages/Resource'),
-        meta: {
-          back: true
-        }
-      },
-      {
-        path: 'device/:id',
-        component: () => import('pages/Device'),
+        name: 'resourceMain',
+        component: () => import('pages/ResourceMain'),
         meta: {
           back: true
         }

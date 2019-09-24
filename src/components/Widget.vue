@@ -11,9 +11,10 @@
       <div v-show="__hasError" class="absolute fit column items-center widget-err-content" style="background-color: inherit; z-index: 5;">
         <q-space/>
         <div class="col-auto text-center text-caption">
-            <slot name="error-before"></slot>
-            <div>{{ String(error || 'error') }}</div>
-            <slot name="error-after"></slot>
+          <!--<q-btn class="absolute-top-right" flat icon="close" @click="error=null"/>-->
+          <slot name="error-before"></slot>
+          <div>{{ String(error || 'error') }}</div>
+          <slot name="error-after"></slot>
         </div>
         <q-space/>
       </div>

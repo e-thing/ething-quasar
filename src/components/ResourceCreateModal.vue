@@ -151,7 +151,7 @@ export default {
             click: () => {
               if (this.open) {
                 this.$router.push({
-                  name: 'create',
+                  name: 'resourceCreate',
                   params: {
                     type: cls._type
                   }

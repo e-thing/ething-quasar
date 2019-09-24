@@ -24,10 +24,6 @@ export default {
 
   },
 
-  open (resource, more) {
-    return '/device/' + resource.id()
-  },
-
   badges (resource) {
     return {
       'battery': {

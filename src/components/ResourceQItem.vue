@@ -47,7 +47,7 @@
         />
 
         <q-btn class="gt-xs" icon="delete" round flat dense @click.stop="remove"/>
-        <q-btn class="gt-xs" icon="settings" round flat dense @click.stop="settings"/>
+        <q-btn class="gt-xs" icon="settings" round flat dense @click.stop="openSettings()"/>
         <q-btn class="lt-sm" icon="more_vert" round flat dense @click.stop="more"/>
       </div>
     </q-item-section>
@@ -148,8 +148,13 @@ export default {
       return ['pad', 'pad-'+n]
     },
 
-    settings () {
-      this.$router.push('/resource/' + this.resource.id())
+    openSettings () {
+      this.$router.push({
+        name: 'resourceEdit',
+        params: {
+          id: this.resource.id()
+        }
+      })
     },
 
     more () {
@@ -185,7 +190,7 @@ export default {
         id: 'settings'
       })
       handlers['settings'] = () => {
-        return this.settings()
+        return this.openSettings()
       }
 
       this.$q.bottomSheet({

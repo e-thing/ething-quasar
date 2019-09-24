@@ -760,9 +760,9 @@ export default {
 
         var createdBy = this.$ething.arbo.get(resource.createdBy())
         if (createdBy) {
-          preferences.subtitle = '<a href="#' + this.$ethingUI.route(createdBy) + '">' + createdBy.basename() + '</a>'
+          preferences.subtitle = createdBy.basename()
         }
-        preferences.title = '<a href="#' + this.$ethingUI.route(resource) + '">' + resource.basename() + '</a>'
+        preferences.title = resource.basename()
         preferences.panes = []
 
         resource.keys().forEach( key => {

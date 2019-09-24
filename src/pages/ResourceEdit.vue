@@ -48,7 +48,7 @@
 import ResourceEditor from '../components/ResourceEditor'
 
 export default {
-  name: 'PageResource',
+  name: 'PageResourceEdit',
 
   components: {
     ResourceEditor

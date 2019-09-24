@@ -40,7 +40,7 @@
             flat round dense
             icon="mdi-chart-line"
             color="faded"
-            @click="$ethingUI.open(resource, 'chart')"
+            @click="plot"
             :disable="isEmpty"
           />
           <q-btn
@@ -546,6 +546,15 @@ export default {
       }
 
       return value
+    },
+
+    plot () {
+      this.$router.push({
+        name: 'chart',
+        params: {
+          id: this.resource.id()
+        }
+      })
     }
   },
   mounted () {

@@ -73,7 +73,7 @@ export default {
     return m
   },
 
-  open (resource, more) {
+  open (resource) {
     if (/\.plot$/.test(resource.basename())) {
       return '/chart/' + resource.id()
     } else if (/image/.test(resource.mime())) {

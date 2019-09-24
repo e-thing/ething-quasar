@@ -11,7 +11,7 @@
           <q-item-section>
             <q-item-label class="text-h4 ellipsis" :class="'text-' + meta.color">
               {{ resource.basename() }}
-              <q-icon v-if="!resource.connected()" right name="mdi-lan-disconnect" color="warning" />
+              <q-icon v-if="resource.hasAttr('connected') && !resource.attr('connected')" right name="mdi-lan-disconnect" color="warning" />
 
               <q-avatar v-for="(icon, key) in extendsIcons" :key="key" :icon="icon" :color="meta.color" text-color="white" size="24px" class="gt-xs q-mr-xs" />
 
@@ -24,7 +24,7 @@
               :label="$q.screen.lt.md ? '' : 'settings'"
               color="faded"
               icon="settings"
-              @click="$router.push('/resource/' + resource.id())"
+              @click="openSettings()"
             />
           </q-item-section>
         </q-item>
@@ -41,7 +41,7 @@
         <q-item :inset-level="1">
           <q-item-section>
             <div>
-              <q-chip dense square icon="access_time" outline color="secondary">
+              <q-chip dense square icon="access_time" outline color="secondary" v-if="resource.hasAttr('lastSeenDate')">
                 {{ $ethingUI.utils.dateToString(resource.lastSeenDate(), 'never') }}
               </q-chip>
               <dynamic-component
@@ -62,7 +62,7 @@
       </div>
 
       <!-- disconnected -->
-      <div class="page-block" v-if="!resource.connected()">
+      <div class="page-block" v-if="resource.hasAttr('connected') && !resource.attr('connected')">
         <q-banner class="bg-warning text-white"><q-icon left name="mdi-lan-disconnect"/> This device is disconnected !</q-banner>
       </div>
 
@@ -166,7 +166,7 @@ import Widget from '../components/Widget'
 import ResourceActivity from '../components/ResourceActivity'
 
 export default {
-  name: 'PageDevice',
+  name: 'PageResourceMain',
 
   components: {
     DeviceApi,
@@ -221,7 +221,7 @@ export default {
       for (var i in types) {
         var t = types[i]
         if (t==currentType || t=='interfaces/Sensor') continue
-        if (t=='resources/Device') break
+        if (t=='resources/Resource') break
         var m = this.$ethingUI.getRaw(t)
         if (m && m.icon && extendsIcons.indexOf(m.icon) === -1 && m.icon != staticMeta.icon) {
           extendsIcons.push(m.icon)
@@ -251,9 +251,6 @@ export default {
       if (id && id.length) {
         if (!r) {
           this.$router.replace('/404')
-        }
-        if (!r.isTypeof('resources/Device')) {
-          return
         }
       }
       return r
@@ -326,7 +323,14 @@ export default {
       return createdBys.reverse()
     },
 
-
+    openSettings () {
+      this.$router.push({
+        name: 'resourceEdit',
+        params: {
+          id: this.resource.id()
+        }
+      })
+    },
 
   },
 

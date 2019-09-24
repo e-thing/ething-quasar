@@ -88,22 +88,8 @@ EThingUI.install = ({ app, router, Vue, store }) => {
         return this.router.app
       },
 
-      /*
-      return the url for opening a resource
-      */
-      route (resource, more) {
-        var cls = this.get(resource)
-        return cls.open ? cls.open(more) : false
-      },
-
-      open (resource, more) {
-        var route = EThingUI.route(resource, more)
-        if (route) {
-          router.push(route)
-          return true
-        } else {
-          return false
-        }
+      open (resource) {
+        this.get(resource).open()
       }
   });
 

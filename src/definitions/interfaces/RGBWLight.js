@@ -18,7 +18,10 @@ export default {
       },
       'dimmable.dimmer': {
         disable: true
-      }
+      },
+      'relay.switch': {
+        disable: true
+      },
     }
   },
 

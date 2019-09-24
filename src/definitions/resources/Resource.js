@@ -34,4 +34,13 @@ export default {
   cacheExpired(resource, modifiedAttributes) {
     return modifiedAttributes.indexOf('extends') !== -1
   },
+
+  open (resource) {
+    return {
+      name: 'resourceMain',
+      params: {
+        id: resource.id()
+      }
+    }
+  },
 }
