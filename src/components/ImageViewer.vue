@@ -1,35 +1,35 @@
 <template>
   <div class="fit">
-  <div ref="container" :class="fullscreen ? 'fullscreen' : 'relative-position fit'" :style="__style">
-    <component :is="__zoom ? 'v-zoomer' : 'div'" v-show="!error" style="width: 100%; height: 100%;">
-      <img
-        :key="key"
-        :src="__url"
-        style="object-fit: contain; width: 100%; height: 100%;"
-        alt=""
-        @load="onload"
-        @error="onerror"
-      >
-    </component>
-    <div class="absolute-top row items-center q-pa-sm" :style="__toolbarStyle">
-      <div class="col text-subtitle1">
-        <span v-if="!noTitle">{{ __data.title }}</span>
+    <div ref="container" :class="__class" :style="__style">
+      <component :is="__zoom ? 'v-zoomer' : 'div'" v-show="!error" style="width: 100%; height: 100%;">
+        <img
+          :key="key"
+          :src="__url"
+          style="object-fit: contain; width: 100%; height: 100%;"
+          alt=""
+          @load="onload"
+          @error="onerror"
+        >
+      </component>
+      <div class="absolute-top row items-center q-pa-sm" :style="__toolbarStyle">
+        <div class="col text-subtitle1">
+          <span v-if="!noTitle">{{ __data.title }}</span>
+        </div>
+        <div class="col-auto">
+          <q-btn round flat icon="mdi-refresh" @click="refresh()" />
+          <q-btn round flat :icon="fullscreen ? 'fullscreen_exit' : 'fullscreen'" @click="toggleFullscreen()" />
+        </div>
       </div>
-      <div class="col-auto">
-        <q-btn round flat icon="mdi-refresh" @click="refresh()" />
-        <q-btn round flat :icon="fullscreen ? 'fullscreen_exit' : 'fullscreen'" @click="toggleFullscreen()" />
+      <div v-show="loading" class="absolute-center">
+        <q-circular-progress
+          indeterminate
+          size="48px"
+        />
+      </div>
+      <div v-show="error" class="absolute-center text-negative">
+        Unable to load the picture
       </div>
     </div>
-    <div v-show="loading" class="absolute-center">
-      <q-circular-progress
-        indeterminate
-        size="48px"
-      />
-    </div>
-    <div v-show="error" class="absolute-center text-negative">
-      Unable to load the picture
-    </div>
-  </div>
   </div>
 </template>
 
@@ -51,7 +51,8 @@ export default {
       default: 'both'
     },
     contentStyle: Object,
-    toolbarStyle: Object
+    contentClass: String,
+    toolbarStyle: Object,
   },
 
   data() {
@@ -86,6 +87,13 @@ export default {
       if (this.zoom === 'fullscreen') return this.fullscreen
       if (this.zoom === 'inline') return !this.fullscreen
       return true
+    },
+    __class () {
+      var cls = this.fullscreen ? 'fullscreen' : 'relative-position fit'
+      if (this.contentClass) {
+        cls += ' ' + this.contentClass
+      }
+      return cls
     },
     __style () {
       var style = {

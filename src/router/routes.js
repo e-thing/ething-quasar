@@ -1,3 +1,4 @@
+import ResourceList from '../components/ResourceList'
 
 const routes = [
   {
@@ -9,14 +10,13 @@ const routes = [
         redirect: 'dashboard',
       },
       {
-        path: 'data',
-        name: 'data',
-        component: () => import('pages/Data')
-      },
-      {
-        path: 'devices',
-        name: 'devices',
-        component: () => import('pages/Devices')
+        path: 'explore',
+        name: 'explore',
+        component: ResourceList,
+        props: (route) => ({
+          resources: route.query.resources,
+          tree: true
+        })
       },
       {
         path: 'table/:id',
@@ -88,18 +88,19 @@ const routes = [
         component: () => import('pages/Dashboard')
       },
       {
-        path: 'settings',
-        component: () => import('pages/Settings')
+        path: 'system',
+        redirect: {
+          name: 'system',
+          params: {
+            panel: 'settings'
+          }
+        },
       },
       {
-        path: 'flows',
-        name: 'flows',
-        component: () => import('pages/Flows')
-      },
-      {
-        path: 'accounts',
-        name: 'accounts',
-        component: () => import('pages/Accounts')
+        path: 'system/:panel',
+        name: 'system',
+        component: () => import('pages/System'),
+        props: true
       }
     ]
   },

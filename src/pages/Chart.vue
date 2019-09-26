@@ -1,10 +1,6 @@
 <template>
   <q-page >
-
-    <div class="page-fit">
-      <chart :preferences="resource" expended class="page-block relative-position"/>
-    </div>
-
+    <chart :preferences="resource" expended/>
   </q-page>
 </template>
 
@@ -39,11 +35,3 @@ export default {
 
 }
 </script>
-
-<style scoped>
-.wrapper {
-  position:relative;
-  width: 100%;
-  height: 100%;
-}
-</style>

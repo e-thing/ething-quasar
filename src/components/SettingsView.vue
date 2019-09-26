@@ -1,8 +1,8 @@
 <template>
-  <div class="page page-width-sm">
+  <div class="center-width-md q-gutter-y-md q-py-md q-px-sm">
 
 
-    <div class="page-block page-block-padding">
+    <div class="bg-white q-pa-md">
 
       <div class="text-h6 text-secondary">General</div>
 
@@ -10,7 +10,7 @@
 
     </div>
 
-    <div v-for="(plugin, name) in plugins" :key="name" v-if="plugin.show" class="page-block page-block-padding">
+    <div v-for="(plugin, name) in plugins" :key="name" v-if="plugin.show" class="bg-white q-pa-md">
 
       <div class="text-h6 text-secondary">{{ name }}</div>
 
@@ -32,13 +32,13 @@
 
     <q-banner
         v-if="saveError"
-        class="bg-negative text-white page-block"
+        class="bg-negative text-white"
     >
       <q-icon left name="mdi-alert"/> {{ String(saveError) }}
     </q-banner>
 
-    <div class="page-block page-block-transparent">
-        <q-btn :disable="globalError" :loading="saving" color="secondary" icon="done" label="save changes" @click="onSave"/>
+    <div>
+        <q-btn :disable="globalError" :loading="saving" color="secondary" icon="done" label="save changes" @click="onSave" :class="$q.screen.xs ? 'q-ml-md' : ''"/>
     </div>
 
   </div>

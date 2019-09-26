@@ -1,8 +1,8 @@
 <template>
 
-  <div class="page page-width-sm">
+  <div class="center-width-sm q-gutter-y-md q-py-md q-px-sm">
 
-    <q-card flat class="page page-block">
+    <q-card flat class="bg-white">
 
       <q-card-section>
         <div class="text-subtitle2">UI</div>

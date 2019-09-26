@@ -1,22 +1,20 @@
 <template>
-  <q-layout view="hHh Lpr lFf">
-    <q-header elevated>
+  <q-layout view="hHh LpR fFf" class="bg-grey-1">
+    <q-header elevated height-hint="50">
       <q-toolbar
         color="primary"
+        class="q-px-none"
       >
-        <q-btn class="xs" flat round dense icon="menu" @click="leftDrawerOpen = !leftDrawerOpen" aria-label="Toggle menu on left side" />
+        <q-btn flat icon="menu" @click="leftDrawerOpen = !leftDrawerOpen" aria-label="Menu" stretch/>
 
         <q-btn v-if="back" flat round dense icon="keyboard_backspace" @click="$router.go(-1)" aria-label="back" />
 
-        <q-toolbar-title shrink >
-          EThing
-        </q-toolbar-title>
-
-        <q-btn class="gt-xs" flat stretch label="Dashboard" @click="$router.push('/dashboard')" />
-        <q-btn class="gt-xs" flat stretch label="Devices" @click="$router.push('/devices')" />
-        <q-btn class="gt-xs" flat stretch label="Data" @click="$router.push('/data')" />
-        <q-btn class="gt-xs" flat stretch label="Flows" @click="$router.push('/flows')" />
-        <q-btn class="gt-xs" flat stretch label="Accounts" @click="$router.push('/accounts')" />
+        <q-btn flat no-caps no-wrap class="q-ml-xs" v-if="$q.screen.gt.xs" stretch @click="$router.push('/')">
+          <q-icon name="img:statics/app-logo-128x128.png" size="28px" />
+          <q-toolbar-title shrink class="text-weight-bold">
+            EThing
+          </q-toolbar-title>
+        </q-btn>
 
         <q-space />
 
@@ -58,7 +56,7 @@
             </q-scroll-area>
           </q-menu>
         </q-btn>
-        <q-btn class="gt-xs" flat stretch icon="settings" aria-label="Settings" @click="$router.push('/settings')"/>
+        <q-btn class="gt-xs" flat stretch icon="settings" aria-label="Settings" @click="$router.push({name: 'system'})"/>
         <q-btn v-if="!$ethingUI.autoLogin" class="gt-xs" flat stretch icon="exit_to_app" aria-label="Logout" @click="logout" />
 
       </q-toolbar>
@@ -68,62 +66,95 @@
     <q-drawer
       v-model="leftDrawerOpen"
       content-class="bg-grey-2"
-      overlay
+      show-if-above
+      bordered
+      :width="240"
     >
-      <div class="absolute-top bg-primary q-px-md q-py-lg row items-center q-gutter-md">
-        <q-avatar size="56px" class="bg-white col-auto">
-          <img src="statics/app-logo-128x128.png">
-        </q-avatar>
-        <div class="text-h4 text-white col">EThing</div>
-      </div>
-
-      <q-scroll-area style="height: calc(100% - 120px); margin-top: 120px">
+      <q-scroll-area class="fit">
         <q-list
-          inset-delimiter
+          padding
         >
-          <q-item-label header>Menu</q-item-label>
-          <q-item clickable @click="$router.push('/dashboard')" v-ripple>
+
+          <q-item v-ripple clickable @click="$router.push('/dashboard')">
             <q-item-section avatar>
-              <q-icon name="dashboard" />
+              <q-icon color="grey-7" name="dashboard" />
             </q-item-section>
-            <q-item-section>Dashboard</q-item-section>
-          </q-item>
-          <q-item clickable @click="$router.push('/devices')" v-ripple>
-            <q-item-section avatar>
-              <q-icon name="devices" />
+            <q-item-section>
+              <q-item-label>Dashboard</q-item-label>
             </q-item-section>
-            <q-item-section>Devices</q-item-section>
-          </q-item>
-          <q-item clickable @click="$router.push('/data')" v-ripple>
-            <q-item-section avatar>
-              <q-icon name="mdi-database" />
-            </q-item-section>
-            <q-item-section>Data</q-item-section>
-          </q-item>
-          <q-item clickable @click="$router.push('/flows')" v-ripple>
-            <q-item-section avatar>
-              <q-icon name="mdi-ray-start-arrow" />
-            </q-item-section>
-            <q-item-section>Flows</q-item-section>
-          </q-item>
-          <q-item clickable @click="$router.push('/accounts')" v-ripple>
-            <q-item-section avatar>
-              <q-icon name="mdi-account" />
-            </q-item-section>
-            <q-item-section>Accounts</q-item-section>
           </q-item>
 
-          <q-separator />
-
-          <q-item clickable @click="$router.push('/settings')" v-ripple>
+          <q-item v-ripple clickable @click="$router.push({name:'explore', query:{resources: 'resources/Flow'}})">
             <q-item-section avatar>
-              <q-icon name="settings" />
+              <q-icon color="grey-7" name="mdi-ray-start-arrow" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Flows</q-item-label>
+            </q-item-section>
+          </q-item>
+
+          <q-separator class="q-mt-md q-mb-xs" />
+
+          <q-item v-ripple clickable @click="$router.push({name:'explore', query:{resources: 'resources/Device'}})">
+            <q-item-section avatar>
+              <q-icon color="grey-7" name="devices" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Devices</q-item-label>
+            </q-item-section>
+          </q-item>
+
+          <q-item
+            v-ripple
+            clickable
+            dense
+            v-for="(cat, index) in __categories" :key="index"
+            class="text-grey-8 text-weight-light sub"
+            @click="$router.push({name:'explore', query:{resources: cat._type}})"
+          >
+            <q-item-section avatar>
+              <q-icon :name="cat.icon" color="grey-5"/>
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>{{ cat.title }}</q-item-label>
+            </q-item-section>
+          </q-item>
+
+          <q-separator class="q-mt-md q-mb-xs" />
+
+          <q-item-label header class="text-weight-bold text-uppercase">
+            Data
+          </q-item-label>
+
+          <q-item v-ripple clickable @click="$router.push({name:'explore', query:{resources: 'resources/Table'}})">
+            <q-item-section avatar>
+              <q-icon color="grey-7" name="mdi-table-large" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Tables</q-item-label>
+            </q-item-section>
+          </q-item>
+
+          <q-item v-ripple clickable @click="$router.push({name:'explore', query:{resources: 'resources/File'}})">
+            <q-item-section avatar>
+              <q-icon color="grey-7" name="mdi-file" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>Files</q-item-label>
+            </q-item-section>
+          </q-item>
+
+          <q-separator class="q-mt-md q-mb-xs" />
+
+          <q-item clickable @click="$router.push({name:'system', params: {panel: 'settings'}})" v-ripple>
+            <q-item-section avatar>
+              <q-icon color="grey-7" name="settings" />
             </q-item-section>
             <q-item-section>Settings</q-item-section>
           </q-item>
           <q-item v-if="!$ethingUI.autoLogin" clickable @click="logout" v-ripple>
             <q-item-section avatar>
-              <q-icon name="exit_to_app" />
+              <q-icon color="grey-7" name="exit_to_app" />
             </q-item-section>
             <q-item-section>Logout</q-item-section>
           </q-item>
@@ -145,7 +176,7 @@
           <q-spinner-pie color="primary" size="50px" />
         </div>
       </q-inner-loading>
-      <keep-alive v-else include="PageDashboard,PageDevices,PageData">
+      <keep-alive v-else include="PageDashboard">
         <router-view/>
       </keep-alive>
       <v-keyboard v-if="vKeyboardEnabled"/>
@@ -160,7 +191,8 @@ export default {
   data () {
     return {
       leftDrawerOpen: false, // this.$q.platform.is.desktop
-      persistentNotifications: this.$ethingUI.persistentNotifications
+      persistentNotifications: this.$ethingUI.persistentNotifications,
+      categories: ['interfaces/Sensor', 'interfaces/Switch', 'interfaces/Camera']
     }
   },
   computed: {
@@ -172,6 +204,11 @@ export default {
     },
     vKeyboardEnabled () {
       return this.$ethingUI.virtualKeyboardEnabled
+    },
+    __categories () {
+      return this.categories.map(t => {
+        return this.$ethingUI.get(t)
+      })
     }
   },
   methods: {
@@ -198,5 +235,9 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
+.sub {
+    border-radius: 0 10px 10px 0;
+    margin-right: 12px;
+}
 </style>

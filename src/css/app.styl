@@ -51,62 +51,20 @@ body
   background-color: $grey-2
 
 
-.page
+@media (min-width: $breakpoint-xs)
+  .center-width-sm, .center-width-md, .center-width-lg
+    width: 90%
+    margin-left: auto
+    margin-right: auto
 
-  background-color: $grey-2
-  overflow: auto
-  margin: auto
+  .center-width-sm
+    max-width: 600px
 
-  .page-block
-    background-color white
-    margin-top $flex-gutter-md
+  .center-width-md
+    max-width: 1024px
 
-  .page-block:last-child
-    margin-bottom: $flex-gutter-md
-
-  .page-block-transparent
-    background-color inherit
-
-  .page-block-padding
-    padding: $space-base
-
-
-  & .page-block
-    margin-left: 0
-    margin-right: 0
-
-  @media (min-width: $breakpoint-xs)
-    & .page-block
-      width: 90%
-      margin-left: auto
-      margin-right: auto
-
-    &.page-width-sm
-      & .page-block
-        max-width: 600px
-
-    &.page-width-md
-      & .page-block
-        max-width: 1024px
-
-    &.page-width-lg
-      & .page-block
-        max-width: 1439px
-
-.page-fit
-  position: absolute;
-  width: 100% !important;
-  height: 100% !important;
-
-  &:not(.page-fit-no-padding)
-    @media (min-width: $breakpoint-xs)
-      padding: 8px 8px;
-
-  .page-block
-    background-color white
-    border-radius 3px
-    box-shadow 0 1px 5px rgba(0,0,0,0.2), 0 2px 2px rgba(0,0,0,0.14), 0 3px 1px -2px rgba(0,0,0,0.12)
-
+  .center-width-lg
+    max-width: 1439px
 
 .q-markdown
 

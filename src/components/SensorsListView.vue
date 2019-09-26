@@ -24,6 +24,8 @@ import Widget from './Widget'
 export default {
     name: 'SensorsListView',
 
+    inheritAttrs: false,
+
     components: {
       Widget
     },
@@ -40,6 +42,11 @@ export default {
           var prop = props[propName]
           if (prop.sensor) {
             var title = prop.title || propName
+            var gAttr = {}
+
+            if (this.$attrs.color) gAttr.color = this.$attrs.color
+            if (this.$attrs.bgColor) gAttr.bgColor = this.$attrs.bgColor
+
             var wattr = {
               title,
               minHeight: 220,
@@ -64,8 +71,8 @@ export default {
 
             sensors.push({
               name: propName,
-              attrs: wattr,
-              chart
+              attrs: Object.assign(wattr, gAttr),
+              chart: Object.assign(chart, gAttr)
             })
           }
         }

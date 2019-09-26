@@ -1,22 +1,20 @@
 <template>
-  <q-page>
-    <div class="page-fit scroll">
-      <div class="page-block">
-        <q-btn-group flat >
-          <q-btn :loading="saveLoading" label="save" icon="mdi-content-save-outline" @click="save"/>
-          <q-btn-dropdown :label="langage">
-            <q-list>
-              <q-item v-for="(value, key, index) in langages" :key="key" v-close-popup clickable @click="setLangage(key)">
-                <q-item-section>{{ key }}</q-item-section>
-              </q-item>
-            </q-list>
-          </q-btn-dropdown>
-        </q-btn-group>
-        <span class="title text-faded" :class="{dirty: dirty}">{{ resource.name() }}</span>
-
-        <codemirror ref='cm' v-model="content" :options="cmOption" @changes="onChange"></codemirror>
-      </div>
+  <q-page :style-fn="styleFn" class="column">
+    <div class="col-auto">
+      <q-btn-group flat>
+        <q-btn :loading="saveLoading" label="save" icon="mdi-content-save-outline" @click="save"/>
+        <q-btn-dropdown :label="langage">
+          <q-list>
+            <q-item v-for="(value, key, index) in langages" :key="key" v-close-popup clickable @click="setLangage(key)">
+              <q-item-section>{{ key }}</q-item-section>
+            </q-item>
+          </q-list>
+        </q-btn-dropdown>
+      </q-btn-group>
+      <span class="title text-faded" :class="{dirty: dirty}">{{ resource.name() }}</span>
     </div>
+
+    <codemirror class="col" ref='cm' v-model="content" :options="cmOption" @changes="onChange"></codemirror>
 
   </q-page>
 </template>
@@ -198,6 +196,10 @@ export default {
 
     onChange (cm, changes) {
       this.dirty = !cm.isClean()
+    },
+
+    styleFn (offset) {
+      return { height: offset ? `calc(100vh - ${offset}px)` : '100vh' }
     }
   },
 

@@ -8,7 +8,7 @@
       </q-inner-loading>
     </div>
 
-    <div v-else-if="currentDashboard" class="page-fit page-fit-no-padding scroll column">
+    <div v-else-if="currentDashboard" class="absolute fit scroll column">
 
       <q-resize-observer @resize="onPageResize" />
 

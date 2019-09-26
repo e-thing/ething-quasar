@@ -1,9 +1,7 @@
 <template>
-  <q-page class="">
+  <q-page class="center-width-md q-gutter-y-md q-py-md q-px-sm">
 
-    <div class="bg-white" :class="$q.screen.lt.md ? 'q-py-sm' : 'q-py-lg q-px-md'" style="border-bottom: 5px solid #eee">
-
-      <q-list dense>
+      <q-list dense style="margin-left: -16px;margin-right: -16px;">
         <q-item>
           <q-item-section avatar top>
             <q-avatar :icon="meta.icon" text-color="white" :color="meta.color" />
@@ -38,121 +36,99 @@
             </div>
           </q-item-section>
         </q-item>
-        <q-item :inset-level="1">
-          <q-item-section>
-            <div>
-              <q-chip dense square icon="access_time" outline color="secondary" v-if="resource.hasAttr('lastSeenDate')">
-                {{ $ethingUI.utils.dateToString(resource.lastSeenDate(), 'never') }}
-              </q-chip>
-              <dynamic-component
-                :component="badge"
-                v-for="(badge, index) in badges" :key="index"
-              />
-            </div>
-          </q-item-section>
-        </q-item>
       </q-list>
     </div>
 
-    <div class="page page-width-md">
+    <div>
+      <q-chip dense square icon="access_time" outline color="secondary" v-if="resource.attr('lastSeenDate')" class="q-ml-none">
+        {{ $ethingUI.utils.dateToString(resource.lastSeenDate(), 'never') }}
+      </q-chip>
+      <dynamic-component
+        :component="badge"
+        v-for="(badge, index) in badges" :key="index"
+        class="q-ml-none"
+      />
+    </div>
 
-      <!-- error -->
-      <div class="page-block" v-if="resource.attr('error')">
-        <q-banner class="bg-negative text-white"><q-icon left name="mdi-alert"/> {{ resource.attr('error') }}</q-banner>
+    <!-- error -->
+    <div v-if="resource.attr('error')">
+      <q-banner class="bg-negative text-white"><q-icon left name="mdi-alert"/> {{ resource.attr('error') }}</q-banner>
+    </div>
+
+    <!-- disconnected -->
+    <div v-if="resource.hasAttr('connected') && !resource.attr('connected')">
+      <q-banner class="bg-warning text-white"><q-icon left name="mdi-lan-disconnect"/> This device is disconnected !</q-banner>
+    </div>
+
+    <!-- description -->
+    <div class="text-faded" v-if="resource.description()">
+      {{ resource.description() }}
+    </div>
+
+    <!-- components -->
+    <div v-for="(item, index) in componentsItems" :key="index" v-if="componentsItems.length>0">
+      <div class="text-h6 text-grey-8 q-py-md" v-if="item.title">
+        <q-icon :name="item.icon || 'mdi-brightness-1'" left/>
+        <span>{{ item.title }}</span>
       </div>
-
-      <!-- disconnected -->
-      <div class="page-block" v-if="resource.hasAttr('connected') && !resource.attr('connected')">
-        <q-banner class="bg-warning text-white"><q-icon left name="mdi-lan-disconnect"/> This device is disconnected !</q-banner>
+      <div class="bg-white">
+        <dynamic-component :component="item" color="secondary"/>
       </div>
+    </div>
 
-      <!-- description -->
-      <div class="page-block q-pa-md text-faded" v-if="resource.description()">
-        {{ resource.description() }}
+    <!-- activity -->
+    <div>
+      <div class="text-h6 text-grey-8 q-py-md">
+        <q-icon name="mdi-bell" left/>
+        <span>Activity</span>
       </div>
-
-      <!-- components -->
-      <div class="page-block" v-for="(item, index) in componentsItems" :key="index" v-if="componentsItems.length>0">
-        <div class="bloc-title" v-if="item.title">
-          <q-icon :name="item.icon || 'mdi-brightness-1'"/>
-          <span>{{ item.title }}</span>
-        </div>
-        <div class="bloc-content bloc-content-no-padding">
-          <dynamic-component :component="item"/>
-        </div>
+      <div class="bg-white" style="max-height: 400px;overflow: auto;">
+        <resource-activity :source="activitySource" />
       </div>
+    </div>
 
-      <!-- activity -->
-      <div class="page-block">
-        <div class="bloc-title">
-          <q-icon name="mdi-bell"/>
-          <span>Activity</span>
-        </div>
-        <div class="bloc-content" style="max-height: 400px;overflow: auto;">
-          <resource-activity :source="activitySource" />
-        </div>
+    <!-- attributes -->
+    <div class="attributes">
+      <div class="text-h6 text-grey-8 q-py-md">
+        <q-icon name="mdi-format-list-bulleted" left/>
+        <span>Attributes</span>
+        <q-btn class="float-right" flat rounded size="small" :label="showDetailledAttributes ? 'less' : 'more'" :icon="showDetailledAttributes ? 'expand_less' : 'expand_more'" style="line-height: initial" @click="showDetailledAttributes = !showDetailledAttributes"/>
       </div>
-
-      <!-- attributes -->
-      <div class="page-block attributes">
-        <div class="bloc-title">
-          <q-icon name="mdi-format-list-bulleted" />
-          <span>Attributes</span>
-          <q-btn class="float-right" flat rounded size="small" :label="showDetailledAttributes ? 'less' : 'more'" :icon="showDetailledAttributes ? 'expand_less' : 'expand_more'" style="line-height: initial" @click="showDetailledAttributes = !showDetailledAttributes"/>
+      <div class="bg-white q-pa-md">
+        <div class="row" v-if="attributes.length>0">
+          <template v-for="attr in attributes">
+            <div class="col-xs-12 col-sm-2 key text-secondary ellipsis">{{ attr.name }}</div>
+            <div class="col-xs-12 col-sm-10 value text-faded ellipsis">{{ attr.value }}</div>
+          </template>
         </div>
-        <div class="bloc-content">
-          <div class="row" v-if="attributes.length>0">
-            <template v-for="attr in attributes">
-              <div class="col-xs-12 col-sm-2 key text-secondary ellipsis">{{ attr.name }}</div>
-              <div class="col-xs-12 col-sm-10 value text-faded ellipsis">{{ attr.value }}</div>
-            </template>
-          </div>
-          <div v-else class="text-center text-faded">
-            <small>no attributes</small>
-          </div>
-        </div>
-      </div>
-
-      <!-- data -->
-      <div class="page-block" v-if="data">
-        <div class="bloc-title">
-          <q-icon name="mdi-format-list-bulleted" />
-          <span>Data</span>
-        </div>
-        <div class="bloc-content">
-          <div class="row">
-            <template v-for="(value, key) in data">
-              <div class="col-xs-12 col-sm-2 key text-secondary">{{ key }}</div>
-              <div class="col-xs-12 col-sm-10 value">{{ value }}</div>
-            </template>
-          </div>
+        <div v-else class="text-center text-faded">
+          <small>no attributes</small>
         </div>
       </div>
+    </div>
 
-      <!-- resource -->
-      <div class="page-block" v-if="children.length">
-        <div class="bloc-title">
-          <q-icon name="mdi-database" />
-          <span>Resources</span>
-        </div>
-        <div class="bloc-content bloc-content-no-padding">
-          <q-list>
-            <resource-q-item v-for="child in children" :key="child.id()" :resource="child" />
-          </q-list>
-        </div>
+    <!-- resource -->
+    <div v-if="children.length">
+      <div class="text-h6 text-grey-8 q-py-md">
+        <q-icon name="mdi-database" left/>
+        <span>Resources</span>
       </div>
-
-      <!-- api -->
-      <div class="page-block" v-if="Object.keys(staticMeta.methods).length">
-        <div class="bloc-title">
-          <q-icon name="mdi-console" />
-          <span>Commands</span>
-        </div>
-        <div class="bloc-content bloc-content-no-padding">
-          <device-api :device="resource" />
-        </div>
+      <div class="bg-white">
+        <q-list>
+          <resource-q-item v-for="child in children" :key="child.id()" :resource="child" />
+        </q-list>
       </div>
+    </div>
 
+    <!-- api -->
+    <div v-if="Object.keys(staticMeta.methods).length">
+      <div class="text-h6 text-grey-8 q-py-md">
+        <q-icon name="mdi-console" left/>
+        <span>Commands</span>
+      </div>
+      <div class="bg-white">
+        <device-api :device="resource" />
+      </div>
     </div>
 
   </q-page>
@@ -160,20 +136,8 @@
 
 <script>
 
-import DeviceApi from '../components/DeviceApi'
-import ResourceQItem from '../components/ResourceQItem'
-import Widget from '../components/Widget'
-import ResourceActivity from '../components/ResourceActivity'
-
 export default {
   name: 'PageResourceMain',
-
-  components: {
-    DeviceApi,
-    ResourceQItem,
-    Widget,
-    ResourceActivity,
-  },
 
   data () {
 
@@ -289,8 +253,8 @@ export default {
     attributes () {
       var props = this.meta.properties
       var attributes = []
-      var skippedFields = ['name', 'data', 'description']
-      var detailledFields = ['id', 'modifiedDate', 'createdBy', 'type', 'extends', 'public', 'createdDate', 'methods', 'battery', 'location', 'interfaces', 'connected', 'lastSeenDate', 'error']
+      var skippedFields = ['name', 'description']
+      var detailledFields = ['id', 'modifiedDate', 'createdBy', 'type', 'extends', 'data', 'createdDate', 'methods', 'battery', 'location', 'interfaces', 'connected', 'lastSeenDate', 'error']
       for(let name in props) {
         if (skippedFields.indexOf(name) !== -1) continue
 
@@ -355,20 +319,6 @@ export default {
   &:hover
     color $primary
 
-.bloc-title
-  background-color $primary
-  color white
-  border-bottom 5px solid #eee
-  padding ($space-base / 4) $space-base
-  line-height: 2rem
-  span
-    vertical-align middle
-    margin-left $space-base
 
-  /*color $faded
-  border-bottom 1px solid $secondary*/
-.bloc-content
-  &:not(.bloc-content-no-padding)
-    padding $space-base
 
 </style>

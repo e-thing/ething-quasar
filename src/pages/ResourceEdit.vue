@@ -1,7 +1,7 @@
 <template>
-  <q-page class="page page-width-md">
+  <q-page class="center-width-md q-gutter-y-md q-py-md q-px-sm">
 
-    <q-card class="page-block" flat>
+    <q-card class="bg-white" flat>
 
       <q-card-section v-if="create" class="row items-center">
         <div class="col-auto q-mr-md" v-if="meta.icon">
@@ -45,14 +45,8 @@
 
 <script>
 
-import ResourceEditor from '../components/ResourceEditor'
-
 export default {
   name: 'PageResourceEdit',
-
-  components: {
-    ResourceEditor
-  },
 
   data () {
     return {
@@ -112,19 +106,3 @@ export default {
 
 }
 </script>
-
-<style lang="stylus" scoped>
-
-.page-block > .q-card__section {
-  padding-top: $spaces.lg.y;
-  padding-bottom: $spaces.lg.y;
-}
-
-@media (min-width: $sizes.sm) {
-  .page-block > .q-card__section {
-    padding-left: $spaces.lg.x;
-    padding-right: $spaces.lg.x;
-  }
-}
-
-</style>

@@ -1,6 +1,6 @@
 <template>
   <q-page class="page">
-    <q-tabs v-model="tab" class="bg-secondary text-white">
+    <q-tabs v-model="tab" class="text-secondary">
       <q-tab label="settings" name="settings" icon="settings" />
       <q-tab label="api key" name="apikey" icon="mdi-key" />
       <q-tab label="plugins" name="plugins" icon="mdi-puzzle" />
@@ -8,9 +8,7 @@
       <q-tab label="about" name="about" icon="info" />
     </q-tabs>
 
-    <q-separator />
-
-    <q-tab-panels v-model="tab">
+    <q-tab-panels v-model="tab" class="bg-transparent">
       <!-- Targets -->
       <q-tab-panel name="settings" class="pane">
         <settings-view />
@@ -40,7 +38,7 @@ import ClientsView from '../components/ClientsView'
 import AboutView from '../components/AboutView'
 
 export default {
-  name: 'PageSettings',
+  name: 'PageSystem',
 
   components: {
     SettingsView,
@@ -50,9 +48,22 @@ export default {
     AboutView
   },
 
-  data () {
-    return {
-      tab: 'settings'
+  props: {
+    panel: {
+      type: String,
+      default: 'settings'
+    }
+
+  },
+
+  computed: {
+    tab: {
+      get: function () {
+        return this.panel
+      },
+      set: function (val) {
+        this.$router.push({name:this.$router.currentRoute.name, params: {panel: val}})
+      }
     }
   }
 

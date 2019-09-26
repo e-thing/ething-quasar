@@ -1,8 +1,8 @@
 <template>
 
-  <div class="page page-width-sm">
+  <div class="center-width-sm q-gutter-y-md q-py-md q-px-sm">
 
-    <div class="page-block page-block-padding">
+    <div class="bg-white q-pa-md">
       <div class="text-h6 q-mb-md">Installed</div>
 
       <div v-if="installedPlugins.length > 0">
@@ -33,7 +33,7 @@
       </div>
     </div>
 
-    <div v-if="localPlugins.length > 0" class="page-block page-block-padding">
+    <div v-if="localPlugins.length > 0" class="bg-white q-pa-md">
       <div class="text-h6 q-mb-md">Local</div>
 
       <q-card class="q-my-sm bg-secondary text-white" v-for="plugin in localPlugins" :key="plugin.name">
@@ -62,7 +62,7 @@
       </q-card>
     </div>
 
-    <div v-if="builtinPlugins.length > 0" class="page-block page-block-padding">
+    <div v-if="builtinPlugins.length > 0" class="bg-white q-pa-md">
       <div class="text-h6 q-mb-md">Builtin</div>
 
       <q-card class="q-my-sm bg-secondary text-white" v-for="plugin in builtinPlugins" :key="plugin.name">

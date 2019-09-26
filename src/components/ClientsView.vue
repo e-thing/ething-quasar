@@ -1,10 +1,10 @@
 <template>
-  <div class="page page-width-sm">
-    <div v-if="loading===false">
+  <div class="center-width-sm q-gutter-y-md q-py-md q-px-sm">
+    <template v-if="loading===false">
 
-      <div v-if="clients.length > 0">
+      <template v-if="clients.length > 0">
 
-        <q-card flat v-for="client in clients" :key="client.id" class="page-block">
+        <q-card flat v-for="client in clients" :key="client.id" class="bg-white">
 
           <q-card-section>
             <div class="row items-center no-wrap">
@@ -34,9 +34,9 @@
           </q-card-actions>
         </q-card>
 
-      </div>
+      </template>
       <div v-else class="absolute-center text-faded">No API keys</div>
-    </div>
+    </template>
     <div v-else>loading ...</div>
 
   </div>

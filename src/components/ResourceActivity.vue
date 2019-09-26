@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="q-px-md">
     <q-timeline layout="dense" v-if="items.length > 0">
       <q-timeline-entry
           v-for="(item, index) in items"
@@ -19,7 +19,7 @@
         </div>
       </q-timeline-entry>
     </q-timeline>
-    <div v-else class="text-center text-faded">No activity. Please wait...</div>
+    <div v-else class="q-pa-md text-center text-faded">No activity. Please wait...</div>
   </div>
 </template>
 

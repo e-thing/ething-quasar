@@ -23,7 +23,7 @@ export default {
 
   errorHandler: function (err, vm, info) {
     console.error('widget error:', err, vm, info);
-    this.setError(err)
+    //this.setError(err)
   }
 }
 </script>
