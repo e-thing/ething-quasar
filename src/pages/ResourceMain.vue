@@ -205,7 +205,15 @@ export default {
           }
         }
       })
-    }
+    },
+    openSettings () {
+      this.$router.push({
+        name: 'resourceEdit',
+        params: {
+          id: this.resource.id()
+        }
+      })
+    },
   },
 
   computed: {
@@ -286,19 +294,7 @@ export default {
 
       return createdBys.reverse()
     },
-
-    openSettings () {
-      this.$router.push({
-        name: 'resourceEdit',
-        params: {
-          id: this.resource.id()
-        }
-      })
-    },
-
   },
-
-
 
 }
 </script>

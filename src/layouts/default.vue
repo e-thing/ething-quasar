@@ -56,7 +56,7 @@
             </q-scroll-area>
           </q-menu>
         </q-btn>
-        <q-btn class="gt-xs" flat stretch icon="settings" aria-label="Settings" @click="$router.push({name: 'system'})"/>
+        <q-btn class="gt-xs" flat stretch icon="settings" aria-label="Settings" @click="$router.push({name: 'system', params: {panel: 'settings'}})"/>
         <q-btn v-if="!$ethingUI.autoLogin" class="gt-xs" flat stretch icon="exit_to_app" aria-label="Logout" @click="logout" />
 
       </q-toolbar>

@@ -25,10 +25,6 @@
 
 <script>
 
-var blackList = [
-  'ResourceUpdated'
-]
-
 export default {
   name: 'ResourceActivity',
 

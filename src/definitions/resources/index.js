@@ -4,7 +4,6 @@ import Table from './Table'
 import Device from './Device'
 import Flow from './Flow'
 import Group from './Group'
-import Account from './Account'
 
 export default {
   Resource,
@@ -13,5 +12,4 @@ export default {
   Device,
   Flow,
   Group,
-  Account,
 }

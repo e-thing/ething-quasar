@@ -74,10 +74,9 @@ export default {
 
         // load local plugin (for dev purpose)
         if (process.env.DEV) {
-          //pluginPromises.push(import('../../../ething/ething/plugins/google/js/src/index.js'))
           //pluginPromises.push(import('../../../ething/ething/plugins/OpenWeatherMap/js/src/index.js'))
-          pluginPromises.push(import('../../../ething/ething/plugins/spotify/js/src/index.js'))
-          //pluginPromises.push(import('../../../ething/ething/plugins/google/js/src/index.js'))
+          //pluginPromises.push(import('../../../ething/ething/plugins/spotify/js/src/index.js'))
+          // pluginPromises.push(import('../../../ething/ething/plugins/google/js/src/index.js'))
         }
 
         return Promise.all(pluginPromises)

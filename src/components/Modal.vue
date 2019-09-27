@@ -10,7 +10,7 @@
     @dismiss="$emit('cancel')"
     :maximized="__size==100"
   >
-    <div class="column bg-white" :style="dimCss">
+    <div class="column bg-white no-wrap" :style="__dimCss">
 
       <div class="col-auto bg-primary text-white q-py-sm q-px-md title">
         <div class="row items-center">
@@ -21,7 +21,7 @@
         </div>
       </div>
 
-      <div class="col scroll relative-position">
+      <div class="col scroll relative-position" :style="__contentDimCss">
 
         <div :class="__contentClass">
           <slot></slot>
@@ -178,7 +178,6 @@ export default {
       __contentClass () {
         var cls = []
         if (!this.noContentPadding) cls.push('q-pa-md')
-        if (!this.scroll) cls.push('absolute fit')
         return cls.join(' ')
       },
 
@@ -192,13 +191,19 @@ export default {
         return 100
       },
 
-      dimCss () {
+      __dimCss () {
         if (this.__size!=100) {
           return {
-            height: this.__size+'%',
-            maxHeight: this.__size+'vh',
             width: this.__size+'%',
             maxWidth: this.__size+'vw'
+          }
+        }
+      },
+
+      __contentDimCss () {
+        if (this.__size!=100) {
+          return {
+            maxHeight: '80vh',
           }
         }
       },
