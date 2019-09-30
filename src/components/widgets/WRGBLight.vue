@@ -1,43 +1,58 @@
 <template>
-  <div class="absolute-center" style="min-width: 100%;">
-    <q-btn icon="mdi-lightbulb" flat size="xl" class="full-width" :style="{color: displayHex}" @click="p_toggle"/>
-
-    <div class="row items-center">
-      <q-icon name="mdi-brightness-5" class="col-auto q-mx-sm"/>
-      <q-slider class="col" :min="0" :max="100" :disable="writing" :value="brightness || 0" @change="p_setBrightness"/>
-      <q-icon name="mdi-brightness-7" class="col-auto q-mx-sm"/>
-    </div>
-
-    <div class="row items-center">
-      <q-icon name="mdi-brightness-5" class="col-auto q-mx-sm" style="visibility: hidden"/>
-      <q-slider :min="0" :max="360" :disable="writing" class="col hue-slider" :value="hue" @change="p_setColorHue"/>
-      <q-icon name="mdi-brightness-7" class="col-auto q-mx-sm" style="visibility: hidden"/>
-    </div>
-
-  </div>
+  <knob
+    :value="brightness"
+    :set="__setBrightness"
+    :color="color"
+    :bg-color="bgColor"
+  >
+    <template>
+      <div class="top" @click.stop="__toggle" :style="__topStyle">
+        <div class="absolute-center">{{ __stateTxt }}</div>
+      </div>
+      <div class="bottom" @click.stop="colorModel=true" :style="__bottomStyle">
+        <q-icon class="absolute-center" name="mdi-palette" />
+        <q-dialog transition-show="scale" transition-hide="scale" v-model="colorModel">
+          <q-color
+            :value="displayHex"
+            @input="__setColor"
+            no-header
+            default-view="palette"
+            :palette="palette"
+            style="width: 50%;"
+          />
+        </q-dialog>
+      </div>
+    </template>
+  </knob>
 </template>
-
 
 <script>
 import Base from './Base'
+import Knob from './generic/Knob'
 import { colors } from 'quasar'
 
 const { hexToRgb, rgbToHsv, hsvToRgb, rgbToHex } = colors
+
+var palette = []
+
+for (var s=100; s>0; s-=10) {
+  for (var h=0; h<360; h+=36) {
+    palette.push(rgbToHex(hsvToRgb({h, s, v: 100})))
+  }
+}
 
 export default {
     name: 'WRGBLight',
 
     mixins: [Base],
 
-    props: {
-      setBrightness: Function,
-      setColor: Function,
-      setState: {}
-    },
+    components: {Knob},
 
     data () {
       return {
-        writing: false
+        writing: false,
+        colorModel: false,
+        palette
       }
     },
 
@@ -56,56 +71,100 @@ export default {
       },
       state () {
         return this.resource.attr('state')
+      },
+      __stateTxt () {
+        return this.state ? 'On' : 'Off'
+      },
+
+      __topStyle () {
+        return {
+          backgroundColor: this.state ? this.color : '#bdbdbd',
+          color: this.state ? this.bgColor : 'white'
+        }
+      },
+
+      __notWhiteTextColor () {
+        if (this.__isWhite(this.color)) return this.bgColor
+        return this.color
+      },
+
+      __bottomStyle () {
+        return {
+          backgroundColor: this.displayHex,
+          color: this.__isWhite(this.displayHex) ? this.__notWhiteTextColor : 'white',
+          borderColor: this.state ? this.color : '#bdbdbd',
+        }
       }
     },
 
     methods: {
+      __isWhite (hex) {
+        return /^#ffffff/i.test(hex) || hex === 'white'
+      },
 
-      p_setBrightness (brightness) {
+      __setBrightness (brightness) {
         this.writing = true
-        Promise.resolve(this.setBrightness(this.resource, brightness)).catch(err => {
+        Promise.resolve(this.resource.execute('setLevel', brightness)).catch(err => {
           this.setError(err)
         }).finally(() => {
           this.writing = false
         })
       },
 
-      p_setColorHue (hue) {
-        var saturation = 100
+      __setColor (hex) {
+        var hsv = rgbToHsv(hexToRgb(hex))
         this.writing = true
-        Promise.resolve(this.setColor(this.resource, hue, saturation)).catch(err => {
+        Promise.resolve(this.resource.execute('setColor', {hue: hsv.h, saturation: hsv.s})).catch(err => {
+          this.setError(err)
+        }).finally(() => {
+          this.writing = false
+          this.colorModel = false
+        })
+      },
+
+      __toggle () {
+        this.writing = true
+        Promise.resolve(this.resource.execute('setState', !this.state)).catch(err => {
           this.setError(err)
         }).finally(() => {
           this.writing = false
         })
       },
-
-      p_toggle () {
-        if (this.setState) {
-          Promise.resolve(this.setState(this.resource, !this.state)).catch(err => {
-            this.setError(err)
-          }).finally(() => {
-            this.writing = false
-          })
-        } else {
-          this.p_setBrightness(this.state ? 0 : this.brightness || 100)
-        }
-      }
     }
 
 
 }
 </script>
 
-<style>
-.hue-slider .q-slider__track-container {
-    /*border-radius: 2px;*/
-    background: -webkit-gradient(linear,left top,right top,from(red),color-stop(17%,#ff0),color-stop(33%,#0f0),color-stop(50%,#0ff),color-stop(67%,#00f),color-stop(83%,#f0f),to(red));
-    background: linear-gradient(90deg,red 0,#ff0 17%,#0f0 33%,#0ff 50%,#00f 67%,#f0f 83%,red);
-    opacity: 1;
-    /*height: 8px*/
+<style scoped>
+
+.top {
+    width: 100%;
+    height: 50%;
+    position: relative;
+
+    border-top-left-radius: 100px;
+    border-top-right-radius: 100px;
+
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
 }
-.hue-slider .q-slider__track {
-    opacity: 0
+
+.bottom {
+    width: 100%;
+    height: 50%;
+    position: relative;
+
+    border-bottom-left-radius: 100px;
+    border-bottom-right-radius: 100px;
+
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+
+    border: 5px solid gray;
+    border-top: 0;
 }
+
 </style>

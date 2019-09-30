@@ -18,21 +18,23 @@
         @change="__change"
         :disable="writing"
       >
-        <slot>
-          <div v-if="!__centerButton" class="text-center" :style="{fontSize}">
-            <q-icon v-if="icon" :name="icon" class="light" style="vertical-align: text-bottom;"/>
-            <div class="big">{{ value }}</div>
-            <div class="light" v-if="unit">{{unit}}</div>
-          </div>
-          <q-avatar v-else
-            :style="__buttonStyle"
-            @click.stop="__toggle"
-            font-size="30%"
-            :size="buttonSize"
-          >
-            {{ __state ? buttonLabelOn : buttonLabelOff }}
-          </q-avatar>
-        </slot>
+        <div class="toto relative-position" :style="{width: innerSize+'px', height: innerSize+'px', fontSize}">
+          <slot>
+            <div v-if="!__centerButton" class="text-center">
+              <q-icon v-if="icon" :name="icon" class="light" style="vertical-align: text-bottom;"/>
+              <div class="big">{{ value }}</div>
+              <div class="light" v-if="unit">{{unit}}</div>
+            </div>
+            <q-avatar v-else
+              :style="__buttonStyle"
+              @click.stop="__toggle"
+              font-size="30%"
+              :size="buttonSize"
+            >
+              {{ __state ? buttonLabelOn : buttonLabelOff }}
+            </q-avatar>
+          </slot>
+        </div>
       </q-knob>
     </div>
   </div>
@@ -85,7 +87,8 @@ export default {
         knobSize: '64px',
         fontSize: '16px',
         buttonSize: '56px',
-        writing: false
+        writing: false,
+        innerSize: 0
       }
     },
 
@@ -111,7 +114,7 @@ export default {
 
       __state () {
         return !!this.buttonValue;
-      }
+      },
     },
 
     watch: {
@@ -131,6 +134,7 @@ export default {
         var knobSize = Math.min(size.width, size.height)
         this.knobSize = knobSize + 'px'
         var innerSize = knobSize * (1-this.thickness)
+        this.innerSize = Math.floor(innerSize) - 8
         this.buttonSize = (innerSize-8) + 'px'
         var lineHeight = 1.2 // ratio between text and innerSize
         var g = 1.5 // big = 200%

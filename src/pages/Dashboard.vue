@@ -8,7 +8,7 @@
       </q-inner-loading>
     </div>
 
-    <div v-else-if="currentDashboard" class="absolute fit scroll column">
+    <div v-else-if="currentDashboard" class="absolute fit column">
 
       <q-resize-observer @resize="onPageResize" />
 
@@ -27,70 +27,68 @@
         <q-btn class="col-auto" flat :icon="iDashboard >= dashboards.length - 1 ? 'mdi-plus' : 'mdi-chevron-right'" @click="nextOrAddDashboard()"/>
       </q-btn-group>
 
-      <keep-alive>
-        <div v-if="currentDashboard.items.length==0" class="absolute-center text-center">
-          <p>
-            <img
-              src="~assets/sad.svg"
-              style="width:30vw;max-width:150px;"
-            >
-          </p>
-          <p class="text-faded">No widgets</p>
-          <q-btn icon="mdi-pin" label="pin widget" color="secondary" @click="pinResourceModal = true"/>
-        </div>
+      <div class="col scroll relative-position">
 
-        <grid-layout v-else
-          ref="grid"
-          class="col scroll"
-          :layout.sync="currentDashboard.items"
-          :col-num="__columns"
-          :row-height="grid.rowHeight"
-          :is-draggable="draggable"
-          :is-resizable="resizable"
-          :vertical-compact="false"
-          prevent-collision
-          :margin="[grid.margin, grid.margin]"
-          :use-css-transforms="true"
-          :key="iDashboard"
-          @click.native.self="bgClick"
-          v-touch-hold="handleHold"
-          @layout-updated="layoutUpdatedEvent"
-        >
-            <grid-item v-for="(layoutItem) in currentDashboard.items" :key="layoutItem.i"
-               :x="layoutItem.x"
-               :y="layoutItem.y"
-               :w="layoutItem.w"
-               :h="layoutItem.h"
-               :i="layoutItem.i"
-               :minW="layoutItem.minW || 1"
-               :minH="layoutItem.minH || 1"
-               class="gditem"
-               drag-ignore-from="button"
-               drag-allow-from=".dragger"
-            >
-                <div v-show="editing" class="absolute fit widget-edit-layer">
-                  <q-btn-group flat class="absolute-center" >
-                    <!--<div class="dragger" style="padding: 4px 16px; font-size: 1.718em;">
-                      <q-icon name="mdi-cursor-move" color="faded"/>
-                    </div>-->
-                    <q-btn class="dragger" flat icon="mdi-cursor-move" color="faded" type="a"/>
-                    <q-btn v-if="isEditable(layoutItem)" flat icon="settings" color="faded" @click="editItem(layoutItem)"/>
-                    <q-btn flat icon="delete" color="negative" @click="removeItem(layoutItem)"/>
-                  </q-btn-group>
-                </div>
-                <widget :key="layoutItem.key" class="absolute fit"
-                  :resource="layoutItem.resource"
-                  :widget="layoutItem.widget"
-                  v-bind="computeOptions(layoutItem)"
-                >
-                  <template v-slot:error-after>
-                    <q-btn label="remove" size="sm" flat icon="delete" @click="removeItem(layoutItem)"/>
-                  </template>
-                </widget>
-            </grid-item>
-        </grid-layout>
-      </keep-alive>
+        <keep-alive>
+          <div v-if="currentDashboard.items.length==0" class="absolute-center text-center">
+            <p>
+              <img
+                src="~assets/sad.svg"
+                style="width:30vw;max-width:150px;"
+              >
+            </p>
+            <p class="text-faded">No widgets</p>
+            <q-btn icon="mdi-pin" label="pin widget" color="secondary" @click="pinResourceModal = true"/>
+          </div>
 
+          <grid-layout v-else
+            ref="grid"
+            :layout.sync="currentDashboard.items"
+            :col-num="__columns"
+            :row-height="grid.rowHeight"
+            :is-draggable="draggable"
+            :is-resizable="resizable"
+            :vertical-compact="false"
+            prevent-collision
+            :margin="[grid.margin, grid.margin]"
+            :use-css-transforms="true"
+            :key="iDashboard"
+            @click.native.self="bgClick"
+            v-touch-hold="handleHold"
+            @layout-updated="layoutUpdatedEvent"
+          >
+              <grid-item v-for="(layoutItem) in currentDashboard.items" :key="layoutItem.i"
+                 :x="layoutItem.x"
+                 :y="layoutItem.y"
+                 :w="layoutItem.w"
+                 :h="layoutItem.h"
+                 :i="layoutItem.i"
+                 :minW="layoutItem.minW || 1"
+                 :minH="layoutItem.minH || 1"
+                 class="gditem"
+                 drag-ignore-from="button"
+                 drag-allow-from=".dragger"
+              >
+                  <div v-show="editing" class="absolute fit widget-edit-layer">
+                    <q-btn-group flat class="absolute-center" >
+                      <q-btn class="dragger" flat icon="mdi-cursor-move" color="faded" type="a"/>
+                      <q-btn v-if="isEditable(layoutItem)" flat icon="settings" color="faded" @click="editItem(layoutItem)"/>
+                      <q-btn flat icon="delete" color="negative" @click="removeItem(layoutItem)"/>
+                    </q-btn-group>
+                  </div>
+                  <widget :key="layoutItem.key" class="absolute fit"
+                    :resource="layoutItem.resource"
+                    :widget="layoutItem.widget"
+                    v-bind="computeOptions(layoutItem)"
+                  >
+                    <template v-slot:error-after>
+                      <q-btn label="remove" size="sm" flat icon="delete" @click="removeItem(layoutItem)"/>
+                    </template>
+                  </widget>
+              </grid-item>
+          </grid-layout>
+        </keep-alive>
+      </div>
     </div>
 
     <widget-chooser v-model="pinResourceModal" :pinned="pinnedResources" @done="pin"/>
