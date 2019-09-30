@@ -66,6 +66,22 @@
               />
             </q-card-section>
           </q-card>
+
+          <q-card flat bordered class="my-card">
+            <q-card-section>
+              <div class="text-h6">MRO</div>
+            </q-card-section>
+
+            <q-separator inset />
+
+            <q-card-section>
+              <div
+                v-for="item in meta._dep" :key="item"
+              >
+                {{ item }}
+              </div>
+            </q-card-section>
+          </q-card>
         </div>
 
         <div class="col-xs-12 col-lg-5 q-gutter-y-md">

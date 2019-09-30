@@ -206,9 +206,12 @@ export default {
       return this.$ethingUI.virtualKeyboardEnabled
     },
     __categories () {
-      return this.categories.map(t => {
-        return this.$ethingUI.get(t)
-      })
+      if (this.$root.state==='ok') {
+        return this.categories.map(t => {
+          return this.$ethingUI.get(t)
+        })
+      }
+      return []
     }
   },
   methods: {

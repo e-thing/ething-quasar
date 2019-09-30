@@ -323,7 +323,11 @@ export default {
         return
       }*/
 
-      if (ts - this.bgClickTs < DBL_CLICK_DELAY) {
+      var diff = ts - this.bgClickTs
+
+      if (diff==0) return // bug
+
+      if (diff < DBL_CLICK_DELAY) {
         // double click
         clearTimeout(this.bgClickTimer)
         //console.log('BG DBL CLICK', evt)

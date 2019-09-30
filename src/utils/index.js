@@ -97,6 +97,8 @@ export function sizeToString (s) {
 }
 
 export function colorNameToHex (colorStr) {
+  colorStr = colorStr || ''
+  if (/^#/.test(colorStr)) return colorStr
   var qColor = colors.getBrand(colorStr)
   if (qColor) return qColor
   var a = document.createElement('div');

@@ -3,6 +3,14 @@ import WKnob from '../../components/widgets/generic/Knob'
 
 export default {
 
+  components (resource) {
+    return {
+      'relay.switch': {
+        disable: true
+      },
+    }
+  },
+
   widgets (resource) {
     return {
       'dimmable.dimmer': {

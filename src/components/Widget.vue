@@ -39,6 +39,15 @@ import { widgets } from '../core/widget'
 import { extend } from 'quasar'
 
 
+var emptyWidget = {
+  listeners () {
+    return {}
+  },
+  attributes (opt) {
+    return opt
+  }
+}
+
 export default {
     name: 'Widget',
 
@@ -95,7 +104,7 @@ export default {
               var errStr = 'widget "' + widgetId + '" not found for the resource ' + this.resource.name()
               console.error(errStr)
               this.setError(errStr)
-              widget = {}
+              widget = emptyWidget
             }
           } else {
             // widget Type
@@ -105,7 +114,7 @@ export default {
               var errStr = 'unknown widget type: ' + widgetType
               console.error(errStr)
               this.setError(errStr)
-              widget = {}
+              widget = emptyWidget
             }
           }
         }
@@ -162,14 +171,6 @@ export default {
 
       __footer () {
         return this.footer
-      },
-
-      __minWidth () {
-        return this.__widget.minWidth
-      },
-
-      __minHeight () {
-        return this.__widget.minHeight
       },
 
       __style () {
