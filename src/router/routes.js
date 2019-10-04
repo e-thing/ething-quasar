@@ -1,4 +1,5 @@
 import ResourceList from '../components/ResourceList'
+import EThingUI from '../core'
 
 const routes = [
   {
@@ -13,10 +14,45 @@ const routes = [
         path: 'explore',
         name: 'explore',
         component: ResourceList,
-        props: (route) => ({
-          resources: route.query.resources,
-          tree: true
-        })
+        props: (route) => {
+          var props = {
+            tree: true,
+          };
+          var resources = route.query.resources
+
+          if (typeof route.query.deviceMenu != 'undefined') {
+
+            props.defaultSort = 'location'
+
+            var deviceMenuItems = EThingUI.menu.devices
+
+            if (route.query.deviceMenu==='other') {
+              var filters = deviceMenuItems.map(item => EThingUI.resource.typeFilter(item.types))
+
+              resources = r => {
+                if (EThingUI.isSubclass(r, 'resources/Device')) {
+                  var pass = true
+                  for (var i in filters) {
+                    if (filters[i](r)) {
+                      pass = false
+                      break;
+                    }
+                  }
+                  return pass
+                }
+              }
+
+              props.createTypes = 'resources/Device'
+
+            } else {
+              resources = deviceMenuItems[route.query.deviceMenu].types
+            }
+          }
+
+          props.resources = resources
+
+          return props
+        }
       },
       {
         path: 'table/:id',
@@ -97,7 +133,7 @@ const routes = [
         },
       },
       {
-        path: 'system/:panel',
+        path: 'system/:panel?',
         name: 'system',
         component: () => import('pages/System'),
         props: true

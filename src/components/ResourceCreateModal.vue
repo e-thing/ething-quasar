@@ -124,9 +124,17 @@ export default {
 
       __createSelectOptions () {
 
-        var baseCls = (this.__createTypes || []).filter(t => typeof t === 'string')
+        var baseCls = (this.__createTypes || []).filter(t => typeof t === 'string' && t[0] !== '!')
+        var excludeCls = (this.__createTypes || []).filter(t => typeof t === 'string' && t[0] === '!')
         var extra = (this.__createTypes || []).filter(t => typeof t === 'object' && t !== null)
-        var clsList = this.$ethingUI.getSubclass(baseCls).filter(cls => !cls.virtual && !cls.disableCreation)
+        var clsList = this.$ethingUI.getSubclass(baseCls).filter(cls => !cls.virtual && !cls.disableCreation).filter(cls => {
+          for (var i in excludeCls) {
+            if (this.$ethingUI.isSubclass(cls, excludeCls[i])) {
+              return false
+            }
+          }
+          return true
+        })
         var defaultCategory = 'other'
 
         // order by categories

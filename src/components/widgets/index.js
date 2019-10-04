@@ -6,6 +6,8 @@ import WClock from './WClock'
 import WFlow from './WFlow'
 import WFlowNode from './WFlowNode'
 import WRGBLight from './WRGBLight'
+import WCover from './WCover'
+import WThermostat from './WThermostat'
 import generic from './generic'
 
 export default {
@@ -18,6 +20,9 @@ export default {
   WClock,
   WFlow,
   WFlowNode,
+
+  WCover,
+  WThermostat,
 
   generic
 }

@@ -13,9 +13,9 @@
       <q-resize-observer @resize="onPageResize" />
 
       <q-btn-group flat class="col-auto row items-center">
-        <q-btn class="col-auto" flat icon="mdi-chevron-left" :disabled="iDashboard <= 0" @click="iDashboard = iDashboard - 1"/>
+        <q-btn size="lg" class="col-auto" flat icon="mdi-chevron-left" :disabled="iDashboard <= 0" @click="iDashboard = iDashboard - 1"/>
         <div class="col text-center">
-          <q-btn-dropdown flat :label="currentDashboard.options.title">
+          <q-btn-dropdown flat :label="currentDashboard.options.title" size="lg">
             <q-list class="text-faded">
               <q-item v-close-popup clickable @click="iDashboard = index" v-for="(dashboard, index) in dashboards" :key="index">
                 <q-item-section>{{ dashboard.options.title }}</q-item-section>
@@ -23,8 +23,8 @@
             </q-list>
           </q-btn-dropdown>
         </div>
-        <q-btn class="col-auto" flat :icon="editing ? 'mdi-cancel' : 'mdi-pencil'" :label="editing ? 'cancel' : ''" v-show="!editing" @click="editing = !editing"/>
-        <q-btn class="col-auto" flat :icon="iDashboard >= dashboards.length - 1 ? 'mdi-plus' : 'mdi-chevron-right'" @click="nextOrAddDashboard()"/>
+        <q-btn stretch class="col-auto" flat :icon="editing ? 'mdi-cancel' : 'mdi-pencil'" :label="editing ? 'cancel' : ''" v-show="!editing" @click="editing = !editing"/>
+        <q-btn size="lg" class="col-auto" flat :icon="iDashboard >= dashboards.length - 1 ? 'mdi-plus' : 'mdi-chevron-right'" @click="nextOrAddDashboard()"/>
       </q-btn-group>
 
       <div class="col scroll relative-position">
@@ -80,6 +80,7 @@
                     :resource="layoutItem.resource"
                     :widget="layoutItem.widget"
                     v-bind="computeOptions(layoutItem)"
+                    enable-title-click
                   >
                     <template v-slot:error-after>
                       <q-btn label="remove" size="sm" flat icon="delete" @click="removeItem(layoutItem)"/>
@@ -110,6 +111,7 @@
     <q-page-sticky position="bottom-right" :offset="[36, 36]" v-show="editing">
       <div class=" q-gutter-x-sm">
         <q-btn rounded size="md" icon="mdi-cancel" color="primary" label="cancel" @click="editing = false"/>
+        <q-btn round size="md" icon="delete" color="primary" @click="removeDashboard()"/>
         <q-btn round size="md" icon="mdi-settings" color="primary" @click="editDashboard()"/>
         <q-btn fab icon="add" color="primary" @click="pinResourceModal = true"/>
       </div>
@@ -132,8 +134,6 @@ import {dashboardWidgetSchemaDefaults} from '../core/widget'
 
 var GridLayout = VueGridLayout.GridLayout
 var GridItem = VueGridLayout.GridItem
-
-const LAYOUT_FILENAME = ".dashboard.json"
 
 const DBL_CLICK_DELAY  = 200
 
@@ -161,6 +161,7 @@ export default {
 
   data () {
     return {
+        etag: '-',
         pageWidth: window.innerWidth,
         loading: false,
         iDashboard: 0,
@@ -196,6 +197,10 @@ export default {
   },
 
   computed: {
+    __index () {
+      return this.$route.query.index || 0
+    },
+
     __columns () {
       var width = this.pageWidth
       var columns = 2
@@ -257,6 +262,21 @@ export default {
       },
       immediate: true
     },
+    __index: {
+      handler (val) {
+        this.iDashboard = val
+      },
+    },
+    iDashboard: {
+      handler (val) {
+        this.$router.replace({
+          query: {
+            index: val
+          }
+        })
+      },
+      immediate: true
+    }
   },
 
   methods: {
@@ -425,29 +445,20 @@ export default {
       }
     },
 
-    file (callback) {
-      var files = this.$ething.arbo.glob(LAYOUT_FILENAME).filter(r => r instanceof this.$ething.File)
-      var file = null
+    removeDashboard () {
+      this.dashboards.splice(this.iDashboard, 1)
 
-      if (files.length) {
-        file = files[0]
+      if (!this.dashboards.length) {
+        this.dashboards.push({})
       }
 
-      if (typeof callback === 'function'){
-        if (!file) {
-          // create the file if not found !
-          this.$ething.File.create({
-  					name: LAYOUT_FILENAME
-  				}).then( (file) => {
-  					callback(file)
-  				})
-        } else {
-          callback(file)
-        }
-      } else {
-        return file
+      if (this.iDashboard >= this.dashboards.length) {
+        this.iDashboard--
       }
 
+      this.editing = false;
+
+      this.save()
     },
 
     initDashboard (dashboards) {
@@ -458,10 +469,14 @@ export default {
       }
 
       dashboards = dashboards.map((d, i) => {
+
+        var options = d.options || {}
+        if (typeof options.title !== 'string') {
+          options.title = 'dashboard #' + i
+        }
+
         return {
-          options: extend(true, {
-              title: 'dashboard #' + i,
-            }, d.options || {}),
+          options,
           items: (d.widgets || []).map(l => this.normalizeLayoutItem(l)).filter(l => !!l),
           layouts: d.layouts || {}
         }
@@ -473,40 +488,9 @@ export default {
     },
 
     load: function() {
-      this.loading = true
-
-      var file = this.file()
-
-      if (file) {
-        file.read().then( (config) => {
-
-          if(typeof config == 'string') {
-						try{
-							config = JSON.parse(config);
-						}
-						catch(e){
-              config = {}
-            }
-          }
-
-          if (typeof config.widgets != 'undefined') {
-            config = {
-              dashboards: [config]
-            }
-          }
-
-          this.initDashboard(config.dashboards)
-
-        }).catch(err => {
-          this.initDashboard()
-        }).finally(() => {
-          this.loading = false
-        })
-      } else {
-        this.initDashboard()
-        this.loading = false
-      }
-
+      if (this.etag === this.$ethingUI.dashboard.config.etag) return
+      var config = extend(true, {}, this.$ethingUI.dashboard.config) // deep copy
+      this.initDashboard(config.dashboards)
     },
 
     normalizeLayoutItem (item) {
@@ -584,20 +568,19 @@ export default {
     },
 
     save: debounce( function(){
-      this.file( file => {
 
-        var dashboards = this.dashboards.map(d => {
-          return {
-            options: d.options,
-            widgets: d.items.map(layoutItem => layoutItem.item),
-            layouts: d.layouts
-          }
-        })
-
-        file.write( JSON.stringify({
-          dashboards
-        }, null, 4) )
+      var dashboards = this.dashboards.map(d => {
+        return {
+          options: d.options,
+          widgets: d.items.map(layoutItem => layoutItem.item),
+          layouts: d.layouts
+        }
       })
+
+      this.etag = this.$ethingUI.dashboard.save({
+        dashboards
+      })
+
     }, 500),
 
     addWidget (attr) {
@@ -669,7 +652,12 @@ export default {
   },
 
   mounted () {
+    this.$ethingUI.on('ui.dashboard.config', this.load)
     this.load()
+  },
+
+  beforeDestroy () {
+    this.$ethingUI.off('ui.dashboard.config', this.load)
   }
 
 }

@@ -29,7 +29,7 @@
 <script>
 import Base from './Base'
 import Knob from './generic/Knob'
-import { colors } from 'quasar'
+import { colors, debounce } from 'quasar'
 
 const { hexToRgb, rgbToHsv, hsvToRgb, rgbToHex } = colors
 
@@ -111,16 +111,15 @@ export default {
         })
       },
 
-      __setColor (hex) {
+      __setColor: debounce( function (hex) {
         var hsv = rgbToHsv(hexToRgb(hex))
         this.writing = true
         Promise.resolve(this.resource.execute('setColor', {hue: hsv.h, saturation: hsv.s})).catch(err => {
           this.setError(err)
         }).finally(() => {
           this.writing = false
-          this.colorModel = false
         })
-      },
+      }, 400, true),
 
       __toggle () {
         this.writing = true

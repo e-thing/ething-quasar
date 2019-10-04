@@ -2,20 +2,48 @@
 const sortItems = [{
   name: 'name',
   label: 'name',
-  fn (a, b) {
+  compare (a, b) {
     return a.name().localeCompare(b.name())
   }
 },{
   name: 'date',
   label: 'date',
-  fn (a, b) {
+  compare (a, b) {
     return b.modifiedDate() - a.modifiedDate()
   }
 },{
   name: 'type',
   label: 'type',
-  fn (a, b) {
+  compare (a, b) {
     return a.types().reverse().join(' ').localeCompare(b.types().reverse().join(' '))
+  },
+},{
+  name: 'location',
+  label: 'location',
+  groups (resources) {
+    var locations = [];
+    resources.forEach(r => {
+      var loc = r.attr('location')
+      if (loc && locations.indexOf(loc)===-1) {
+        locations.push(loc)
+      }
+    })
+    if (!locations.length) return
+    var groups = locations.map(loc => {
+      return {
+        label: loc,
+        filter (r) {
+          return r.attr('location') === loc
+        }
+      }
+    })
+    groups.push({
+      label: 'unknown location',
+      filter (r) {
+        return !r.attr('location')
+      }
+    })
+    return groups
   }
 }]
 
@@ -46,17 +74,13 @@ export default {
 
       showHiddenFiles: Boolean,
 
-      defaultSort: {
-        type: String,
-        default: 'name'
-      }
+      defaultSort: String,
 
     },
 
     data () {
         return {
-          sortItems,
-          sort_: this.defaultSort, // name
+          sort_: this.defaultSort || (this.groups ? 'custom' : 'name'), // name
           search_: '',
           filter_ :null // a custom resources filter function
         }
@@ -64,14 +88,51 @@ export default {
 
     computed: {
 
+      __sortItems () {
+        var res = sortItems.slice()
+        if (this.groups) {
+          res.unshift({
+            name: 'custom',
+            label: 'custom',
+            groups: this.groups
+          })
+        }
+        return res
+      },
+
       __resources () {
         var resources = [];
         if (typeof this.resources === 'function') {
           resources = this.$ething.arbo.find(this.resources)
         } else if (typeof this.resources === 'string') {
+          // blank separated list of types
+          var whiteList = [], blackList = [];
+
           this.resources.split(' ').forEach(type => {
             if (!type) return
-            resources = resources.concat(this.$ething.arbo.find(r => resources.indexOf(r) === -1 && this.$ethingUI.isSubclass(r, type)))
+            if (type[0] === '!') blackList.push(type.replace('!', ''))
+            else whiteList.push(type)
+          })
+
+          resources = this.$ething.arbo.find(r => {
+            var pass = false;
+            if (resources.indexOf(r) === -1) {
+              for (var i in whiteList) {
+                if (this.$ethingUI.isSubclass(r, whiteList[i])) {
+                  pass = true
+                  break
+                }
+              }
+              if (pass) {
+                for (var i in blackList) {
+                  if (this.$ethingUI.isSubclass(r, blackList[i])) {
+                    pass = false
+                    break
+                  }
+                }
+              }
+            }
+            return pass
           })
         } else if (Array.isArray(this.resources)) {
           resources = this.resources.map(r => {
@@ -117,16 +178,29 @@ export default {
         }
 
         var sortItem = this.__selectedSortItem
-        if (sortItem) {
-          resources.sort(sortItem.fn)
+        if (sortItem && sortItem.compare) {
+          resources.sort(sortItem.compare)
         }
 
         return resources
       },
 
       __groups () {
-        if (Array.isArray(this.groups)) {
-          var groups = this.__formatGroupList(this.groups)
+        var groups;
+
+        var sortItem = this.__selectedSortItem
+        if (sortItem && sortItem.groups) {
+          if (typeof sortItem.groups === 'function')
+            groups = sortItem.groups(this.__filteredResources)
+          else
+            groups = sortItem.groups
+        } else {
+          groups = this.groups
+        }
+
+        if (groups && Array.isArray(groups)) {
+
+          groups = this.__formatGroupList(groups)
           if (!this.hideOtherGroup) {
             groups.push({ // must be last
               label: 'others',
@@ -162,9 +236,9 @@ export default {
 
       __selectedSortItem () {
         if (typeof this.sort_ === 'string') {
-          for (var i in this.sortItems) {
-            if (this.sortItems[i].name === this.sort_) {
-              return this.sortItems[i]
+          for (var i in this.__sortItems) {
+            if (this.__sortItems[i].name === this.sort_) {
+              return this.__sortItems[i]
             }
           }
         }

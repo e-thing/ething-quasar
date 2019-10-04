@@ -75,32 +75,103 @@
           padding
         >
 
-          <q-item v-ripple clickable @click="$router.push('/dashboard')">
+          <q-item v-ripple clickable :to="{name:'dashboard'}">
             <q-item-section avatar>
-              <q-icon color="grey-7" name="dashboard" />
+              <q-icon name="dashboard" />
             </q-item-section>
             <q-item-section>
               <q-item-label>Dashboard</q-item-label>
             </q-item-section>
           </q-item>
 
-          <q-item v-ripple clickable @click="$router.push({name:'explore', query:{resources: 'resources/Flow'}})">
+          <template
+            v-if="dashboardTitles.length>1"
+          >
+            <q-item
+              v-for="(title, index) in dashboardTitles" :key="'dashboard' + index"
+              v-ripple clickable
+              dense
+              class="sub"
+              :to="{name:'dashboard', query:{index: index}}" exact
+            >
+              <q-item-section avatar></q-item-section>
+              <q-item-section>
+                <q-item-label>{{ title }}</q-item-label>
+              </q-item-section>
+            </q-item>
+
+            <q-separator class="q-mt-md q-mb-xs" />
+
+          </template>
+
+          <q-item v-ripple clickable :to="{name:'explore', query:{resources: 'resources/Flow'}}" exact>
             <q-item-section avatar>
-              <q-icon color="grey-7" name="mdi-ray-start-arrow" />
+              <q-icon name="mdi-ray-start-arrow" />
             </q-item-section>
             <q-item-section>
               <q-item-label>Flows</q-item-label>
             </q-item-section>
           </q-item>
 
-          <q-separator class="q-mt-md q-mb-xs" />
-
-          <q-item v-ripple clickable @click="$router.push({name:'explore', query:{resources: 'resources/Device'}})">
+          <q-item
+            v-for="(item, index) in __rootItems" :key="'menu-'+index"
+            v-ripple clickable
+            :to="item.route" exact
+          >
             <q-item-section avatar>
-              <q-icon color="grey-7" name="devices" />
+              <q-icon :name="item.icon" />
             </q-item-section>
             <q-item-section>
-              <q-item-label>Devices</q-item-label>
+              <q-item-label>{{ item.label }}</q-item-label>
+            </q-item-section>
+          </q-item>
+
+          <template
+            v-for="(menu, index) in __rootSubMenus"
+          >
+            <q-separator class="q-mt-md q-mb-xs" />
+
+            <q-item-label header class="text-weight-bold text-uppercase">
+              {{ menu.label }}
+            </q-item-label>
+
+            <q-item
+              v-for="(item, i) in menu.items" :key="'submenu-'+index+'-'+i"
+              v-ripple clickable
+              :to="item.route" exact
+              dense
+              class="sub"
+            >
+              <q-item-section avatar>
+                <q-icon :name="item.icon" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label>{{ item.label }}</q-item-label>
+              </q-item-section>
+            </q-item>
+
+          </template>
+
+          <q-separator class="q-mt-md q-mb-xs" />
+
+          <q-item-label header class="text-weight-bold text-uppercase">
+            Devices
+          </q-item-label>
+
+          <q-item
+            v-ripple
+            clickable
+            dense
+            v-for="(item, index) in __deviceItems" :key="'device-'+index"
+            class="sub"
+            :to="{name:'explore', query:{deviceMenu: index}}"
+            exact
+          >
+            <q-item-section avatar>
+              <q-icon :name="item.icon"/>
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>{{ item.label }}</q-item-label>
             </q-item-section>
           </q-item>
 
@@ -108,15 +179,13 @@
             v-ripple
             clickable
             dense
-            v-for="(cat, index) in __categories" :key="index"
-            class="text-grey-8 text-weight-light sub"
-            @click="$router.push({name:'explore', query:{resources: cat._type}})"
+            class="sub"
+            :inset-level="1"
+            :to="{name:'explore', query:{deviceMenu: 'other'}}"
+            exact
           >
-            <q-item-section avatar>
-              <q-icon :name="cat.icon" color="grey-5"/>
-            </q-item-section>
             <q-item-section>
-              <q-item-label>{{ cat.title }}</q-item-label>
+              <q-item-label>Other</q-item-label>
             </q-item-section>
           </q-item>
 
@@ -126,18 +195,18 @@
             Data
           </q-item-label>
 
-          <q-item v-ripple clickable @click="$router.push({name:'explore', query:{resources: 'resources/Table'}})">
+          <q-item v-ripple clickable dense class="sub" :to="{name:'explore', query:{resources: 'resources/Table'}}" exact>
             <q-item-section avatar>
-              <q-icon color="grey-7" name="mdi-table-large" />
+              <q-icon name="mdi-table-large" />
             </q-item-section>
             <q-item-section>
               <q-item-label>Tables</q-item-label>
             </q-item-section>
           </q-item>
 
-          <q-item v-ripple clickable @click="$router.push({name:'explore', query:{resources: 'resources/File'}})">
+          <q-item v-ripple clickable dense class="sub" :to="{name:'explore', query:{resources: 'resources/File'}}" exact>
             <q-item-section avatar>
-              <q-icon color="grey-7" name="mdi-file" />
+              <q-icon name="mdi-file" />
             </q-item-section>
             <q-item-section>
               <q-item-label>Files</q-item-label>
@@ -146,15 +215,15 @@
 
           <q-separator class="q-mt-md q-mb-xs" />
 
-          <q-item clickable @click="$router.push({name:'system', params: {panel: 'settings'}})" v-ripple>
+          <q-item clickable :to="{name:'system'}" v-ripple exact>
             <q-item-section avatar>
-              <q-icon color="grey-7" name="settings" />
+              <q-icon name="settings" />
             </q-item-section>
             <q-item-section>Settings</q-item-section>
           </q-item>
           <q-item v-if="!$ethingUI.autoLogin" clickable @click="logout" v-ripple>
             <q-item-section avatar>
-              <q-icon color="grey-7" name="exit_to_app" />
+              <q-icon name="exit_to_app" />
             </q-item-section>
             <q-item-section>Logout</q-item-section>
           </q-item>
@@ -192,7 +261,7 @@ export default {
     return {
       leftDrawerOpen: false, // this.$q.platform.is.desktop
       persistentNotifications: this.$ethingUI.persistentNotifications,
-      categories: ['interfaces/Sensor', 'interfaces/Switch', 'interfaces/Camera']
+      dashboardTitles: [],
     }
   },
   computed: {
@@ -205,13 +274,33 @@ export default {
     vKeyboardEnabled () {
       return this.$ethingUI.virtualKeyboardEnabled
     },
-    __categories () {
-      if (this.$root.state==='ok') {
-        return this.categories.map(t => {
-          return this.$ethingUI.get(t)
-        })
-      }
-      return []
+    __deviceItems () {
+      return this.$ethingUI.menu.devices
+    },
+    __rootItems () {
+      return this.$ethingUI.menu.root.filter(item => !item.parent)
+    },
+    __rootSubMenus () {
+      var submenus = []
+      this.$ethingUI.menu.root.filter(item => item.parent).forEach(item => {
+        var submenu = null;
+        for (var i in submenus) {
+          if (submenus[i].label === item.parent) {
+            submenu = submenus[i]
+            break
+          }
+        }
+        if (!submenu) {
+          submenu = {
+            label: item.parent,
+            items: []
+          }
+          submenus.push(submenu)
+        }
+
+        submenu.items.push(item)
+      })
+      return submenus
     }
   },
   methods: {
@@ -232,15 +321,62 @@ export default {
     },
     refresh () {
       this.$router.go()
+    },
+    updateDashboardItems () {
+      try {
+        this.dashboardTitles = this.$ethingUI.dashboard.config.dashboards.map(d => d.options.title)
+      } catch(e) {
+        this.dashboardTitles = []
+      }
     }
   },
+
+  mounted () {
+    this.$ethingUI.on('ui.dashboard.config', this.updateDashboardItems)
+    this.updateDashboardItems()
+  },
+
+  beforeDestroy () {
+    this.$ethingUI.off('ui.dashboard.config', this.updateDashboardItems)
+  }
 
 }
 </script>
 
-<style scoped>
+<style lang="stylus" scoped>
+
+
+light-primary = lightness($primary, (1 - 0.85) * lightness($primary) + 0.85 * 100)
+
 .sub {
     border-radius: 0 10px 10px 0;
     margin-right: 12px;
 }
+
+.q-item:not(.sub)
+  .q-icon
+    color: $grey-7
+
+  &.q-router-link--active
+    color: $primary
+    font-weight: 700
+    .q-icon
+      color: $primary
+
+.q-item.sub
+  color: $grey-8
+  font-weight: 300
+  .q-icon
+    color: $grey-5;
+
+  &.q-router-link--active
+    color: $primary
+    background-color: light-primary
+    font-weight: 700
+    .q-icon
+      color: $primary
+
+
+
+
 </style>

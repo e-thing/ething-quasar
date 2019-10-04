@@ -204,11 +204,7 @@ export default {
     remove () {
       var name = this.resource.name()
 
-      var children = this.$ething.arbo.list().filter(r => {
-        return r.createdBy() === this.resource.id()
-      })
-
-      if (confirm('Do you really want to remove definitely the ' + (this.meta.title || 'resource') + ' "' + this.resource.name() + '" ?')) {
+      if (confirm('Do you really want to remove definitely "' + this.resource.name() + '" ?')) {
         this.resource.remove().then( () => {
           this.$q.notify('"' + name + '" removed !')
         })

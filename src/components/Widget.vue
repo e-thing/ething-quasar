@@ -1,7 +1,7 @@
 <template>
   <div class="widget column" :class="{'widget-err': __hasError}" :style="__style">
 
-    <div class="col-auto title full-width" v-if="!dense && (__title || $slots.title)">
+    <div class="col-auto title full-width" v-if="!dense && (__title || $slots.title)" @click="__titleClick" :class="{'cursor-pointer': enableTitleClick}" >
       <slot name="title">
         <div class="text-center ellipsis">{{ __title }}</div>
       </slot>
@@ -25,7 +25,7 @@
       </div>
     </div>
 
-    <div class="col-auto footer full-width" v-if="!dense && (__footer || $slots.footer)">
+    <div class="col-auto footer full-width" v-if="!dense && (__footer || $slots.footer)" @click="__footerClick" :class="{cursorPointer: enableFooterClick}">
       <slot name="footer">
         <div class="text-center ellipsis">{{ __footer }}</div>
       </slot>
@@ -83,6 +83,10 @@ export default {
         type: String,
         default: 'white'
       },
+
+      enableTitleClick: Boolean,
+      enableFooterClick: Boolean,
+
 
     },
     data() {
@@ -208,6 +212,24 @@ export default {
       setError (error) {
         this.error = error
       },
+
+      __titleClick (evt) {
+        if (this.enableTitleClick) {
+          if (this.$listeners.titleClick) {
+            this.$emit('titleClick', evt)
+          } else {
+            // default
+            if (this.resource) this.$ethingUI.open(this.resource)
+          }
+        }
+      },
+
+      __footerClick (evt) {
+        if (this.enableFooterClick) {
+          this.$emit('footerClick', evt)
+        }
+      },
+
     }
 
 }

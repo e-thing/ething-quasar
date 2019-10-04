@@ -31,11 +31,11 @@
         </template>
       </q-input>
 
-      <q-btn-dropdown v-if="!noSort" flat text-color="primary" :label="$q.screen.gt.xs ? (__selectedSortItem ? __selectedSortItem.label : 'sort') : null" icon="mdi-sort" :dense="$q.screen.lt.lg">
+      <q-btn-dropdown v-if="sort" flat text-color="primary" :label="$q.screen.gt.xs ? (__selectedSortItem ? __selectedSortItem.label : 'sort') : null" icon="mdi-sort" :dense="$q.screen.lt.lg">
         <q-list>
           <q-item
             sort_items
-            v-for="(item, index) in sortItems"
+            v-for="(item, index) in __sortItems"
             :key="index"
             v-close-popup
             clickable
@@ -152,8 +152,8 @@ export default {
 
       readonly: Boolean,
       dense: Boolean,
-      noSort: Boolean,
-      noSearch: Boolean,
+      sort: Boolean,
+      search: Boolean,
 
       emptyMessage: {
         type: String,
@@ -178,11 +178,11 @@ export default {
     computed: {
 
       __showHeader () {
-        return this.__categories || this.$slots['header-left'] || this.$slots['header-right'] || this.__showSearch || !this.noSort || (!this.readonly && this.__createTypes)
+        return this.__categories || this.$slots['header-left'] || this.$slots['header-right'] || this.__showSearch || this.sort || (!this.readonly && this.__createTypes)
       },
 
       __showSearch () {
-        return !this.noSearch && this.$q.screen.gt.sm
+        return this.search && this.$q.screen.gt.sm
       },
 
       __checksum () {

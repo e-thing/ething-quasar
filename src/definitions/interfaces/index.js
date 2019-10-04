@@ -10,6 +10,8 @@ import DoorSensor from './DoorSensor'
 import DimmableRelay from './DimmableRelay'
 import DimmableLight from './DimmableLight'
 import RGBWLight from './RGBWLight'
+import Cover from './Cover'
+import Thermostat from './Thermostat'
 
 
 export default {
@@ -24,4 +26,6 @@ export default {
   DimmableRelay,
   DimmableLight,
   RGBWLight,
+  Cover,
+  Thermostat,
 }

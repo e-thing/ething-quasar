@@ -16,6 +16,9 @@ import info from './info.js'
 import plugins from './plugins.js'
 import activity from './activity.js'
 import notification from './notification.js'
+import resources from './resources.js'
+import menu from './menu.js'
+import dashboard from './dashboard.js'
 
 
 // necessary for older browsers
@@ -104,12 +107,19 @@ EThingUI.install = ({ app, router, Vue, store }) => {
     info,
     plugins,
     activity,
-    notification
+    notification,
+    resources,
+    menu,
+    dashboard,
   ]
 
   pp.forEach(p => {
     var f = typeof p === 'function' ? p : p.install
-    f({ EThingUI, Vue, router, store })
+    try {
+      f({ EThingUI, Vue, router, store })
+    } catch (e) {
+      console.error(e)
+    }
   })
 
 
@@ -329,7 +339,7 @@ EThingUI.install = ({ app, router, Vue, store }) => {
       })
 
       Promise.all([infoDfr, arboDfr, metaDfr, settingsDfr]).then(() => {
-        return EThingUI.loadPlugins()
+        return Promise.all([EThingUI.loadPlugins(), EThingUI.dashboard.init()])
       }).then(() => {
 
         // everything went ok !
