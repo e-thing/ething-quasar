@@ -267,7 +267,7 @@ export default {
     },
     __index: {
       handler (val) {
-        this.iDashboard = val
+        this.iDashboard = parseInt(val)
       },
       immediate: true
     },
@@ -340,7 +340,7 @@ export default {
 
       var color = options.widgetsColor
       if (color) {
-        colors.setBrand('light', colors.lighten(color, (colors.luminosity(color) < 0.5) ? -10 : 10), this.$el)
+        colors.setBrand('light', colors.lighten(color, (colors.luminosity(color) < 0.5) ? 40 : -30), this.$el)
       }
 
       var primaryColor = options.primaryColor

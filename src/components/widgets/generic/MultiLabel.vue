@@ -2,15 +2,15 @@
   <div class="column fit justify-center q-pa-sm no-wrap">
     <template v-for="(item, index) in items">
       <div class="col-auto item row">
-        <div class="col-auto" v-if="__hasIcons">
+        <div class="col-auto text-secondary" v-if="__hasIcons">
           <q-icon v-if="__getProp(item, 'icon')" :name="__getProp(item, 'icon')" style="vertical-align: baseline;" left/>
           <q-icon v-else name="mdi-minus" style="vertical-align: baseline; visibility: hidden;" left/>
         </div>
         <div class="col ellipsis" v-if="__getProp(item, 'label')">
           <span>{{ __getProp(item, 'label') }}</span>
         </div>
-        <span class="text-bold col-auto">{{ __getProp(item, 'value') }}</span>
-        <span v-if="__getProp(item, 'unit')" class="col-auto">{{ __getProp(item, 'unit') }}</span>
+        <span class="text-bold text-primary col-auto">{{ __getProp(item, 'value') }}</span>
+        <span v-if="__getProp(item, 'unit')" class="text-primary col-auto">{{ __getProp(item, 'unit') }}</span>
       </div>
     </template>
   </div>

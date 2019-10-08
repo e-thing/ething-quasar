@@ -72,7 +72,7 @@
         <span>{{ item.title }}</span>
       </div>
       <div class="bg-white">
-        <dynamic-component :component="item" color="secondary"/>
+        <dynamic-component :component="item"/>
       </div>
     </div>
 

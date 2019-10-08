@@ -5,6 +5,7 @@
 <script>
 import Chart from '../Chart'
 import Base from './Base'
+import { colors } from 'quasar'
 
 export default {
     name: 'WChart',
@@ -29,7 +30,7 @@ export default {
           },
           plotOptions:{
             series:{
-              color: this.color
+              color: this.primaryColor
             }
           },
           title:{

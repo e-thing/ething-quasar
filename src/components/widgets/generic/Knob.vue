@@ -1,5 +1,5 @@
 <template>
-  <div class="fit column no-wrap text-center q-pt-xs q-gutter-y-xs q-pl-xs q-gutter-x-xs">
+  <div class="fit column no-wrap text-center q-pt-sm q-gutter-y-sm q-pl-sm q-gutter-x-sm">
     <div class="col-auto" v-if="label">{{ label }}</div>
     <div class="col relative-position">
       <q-resize-observer @resize="updateLayout" />
@@ -10,7 +10,7 @@
         :min="min"
         :max="max"
         :readonly="__readonly"
-        :color="color"
+        color="primary"
         show-value
         :size="knobSize"
         :thickness="thickness"
@@ -20,13 +20,14 @@
       >
         <div class="toto relative-position" :style="{width: innerSize+'px', height: innerSize+'px', fontSize}">
           <slot>
-            <div v-if="!__centerButton" class="text-center">
+            <div v-if="!__centerButton" class="text-center text-primary">
               <q-icon v-if="icon" :name="icon" class="light" style="vertical-align: text-bottom;"/>
               <div class="big">{{ value }}</div>
               <div class="light" v-if="unit">{{unit}}</div>
             </div>
             <q-avatar v-else
-              :style="__buttonStyle"
+              :color="__state ? 'primary' : '#bdbdbd'"
+              text-color="white"
               @click.stop="__toggle"
               font-size="30%"
               :size="buttonSize"
@@ -42,7 +43,6 @@
 
 <script>
 import Base from '../Base'
-import { colors } from 'quasar'
 
 
 export default {
@@ -104,23 +104,9 @@ export default {
         if (typeof value === 'string') value = parseInt(value)
         return (typeof value === 'number' && !Number.isNaN(value)) ? value : 0
       },
-
-      __buttonStyle () {
-        return {
-          backgroundColor: this.__state ? this.color : '#bdbdbd',
-          color: this.__state ? this.bgColor : 'white',
-        }
-      },
-
       __state () {
         return !!this.buttonValue;
       },
-    },
-
-    watch: {
-      color (val) {
-        this.__refreshTrackColor()
-      }
     },
 
     mounted () {
@@ -149,15 +135,7 @@ export default {
         var trackEl = knobEl.$el.querySelector('.text-track-color-custom')
         if (!trackEl) return
 
-        var trackColor;
-
-        if (/^#ffffff/.test(this.color) || this.color == 'white') {
-          // add transparency
-          trackColor = this.color.substring(0, 7) + '40'
-        } else {
-          // lighten
-          trackColor = colors.lighten(this.color, 80)
-        }
+        var trackColor = this.primaryColor.substring(0, 7) + '40'
 
         trackEl.style.color = trackColor
 

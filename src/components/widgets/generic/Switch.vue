@@ -9,7 +9,7 @@
         @click="__set(true)"
         flat
         :size="__value ? '150%' : '80%'"
-        :style="__value ? __activeStyle : {}"
+        :style="__value ? __activeStyle : __passiveStyle"
       />
     </div>
     <div class="col-6 q-pa-xs">
@@ -21,7 +21,7 @@
         @click="__set(false)"
         flat
         :size="__value ? '80%' : '150%'"
-        :style="__value ? {} : __activeStyle"
+        :style="__value ? __passiveStyle : __activeStyle"
       />
     </div>
   </div>
@@ -64,11 +64,12 @@ export default {
       },
       __activeStyle () {
         return {
-          /*backgroundColor: this.color,
-          color: this.bgColor,*/
-          color: this.color+ '!important',
-          border: '1px solid '+this.color
+          backgroundColor: this.primaryColor,
+          color: 'white',
         }
+      },
+      __passiveStyle () {
+        return {}
       }
     },
 

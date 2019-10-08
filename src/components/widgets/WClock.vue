@@ -49,21 +49,17 @@ var c = {
       this.timerId = setInterval(() => {
         this.refreshTime()
       }, 1000)
-      console.log('clock mounted', this._uid)
     },
 
     beforeDestroy () {
       if(this.timerId !== null) {
         clearInterval(this.timerId)
-        console.log('clock clearInterval', this._uid)
       }
-      console.log('clock beforeDestroy', this._uid)
     },
 
     methods: {
 
       refreshTime () {
-        console.log('clock refresh', this._uid)
         var now = new Date()
         this.hours = pad(now.getHours(), 2)
         this.minutes = pad(now.getMinutes(), 2)

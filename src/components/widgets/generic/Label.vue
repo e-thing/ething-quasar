@@ -1,5 +1,5 @@
 <template>
-  <div class="column fit text-center no-wrap q-pt-sm q-gutter-y-sm">
+  <div class="column fit text-center text-primary no-wrap q-pt-sm q-gutter-y-sm">
     <span v-if="label && !horizontal" class="col-auto">{{ label }}</span>
     <div class="col column justify-center" :style="{fontSize}">
       <q-resize-observer @resize="updateLayout" />

@@ -6,12 +6,11 @@ export default {
   inheritAttrs: false,
 
   props: {
-    color: {
-      type: String,
-    },
-    bgColor: {
-      type: String,
-    },
+    color: String,
+    bgColor: String,
+    primaryColor: String,
+    secondaryColor: String,
+    accentColor: String,
     resource: {}
   },
 

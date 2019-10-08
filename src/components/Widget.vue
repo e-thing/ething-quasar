@@ -36,7 +36,7 @@
 
 <script>
 import { widgets } from '../core/widget'
-import { extend } from 'quasar'
+import { extend, colors } from 'quasar'
 
 
 var emptyWidget = {
@@ -78,7 +78,7 @@ export default {
 
       color: {
         type: String,
-        default: 'primary'
+        default: 'black'
       },
       bgColor: {
         type: String,
@@ -91,7 +91,6 @@ export default {
       enableTitleClick: Boolean,
       enableFooterClick: Boolean,
 
-
     },
     data() {
       return {
@@ -102,7 +101,16 @@ export default {
     watch: {
       color () {
         this.loadColors()
-      }
+      },
+      primaryColor () {
+        this.loadColors()
+      },
+      secondaryColor () {
+        this.loadColors()
+      },
+      accentColor () {
+        this.loadColors()
+      },
     },
 
     computed: {
@@ -143,7 +151,10 @@ export default {
 
         var options = extend(true, {
           color: this.__color,
-          bgColor: this.__bgColor
+          bgColor: this.__bgColor,
+          primaryColor: this.__primaryColor,
+          secondaryColor: this.__secondaryColor,
+          accentColor: this.__accentColor,
         }, this.$attrs)
 
         return widget.attributes(options)
@@ -216,6 +227,15 @@ export default {
       __bgColor () {
         return this.bgColor ? this.$ethingUI.utils.colorNameToHex(this.bgColor) : undefined
       },
+      __primaryColor () {
+        return this.primaryColor || colors.getBrand('primary', this.$el)
+      },
+      __secondaryColor () {
+        return this.secondaryColor || colors.getBrand('secondary', this.$el)
+      },
+      __accentColor () {
+        return this.accentColor || colors.getBrand('accent', this.$el)
+      },
     },
 
     methods: {
@@ -247,7 +267,7 @@ export default {
 
         var color = this.__color
         if (color) {
-          colors.setBrand('light', colors.lighten(color, (colors.luminosity(color) < 0.5) ? -10 : 10), this.$el)
+          colors.setBrand('light', colors.lighten(color, (colors.luminosity(color) < 0.5) ? 40 : -30), this.$el)
         }
 
         var primaryColor = options.primaryColor

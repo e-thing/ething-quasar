@@ -4,6 +4,7 @@
     :set="__setBrightness"
     :color="color"
     :bg-color="bgColor"
+    :primary-color="primaryColor"
   >
     <template>
       <div class="top" @click.stop="__toggle" :style="__topStyle">
@@ -78,8 +79,8 @@ export default {
 
       __topStyle () {
         return {
-          backgroundColor: this.state ? this.color : '#bdbdbd',
-          color: this.state ? this.bgColor : 'white'
+          backgroundColor: this.state ? this.primaryColor : '#bdbdbd',
+          color: 'white'
         }
       },
 
@@ -92,7 +93,7 @@ export default {
         return {
           backgroundColor: this.displayHex,
           color: this.__isWhite(this.displayHex) ? this.__notWhiteTextColor : 'white',
-          borderColor: this.state ? this.color : '#bdbdbd',
+          borderColor: this.state ? this.primaryColor : '#bdbdbd',
         }
       }
     },
