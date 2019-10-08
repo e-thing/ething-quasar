@@ -12,9 +12,9 @@
 
       <q-resize-observer @resize="onPageResize" />
 
-      <q-btn-group flat class="col-auto row items-center">
+      <q-btn-group flat class="col-auto row items-center full-width" v-show="!editing">
         <q-btn size="lg" class="col-auto" flat icon="mdi-chevron-left" :disabled="iDashboard <= 0" @click="iDashboard = iDashboard - 1"/>
-        <div class="col text-center">
+        <div class="col text-center ellipsis">
           <q-btn-dropdown flat :label="currentDashboard.options.title" size="lg">
             <q-list class="text-faded">
               <q-item v-close-popup clickable @click="iDashboard = index" v-for="(dashboard, index) in dashboards" :key="index">
@@ -27,72 +27,79 @@
         <q-btn size="lg" class="col-auto" flat :icon="iDashboard >= dashboards.length - 1 ? 'mdi-plus' : 'mdi-chevron-right'" @click="nextOrAddDashboard()"/>
       </q-btn-group>
 
+      <div flat class="col-auto row items-center bg-secondary" v-show="editing" style="height: 51px;">
+        <q-btn flat stretch icon="add" color="white" @click="pinResourceModal = true"/>
+        <q-btn flat stretch icon="delete" color="white" @click="removeDashboard()"/>
+        <q-btn flat stretch icon="mdi-settings" color="white" @click="editDashboard()"/>
+        <q-space/>
+        <q-btn flat stretch color="white" label="cancel" @click="editing = false"/>
+      </div>
+
       <div class="col scroll relative-position">
 
-        <keep-alive>
-          <div v-if="currentDashboard.items.length==0" class="absolute-center text-center">
-            <p>
-              <img
-                src="~assets/sad.svg"
-                style="width:30vw;max-width:150px;"
-              >
-            </p>
-            <p class="text-faded">No widgets</p>
-            <q-btn icon="mdi-pin" label="pin widget" color="secondary" @click="pinResourceModal = true"/>
-          </div>
+        <div v-if="currentDashboard.items.length==0" class="absolute-center text-center">
+          <p>
+            <img
+              src="~assets/sad.svg"
+              style="width:30vw;max-width:150px;"
+            >
+          </p>
+          <p class="text-faded">No widgets</p>
+          <q-btn icon="mdi-pin" label="pin widget" color="secondary" @click="pinResourceModal = true"/>
+        </div>
 
-          <grid-layout v-else
-            ref="grid"
-            :layout.sync="currentDashboard.items"
-            :col-num="__columns"
-            :row-height="grid.rowHeight"
-            :is-draggable="draggable"
-            :is-resizable="resizable"
-            :vertical-compact="false"
-            prevent-collision
-            :margin="[grid.margin, grid.margin]"
-            :use-css-transforms="true"
-            :key="iDashboard"
-            @click.native.self="bgClick"
-            v-touch-hold="handleHold"
-            @layout-updated="layoutUpdatedEvent"
-          >
-              <grid-item v-for="(layoutItem) in currentDashboard.items" :key="layoutItem.i"
-                 :x="layoutItem.x"
-                 :y="layoutItem.y"
-                 :w="layoutItem.w"
-                 :h="layoutItem.h"
-                 :i="layoutItem.i"
-                 :minW="layoutItem.minW || 1"
-                 :minH="layoutItem.minH || 1"
-                 class="gditem"
-                 drag-ignore-from="button"
-                 drag-allow-from=".dragger"
-              >
-                  <div v-show="editing" class="absolute fit widget-edit-layer">
-                    <q-btn-group flat class="absolute-center" >
-                      <q-btn class="dragger" flat icon="mdi-cursor-move" color="faded" type="a"/>
-                      <q-btn v-if="isEditable(layoutItem)" flat icon="settings" color="faded" @click="editItem(layoutItem)"/>
-                      <q-btn flat icon="delete" color="negative" @click="removeItem(layoutItem)"/>
-                    </q-btn-group>
-                  </div>
-                  <widget :key="layoutItem.key" class="absolute fit"
-                    :resource="layoutItem.resource"
-                    :widget="layoutItem.widget"
-                    v-bind="computeOptions(layoutItem)"
-                    enable-title-click
-                  >
-                    <template v-slot:error-after>
-                      <q-btn label="remove" size="sm" flat icon="delete" @click="removeItem(layoutItem)"/>
-                    </template>
-                  </widget>
-              </grid-item>
-          </grid-layout>
-        </keep-alive>
+        <grid-layout v-else
+          ref="grid"
+          :layout.sync="currentDashboard.items"
+          :col-num="__columns"
+          :row-height="grid.rowHeight"
+          :is-draggable="draggable"
+          :is-resizable="resizable"
+          :vertical-compact="false"
+          prevent-collision
+          :margin="[grid.margin, grid.margin]"
+          :use-css-transforms="true"
+          :key="iDashboard"
+          @click.native.self="bgClick"
+          v-touch-hold="handleHold"
+          @layout-updated="layoutUpdatedEvent"
+          style="min-height: 100%;"
+        >
+            <grid-item v-for="(layoutItem) in currentDashboard.items" :key="layoutItem.i"
+               :x="layoutItem.x"
+               :y="layoutItem.y"
+               :w="layoutItem.w"
+               :h="layoutItem.h"
+               :i="layoutItem.i"
+               :minW="layoutItem.minW || 1"
+               :minH="layoutItem.minH || 1"
+               class="gditem"
+               drag-ignore-from="button"
+               drag-allow-from=".dragger"
+            >
+                <div v-show="editing" class="absolute fit widget-edit-layer">
+                  <q-btn-group flat class="absolute-center" >
+                    <q-btn class="dragger" flat icon="mdi-cursor-move" color="faded" type="a"/>
+                    <q-btn v-if="isEditable(layoutItem)" flat icon="settings" color="faded" @click="editItem(layoutItem)"/>
+                    <q-btn flat icon="delete" color="negative" @click="removeItem(layoutItem)"/>
+                  </q-btn-group>
+                </div>
+                <widget :key="layoutItem.key" class="absolute fit"
+                  :resource="layoutItem.resource"
+                  :widget="layoutItem.widget"
+                  v-bind="computeOptions(layoutItem)"
+                  enable-title-click
+                >
+                  <template v-slot:error-after>
+                    <q-btn label="remove" size="sm" flat icon="delete" @click="removeItem(layoutItem)"/>
+                  </template>
+                </widget>
+            </grid-item>
+        </grid-layout>
       </div>
     </div>
 
-    <widget-chooser v-model="pinResourceModal" :pinned="pinnedResources" @done="pin"/>
+    <widget-chooser v-model="pinResourceModal" :pinned="pinnedResources" @done="pin" @cancel="cancelPin"/>
 
     <modal v-model="widgetEdit.modal" title="Edit" icon="edit" :valid-btn-disable="widgetEdit.error" @valid="widgetEditDone">
 
@@ -108,15 +115,6 @@
 
     </modal>
 
-    <q-page-sticky position="bottom-right" :offset="[36, 36]" v-show="editing">
-      <div class=" q-gutter-x-sm">
-        <q-btn rounded size="md" icon="mdi-cancel" color="primary" label="cancel" @click="editing = false"/>
-        <q-btn round size="md" icon="delete" color="primary" @click="removeDashboard()"/>
-        <q-btn round size="md" icon="mdi-settings" color="primary" @click="editDashboard()"/>
-        <q-btn fab icon="add" color="primary" @click="pinResourceModal = true"/>
-      </div>
-    </q-page-sticky>
-
   </q-page>
 </template>
 
@@ -126,11 +124,12 @@ import Vue from 'vue'
 import EThing from 'ething-js'
 import VueGridLayout from 'vue-grid-layout'
 import Widget from '../components/Widget'
-import { debounce, extend, uid } from 'quasar'
+import { debounce, extend, uid, dom, colors } from 'quasar'
 import WidgetChooser from '../components/WidgetChooser'
 import {extend as extendSchema} from '../utils/schema'
 import {dashboardWidgetSchemaDefaults} from '../core/widget'
 
+const { offset, height, width } = dom
 
 var GridLayout = VueGridLayout.GridLayout
 var GridItem = VueGridLayout.GridItem
@@ -171,6 +170,7 @@ export default {
           margin: 10
         },
         pinResourceModal: false,
+        pinLayoutPreset: null,
         editing: false,
 
         widgetEdit: {
@@ -258,7 +258,10 @@ export default {
     },
     currentDashboard: {
       handler (dashboard) {
-        if (dashboard) this.loadLayout(null, dashboard)
+        if (dashboard) {
+          this.loadLayout(null, dashboard)
+          this.loadColors()
+        }
       },
       immediate: true
     },
@@ -266,6 +269,7 @@ export default {
       handler (val) {
         this.iDashboard = val
       },
+      immediate: true
     },
     iDashboard: {
       handler (val) {
@@ -329,8 +333,39 @@ export default {
       })
     },
 
-    handleHold ({ evt, ...info }) {
-      this.editing = !this.editing
+    loadColors () {
+      if (!this.$el) return
+
+      var options = this.currentDashboard.options
+
+      var color = options.widgetsColor
+      if (color) {
+        colors.setBrand('light', colors.lighten(color, (colors.luminosity(color) < 0.5) ? -10 : 10), this.$el)
+      }
+
+      var primaryColor = options.primaryColor
+      if (primaryColor) colors.setBrand('primary', primaryColor, this.$el)
+
+      var secondaryColor = options.secondaryColor
+      if (secondaryColor) colors.setBrand('secondary', secondaryColor, this.$el)
+
+      var accentColor = options.accentColor
+      if (accentColor) colors.setBrand('accent', accentColor, this.$el)
+    },
+
+    handleHold ({ evt, position, ...info }) {
+      var gridEl = this.$refs.grid.$el
+      if (evt.target === gridEl) {
+        var orig = offset(gridEl)
+        var widgetWidth = (width(gridEl) - (this.__columns+1) * this.grid.margin) / this.__columns
+
+        this.pinLayoutPreset = {
+          x: Math.floor((position.left - orig.left) / (widgetWidth + this.grid.margin)),
+          y: Math.floor((position.top - orig.top) / (this.grid.rowHeight + this.grid.margin))
+        }
+
+        this.pinResourceModal = true
+      }
     },
 
     bgClick (evt) {
@@ -343,12 +378,23 @@ export default {
 
       var diff = ts - this.bgClickTs
 
-      if (diff==0) return // bug
+      //console.log('bgClick', diff, evt)
+
+      if (diff<5) return // bug
 
       if (diff < DBL_CLICK_DELAY) {
         // double click
         clearTimeout(this.bgClickTimer)
-        //console.log('BG DBL CLICK', evt)
+        //console.log('BG DBL CLICK')
+
+        var gridEl = this.$refs.grid.$el
+        var orig = offset(gridEl)
+        var widgetWidth = (width(gridEl) - (this.__columns+1) * this.grid.margin) / this.__columns
+
+        this.pinLayoutPreset = {
+          x: Math.floor((evt.x - orig.left) / (widgetWidth + this.grid.margin)),
+          y: Math.floor((evt.y - orig.top) / (this.grid.rowHeight + this.grid.margin))
+        }
 
         this.pinResourceModal = true
 
@@ -437,6 +483,7 @@ export default {
           this.iDashboard++
         } else {
           this.$set(this.currentDashboard, 'options', this.dashboardEdit.model)
+          this.loadColors()
         }
 
         this.dashboardEdit.modal = false
@@ -449,7 +496,11 @@ export default {
       this.dashboards.splice(this.iDashboard, 1)
 
       if (!this.dashboards.length) {
-        this.dashboards.push({})
+        this.dashboards.push({
+          options: {},
+          items: [],
+          layouts: {}
+        })
       }
 
       if (this.iDashboard >= this.dashboards.length) {
@@ -583,16 +634,28 @@ export default {
 
     }, 500),
 
-    addWidget (attr) {
+    addWidget (attr, layoutPreset) {
       var l  = this.normalizeLayoutItem(attr)
-      if (l)
+      if (l) {
+        if (layoutPreset) {
+          Object.assign(l, layoutPreset)
+        }
         this.currentDashboard.items.push(l)
+        if (layoutPreset) {
+          this.saveLayout()
+        }
+      }
     },
 
     pin (info) {
-      this.addWidget(info)
+      this.addWidget(info, this.pinLayoutPreset)
       this.save()
+      this.pinLayoutPreset = null
       this.pinResourceModal = false
+    },
+
+    cancelPin () {
+      this.pinLayoutPreset = null
     },
 
     isEditable (layoutItem) {
@@ -671,7 +734,7 @@ export default {
 }
 
 /* Cf. https://github.com/taye/interact.js/issues/580 */
-.gditem {
+.gditem .dragger {
   -ms-touch-action: none;
       touch-action: none;
 }
@@ -705,5 +768,7 @@ export default {
   border-right: 4px solid #ababab;
   padding: 0 !important;
   z-index: 5 !important;
+  -ms-touch-action: none;
+  touch-action: none;
 }
 </style>

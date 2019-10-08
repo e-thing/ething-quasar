@@ -17,7 +17,7 @@
           <q-icon v-if="icon" :name="icon" left />
           <div v-if="title" class="text-h6">{{ title }}</div>
           <q-space/>
-          <q-btn dense flat icon="close" @click="onCloseBtnClick">Close</q-btn>
+          <q-btn dense flat icon="close" @click="onCloseBtnClick" />
         </div>
       </div>
 
@@ -136,6 +136,8 @@ export default {
         default: 'md'
       },
 
+      minHeight: String,
+
       scroll: Boolean,
 
       noContentPadding: Boolean,
@@ -204,6 +206,7 @@ export default {
         if (this.__size!=100) {
           return {
             maxHeight: '80vh',
+            minHeight: this.minHeight
           }
         }
       },

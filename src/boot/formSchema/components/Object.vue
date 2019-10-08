@@ -1,31 +1,60 @@
 <template>
   <form-schema-layout class="form-schema-object" :class="{indent: level}">
 
-    <template v-if="items.length>0">
-      <div
-        v-for="item in items"
-        :key="item.key"
-        class="form-schema-object-item"
-        :class="{'form-schema-object-item-required': item.required, 'form-schema-object-item-error': !!errors[item.key]}"
-        :style="{display: inlined ? 'inline' : 'block'}"
+    <template v-if="items.length > 1">
+      <q-tabs
+        v-model="group_"
+        dense
+        class="text-grey"
+        align="justify"
       >
-        <div
-          class="form-schema-object-item-title text-subtitle2"
-          :style="{display: inlined ? 'inline' : 'block'}"
-          v-if="!item.schema.$hideLabel"
-        >
-          {{ item.schema.title || item.key }}
-          <!--<small v-if="!inlined && !item.required">(optional)</small>-->
+        <q-tab
+          v-for="g in items"
+          :key="g.name"
+          :name="g.name"
+          :label="g.name"
+          :class="{'text-negative': hasGroupError(g), 'text-primary': g.name === group_}"
+        />
+      </q-tabs>
 
-          <q-toggle class="q-ml-sm" :value="item.enable" v-if="item.schema.$optional" @input="onEnableChange(item, $event)"/>
-        </div>
-        <form-schema v-if="item.enable" :required="item.required" :inline="inlined" :force-description="!inlined" :schema="item.schema" :value="item.model" :level="level+1" @input="onChildValueChange(item, $event)" @error="onChildErrorChange(item, $event)"/>
-      </div>
+      <q-separator class="q-mb-md"/>
     </template>
 
-    <div v-else>
-        <small class="text-faded">empty</small>
-    </div>
+    <q-tab-panels v-model="group_" keep-alive>
+
+      <q-tab-panel
+        v-for="g in items"
+        :key="g.name"
+        :name="g.name"
+        class="q-pa-none"
+      >
+        <template v-if="g.items.length>0">
+          <div
+            v-for="item in g.items"
+            :key="item.key"
+            class="form-schema-object-item"
+            :class="{'form-schema-object-item-required': item.required, 'form-schema-object-item-error': !!errors[item.key]}"
+            :style="{display: inlined ? 'inline' : 'block'}"
+          >
+            <div
+              class="form-schema-object-item-title text-subtitle2"
+              :style="{display: inlined ? 'inline' : 'block'}"
+              v-if="!item.schema.$hideLabel"
+            >
+              {{ item.schema.title || item.key }}
+              <!--<small v-if="!inlined && !item.required">(optional)</small>-->
+
+              <q-toggle class="q-ml-sm" :value="item.enable" v-if="item.schema.$optional" @input="onEnableChange(item, $event)"/>
+            </div>
+            <form-schema v-if="item.enable" :required="item.required" :inline="inlined" :force-description="!inlined" :schema="item.schema" :value="item.model" :level="level+1" @input="onChildValueChange(item, $event)" @error="onChildErrorChange(item, $event)"/>
+          </div>
+        </template>
+
+        <div v-else>
+            <small class="text-faded">empty</small>
+        </div>
+      </q-tab-panel>
+    </q-tab-panels>
 
   </form-schema-layout>
 </template>
@@ -57,7 +86,8 @@ export default {
   data () {
     return {
       errors: {},
-      cache: {}
+      cache: {},
+      group_: null,
     }
   },
 
@@ -86,6 +116,12 @@ export default {
       var keyOrdered = requiredProperties.concat(Object.keys(schema.properties || {}).filter(k => {
           return requiredProperties.indexOf(k)===-1 && readOnlyProperties.indexOf(k)===-1
       })).filter(k => disabledProperties.indexOf(k)===-1 && !!schema.properties[k])
+
+      var groups = []
+      keyOrdered.forEach(key => {
+        var group = schema.properties[key]['$group']
+        if (groups.indexOf(group) === -1) groups.push(group)
+      })
 
       if (schema['$order']) {
         for (var i = schema['$order'].length; i>0; i--) {
@@ -123,9 +159,10 @@ export default {
         this.c_value = copy_value
       }
 
-      return keyOrdered.map(key => {
+      var items = keyOrdered.map(key => {
         var schema_ = schema.properties[key]
         var value = (this.c_value || {})[key]
+        var group = schema_['$group']
 
         var enable = true
 
@@ -138,9 +175,30 @@ export default {
           schema: schema_,
           required:  requiredProperties.indexOf(key) !== -1,
           model: value,
-          enable
+          enable,
+          group
         }
       })
+
+      return groups.map(group => {
+        var groupName = group || 'general';
+        return {
+          name: groupName,
+          items: items.filter(i => i.group === group)
+        }
+      })
+    }
+  },
+
+  watch : {
+    items: {
+      handler (val) {
+        var groups = val.map(g => g.name)
+        if (this.group_ === null || groups.indexOf(this.group_) === -1) {
+          this.group_ = groups[0]
+        }
+      },
+      immediate: true
     }
   },
 
@@ -168,6 +226,12 @@ export default {
         this.cache[item.key] = this.c_value[item.key]
         this.$delete(this.c_value, item.key)
       }
+    },
+
+    hasGroupError (group) {
+      return group.items.some(item => {
+        return this.errors[item.key]
+      })
     }
   },
 

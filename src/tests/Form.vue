@@ -1,10 +1,15 @@
 <template>
-  <div>
+  <div class="row q-col-gutter-x-md">
 
-    <form-schema :schema="schema" v-model="model" @error="error = $event"/>
+    <form-schema class="col-6" :schema="schema" v-model="model" @error="error = $event"/>
 
-    <div>
-      error: {{ error}}
+    <div class="col-6">
+      <div>
+        error: {{ error}}
+      </div>
+      <div>
+        <pre>{{ model }}</pre>
+      </div>
     </div>
 
   </div>
@@ -12,8 +17,12 @@
 
 <script>
 
+import JsonFormatter from '../components/JsonFormatter'
+
 export default {
   name: 'TestForm',
+
+  components: {JsonFormatter},
 
   data () {
 
@@ -25,6 +34,17 @@ export default {
             "type": "string",
             "minLength": 1
           },
+          "obj_group": {
+            "type": "object",
+            "properties": {
+              'grpa_a': {type:'string', '$group': 'grpa'},
+              'grpa_b': {type:'string', '$group': 'grpa'},
+              'grpb_a': {type:'string', '$group': 'grpb', "minLength": 1},
+              'grpb_b': {type:'string', '$group': 'grpb'},
+            },
+            required: ['grpb_a']
+          },
+
           widgetsBackgroundColor: {
             oneOf:[{
               const: null,
@@ -105,7 +125,7 @@ export default {
     }
 
   },
-  
+
 }
 </script>
 

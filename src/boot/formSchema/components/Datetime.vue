@@ -13,8 +13,8 @@
         <q-icon :name="showDate ? 'event' : 'access_time'" class="cursor-pointer">
           <q-dialog v-model="isDialogOpen" transition-show="scale" transition-hide="scale" square>
             <div class="row items-stretch" :style="{'max-width': __width, 'width': __width}">
-              <q-date v-if="showDate" class="col-xs-12 no-shadow no-border-radius" :class="__both ? 'col-sm-6' : ''" v-model="_date" mask="YYYY-MM-DD HH:mm" ></q-date>
-              <q-time v-if="showTime" class="col-xs-12 no-shadow no-border-radius" :class="__both ? 'col-sm-6' : ''" v-model="_date" mask="YYYY-MM-DD HH:mm" format24h ></q-time>
+              <q-date v-if="showDate" class="col-xs-12 no-shadow no-border-radius" :class="__both ? 'col-sm-6' : ''" v-model="_date" :mask="_mask" ></q-date>
+              <q-time v-if="showTime" class="col-xs-12 no-shadow no-border-radius" :class="__both ? 'col-sm-6' : ''" v-model="_date" :mask="_mask" format24h ></q-time>
             </div>
           </q-dialog>
         </q-icon>
@@ -44,6 +44,12 @@ export default {
     },
     showTime () {
       return this.c_schema.format !== 'date'
+    },
+    _mask () {
+      var format = this.c_schema.format
+      if (format === 'time') return 'HH:mm'
+      if (format === 'date') return 'YYYY-MM-DD'
+      return 'YYYY-MM-DD HH:mm'
     },
     _date: {
       // getter

@@ -4,13 +4,15 @@
     ref="modal"
     :value="value"
     @input="$emit('input', $event)"
-    title="Pin resource"
+    title="Pin widget"
     v-bind="$attrs"
     size="lg"
     valid-btn-label="pin"
     :valid-btn-disable="!selectedWidget || optionsError"
     @valid="done"
+    @cancel="cancel"
     no-content-padding
+    min-height="60vh"
   >
 
     <div class="items-stretch fit" :class="$q.screen.gt.sm ? 'row' : 'column'">
@@ -244,6 +246,10 @@ export default {
       }
 
     },
+
+    cancel () {
+      this.$emit('cancel')
+    }
 
   }
 

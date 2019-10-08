@@ -1,7 +1,7 @@
 <template>
   <div class="widget column" :class="{'widget-err': __hasError}" :style="__style">
 
-    <div class="col-auto title full-width" v-if="!dense && (__title || $slots.title)" @click="__titleClick" :class="{'cursor-pointer': enableTitleClick}" >
+    <div class="col-auto title full-width text-subtitle1" v-if="!dense && (__title || $slots.title)" @click="__titleClick" :class="{'cursor-pointer': enableTitleClick}" >
       <slot name="title">
         <div class="text-center ellipsis">{{ __title }}</div>
       </slot>
@@ -75,6 +75,7 @@ export default {
       // options
       title: String,
       footer: String,
+
       color: {
         type: String,
         default: 'primary'
@@ -83,6 +84,9 @@ export default {
         type: String,
         default: 'white'
       },
+      primaryColor: String,
+      secondaryColor: String,
+      accentColor: String,
 
       enableTitleClick: Boolean,
       enableFooterClick: Boolean,
@@ -93,6 +97,12 @@ export default {
       return {
         error: false,
       };
+    },
+
+    watch: {
+      color () {
+        this.loadColors()
+      }
     },
 
     computed: {
@@ -230,6 +240,30 @@ export default {
         }
       },
 
+      loadColors () {
+        if (!this.$el) return
+
+        var options = this.$attrs
+
+        var color = this.__color
+        if (color) {
+          colors.setBrand('light', colors.lighten(color, (colors.luminosity(color) < 0.5) ? -10 : 10), this.$el)
+        }
+
+        var primaryColor = options.primaryColor
+        if (primaryColor) colors.setBrand('primary', primaryColor, this.$el)
+
+        var secondaryColor = options.secondaryColor
+        if (secondaryColor) colors.setBrand('secondary', secondaryColor, this.$el)
+
+        var accentColor = options.accentColor
+        if (accentColor) colors.setBrand('accent', accentColor, this.$el)
+      },
+
+    },
+
+    mounted () {
+      this.loadColors()
     }
 
 }

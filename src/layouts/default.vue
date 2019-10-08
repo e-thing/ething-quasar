@@ -96,7 +96,7 @@
             >
               <q-item-section avatar></q-item-section>
               <q-item-section>
-                <q-item-label>{{ title }}</q-item-label>
+                <q-item-label :lines="1">{{ title }}</q-item-label>
               </q-item-section>
             </q-item>
 
@@ -245,9 +245,7 @@
           <q-spinner-pie color="primary" size="50px" />
         </div>
       </q-inner-loading>
-      <keep-alive v-else include="PageDashboard">
-        <router-view/>
-      </keep-alive>
+      <router-view v-else/>
       <v-keyboard v-if="vKeyboardEnabled"/>
     </q-page-container>
   </q-layout>
