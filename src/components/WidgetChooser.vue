@@ -29,12 +29,11 @@
       <q-card flat class="col scroll fit">
 
         <!-- resource select -->
-        <q-card-section v-if="widgetType==='resource'">
+        <q-card-section v-if="widgetType==='resource'" class="q-mb-md">
 
 
-          <div class="text-h6 q-mb-md">
+          <div class="text-h6 q-mb-md text-secondary">
             <q-icon name="mdi-chevron-double-right"/> Select the resource to pin
-            <q-separator/>
           </div>
 
           <div v-if="resources.length">
@@ -54,10 +53,9 @@
           </q-banner>
         </q-card-section>
 
-        <q-card-section v-if="widgets && Object.keys(widgets).length > 0">
-          <div class="text-h6 q-my-md">
+        <q-card-section v-if="widgets && Object.keys(widgets).length > 0" class="q-mb-md">
+          <div class="text-h6 q-mb-md text-secondary">
             <q-icon name="mdi-chevron-double-right"/> Choose the widget type
-            <q-separator/>
           </div>
 
           <q-list>
@@ -77,15 +75,50 @@
 
         </q-card-section>
 
-        <q-card-section v-if="widgetOptions">
-          <div class="text-h6 q-my-md">
+        <q-card-section v-if="widgetOptions" class="q-mb-md">
+          <div class="text-h6 q-mb-md text-secondary">
             <q-icon name="mdi-chevron-double-right"/> Configure the widget
-            <q-separator/>
           </div>
 
           <form-schema :key="widgetId" :schema="widgetOptions" v-model="options" @error="optionsError = $event"/>
         </q-card-section>
 
+      </q-card>
+
+      <q-card flat class="col-4 scroll" v-if="selectedWidget"
+        @mousemove="previewResizeMove"
+        @mouseup="previewResizeStop"
+      >
+        <q-card-section>
+          <div class="text-h6 q-mb-md text-secondary">
+            <q-icon name="mdi-chevron-double-right"/> Preview
+          </div>
+
+          <div v-if="!optionsError" id="previewWrapper">
+            <widget
+              :resource="resource"
+              :widget="selectedWidget"
+              v-bind="options"
+              style="min-height: 100px;border: 1px solid #e2e2e2;"
+              :style="{height: previewHeight+'px'}"
+            />
+            <div class="text-light text-center" style="cursor: row-resize;"
+              v-if="$q.screen.gt.sm"
+              @mousedown="previewResizeStart"
+            >
+              change height
+            </div>
+            <div class="text-light row justify-center items-center"
+              v-else
+            >
+              <q-btn flat dense size="sm" icon="mdi-minus-box-outline" @click="previewHeight -= 40" />
+              <div>change height</div>
+              <q-btn flat dense size="sm" icon="mdi-plus-box-outline" @click="previewHeight += 40" />
+            </div>
+          </div>
+          <div class="text-light text-center q-py-md" v-else>No preview</div>
+
+        </q-card-section>
       </q-card>
 
     </div>
@@ -100,6 +133,7 @@ import {extend as extendSchema} from '../utils/schema'
 import {dashboardWidgetSchemaDefaults} from '../core/widget'
 import ResourceList from '../components/ResourceList'
 import ResourceSelect from '../components/ResourceSelect'
+import { dom } from 'quasar'
 
 
 export default {
@@ -136,7 +170,10 @@ export default {
             return !found
           },
         },
-        currentFilter: 'devices'
+        currentFilter: 'devices',
+        previewHeight: 200,
+        previewResizing: false,
+        previewResizeLastPos: null
       }
   },
 
@@ -207,7 +244,11 @@ export default {
 
     filteredResources () {
       return this.resources.filter(this.filters[this.currentFilter])
-    }
+    },
+
+    preview () {
+      return this.resource && this.selectedWidget && !this.optionsError
+    },
 
   },
 
@@ -249,6 +290,22 @@ export default {
 
     cancel () {
       this.$emit('cancel')
+    },
+
+    previewResizeStart (evt) {
+      this.previewResizing = true
+      this.previewResizeLastPos = evt.y
+    },
+
+    previewResizeMove (evt) {
+      if (this.previewResizing) {
+        this.previewHeight += evt.y - this.previewResizeLastPos
+        this.previewResizeLastPos = evt.y
+      }
+    },
+
+    previewResizeStop (evt) {
+      this.previewResizing = false
     }
 
   }

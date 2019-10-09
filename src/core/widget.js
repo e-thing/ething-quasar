@@ -1,5 +1,5 @@
 // widgets module
-import { extend } from 'quasar'
+import { extend, colors } from 'quasar'
 import {defaultMerge,mapMerge,functionMerge,vueComponentMerge} from '../utils/merging'
 
 
@@ -92,7 +92,8 @@ export function dashboardWidgetSchemaDefaults (widget, resource) {
         }],
         description: 'The color of the widget',
         default: null,
-        '$inline': true
+        '$inline': true,
+        '$group': 'Appearance'
       },
       bgColor: {
         oneOf:[{
@@ -108,7 +109,40 @@ export function dashboardWidgetSchemaDefaults (widget, resource) {
         title: 'background color',
         description: 'The color of the widget\'s background',
         default: null,
-        '$inline': true
+        '$inline': true,
+        '$group': 'Appearance'
+      },
+      primaryColor: {
+        oneOf:[{
+          const: null,
+          title: 'inherit'
+        }, {
+          type: 'string',
+          '$component': 'color',
+          default: colors.getBrand('primary'),
+          title: 'custom'
+        }],
+        title: 'primary color',
+        description: 'The primary color of the widget',
+        default: null,
+        '$inline': true,
+        '$group': 'Appearance'
+      },
+      secondaryColor: {
+        oneOf:[{
+          const: null,
+          title: 'inherit'
+        }, {
+          type: 'string',
+          '$component': 'color',
+          default: colors.getBrand('secondary'),
+          title: 'custom'
+        }],
+        title: 'secondary color',
+        description: 'The secondary color of the widget',
+        default: null,
+        '$inline': true,
+        '$group': 'Appearance'
       },
     }
   }

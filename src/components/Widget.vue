@@ -263,20 +263,18 @@ export default {
       loadColors () {
         if (!this.$el) return
 
-        var options = this.$attrs
-
         var color = this.__color
         if (color) {
           colors.setBrand('light', colors.lighten(color, (colors.luminosity(color) < 0.5) ? 40 : -30), this.$el)
         }
 
-        var primaryColor = options.primaryColor
+        var primaryColor = this.primaryColor
         if (primaryColor) colors.setBrand('primary', primaryColor, this.$el)
 
-        var secondaryColor = options.secondaryColor
+        var secondaryColor = this.secondaryColor
         if (secondaryColor) colors.setBrand('secondary', secondaryColor, this.$el)
 
-        var accentColor = options.accentColor
+        var accentColor = this.accentColor
         if (accentColor) colors.setBrand('accent', accentColor, this.$el)
       },
 

@@ -35,20 +35,24 @@
         <q-btn flat stretch color="white" label="cancel" @click="editing = false"/>
       </div>
 
-      <div class="col scroll relative-position">
-
-        <div v-if="currentDashboard.items.length==0" class="absolute-center text-center">
+      <div class="col relative-position" v-if="currentDashboard.items.length==0">
+        <div class="absolute-center text-center">
           <p>
-            <img
-              src="~assets/sad.svg"
-              style="width:30vw;max-width:150px;"
-            >
+            <q-icon name="error_outline" color="secondary" style="font-size: 6em;" />
           </p>
           <p class="text-faded">No widgets</p>
           <q-btn icon="mdi-pin" label="pin widget" color="secondary" @click="pinResourceModal = true"/>
         </div>
+      </div>
 
-        <grid-layout v-else
+      <q-scroll-area
+        class="col relative-position"
+        v-else
+        @click.native="bgClick"
+        v-touch-hold.mouse="handleHold"
+      >
+
+        <grid-layout
           ref="grid"
           :layout.sync="currentDashboard.items"
           :col-num="__columns"
@@ -60,10 +64,7 @@
           :margin="[grid.margin, grid.margin]"
           :use-css-transforms="true"
           :key="iDashboard"
-          @click.native.self="bgClick"
-          v-touch-hold="handleHold"
           @layout-updated="layoutUpdatedEvent"
-          style="min-height: 100%;"
         >
             <grid-item v-for="(layoutItem) in currentDashboard.items" :key="layoutItem.i"
                :x="layoutItem.x"
@@ -76,12 +77,13 @@
                class="gditem"
                drag-ignore-from="button"
                drag-allow-from=".dragger"
+               @touchstart.stop @mousedown.stop @click.native.stop
             >
                 <div v-show="editing" class="absolute fit widget-edit-layer">
                   <q-btn-group flat class="absolute-center" >
                     <q-btn class="dragger" flat icon="mdi-cursor-move" color="faded" type="a"/>
                     <q-btn v-if="isEditable(layoutItem)" flat icon="settings" color="faded" @click="editItem(layoutItem)"/>
-                    <q-btn flat icon="delete" color="negative" @click="removeItem(layoutItem)"/>
+                    <q-btn flat icon="delete" color="negative" @click="removeWidget(layoutItem)"/>
                   </q-btn-group>
                 </div>
                 <widget :key="layoutItem.key" class="absolute fit"
@@ -91,12 +93,12 @@
                   enable-title-click
                 >
                   <template v-slot:error-after>
-                    <q-btn label="remove" size="sm" flat icon="delete" @click="removeItem(layoutItem)"/>
+                    <q-btn label="remove" size="sm" flat icon="delete" @click="removeWidget(layoutItem)"/>
                   </template>
                 </widget>
             </grid-item>
         </grid-layout>
-      </div>
+      </q-scroll-area>
     </div>
 
     <widget-chooser v-model="pinResourceModal" :pinned="pinnedResources" @done="pin" @cancel="cancelPin"/>
@@ -296,26 +298,27 @@ export default {
       if (!dashboard) return
       var layouts = dashboard.layouts || {}
       var layout = layouts[colNb] || []
+      var save = false
       dashboard.items.forEach(item => {
         var layoutItem = this.findItemInLayout(layout, item.i)
         if (!layoutItem) {
-          // try to find in any other layout
-          for (var i in layouts) {
-            layoutItem = this.findItemInLayout(layouts[i], item.i)
-            if (layoutItem) break
-          }
-          if (!layoutItem) {
-            // default
-            layoutItem = {
-              x: 0,
-              y: 0,
-              w: 1,
-              h: 1
-            }
-          }
+          // find the first free place
+          layoutItem = this.findFreePlaceInLayout(colNb, layout, 1, 1)
+
+          layout.push({
+            i:item.i,
+            ...layoutItem
+          })
+
+          save = true
         }
         Object.assign(item, layoutItem)
       })
+
+      if (save) {
+        this.saveLayout()
+        this.save()
+      }
     },
 
     saveLayout (colNb, dashboard) {
@@ -354,18 +357,16 @@ export default {
     },
 
     handleHold ({ evt, position, ...info }) {
-      var gridEl = this.$refs.grid.$el
-      if (evt.target === gridEl) {
-        var orig = offset(gridEl)
-        var widgetWidth = (width(gridEl) - (this.__columns+1) * this.grid.margin) / this.__columns
+      /*var gridEl = this.$refs.grid.$el
+      var orig = offset(gridEl)
+      var widgetWidth = (width(gridEl) - (this.__columns+1) * this.grid.margin) / this.__columns
 
-        this.pinLayoutPreset = {
-          x: Math.floor((position.left - orig.left) / (widgetWidth + this.grid.margin)),
-          y: Math.floor((position.top - orig.top) / (this.grid.rowHeight + this.grid.margin))
-        }
+      this.pinLayoutPreset = {
+        x: Math.floor((position.left - orig.left) / (widgetWidth + this.grid.margin)),
+        y: Math.floor((position.top - orig.top) / (this.grid.rowHeight + this.grid.margin))
+      }*/
 
-        this.pinResourceModal = true
-      }
+      this.pinResourceModal = true
     },
 
     bgClick (evt) {
@@ -387,14 +388,14 @@ export default {
         clearTimeout(this.bgClickTimer)
         //console.log('BG DBL CLICK')
 
-        var gridEl = this.$refs.grid.$el
+        /*var gridEl = this.$refs.grid.$el
         var orig = offset(gridEl)
         var widgetWidth = (width(gridEl) - (this.__columns+1) * this.grid.margin) / this.__columns
 
         this.pinLayoutPreset = {
           x: Math.floor((evt.x - orig.left) / (widgetWidth + this.grid.margin)),
           y: Math.floor((evt.y - orig.top) / (this.grid.rowHeight + this.grid.margin))
-        }
+        }*/
 
         this.pinResourceModal = true
 
@@ -637,13 +638,9 @@ export default {
     addWidget (attr, layoutPreset) {
       var l  = this.normalizeLayoutItem(attr)
       if (l) {
-        if (layoutPreset) {
-          Object.assign(l, layoutPreset)
-        }
+        Object.assign(l, layoutPreset || this.findFreePlaceInLayout())
         this.currentDashboard.items.push(l)
-        if (layoutPreset) {
-          this.saveLayout()
-        }
+        this.saveLayout()
       }
     },
 
@@ -692,10 +689,23 @@ export default {
       }
     },
 
-    removeItem (layoutItem) {
+    removeWidget (layoutItem) {
       var index = this.currentDashboard.items.indexOf(layoutItem)
       if (index !== -1) {
         this.currentDashboard.items.splice(index, 1)
+
+        // remove from layouts
+        var layouts = this.currentDashboard.layouts
+        for (var k in layouts) {
+          var layout = layouts[k];
+          for (var j in layout) {
+            if (layout[j].i === layoutItem.i) {
+              layout.splice(j, 1)
+              break
+            }
+          }
+        }
+
         this.save()
       }
     },
@@ -710,7 +720,50 @@ export default {
           return layout[j]
         }
       }
-    }
+    },
+
+    findFreePlaceInLayout (colNumber, layout, width, height) {
+      colNumber = colNumber || this.__columns
+      layout = layout || this.currentDashboard.layouts[colNumber] || {}
+      width = width || 1
+      height = height || 1
+
+      function isFree(i, j) {
+        var free = true
+        for (var k in layout) {
+          var item = layout[k];
+          if (i>=item.x && i<(item.x+item.w) && j>=item.y && j<(item.y+item.h)) {
+            // not free
+            free = false
+            break
+          }
+        }
+        return free
+      }
+
+      for (var j=0; ; j++) {
+        for (var i=0; i<colNumber; i++) {
+          var free = true
+          for (var w=0; w<width && free; w++) {
+            for (var h=0; h<height && free; h++) {
+              if(!isFree(i+w, j+h)) {
+                free=false
+                break
+              }
+            }
+          }
+          if (free) {
+            console.log('findFreePlaceInLayout', colNumber, Object.assign({}, layout), i, j, width, height)
+            return {
+              x: i,
+              y: j,
+              w: width,
+              h: height
+            }
+          }
+        }
+      }
+    },
 
   },
 

@@ -165,7 +165,7 @@ export default {
         var id = 'custom'+index
         actions.push({
           label: action.label,
-          color: action.color,
+          color: action.color || 'secondary',
           icon: action.icon,
           id
         })
@@ -187,7 +187,8 @@ export default {
       actions.push({
         label: 'Settings',
         icon: 'settings',
-        id: 'settings'
+        id: 'settings',
+        color: 'grey'
       })
       handlers['settings'] = () => {
         return this.openSettings()

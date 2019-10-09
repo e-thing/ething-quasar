@@ -4,6 +4,7 @@ import Table from './Table'
 import Device from './Device'
 import Flow from './Flow'
 import Group from './Group'
+import LightGroup from './LightGroup'
 
 export default {
   Resource,
@@ -12,4 +13,5 @@ export default {
   Device,
   Flow,
   Group,
+  LightGroup,
 }
