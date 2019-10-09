@@ -94,6 +94,7 @@ export default {
       },
 
       updateLayout (size) {
+        if (!size.height && !size.width) return
         var ratio = size.width / size.height;
         this.vertical = ratio < 2
       }

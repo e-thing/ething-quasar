@@ -679,7 +679,7 @@ export default {
       this.resize()
     },
 
-    resize: debounce( function () {
+    resize: debounce( function (size) {
       var chart = this.chart()
       if (chart) chart.reflow()
     }, 1000),

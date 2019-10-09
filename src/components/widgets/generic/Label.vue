@@ -38,6 +38,7 @@ export default {
     methods: {
 
       updateLayout (size) {
+        if (!size.height && !size.width) return
         var height = size.height
         var lineHeight = 1.5
         var g = 2 // big = 200 %

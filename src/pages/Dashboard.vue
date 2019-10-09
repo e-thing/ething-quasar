@@ -13,7 +13,7 @@
       <q-resize-observer @resize="onPageResize" />
 
       <q-btn-group flat class="col-auto row items-center full-width" v-show="!editing">
-        <q-btn size="lg" class="col-auto" flat icon="mdi-chevron-left" :disabled="iDashboard <= 0" @click="iDashboard = iDashboard - 1"/>
+        <q-btn size="lg" class="col-auto" flat icon="mdi-chevron-left" :style="iDashboard <= 0 ? 'visibility: hidden' : ''" @click="iDashboard = iDashboard - 1"/>
         <div class="col text-center ellipsis">
           <q-btn-dropdown flat :label="currentDashboard.options.title" size="lg">
             <q-list class="text-faded">
@@ -53,8 +53,9 @@
       >
 
         <grid-layout
-          ref="grid"
-          :layout.sync="currentDashboard.items"
+          v-for="cacheItem in cache" :key="cacheItem.id"
+          v-show="currentDashboard.id === cacheItem.dashboard.id"
+          :layout.sync="cacheItem.dashboard.items"
           :col-num="__columns"
           :row-height="grid.rowHeight"
           :is-draggable="draggable"
@@ -63,10 +64,9 @@
           prevent-collision
           :margin="[grid.margin, grid.margin]"
           :use-css-transforms="true"
-          :key="iDashboard"
           @layout-updated="layoutUpdatedEvent"
         >
-            <grid-item v-for="(layoutItem) in currentDashboard.items" :key="layoutItem.i"
+            <grid-item v-for="(layoutItem) in cacheItem.dashboard.items" :key="layoutItem.i"
                :x="layoutItem.x"
                :y="layoutItem.y"
                :w="layoutItem.w"
@@ -82,18 +82,18 @@
                 <div v-show="editing" class="absolute fit widget-edit-layer">
                   <q-btn-group flat class="absolute-center" >
                     <q-btn class="dragger" flat icon="mdi-cursor-move" color="faded" type="a"/>
-                    <q-btn v-if="isEditable(layoutItem)" flat icon="settings" color="faded" @click="editItem(layoutItem)"/>
-                    <q-btn flat icon="delete" color="negative" @click="removeWidget(layoutItem)"/>
+                    <q-btn v-if="isEditable(cacheItem.dashboard, layoutItem)" flat icon="settings" color="faded" @click="editItem(cacheItem.dashboard, layoutItem)"/>
+                    <q-btn flat icon="delete" color="negative" @click="removeWidget(cacheItem.dashboard, layoutItem)"/>
                   </q-btn-group>
                 </div>
                 <widget :key="layoutItem.key" class="absolute fit"
                   :resource="layoutItem.resource"
                   :widget="layoutItem.widget"
-                  v-bind="computeOptions(layoutItem)"
+                  v-bind="computeOptions(cacheItem.dashboard, layoutItem)"
                   enable-title-click
                 >
                   <template v-slot:error-after>
-                    <q-btn label="remove" size="sm" flat icon="delete" @click="removeWidget(layoutItem)"/>
+                    <q-btn label="remove" size="sm" flat icon="delete" @click="removeWidget(cacheItem.dashboard, layoutItem)"/>
                   </template>
                 </widget>
             </grid-item>
@@ -138,6 +138,9 @@ var GridItem = VueGridLayout.GridItem
 
 const DBL_CLICK_DELAY  = 200
 
+const CACHE_TIMEOUT = 300000
+const CACHE_CHECK_INTERVAL = 5000
+
 const LAYOUTS = [{
   columns: 2,
   breakpoint: 0,
@@ -167,6 +170,7 @@ export default {
         loading: false,
         iDashboard: 0,
         dashboards: [],
+        cache: [],
         grid: {
           rowHeight: 120, // in px
           margin: 10
@@ -261,6 +265,7 @@ export default {
     currentDashboard: {
       handler (dashboard) {
         if (dashboard) {
+          this.cacheDashboard(dashboard)
           this.loadLayout(null, dashboard)
           this.loadColors()
         }
@@ -286,7 +291,44 @@ export default {
   },
 
   methods: {
-    layoutUpdatedEvent: function(newLayout){
+
+    cacheDashboard (dashboard) {
+      var cache = this.cache, item = null;
+      for(var i in cache) {
+        if (cache[i].id === dashboard.id) {
+          item = cache[i]
+          break
+        }
+      }
+      if (!item) {
+        // not in cache, add it !
+        console.log('add cache')
+        item = {
+          id: dashboard.id,
+          dashboard
+        }
+        cache.push(item)
+      }
+      item.ts = Date.now()
+    },
+
+    checkCache () {
+      var now = Date.now();
+      var cache = this.cache;
+
+      for(var i=0; i<cache.length; i++) {
+        if (cache[i].id === this.currentDashboard.id) {
+          cache[i].ts = now
+        }
+        else if (now > cache[i].ts + CACHE_TIMEOUT ) {
+          console.log('remove cache')
+          cache.splice(i, 1)
+          i--
+        }
+      }
+    },
+
+    layoutUpdatedEvent (newLayout) {
       if (!this.editing) return
       this.saveLayout()
       this.save()
@@ -479,7 +521,8 @@ export default {
           this.dashboards.push({
             options: this.dashboardEdit.model,
             items: [],
-            layouts: {}
+            layouts: {},
+            id: uid()
           })
           this.iDashboard++
         } else {
@@ -500,7 +543,8 @@ export default {
         this.dashboards.push({
           options: {},
           items: [],
-          layouts: {}
+          layouts: {},
+          id: uid()
         })
       }
 
@@ -530,7 +574,8 @@ export default {
         return {
           options,
           items: (d.widgets || []).map(l => this.normalizeLayoutItem(l)).filter(l => !!l),
-          layouts: d.layouts || {}
+          layouts: d.layouts || {},
+          id: uid()
         }
       })
 
@@ -606,14 +651,14 @@ export default {
       }
     },
 
-    computeOptions (layoutItem) {
+    computeOptions (dashboard, layoutItem) {
       var options = extend(true, {}, layoutItem.item.options)
 
       if (!options.bgColor) {
-        options.bgColor = this.currentDashboard.options.widgetsBackgroundColor
+        options.bgColor = dashboard.options.widgetsBackgroundColor
       }
       if (!options.color) {
-        options.color = this.currentDashboard.options.widgetsColor
+        options.color = dashboard.options.widgetsColor
       }
 
       return options
@@ -655,11 +700,11 @@ export default {
       this.pinLayoutPreset = null
     },
 
-    isEditable (layoutItem) {
+    isEditable (dashboard, layoutItem) {
       return true
     },
 
-    editItem (layoutItem) {
+    editItem (dashboard, layoutItem) {
       var schema = extendSchema(dashboardWidgetSchemaDefaults(layoutItem.widget, layoutItem.resource), layoutItem.widget.schema)
 
       this.widgetEdit.key++
@@ -689,13 +734,13 @@ export default {
       }
     },
 
-    removeWidget (layoutItem) {
-      var index = this.currentDashboard.items.indexOf(layoutItem)
+    removeWidget (dashboard, layoutItem) {
+      var index = dashboard.items.indexOf(layoutItem)
       if (index !== -1) {
-        this.currentDashboard.items.splice(index, 1)
+        dashboard.items.splice(index, 1)
 
         // remove from layouts
-        var layouts = this.currentDashboard.layouts
+        var layouts = dashboard.layouts
         for (var k in layouts) {
           var layout = layouts[k];
           for (var j in layout) {
@@ -753,7 +798,6 @@ export default {
             }
           }
           if (free) {
-            console.log('findFreePlaceInLayout', colNumber, Object.assign({}, layout), i, j, width, height)
             return {
               x: i,
               y: j,
@@ -769,11 +813,15 @@ export default {
 
   mounted () {
     this.$ethingUI.on('ui.dashboard.config', this.load)
+    this.cacheTimer = setInterval(this.checkCache, CACHE_CHECK_INTERVAL)
     this.load()
   },
 
   beforeDestroy () {
     this.$ethingUI.off('ui.dashboard.config', this.load)
+    if (this.cacheTimer) {
+      clearInterval(this.checkCache)
+    }
   }
 
 }

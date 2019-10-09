@@ -91,6 +91,7 @@ export default {
       },
 
       updateLayout (size) {
+        if (!size.height && !size.width) return
         if (Math.max(size.width, size.height) < 200) {
           this.vertical = true
           this.controlsVertical = false

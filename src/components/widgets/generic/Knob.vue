@@ -116,6 +116,7 @@ export default {
     methods: {
 
       updateLayout (size) {
+        if (!size.height && !size.width) return
         //var knobSize = parseInt(Math.min(size.width, size.height) / 1.5)
         var knobSize = Math.min(size.width, size.height)
         this.knobSize = knobSize + 'px'
