@@ -97,10 +97,11 @@ export default {
 
       model: {
         get: function () {
-          var mids = this.selectedResources.map(r => {
+          var mids = [];
+          this.selectedResources.forEach(r => {
             for (var i in this.options) {
               if (this.options[i].value === r.id()) {
-                return this.options[i]
+                mids.push(this.options[i])
               }
             }
           })
@@ -198,6 +199,10 @@ export default {
       },
 
     },
+
+    created () {
+      this.options = this.compute_options()
+    }
 
 
 }

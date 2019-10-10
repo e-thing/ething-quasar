@@ -10,7 +10,7 @@
 
     <div v-else-if="currentDashboard" class="absolute fit column">
 
-      <q-resize-observer @resize="onPageResize" />
+      <q-resize-observer @resize="onPageResize" debounce="250" />
 
       <q-btn-group flat class="col-auto row items-center full-width" v-show="!editing">
         <q-btn size="lg" class="col-auto" flat icon="mdi-chevron-left" :style="iDashboard <= 0 ? 'visibility: hidden' : ''" @click="iDashboard = iDashboard - 1"/>
