@@ -37,7 +37,7 @@ export default {
   		eventsSocket.on('*', (event, a) => {
   			// console.log('[socketio]', event)
   			var signal = event.data[1];
-  			EThing.arbo.dispatch(JSON.parse(signal))
+  			EThing.dispatch(JSON.parse(signal))
   		})
 
       notifSocket.on('connect', () => {
