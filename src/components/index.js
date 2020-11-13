@@ -1,13 +1,14 @@
 
 import Chart from './Chart'
 import Cron from './Cron'
-import DeviceApi from './DeviceApi'
+import EntityApi from './EntityApi'
 import FlowNode from './FlowNode'
 import ImageViewer from './ImageViewer'
 import Modal from './Modal'
 import ResourceEditor from './ResourceEditor'
 import ResourceQItem from './ResourceQItem'
 import ResourceSelect from './ResourceSelect'
+import PluginSelect from './PluginSelect'
 import Widget from './Widget'
 import ResourceObservable from './ResourceObservable'
 import widgets from './widgets'
@@ -22,13 +23,14 @@ export {
     widgets,
     FlowNodes,
     Chart,
-    DeviceApi,
+    EntityApi,
     FlowNode,
     ImageViewer,
     Modal,
     ResourceEditor,
     ResourceQItem,
     ResourceSelect,
+    PluginSelect,
     Widget,
     ResourceObservable,
     ResourceActivity,

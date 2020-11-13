@@ -124,10 +124,10 @@
     <div v-if="Object.keys(staticMeta.methods).length">
       <div class="text-h6 text-grey-8 q-py-md">
         <q-icon name="mdi-console" left/>
-        <span>Commands</span>
+        <span>Controls</span>
       </div>
       <div class="bg-white">
-        <device-api :device="resource" />
+        <entity-api :entity="resource" />
       </div>
     </div>
 
@@ -184,7 +184,7 @@ export default {
       var types = this.resource.types()
       for (var i in types) {
         var t = types[i]
-        if (t==currentType || t=='interfaces/Sensor') continue
+        if (t==currentType || t=='interfaces/Sensor' || t=='resources/Device') continue
         if (t=='resources/Resource') break
         var m = this.$ethingUI.getRaw(t)
         if (m && m.icon && extendsIcons.indexOf(m.icon) === -1 && m.icon != staticMeta.icon) {

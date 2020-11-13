@@ -162,7 +162,26 @@
             v-ripple
             clickable
             dense
+            class="sub"
+            :inset-level="1"
+            :to="{name:'explore', query:{deviceMenu: 'all'}}"
+            exact
+          >
+            <q-item-section>
+              <q-item-label>All</q-item-label>
+            </q-item-section>
+
+            <q-item-section side>
+              <q-badge color="primary" :label="__devicesLen" />
+            </q-item-section>
+          </q-item>
+
+          <q-item
+            v-ripple
+            clickable
+            dense
             v-for="(item, index) in __deviceItems" :key="'device-'+index"
+            v-if="item.len>0"
             class="sub"
             :to="{name:'explore', query:{deviceMenu: index}}"
             exact
@@ -173,19 +192,8 @@
             <q-item-section>
               <q-item-label>{{ item.label }}</q-item-label>
             </q-item-section>
-          </q-item>
-
-          <q-item
-            v-ripple
-            clickable
-            dense
-            class="sub"
-            :inset-level="1"
-            :to="{name:'explore', query:{deviceMenu: 'other'}}"
-            exact
-          >
-            <q-item-section>
-              <q-item-label>Other</q-item-label>
+            <q-item-section side>
+              <q-badge color="primary" :label="item.len" />
             </q-item-section>
           </q-item>
 
@@ -213,15 +221,15 @@
             </q-item-section>
           </q-item>
 
-          <q-separator class="q-mt-md q-mb-xs" />
+          <q-separator class="q-mt-md q-mb-xs lt-sm" />
 
-          <q-item clickable :to="{name:'system'}" v-ripple exact>
+          <q-item clickable :to="{name:'system'}" v-ripple exact class="lt-sm">
             <q-item-section avatar>
               <q-icon name="settings" />
             </q-item-section>
             <q-item-section>Settings</q-item-section>
           </q-item>
-          <q-item v-if="!$ethingUI.autoLogin" clickable @click="logout" v-ripple>
+          <q-item v-if="!$ethingUI.autoLogin" clickable @click="logout" v-ripple class="lt-sm">
             <q-item-section avatar>
               <q-icon name="exit_to_app" />
             </q-item-section>
@@ -272,8 +280,16 @@ export default {
     vKeyboardEnabled () {
       return this.$ethingUI.virtualKeyboardEnabled
     },
+    __devicesLen () {
+      return this.$ethingUI.resource.listFromTypes('resources/Device').length
+    },
     __deviceItems () {
-      return this.$ethingUI.menu.devices
+      return this.$ethingUI.menu.devices.map(item => {
+        var len = this.$ethingUI.resource.listFromTypes(item.types).length
+        return Object.assign({
+          len
+        }, item)
+      })
     },
     __rootItems () {
       return this.$ethingUI.menu.root.filter(item => !item.parent)

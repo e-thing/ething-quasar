@@ -8,7 +8,6 @@ import * as formSchemaCore from '../boot/formSchema/core'
 import { extend } from 'quasar'
 import { linearize } from 'c3-linearization'
 import {widgetMerge} from './widget'
-import {Plugin} from './plugins'
 import {merge,defaultMerge,arrayUniqueMerge,noMerge,mapMerge,functionMerge,vueComponentMerge} from '../utils/merging'
 import localDefinitions from '../definitions'
 
@@ -177,7 +176,7 @@ function componentDefaults (instance) {
         resource: instance
       }
     }
-  } else if (instance instanceof Plugin) {
+  } else if (instance instanceof EThing.Plugin) {
     attributes = function (options) {
       return {
         plugin: instance
@@ -443,7 +442,6 @@ function compile(mro, definitions, instance) {
   var dynamic = false
 
   mro_.forEach( path => {
-
     var child = getFromPath(definitions, path)
 
     // deep copy first
@@ -695,8 +693,8 @@ function importDefinitions (self, definitions) {
 function getInstanceType (instance) {
   if (instance instanceof EThing.Resource) {
     return instance.type()
-  } else if(instance instanceof Plugin) {
-    return instance.type
+  } else if(instance instanceof EThing.Plugin) {
+    return instance.type()
   } else {
     throw Error('not a valid instance '+instance)
   }

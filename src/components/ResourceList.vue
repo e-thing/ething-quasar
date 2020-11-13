@@ -117,7 +117,7 @@
     </template>
     <div v-else class="col relative-position" style="min-height: 50px;">
       <div class="absolute-center text-caption text-faded">
-        {{ emptyMessage }}
+        {{ __emptyMessage }}
       </div>
     </div>
   </div>
@@ -157,7 +157,7 @@ export default {
 
       emptyMessage: {
         type: String,
-        default: 'No resources found'
+        default: '<default>'
       },
 
       headerClass: {},
@@ -194,6 +194,25 @@ export default {
           return this.__formatGroupList(this.categories)
         }
       },
+
+      __typename () {
+        var name = "resource"
+        if (typeof this.resources === 'string') {
+          var types = this.resources.split(' ')
+          if (types.length == 1) {
+            name = this.$ethingUI.get(types[0]).title
+          }
+        }
+        return name
+      },
+
+      __emptyMessage () {
+        var msg = this.emptyMessage
+        if (msg==='<default>') {
+          msg = "No " + this.__typename + " found"
+        }
+        return msg
+      }
 
     },
 

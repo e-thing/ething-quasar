@@ -32,7 +32,7 @@
         <q-btn flat stretch icon="delete" color="white" @click="removeDashboard()"/>
         <q-btn flat stretch icon="mdi-settings" color="white" @click="editDashboard()"/>
         <q-space/>
-        <q-btn flat stretch color="white" label="cancel" @click="editing = false"/>
+        <q-btn flat stretch color="white" label="close" @click="editing = false"/>
       </div>
 
       <div class="col relative-position" v-if="currentDashboard.items.length==0">
@@ -407,8 +407,9 @@ export default {
         x: Math.floor((position.left - orig.left) / (widgetWidth + this.grid.margin)),
         y: Math.floor((position.top - orig.top) / (this.grid.rowHeight + this.grid.margin))
       }*/
-
-      this.pinResourceModal = true
+      if (info.touch) {
+        this.pinResourceModal = true
+      }
     },
 
     bgClick (evt) {

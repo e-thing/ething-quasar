@@ -106,34 +106,7 @@ export default {
           resources = this.$ething.arbo.find(this.resources)
         } else if (typeof this.resources === 'string') {
           // blank separated list of types
-          var whiteList = [], blackList = [];
-
-          this.resources.split(' ').forEach(type => {
-            if (!type) return
-            if (type[0] === '!') blackList.push(type.replace('!', ''))
-            else whiteList.push(type)
-          })
-
-          resources = this.$ething.arbo.find(r => {
-            var pass = false;
-            if (resources.indexOf(r) === -1) {
-              for (var i in whiteList) {
-                if (this.$ethingUI.isSubclass(r, whiteList[i])) {
-                  pass = true
-                  break
-                }
-              }
-              if (pass) {
-                for (var i in blackList) {
-                  if (this.$ethingUI.isSubclass(r, blackList[i])) {
-                    pass = false
-                    break
-                  }
-                }
-              }
-            }
-            return pass
-          })
+          resources = this.$ething.arbo.find(this.$ethingUI.resource.typeFilter(this.resources))
         } else if (Array.isArray(this.resources)) {
           resources = this.resources.map(r => {
             if (typeof r === 'string') return this.$ething.arbo.get(r)

@@ -8,9 +8,6 @@ export default {
       // contains some information about the server
       info: {},
 
-      // store informations about loaded plugins
-      plugins: {},
-
       // list the available scopes (used in api key)
       scopes: {},
 

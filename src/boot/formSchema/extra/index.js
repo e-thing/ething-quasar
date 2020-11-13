@@ -2,6 +2,7 @@ import BluetoothInterface from './BluetoothInterface'
 import Editor from './Editor'
 import EthingFlowNode from './EthingFlowNode'
 import EthingResource from './EthingResource'
+import EthingPlugin from './EthingPlugin'
 import Cron from './Cron'
 import Host from './Host'
 import Oneof from './Oneof'
@@ -17,6 +18,7 @@ export default {
   Editor,
   EthingFlowNode,
   EthingResource,
+  EthingPlugin,
   Cron,
   Host,
   Oneof,

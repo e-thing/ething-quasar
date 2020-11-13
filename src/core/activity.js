@@ -25,24 +25,24 @@ export default ({EThingUI, Vue}) => {
     if (!evt.originalEvent) return // skip internal event
     if (blackList.indexOf(type) !== -1) return // skip
 
-    if (evt.originalEvent.resource) {
-      var rid = evt.originalEvent.resource.id
-      var resource = EThing.arbo.get(rid)
-      
-      if (resource) {
-        if (!activityData[rid]) {
-          activityData[rid] = []
-        }
+    var aid = null;
 
-        var list = activityData[rid]
+    if (evt.resource) {
+      aid = evt.resource.id()
+    } else if (evt.plugin) {
+      aid = evt.plugin.type()
+    } else {
+      aid = "global"
+    }
 
-        activityData[rid].push(evt)
+    if (!activityData[aid]) {
+      activityData[aid] = []
+    }
 
-        if (activityHistoryLength>0) {
-          activityData[rid] = activityData[rid].slice(Math.max(activityData[rid].length - activityHistoryLength, 0))
-        }
+    activityData[aid].push(evt)
 
-      }
+    if (activityHistoryLength>0) {
+      activityData[aid] = activityData[aid].slice(Math.max(activityData[aid].length - activityHistoryLength, 0))
     }
   }
 

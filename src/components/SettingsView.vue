@@ -6,15 +6,17 @@
 
       <div class="text-h6 text-secondary">General</div>
 
-      <form-schema :schema="$ethingUI.get('Config')" v-model="settings['global']" @error="error = $event" class="q-my-md"/>
+      <form-schema :schema="$ethingUI.get('Config')" v-model="settings" @error="error = $event" class="q-my-md"/>
 
     </div>
 
-    <div v-for="(plugin, name) in plugins" :key="name" v-if="plugin.show" class="bg-white q-pa-md">
+    <div v-for="plugin in plugins" :key="plugin.type" v-if="plugin.show" class="bg-white q-pa-md">
 
-      <div class="text-h6 text-secondary">{{ name }}</div>
+      <div class="text-h6 text-secondary">{{ plugin.name }}</div>
 
-      <div v-if="plugin.meta.description" class="text-faded q-mt-md">{{ plugin.meta.description }}</div>
+      <div v-if="!!plugin.meta.description" class="text-faded q-mt-md">
+        <q-markdown>{{ plugin.meta.description.trim() }}</q-markdown>
+      </div>
 
       <template v-if="plugin.components">
         <dynamic-component
@@ -24,8 +26,18 @@
         />
       </template>
 
-      <template v-if="plugin.schema">
-        <form-schema :schema="plugin.schema" v-model="settings[name]" @error="plugin.error = $event" class="q-my-md"/>
+      <div v-if="plugin.hasAttr" class="text-faded q-mt-md">
+        <div v-for="(val, key) in plugin.attr" :key="key">
+          {{ key }} : {{ val }}
+        </div>
+      </div>
+
+      <template v-if="plugin.hasSettings">
+        <form-schema :schema="plugin.schema" v-model="plugin.settings" @error="plugin.error = $event" class="q-my-md"/>
+      </template>
+
+      <template v-if="plugin.hasMethods">
+        <entity-api :entity="plugin.instance" class="q-mt-md"/>
       </template>
 
     </div>
@@ -54,25 +66,41 @@ export default {
 
     data () {
 
-        var plugins = {}
-
-        for (let pluginName in this.$ethingUI.plugins) {
-          let plugin = this.$ethingUI.plugins[pluginName]
-          let meta = plugin.meta
+        var plugins = this.$ethingUI.plugins.map(plugin => {
+          let meta = this.$ethingUI.get(plugin)
           let components = Object.values(meta.components)
+
           let obj = {
-            show: false,
-            plugin,
+            name: plugin.name(),
+            type: plugin.type(),
+            instance: plugin,
             meta,
+            show: false,
           }
 
           if (meta && Object.keys(meta.properties).length) {
             var schema = Object.assign({}, meta.schema)
             delete schema.description
+
+            let settings = {}, attr = {}
+            var k
+
+            for (k in meta.properties) {
+              if (meta.properties[k]['$readOnly']) {
+                attr[k] = plugin.attr(k)
+              } else {
+                settings[k] = plugin.attr(k)
+              }
+            }
+
             Object.assign(obj, {
               error: false,
               show: true,
-              schema
+              schema,
+              settings,
+              hasSettings: Object.keys(settings).length>0,
+              attr,
+              hasAttr: Object.keys(attr).length>0,
             })
           }
 
@@ -83,8 +111,10 @@ export default {
             })
           }
 
-          plugins[pluginName] = obj
-        }
+          obj.hasMethods = Object.keys(meta.methods).length>0
+
+          return obj
+        })
 
         return {
           saving: false,
@@ -99,8 +129,8 @@ export default {
       globalError () {
         var err = this.error
         if (!err) {
-          for (var name in this.plugins) {
-            if(this.plugins[name].error)
+          for (var i in this.plugins) {
+            if(this.plugins[i].error)
               err = true
               break
           }
@@ -116,22 +146,26 @@ export default {
         // copy
         this.settings = extend(true, {}, this.$ethingUI.settings)
 
-        for (var name in this.$ethingUI.plugins) {
-          if (typeof this.settings[name] == 'undefined') {
-            this.settings[name] = {}
-          }
-        }
-
       },
 
       onSave () {
 
-        var settings = this.settings
-
         this.saving = true
         this.saveError = false
 
-        this.$ething.settings.set(settings).then(() => {
+        var promises = []
+
+        promises.push(
+          this.$ething.settings.set(this.settings)
+        )
+
+        this.plugins.forEach(plugin => {
+          if (plugin.settings) {
+            promises.push(plugin.instance.set(plugin.settings))
+          }
+        })
+
+        Promise.all(promises).then(() => {
           this.$q.notify({
             icon: 'done',
             color: 'positive',
@@ -144,7 +178,7 @@ export default {
           this.saving = false
         })
 
-      }
+      },
 
     },
 

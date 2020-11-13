@@ -73,22 +73,30 @@ var blobToText = function(blob, cb){
 	}
 }
 
-export default {
-    name: 'DeviceApi',
+var entity_id = function (entity) {
+  if (entity instanceof EThing.Resource) {
+    return entity.id()
+  } else if (entity instanceof EThing.Plugin) {
+    return entity.type()
+  }
+}
 
-    props: ['device'],
+export default {
+    name: 'EntityApi',
+
+    props: ['entity'],
 
     data () {
         return {
           operations: [],
-          _resourceId: null
+          _entityId: null
         }
     },
 
     watch: {
-      device : {
-        handler (resource) {
-          if (resource && this._resourceId != resource.id()) {
+      entity : {
+        handler (entity) {
+          if (entity && this._entityId != entity_id(entity)) {
             this.buildApi()
           }
         },
@@ -99,7 +107,7 @@ export default {
     methods: {
 
       buildApi () {
-        var methods = this.$ethingUI.get(this.device).methods
+        var methods = this.$ethingUI.get(this.entity).methods
         var operations = []
 
         for(let name in methods) {
@@ -181,7 +189,7 @@ export default {
     		}
     		else {
     			// get the content as Blob
-          this.device.execute(operation.name, operation.model, 'blob').then( (blobData) => {
+          this.entity.execute(operation.name, operation.model, 'blob').then( (blobData) => {
 
             operation.loading = false
 
@@ -266,13 +274,7 @@ export default {
       },
 
       toUrl (operation) {
-        var url = 'devices/'+this.device.id()+'/call/'+operation.name;
-
-    		if(operation.model){
-    			url += '?'+ this.$ething.utils.param(operation.model);
-    		}
-
-    		return this.$ething.toApiUrl(url,true);
+        return this.entity.executeUrl(operation.name, operation.model)
       },
 
     }

@@ -428,11 +428,13 @@ EThingUI.install = ({ app, router, Vue, store }) => {
         // something went wrong !
         app.data.state = 'error'
         app.data.error = err
+      }).finally( () => {
+        next()
       })
 
+    } else {
+      next()
     }
-
-    next()
 
   })
 }

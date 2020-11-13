@@ -33,6 +33,15 @@
 
       <q-separator />
 
+      <q-card-section>
+        <div class="text-subtitle2">Plugins</div>
+        <div v-for="plugin in $ethingUI.plugins" :key="plugin.type()">
+          {{ plugin.name() }} {{ $ethingUI.get(plugin).package.version || '' }}
+        </div>
+      </q-card-section>
+
+      <q-separator />
+
       <q-card-actions vertical>
         <q-btn flat @click="downloadLogFile">Download LOG file</q-btn>
       </q-card-actions>

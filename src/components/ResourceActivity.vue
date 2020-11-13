@@ -75,11 +75,6 @@ export default {
       return events.map(event => {
         var cls = this.$ethingUI.get(event.type) || {}
 
-        var resource = null
-        try {
-          resource = this.$ething.arbo.get(event.originalEvent.resource.id)
-        } catch (err) {}
-
         return {
           title: cls.title || event.type,
           icon: cls.icon,
@@ -87,7 +82,7 @@ export default {
           dataStr: this.$ethingUI.utils.describe(event.data),
           ts: event.timeStamp,
           event,
-          resource
+          resource: event.resource
         }
       })
     }

@@ -44,6 +44,8 @@ const routes = [
 
               props.createTypes = 'resources/Device'
 
+            } else if (route.query.deviceMenu==='all') {
+              resources = "resources/Device"
             } else {
               resources = deviceMenuItems[route.query.deviceMenu].types
             }

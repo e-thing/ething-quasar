@@ -16,7 +16,7 @@
     <template v-slot:no-option>
       <q-item>
         <q-item-section class="text-grey">
-          No resources
+          No resources available
         </q-item-section>
       </q-item>
     </template>

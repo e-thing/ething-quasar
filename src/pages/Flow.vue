@@ -111,7 +111,7 @@
             <div class="dbg-item q-pa-sm" v-for="(item, index) in dbg.items" :key="index" @mouseover="setDbgActiveNode(item.node, true)" @mouseout="setDbgActiveNode(item.node, false)">
               <div class="dbg-item-header text-caption">
                 <span class="dbg-item-header-date text-faded">
-                  {{ $ethingUI.utils.dateToString(item.ts * 1000) }}
+                  {{ $ethingUI.utils.dateToString(item.data._ts * 1000) }}
                 </span>
                 <span v-if="item.node" class="dbg-item-header-node text-purple">
                   [{{ nodeIdToName(item.node) }}]

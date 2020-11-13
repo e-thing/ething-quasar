@@ -3,7 +3,7 @@ import EThing from 'ething-js'
 
 export default {
   install ({ EThingUI }) {
-    
+
     function typeFilter (types) {
 
       // blank separated list of types
@@ -35,9 +35,14 @@ export default {
       }
     }
 
+    function listFromTypes (types) {
+      return EThing.arbo.find(typeFilter(types))
+    }
+
     Object.assign(EThingUI, {
       resource: {
-        typeFilter
+        typeFilter,
+        listFromTypes
       }
     })
   }
