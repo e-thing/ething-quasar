@@ -8,20 +8,6 @@
       </div>
       <q-btn stretch class="col" flat icon="mdi-chevron-down" @click="__down()"/>
     </div>
-    <q-btn-dropdown class="col-auto" flat :label="__mode">
-      <q-list>
-        <q-item
-          clickable
-          v-close-popup
-          v-for="mode in __modes"
-          :key="mode"
-          @click="__setMode(mode)">
-          <q-item-section>
-            <q-item-label>{{ mode }}</q-item-label>
-          </q-item-section>
-        </q-item>
-      </q-list>
-    </q-btn-dropdown>
   </div>
 </template>
 
@@ -50,15 +36,7 @@ export default {
 
       __unit () {
         return this.$ethingUI.get(this.resource).properties.target_temperature.unit
-      },
-
-      __mode () {
-        return this.resource.attr('mode')
-      },
-
-      __modes () {
-        return this.$ethingUI.get(this.resource).properties.mode.enum
-      },
+      }
     },
 
     methods: {
@@ -75,15 +53,6 @@ export default {
       __down () {
         this.writing = true
         Promise.resolve(this.resource.execute('set_target_temperature', this.__targetTemperature - 1.)).catch(err => {
-          this.setError(err)
-        }).finally(() => {
-          this.writing = false
-        })
-      },
-
-      __setMode (mode) {
-        this.writing = true
-        Promise.resolve(this.resource.execute('set_mode', mode)).catch(err => {
           this.setError(err)
         }).finally(() => {
           this.writing = false

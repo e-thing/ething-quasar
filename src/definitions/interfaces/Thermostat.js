@@ -9,10 +9,29 @@ export default {
       attributes () {
         return {
           widget: 'thermostat',
-          height: '300px'
+          height: '150px'
         }
       },
     },
+  },
+
+  badges (resource) {
+    var unit = this.properties['target_temperature'].unit
+    return {
+      'target_temperature': {
+        component: 'q-chip',
+        attributes () {
+          return {
+            label: resource.attr('target_temperature')+unit,
+            outline: true,
+            square: true,
+            dense: true,
+            color: "secondary",
+            icon: 'mdi-thermostat',
+          }
+        },
+      },
+    }
   },
 
   widgets: {

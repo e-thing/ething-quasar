@@ -98,7 +98,12 @@
         <div class="row" v-if="attributes.length>0">
           <template v-for="attr in attributes">
             <div class="col-xs-12 col-sm-2 key text-secondary ellipsis">{{ attr.name }}</div>
-            <div class="col-xs-12 col-sm-10 value text-faded ellipsis">{{ attr.value }}</div>
+            <div class="col-xs-12 col-sm-10 value text-faded ellipsis">
+              <pre v-if="attr.type === 'object'" v-highlightjs><code class="json">{{ attr.value }}</code></pre>
+              <template v-else>
+                {{ attr.value }}
+              </template>
+            </div>
           </template>
         </div>
         <div v-else class="text-center text-faded">
@@ -275,7 +280,8 @@ export default {
 
         attributes.push({
           name,
-          value
+          value,
+          type: typeof value
         })
       }
       return attributes

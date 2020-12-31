@@ -8,17 +8,15 @@
     </div>
 
     <div class="col relative-position" style="overflow: hidden;">
-      <div v-show="__hasError" class="absolute fit column items-center widget-err-content" style="background-color: inherit; z-index: 5;">
-        <q-space/>
-        <div class="col-auto text-center text-caption">
+      <div v-show="__hasError" class="absolute full-width widget-err-content" style="z-index: 5;">
+        <div class="text-center text-caption">
           <!--<q-btn class="absolute-top-right" flat icon="close" @click="error=null"/>-->
           <slot name="error-before"></slot>
           <div>{{ String(error || 'error') }}</div>
           <slot name="error-after"></slot>
         </div>
-        <q-space/>
       </div>
-      <div :style="{visibility: __hasError ? 'hidden' : 'visible'}" class="absolute fit widget-content">
+      <div class="absolute fit widget-content">
         <slot>
           <component :is="__widget.component" v-bind="__attrs" v-on="__widget.listeners()" @error="error=$event"/>
         </slot>
@@ -292,9 +290,10 @@ export default {
 .widget
   overflow hidden
   &.widget-err
-    /* border 1px solid $negative */
-    background-color $negative !important
-    color white !important
+    .widget-err-content
+      /* border 1px solid $negative */
+      background-color $negative !important
+      color white !important
 
 
 </style>

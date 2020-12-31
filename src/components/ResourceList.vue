@@ -48,7 +48,8 @@
       </q-btn-dropdown>
 
       <template v-if="!readonly && __createTypes.length>0">
-        <q-btn flat text-color="primary" :label="$q.screen.gt.xs ? 'create' : null" icon="add" @click="showCreatePopup_=true"/>
+        <q-btn v-if="allowPairing" flat text-color="primary" :label="__pairing ? 'stop pairing' : 'pair'" icon="add" @click="__pairing ? $ething.stopPairing() : $ething.startPairing()"/>
+        <q-btn flat text-color="primary" :label="$q.screen.gt.xs ? 'add' : null" icon="add" @click="showCreatePopup_=true"/>
         <resource-create-modal :types="__createTypes" v-model="showCreatePopup_" open/>
       </template>
 
@@ -166,6 +167,8 @@ export default {
       contentStyle: {},
       itemClass: {},
       itemStyle: {},
+
+      allowPairing: Boolean,
     },
 
     data () {
@@ -212,6 +215,10 @@ export default {
           msg = "No " + this.__typename + " found"
         }
         return msg
+      },
+
+      __pairing () {
+        return this.$ething.pairing
       }
 
     },

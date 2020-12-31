@@ -65,6 +65,9 @@ EThingUI.install = ({ app, router, Vue, store }) => {
   if (EThingUI.__installed) { return }
   EThingUI.__installed = true
 
+  // anything inside will be reactive
+  app.data = app.data || {}
+
   // install error handler
   Vue.config.errorHandler = function (err, vm, info)  {
     let handler=null, current = vm
@@ -116,7 +119,7 @@ EThingUI.install = ({ app, router, Vue, store }) => {
   pp.forEach(p => {
     var f = typeof p === 'function' ? p : p.install
     try {
-      f({ EThingUI, Vue, router, store })
+      f({ EThingUI, Vue, router, store, app })
     } catch (e) {
       console.error(e)
     }
@@ -177,7 +180,7 @@ EThingUI.install = ({ app, router, Vue, store }) => {
 
   })
 
-  app.data = app.data || {}
+  // will be reactive
   app.data.state = 'begin'
   app.data.error = false
 

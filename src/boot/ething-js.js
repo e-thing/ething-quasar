@@ -5,10 +5,11 @@ import EThing from 'ething-js'
 
 export default ({ Vue }) => {
 
-    // make arbo reactive !
+    // make ething reactive !
     var vm =  new Vue({
       data: {
-        arbo: EThing.arbo
+        ething: EThing
+        //arbo: EThing.arbo
       }
     })
 

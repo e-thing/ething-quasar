@@ -154,8 +154,22 @@
 
           <q-separator class="q-mt-md q-mb-xs" />
 
-          <q-item-label header class="text-weight-bold text-uppercase">
-            Devices
+          <q-item-label header>
+            <span class="text-weight-bold text-uppercase">
+              Devices
+            </span>
+            <span class="text-right cursor-pointer float-right" style="font-size: x-small;">
+              {{ devicesMenuSortMode }} <q-icon name="arrow_drop_down" />
+
+              <q-menu anchor="bottom right" self="top right">
+                <q-list dense>
+                  <q-item v-for="v in ['type', 'location']" clickable v-close-popup @click="devicesMenuSortMode=v">
+                    <q-item-section>{{v}}</q-item-section>
+                  </q-item>
+                </q-list>
+              </q-menu>
+            </span>
+
           </q-item-label>
 
           <q-item
@@ -183,10 +197,11 @@
             v-for="(item, index) in __deviceItems" :key="'device-'+index"
             v-if="item.len>0"
             class="sub"
-            :to="{name:'explore', query:{deviceMenu: index}}"
+            :to="{name:'explore', query: item.query}"
             exact
+            :inset-level="item.icon ? 0 : 1"
           >
-            <q-item-section avatar>
+            <q-item-section avatar v-if="item.icon">
               <q-icon :name="item.icon"/>
             </q-item-section>
             <q-item-section>
@@ -268,6 +283,7 @@ export default {
       leftDrawerOpen: false, // this.$q.platform.is.desktop
       persistentNotifications: this.$ethingUI.persistentNotifications,
       dashboardTitles: [],
+      devicesMenuSortMode: 'location',
     }
   },
   computed: {
@@ -280,16 +296,41 @@ export default {
     vKeyboardEnabled () {
       return this.$ethingUI.virtualKeyboardEnabled
     },
+    __devices () {
+      return this.$ethingUI.resource.listFromTypes('resources/Device')
+    },
     __devicesLen () {
-      return this.$ethingUI.resource.listFromTypes('resources/Device').length
+      return this.__devices.length
     },
     __deviceItems () {
-      return this.$ethingUI.menu.devices.map(item => {
-        var len = this.$ethingUI.resource.listFromTypes(item.types).length
-        return Object.assign({
-          len
-        }, item)
-      })
+      if (this.devicesMenuSortMode=='location') {
+        var locations = {}
+        this.__devices.forEach((dev, i) => {
+          var location = dev.location()
+          if (!locations[location]) {
+            locations[location] = {
+              label: location,
+              len: 0,
+              icon: 'chevron_right',
+              query: {
+                deviceLocation: location
+              }
+            }
+          }
+          locations[location].len++
+        });
+        return Object.values(locations)
+      } else {
+        return this.$ethingUI.menu.devices.map((item, i) => {
+          var len = this.$ethingUI.resource.listFromTypes(item.types).length
+          return Object.assign({
+            len,
+            query: {
+              deviceMenu: i
+            }
+          }, item)
+        })
+      }
     },
     __rootItems () {
       return this.$ethingUI.menu.root.filter(item => !item.parent)

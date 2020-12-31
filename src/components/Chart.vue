@@ -35,7 +35,7 @@
           Panes
           <q-btn flat size="sm"
             color="blue-5"
-            @click="optionsData.panes.push({curves:[]}); $v.optionsData.$touch()"
+            @click="optionsData.panes.push(default_pane(optionsData.panes.length+1)); $v.optionsData.$touch()"
             label="Add pane"
             icon="add"
           />
@@ -51,18 +51,47 @@
               error-message="Required"
             />
 
+            <div class="fit row">
+              <q-select
+                class="col-grow"
+                v-model="pane.yAxisMode"
+                label="Y axis mode"
+                :options="['auto', 'fixed']"
+              />
+
+              <div class="row no-wrap">
+
+                <q-input
+                  v-if="pane.yAxisMode=='fixed'"
+                  type="number"
+                  v-model.number="pane.yAxisMin"
+                  label="Min"
+                  error-message="Required"
+                />
+
+                <q-input
+                  v-if="pane.yAxisMode=='fixed'"
+                  type="number"
+                  v-model.number="pane.yAxisMax"
+                  label="Max"
+                  error-message="Required"
+                />
+              </div>
+            </div>
+
             <div class="q-my-md">
               <div class="q-subheading q-mb-md">
                 Curves
                 <q-btn flat size="sm"
                   color="cyan-5"
-                  @click="pane.curves.push({type:'line',  data:{}}); $v.optionsData.$touch()"
+                  @click="pane.curves.push(default_curve(pane.curves.length+1)); $v.optionsData.$touch()"
                   label="Add"
                   icon="add"
                 />
               </div>
 
               <div class="q-ml-md q-mb-md">
+                <!-- curve -->
                 <div v-for="(curve, cindex) in pane.curves" :key="cindex" class="curve">
                   <q-input
                     v-model="curve.name"
@@ -305,12 +334,7 @@ export default {
       options: false,
       optionsModal: !(this.preferences),
       optionsData: {
-        panes: [{
-          curves: [{
-            type:'line',
-            data:{}
-          }]
-        }]
+        panes: [this.default_pane()]
       },
       serieTypeOptions: [
         {
@@ -551,6 +575,15 @@ export default {
             gridLineWidth: 1,
             id: yAxisId
           }
+          
+          if (pane.yAxisMode === 'fixed') {
+            if (typeof pane.yAxisMin === 'number') {
+              yAxis.min = pane.yAxisMin
+            }
+            if (typeof pane.yAxisMax === 'number') {
+              yAxis.max = pane.yAxisMax
+            }
+          }
 
           this.options.yAxis.push(yAxis)
 
@@ -621,6 +654,24 @@ export default {
       })
     },
 
+    default_curve (index = 1) {
+      return {
+        name: 'curve '+index,
+        type:'line',
+        data:{}
+      }
+    },
+
+    default_pane (index = 1) {
+      return {
+        name: 'pane '+index,
+        yAxisMode: 'auto',
+        yAxisMin: 0,
+        yAxisMax: 100,
+        curves: [this.default_curve()]
+      }
+    },
+
     onOptionsValidate () {
       this.load(this.optionsData)
       this.optionsModal = false
@@ -630,15 +681,10 @@ export default {
       var resource = this.$ething.arbo.get(curve.data.resource)
       if (resource) {
         var keys = resource.keys()
-        if (keys.length) {
+        if (keys.length && (!curve.data.key || keys.indexOf(curve.data.key)===-1)) {
           this.$set(curve.data, 'key', keys[0])
         }
-        return keys.map(key => {
-          return {
-            label: key,
-            value: key
-          }
-        })
+        return keys
       }
     },
 

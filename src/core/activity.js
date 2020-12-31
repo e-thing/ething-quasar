@@ -6,14 +6,15 @@ const blackList = [
 
 const activityHistoryLength = 50
 
-export default ({EThingUI, Vue}) => {
+export default ({EThingUI, app, Vue}) => {
 
   var activityData;
 
   function initData () {
-    activityData = EThingUI.activity = {
+    activityData = app.data.activityData = EThingUI.activity = {
       'global': []
     }
+
     return activityData
   }
 
@@ -36,7 +37,8 @@ export default ({EThingUI, Vue}) => {
     }
 
     if (!activityData[aid]) {
-      activityData[aid] = []
+      Vue.set(activityData, aid, [])
+      //activityData[aid] = []
     }
 
     activityData[aid].push(evt)

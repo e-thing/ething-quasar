@@ -3,7 +3,7 @@
     <q-timeline layout="dense" v-if="items.length > 0">
       <q-timeline-entry
           v-for="(item, index) in items"
-          :key="item.ts"
+          :key="index"
           :subtitle="item.dateStr"
           color="secondary"
       >
@@ -53,7 +53,7 @@ export default {
         if (source instanceof this.$ething.Resource) {
           source = source.id()
         }
-        var sourceEvents = this.$ethingUI.activity[source]
+        var sourceEvents = this.$root.activityData[source]
         if (sourceEvents) {
           events = events.concat(sourceEvents)
         }

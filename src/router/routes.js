@@ -23,6 +23,7 @@ const routes = [
           if (typeof route.query.deviceMenu != 'undefined') {
 
             props.defaultSort = 'location'
+            props.allowPairing = true
 
             var deviceMenuItems = EThingUI.menu.devices
 
@@ -48,6 +49,10 @@ const routes = [
               resources = "resources/Device"
             } else {
               resources = deviceMenuItems[route.query.deviceMenu].types
+            }
+          } else if (typeof route.query.deviceLocation != 'undefined') {
+            resources = r=> {
+              return EThingUI.isSubclass(r, 'resources/Device') && r.location() == route.query.deviceLocation
             }
           }
 

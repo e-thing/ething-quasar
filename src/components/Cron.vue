@@ -149,6 +149,7 @@
           v-model="model.interval"
           :options="[{label:'Runs once', value: 'once'}, {label:'Every x hours', value: 'repeatHours'}, {label:'Every x minutes', value: 'repeatMinutes'}]"
           class="inline"
+          emit-value
         />
 
       </div>
@@ -175,7 +176,7 @@
         </q-input>
       </div>
     </div>
-
+    
     <div class="row cell" v-if="(model.schedule == 'daily' || model.schedule == 'weekly') && (model.interval=='repeatHours' || model.interval=='repeatMinutes')">
 
       <div class="col-xs-12 col-sm-3 title text-bold">
@@ -250,7 +251,7 @@ export default {
         model: Object.assign ({
           schedule: "daily",
           interval: 'once',
-          startTime: date.buildDate({ hours:15, minutes: 0 }),
+          startTime: '15:00',
           every: 1,
           days: [],
           on: 'day',
@@ -325,8 +326,9 @@ export default {
           }
 
           if (model.interval == 'once') {
-            var hours = model.startTime.getHours()
-            var minutes = model.startTime.getMinutes()
+            var hm = model.startTime.split(':')
+            var hours = hm[0]
+            var minutes = hm[1]
             return minutes + ' ' + hours + ' * * ' + days
           } else if (model.interval == 'repeatHours') {
             var every = model.every || 1
@@ -341,8 +343,9 @@ export default {
         }
 
         if (model.schedule == 'monthly') {
-          var hours = model.startTime.getHours()
-          var minutes = model.startTime.getMinutes()
+          var hm = model.startTime.split(':')
+          var hours = hm[0]
+          var minutes = hm[1]
 
           if (model.on == 'day') {
             var day = model.onDay || 1
