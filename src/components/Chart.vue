@@ -361,7 +361,8 @@ export default {
       saveModal: false,
       filename: filename,
       file: file,
-      table: null
+      table: null,
+      refreshIntervalId: null
     }
   },
 
@@ -575,7 +576,7 @@ export default {
             gridLineWidth: 1,
             id: yAxisId
           }
-          
+
           if (pane.yAxisMode === 'fixed') {
             if (typeof pane.yAxisMin === 'number') {
               yAxis.min = pane.yAxisMin
@@ -794,11 +795,11 @@ export default {
       if (typeof this.preferences === 'string') {
         resource = this.$ething.arbo.get(this.preferences)
       }
-      if (this.preferences instanceof this.$ething.Table) {
+      if (this.preferences instanceof this.$ething.Resource) {
         resource = this.$ething.arbo.get(this.preferences.id())
       }
 
-      if (resource) {
+      if (resource instanceof this.$ething.Table) {
         this.table = resource
 
         //resource.on('updated', this.onTableUpdate)
@@ -825,6 +826,28 @@ export default {
           }
           preferences.panes.push(pane)
         })
+      } else if (resource instanceof this.$ething.Device) {
+        preferences.title = resource.basename()
+        preferences.panes = []
+
+        var tables = this.$ething.arbo.find(r => r.createdBy() == resource.id())
+        tables.forEach(table => {
+          table.keys().forEach( key => {
+            var pane = {
+              name: key,
+              curves: [{
+                name: key,
+                type: 'line',
+                data: {
+                  resource: table.id(),
+                  key: key
+                }
+              }]
+            }
+            preferences.panes.push(pane)
+          })
+        });
+
       } else {
         preferences = this.preferences
       }
@@ -832,6 +855,12 @@ export default {
       if (preferences) {
         this.optionsData = preferences
         this.load(preferences)
+
+        if (!this.table && this.refreshIntervalId === null) {
+          this.refreshIntervalId = setInterval(() => {
+              this.refresh()
+          }, 30000);
+        }
       }
     }
 
@@ -839,8 +868,12 @@ export default {
 
   beforeDestroy () {
     if (this.table) {
-      this.table.off('updated', this.onTableUpdate)
+      //this.table.off('updated', this.onTableUpdate)
       this.table.off('TableDataAdded', this.onTableDataAdded)
+    }
+    if (this.refreshIntervalId !== null) {
+      clearInterval(this.refreshIntervalId)
+      this.refreshIntervalId = null
     }
   }
 
