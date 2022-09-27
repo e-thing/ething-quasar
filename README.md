@@ -3,7 +3,7 @@
 
 web app + mobile app + Electron app
 
-based on [Quasar App](https://quasar-framework.org/).
+based on [Quasar App](https://quasar-framework.org/) (V1).
 
 ## Installation
 
