@@ -163,7 +163,7 @@
 
               <q-menu anchor="bottom right" self="top right">
                 <q-list dense>
-                  <q-item v-for="v in ['type', 'location']" clickable v-close-popup @click="devicesMenuSortMode=v">
+                  <q-item v-for="v in ['type', 'location']" :key="v" clickable v-close-popup @click="devicesMenuSortMode=v">
                     <q-item-section>{{v}}</q-item-section>
                   </q-item>
                 </q-list>
@@ -194,8 +194,7 @@
             v-ripple
             clickable
             dense
-            v-for="(item, index) in __deviceItems" :key="'device-'+index"
-            v-if="item.len>0"
+            v-for="(item, index) in __deviceItemsFiltered" :key="'device-'+index"
             class="sub"
             :to="{name:'explore', query: item.query}"
             exact
@@ -283,7 +282,7 @@ export default {
       leftDrawerOpen: false, // this.$q.platform.is.desktop
       persistentNotifications: this.$ethingUI.persistentNotifications,
       dashboardTitles: [],
-      devicesMenuSortMode: 'location',
+      devicesMenuSortMode: 'location'
     }
   },
   computed: {
@@ -303,10 +302,10 @@ export default {
       return this.__devices.length
     },
     __deviceItems () {
-      if (this.devicesMenuSortMode=='location') {
+      if (this.devicesMenuSortMode === 'location') {
         var locations = {}
         this.__devices.forEach((dev, i) => {
-          var location = dev.location()
+          var location = dev.location() || 'unknown'
           if (!locations[location]) {
             locations[location] = {
               label: location,
@@ -318,7 +317,7 @@ export default {
             }
           }
           locations[location].len++
-        });
+        })
         return Object.values(locations)
       } else {
         return this.$ethingUI.menu.devices.map((item, i) => {
@@ -332,13 +331,17 @@ export default {
         })
       }
     },
+    __deviceItemsFiltered () {
+      // remove empty items
+      return this.__deviceItems.filter(item => item.len > 0)
+    },
     __rootItems () {
       return this.$ethingUI.menu.root.filter(item => !item.parent)
     },
     __rootSubMenus () {
       var submenus = []
       this.$ethingUI.menu.root.filter(item => item.parent).forEach(item => {
-        var submenu = null;
+        var submenu = null
         for (var i in submenus) {
           if (submenus[i].label === item.parent) {
             submenu = submenus[i]
@@ -380,7 +383,7 @@ export default {
     updateDashboardItems () {
       try {
         this.dashboardTitles = this.$ethingUI.dashboard.config.dashboards.map(d => d.options.title)
-      } catch(e) {
+      } catch (e) {
         this.dashboardTitles = []
       }
     }
@@ -399,7 +402,6 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-
 
 light-primary = lightness($primary, (1 - 0.85) * lightness($primary) + 0.85 * 100)
 
@@ -430,8 +432,5 @@ light-primary = lightness($primary, (1 - 0.85) * lightness($primary) + 0.85 * 10
     font-weight: 700
     .q-icon
       color: $primary
-
-
-
 
 </style>

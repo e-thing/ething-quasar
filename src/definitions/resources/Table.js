@@ -3,7 +3,6 @@ import WChart from '../../components/widgets/WChart'
 import EThingUI from 'ething-ui'
 import EThing from 'ething-js'
 
-
 export default {
   icon: 'mdi-table-large',
 
@@ -19,7 +18,7 @@ export default {
       getFormatted: function (resource) {
         return date.formatDate(this.get(resource).getTime(), 'YYYY-MM-DD HH:mm')
       }
-    },
+    }
 
   },
 
@@ -33,14 +32,14 @@ export default {
           history: {
             description: 'the past data to plot',
             type: 'number',
-            enum: [3600, 3600*6, 3600*12, 86400, 86400*2, 86400*7, 'all'],
+            enum: [3600, 3600 * 6, 3600 * 12, 86400, 86400 * 2, 86400 * 7, 'all'],
             '$labels': ['1 hour', '6 hours', '12 hours', '1 day', '2 days', '1 week', 'all'],
             default: 86400
           }
         }
       },
       minWidth: 250,
-      minHeight: 150,
+      minHeight: 150
     }
   },
 
@@ -49,6 +48,25 @@ export default {
       return '/chart/' + resource.id()
     } else {
       return '/table/' + resource.id()
+    }
+  },
+
+  badges (resource) {
+    return {
+      'length': {
+        component: 'q-chip',
+        attributes () {
+          return {
+            label: resource.length() + ' rows',
+            icon: 'mdi-unfold-more-horizontal',
+            outline: true,
+            square: true,
+            dense: true,
+            color: 'secondary'
+          }
+        },
+        zIndex: 100
+      }
     }
   },
 
@@ -72,8 +90,8 @@ export default {
               type: 'radio',
               model: 'csv',
               items: [
-                {label: 'CSV', value: 'csv'},
-                {label: 'JSON', value: 'json_pretty'}
+                { label: 'CSV', value: 'csv' },
+                { label: 'JSON', value: 'json_pretty' }
               ]
             },
             cancel: true,
@@ -84,7 +102,7 @@ export default {
               url: resource.getContentUrl() + '?fmt=' + format,
               dataType: 'blob'
             }).then((data) => {
-              EThingUI.utils.saveAs(data, resource.basename() + '.' + (format=='json_pretty' ? 'json' : format))
+              EThingUI.utils.saveAs(data, resource.basename() + '.' + (format === 'json_pretty' ? 'json' : format))
             })
           })
         }

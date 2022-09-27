@@ -13,23 +13,47 @@
       <q-resize-observer @resize="onPageResize" debounce="250" />
 
       <q-btn-group flat class="col-auto row items-center full-width" v-show="!editing">
-        <q-btn size="lg" class="col-auto" flat icon="mdi-chevron-left" :style="iDashboard <= 0 ? 'visibility: hidden' : ''" @click="iDashboard = iDashboard - 1"/>
         <div class="col text-center ellipsis">
-          <q-btn-dropdown flat :label="currentDashboard.options.title" size="lg">
+          <q-btn-dropdown flat split :label="currentDashboard.options.title" size="lg"  @click="editDashboard()">
             <q-list class="text-faded">
-              <q-item v-close-popup clickable @click="iDashboard = index" v-for="(dashboard, index) in dashboards" :key="index">
-                <q-item-section>{{ dashboard.options.title }}</q-item-section>
+              <q-item v-close-popup class="text-primary" clickable @click="iDashboard = index" :active="index==iDashboard" active-class="text-orange" v-for="(dashboard, index) in dashboards" :key="index">
+                <q-item-section >{{ dashboard.options.title }}</q-item-section>
+                <q-item-section side>
+                  <div>
+                    <q-btn
+                        icon="mdi-pencil"
+                        flat
+                        round
+                        size="sm"
+                        @click.stop="editDashboard(index)"
+                      />
+                    <q-btn
+                        icon="delete"
+                        flat
+                        round
+                        size="sm"
+                        @click.stop="confirmRemoveDashboard(index)"
+                      />
+                    </div>
+                </q-item-section>
+              </q-item>
+              <q-separator />
+              <q-item v-close-popup clickable @click="addDashboard()">
+                <q-item-section avatar>
+                  <q-icon name="mdi-plus" />
+                </q-item-section>
+                <q-item-section>create dashboard</q-item-section>
               </q-item>
             </q-list>
           </q-btn-dropdown>
         </div>
-        <q-btn stretch class="col-auto" flat :icon="editing ? 'mdi-cancel' : 'mdi-pencil'" :label="editing ? 'cancel' : ''" v-show="!editing" @click="editing = !editing"/>
-        <q-btn size="lg" class="col-auto" flat :icon="iDashboard >= dashboards.length - 1 ? 'mdi-plus' : 'mdi-chevron-right'" @click="nextOrAddDashboard()"/>
+
+        <q-btn class="col-auto" flat stretch icon="add" :label="$q.screen.gt.xs ? 'Add Widget' : void 0" @click="pinResourceModal = true"/>
       </q-btn-group>
 
       <div flat class="col-auto row items-center bg-secondary" v-show="editing" style="height: 51px;">
         <q-btn flat stretch icon="add" color="white" @click="pinResourceModal = true"/>
-        <q-btn flat stretch icon="delete" color="white" @click="removeDashboard()"/>
+        <q-btn flat stretch icon="delete" color="white" @click="confirmRemoveDashboard()"/>
         <q-btn flat stretch icon="mdi-settings" color="white" @click="editDashboard()"/>
         <q-space/>
         <q-btn flat stretch color="white" label="close" @click="editing = false"/>
@@ -93,7 +117,7 @@
                   enable-title-click
                 >
                   <template v-slot:error-after>
-                    <q-btn label="remove" size="sm" flat icon="delete" @click="removeWidget(cacheItem.dashboard, layoutItem)"/>
+                    <q-btn class="full-width" label="remove widget" size="sm" flat icon="delete" @click="removeWidget(cacheItem.dashboard, layoutItem)"/>
                   </template>
                 </widget>
             </grid-item>
@@ -126,32 +150,31 @@ import Vue from 'vue'
 import EThing from 'ething-js'
 import VueGridLayout from 'vue-grid-layout'
 import Widget from '../components/Widget'
-import { debounce, extend, uid, dom, colors } from 'quasar'
+import { debounce, extend, uid, dom, colors, Dialog } from 'quasar'
 import WidgetChooser from '../components/WidgetChooser'
-import {extend as extendSchema} from '../utils/schema'
-import {dashboardWidgetSchemaDefaults} from '../core/widget'
+import { extend as extendSchema } from '../utils/schema'
+import { dashboardWidgetSchemaDefaults } from '../core/widget'
 
 const { offset, height, width } = dom
 
 var GridLayout = VueGridLayout.GridLayout
 var GridItem = VueGridLayout.GridItem
 
-const DBL_CLICK_DELAY  = 200
+const DBL_CLICK_DELAY = 200
 
 const CACHE_TIMEOUT = 300000
 const CACHE_CHECK_INTERVAL = 5000
 
 const LAYOUTS = [{
   columns: 2,
-  breakpoint: 0,
-},{
+  breakpoint: 0
+}, {
   columns: 4,
-  breakpoint: 800,
-},{
+  breakpoint: 800
+}, {
   columns: 8,
-  breakpoint: 1400,
+  breakpoint: 1400
 }]
-
 
 export default {
   name: 'PageDashboard',
@@ -165,40 +188,41 @@ export default {
 
   data () {
     return {
-        etag: '-',
-        pageWidth: window.innerWidth,
-        loading: false,
-        iDashboard: 0,
-        dashboards: [],
-        cache: [],
-        grid: {
-          rowHeight: 120, // in px
-          margin: 10
-        },
-        pinResourceModal: false,
-        pinLayoutPreset: null,
-        editing: false,
+      etag: '-',
+      pageWidth: window.innerWidth,
+      loading: false,
+      iDashboard: 0,
+      dashboards: [],
+      cache: [],
+      grid: {
+        rowHeight: 120, // in px
+        margin: 10
+      },
+      pinResourceModal: false,
+      pinLayoutPreset: null,
+      editing: false,
 
-        widgetEdit: {
-          modal: false,
-          item: null,
-          schema: {},
-          model: {},
-          error: false,
-          key: 0
-        },
+      widgetEdit: {
+        modal: false,
+        item: null,
+        schema: {},
+        model: {},
+        error: false,
+        key: 0
+      },
 
-        dashboardEdit: {
-          modal: false,
-          schema: {},
-          model: {},
-          error: false,
-          key: 0,
-          create: false
-        },
+      dashboardEdit: {
+        modal: false,
+        schema: {},
+        model: {},
+        error: false,
+        key: 0,
+        create: false,
+        index: 0
+      },
 
-        bgClickTs: 0,
-        bgClickTimer: null,
+      bgClickTs: 0,
+      bgClickTimer: null
     }
   },
 
@@ -235,15 +259,15 @@ export default {
         var options = this.currentDashboard.options
 
         if (options.backgroundColor) {
-    			style['background-color'] = options.backgroundColor
+          style['background-color'] = options.backgroundColor
         }
 
         if (options.backgroundImage) {
-          style['background-image'] = 'url('+options.backgroundImage+')'
+          style['background-image'] = 'url(' + options.backgroundImage + ')'
           style['background-position'] = 'center center'
-    			style['background-repeat'] = 'no-repeat'
-    			style['background-attachment'] = 'fixed'
-    			style['background-size'] = 'cover'
+          style['background-repeat'] = 'no-repeat'
+          style['background-attachment'] = 'fixed'
+          style['background-size'] = 'cover'
         }
 
         if (options.widgetsColor) {
@@ -252,7 +276,8 @@ export default {
 
         return style
       }
-    },
+      return undefined
+    }
   },
 
   watch: {
@@ -293,8 +318,8 @@ export default {
   methods: {
 
     cacheDashboard (dashboard) {
-      var cache = this.cache, item = null;
-      for(var i in cache) {
+      var cache = this.cache, item = null
+      for (var i in cache) {
         if (cache[i].id === dashboard.id) {
           item = cache[i]
           break
@@ -313,14 +338,13 @@ export default {
     },
 
     checkCache () {
-      var now = Date.now();
-      var cache = this.cache;
+      var now = Date.now()
+      var cache = this.cache
 
-      for(var i=0; i<cache.length; i++) {
+      for (var i = 0; i < cache.length; i++) {
         if (cache[i].id === this.currentDashboard.id) {
           cache[i].ts = now
-        }
-        else if (now > cache[i].ts + CACHE_TIMEOUT ) {
+        } else if (now > cache[i].ts + CACHE_TIMEOUT) {
           console.log('remove cache')
           cache.splice(i, 1)
           i--
@@ -348,7 +372,7 @@ export default {
           layoutItem = this.findFreePlaceInLayout(colNb, layout, 1, 1)
 
           layout.push({
-            i:item.i,
+            i: item.i,
             ...layoutItem
           })
 
@@ -373,7 +397,7 @@ export default {
           x: layoutItem.x,
           y: layoutItem.y,
           w: layoutItem.w,
-          h: layoutItem.h,
+          h: layoutItem.h
         }
       })
     },
@@ -399,14 +423,14 @@ export default {
     },
 
     handleHold ({ evt, position, ...info }) {
-      /*var gridEl = this.$refs.grid.$el
+      /* var gridEl = this.$refs.grid.$el
       var orig = offset(gridEl)
       var widgetWidth = (width(gridEl) - (this.__columns+1) * this.grid.margin) / this.__columns
 
       this.pinLayoutPreset = {
         x: Math.floor((position.left - orig.left) / (widgetWidth + this.grid.margin)),
         y: Math.floor((position.top - orig.top) / (this.grid.rowHeight + this.grid.margin))
-      }*/
+      } */
       if (info.touch) {
         this.pinResourceModal = true
       }
@@ -415,64 +439,73 @@ export default {
     bgClick (evt) {
       var ts = Date.now()
 
-      /*if (! evt.srcElement.classList.contains('vue-grid-layout')) {
+      /* if (! evt.srcElement.classList.contains('vue-grid-layout')) {
         // only background click
         return
-      }*/
+      } */
 
       var diff = ts - this.bgClickTs
 
-      //console.log('bgClick', diff, evt)
+      // console.log('bgClick', diff, evt)
 
-      if (diff<5) return // bug
+      if (diff < 5) return // bug
 
       if (diff < DBL_CLICK_DELAY) {
         // double click
         clearTimeout(this.bgClickTimer)
-        //console.log('BG DBL CLICK')
+        // console.log('BG DBL CLICK')
 
-        /*var gridEl = this.$refs.grid.$el
+        /* var gridEl = this.$refs.grid.$el
         var orig = offset(gridEl)
         var widgetWidth = (width(gridEl) - (this.__columns+1) * this.grid.margin) / this.__columns
 
         this.pinLayoutPreset = {
           x: Math.floor((evt.x - orig.left) / (widgetWidth + this.grid.margin)),
           y: Math.floor((evt.y - orig.top) / (this.grid.rowHeight + this.grid.margin))
-        }*/
+        } */
 
         this.pinResourceModal = true
-
       } else {
         // 1 click ?
         this.bgClickTimer = setTimeout(() => {
           // yes 1 click
-          //console.log('BG CLICK', evt)
+          // console.log('BG CLICK', evt)
 
           if (this.editing) {
             this.editing = !this.editing
           }
-
         }, DBL_CLICK_DELAY + 10)
 
         this.bgClickTs = ts
       }
-
     },
 
-    nextOrAddDashboard () {
-      if (this.iDashboard >= this.dashboards.length - 1) {
-        this.editDashboard(true)
-      } else {
+    nextDashboard () {
+      if (this.iDashboard < this.dashboards.length - 1) {
         this.iDashboard = this.iDashboard + 1
       }
     },
 
-    editDashboard (create) {
+    addDashboard () {
+      this.editDashboard(true)
+    },
+
+    editDashboard (createOrIndex) {
+      var index = this.iDashboard
+      var create = false
+
+      if (typeof createOrIndex === 'number') {
+        index = createOrIndex
+      } else {
+        create = !!createOrIndex
+      }
+
       var schema = {
         properties: {
           title: {
             type: 'string',
-            default: 'dashboard #' + this.dashboards.length
+            minLength: 1
+            // default: 'dashboard #' + (this.dashboards.length + 1)
           },
           backgroundColor: {
             title: 'background color',
@@ -500,14 +533,17 @@ export default {
             '$component': 'color',
             description: 'The default color of the widget\'s background',
             default: '#ffffffff'
-          },
+          }
         },
         required: ['title']
       }
 
-      var model = create ? {} : this.currentDashboard.options
+      var dashboard = this.dashboards[index]
+
+      var model = create ? {} : dashboard.options
 
       this.dashboardEdit.key++
+      this.dashboardEdit.index = create ? null : index
       this.dashboardEdit.schema = schema
       this.dashboardEdit.model = extend(true, {}, model)
       this.dashboardEdit.error = false
@@ -517,7 +553,6 @@ export default {
 
     dashboardEditDone () {
       if (!this.currentDashboard.error) {
-
         if (this.dashboardEdit.create) {
           this.dashboards.push({
             options: this.dashboardEdit.model,
@@ -525,9 +560,10 @@ export default {
             layouts: {},
             id: uid()
           })
-          this.iDashboard++
+          this.iDashboard = this.dashboards.length - 1
         } else {
-          this.$set(this.currentDashboard, 'options', this.dashboardEdit.model)
+          var dashboard = this.dashboards[this.dashboardEdit.index]
+          this.$set(dashboard, 'options', this.dashboardEdit.model)
           this.loadColors()
         }
 
@@ -537,12 +573,30 @@ export default {
       }
     },
 
-    removeDashboard () {
-      this.dashboards.splice(this.iDashboard, 1)
+    confirmRemoveDashboard (index) {
+      if (index === undefined) index = this.iDashboard
+      var dashboard = this.dashboards[index]
+
+      Dialog.create({
+        title: 'Confirm',
+        message: 'Do you really want to remove dashboard "' + dashboard.options.title + '"?',
+        cancel: true,
+        persistent: true
+      }).onOk(() => {
+        this.removeDashboard(index)
+      })
+    },
+
+    removeDashboard (index) {
+      if (index === undefined) index = this.iDashboard
+
+      this.dashboards.splice(index, 1)
 
       if (!this.dashboards.length) {
         this.dashboards.push({
-          options: {},
+          options: {
+            title: 'dashboard #1'
+          },
           items: [],
           layouts: {},
           id: uid()
@@ -550,10 +604,10 @@ export default {
       }
 
       if (this.iDashboard >= this.dashboards.length) {
-        this.iDashboard--
+        this.iDashboard = this.dashboards.length - 1
       }
 
-      this.editing = false;
+      this.editing = false
 
       this.save()
     },
@@ -561,12 +615,11 @@ export default {
     initDashboard (dashboards) {
       dashboards = dashboards || []
 
-      if (dashboards.length == 0) {
+      if (dashboards.length === 0) {
         dashboards.push({})
       }
 
       dashboards = dashboards.map((d, i) => {
-
         var options = d.options || {}
         if (typeof options.title !== 'string') {
           options.title = 'dashboard #' + i
@@ -581,21 +634,18 @@ export default {
       })
 
       this.dashboards = dashboards
-
-
     },
 
-    load: function() {
+    load: function () {
       if (this.etag === this.$ethingUI.dashboard.config.etag) return
       var config = extend(true, {}, this.$ethingUI.dashboard.config) // deep copy
       this.initDashboard(config.dashboards)
     },
 
     normalizeLayoutItem (item) {
-
       try {
-        var widget = null;
-        var resource = null;
+        var widget = null
+        var resource = null
 
         if (typeof item.widgetId !== 'undefined') {
           resource = this.$ething.arbo.get(item.options.resource)
@@ -615,20 +665,20 @@ export default {
 
         var minWidth = 1
         var minHeight = 1
-        /*if (widget.minWidth) {
+        /* if (widget.minWidth) {
           var columnNb = dashboardOptions.columnNb
           var widthUnit = Math.floor(this.grid.minWidth / columnNb)
           minWidth = Math.max(Math.min(Math.round(widget.minWidth / widthUnit), columnNb), 1)
         }
         if (widget.minHeight) {
           minHeight = Math.max(Math.round(widget.minHeight / this.grid.rowHeight), 1)
-        }*/
+        } */
 
-        /*if (!item.w || item.w<minWidth) item.w = minWidth
+        /* if (!item.w || item.w<minWidth) item.w = minWidth
         if (!item.h || item.h<minHeight) item.h = minHeight
 
         if (!item.x) item.x = 0
-        if (!item.y) item.y = 0*/
+        if (!item.y) item.y = 0 */
         if (!item.options) item.options = {}
         if (!item.i) item.i = uid()
 
@@ -647,7 +697,7 @@ export default {
         }
 
         return layoutItem
-      } catch(err) {
+      } catch (err) {
         console.error('unable to load a widget item:', item, err)
       }
     },
@@ -665,8 +715,7 @@ export default {
       return options
     },
 
-    save: debounce( function(){
-
+    save: debounce(function () {
       var dashboards = this.dashboards.map(d => {
         return {
           options: d.options,
@@ -678,11 +727,10 @@ export default {
       this.etag = this.$ethingUI.dashboard.save({
         dashboards
       })
-
     }, 500),
 
     addWidget (attr, layoutPreset) {
-      var l  = this.normalizeLayoutItem(attr)
+      var l = this.normalizeLayoutItem(attr)
       if (l) {
         Object.assign(l, layoutPreset || this.findFreePlaceInLayout())
         this.currentDashboard.items.push(l)
@@ -718,11 +766,11 @@ export default {
 
     widgetEditDone () {
       if (!this.widgetEdit.error) {
-        var resource = this.widgetEdit.layoutItem.item.options.resource;
+        var resource = this.widgetEdit.layoutItem.item.options.resource
         var options = this.widgetEdit.model
 
         if (resource) {
-          options = Object.assign({resource}, options)
+          options = Object.assign({ resource }, options)
         }
 
         this.$set(this.widgetEdit.layoutItem.item, 'options', options)
@@ -743,7 +791,7 @@ export default {
         // remove from layouts
         var layouts = dashboard.layouts
         for (var k in layouts) {
-          var layout = layouts[k];
+          var layout = layouts[k]
           for (var j in layout) {
             if (layout[j].i === layoutItem.i) {
               layout.splice(j, 1)
@@ -774,11 +822,11 @@ export default {
       width = width || 1
       height = height || 1
 
-      function isFree(i, j) {
+      function isFree (i, j) {
         var free = true
         for (var k in layout) {
-          var item = layout[k];
-          if (i>=item.x && i<(item.x+item.w) && j>=item.y && j<(item.y+item.h)) {
+          var item = layout[k]
+          if (i >= item.x && i < (item.x + item.w) && j >= item.y && j < (item.y + item.h)) {
             // not free
             free = false
             break
@@ -787,13 +835,13 @@ export default {
         return free
       }
 
-      for (var j=0; ; j++) {
-        for (var i=0; i<colNumber; i++) {
+      for (var j = 0; ; j++) {
+        for (var i = 0; i < colNumber; i++) {
           var free = true
-          for (var w=0; w<width && free; w++) {
-            for (var h=0; h<height && free; h++) {
-              if(!isFree(i+w, j+h)) {
-                free=false
+          for (var w = 0; w < width && free; w++) {
+            for (var h = 0; h < height && free; h++) {
+              if (!isFree(i + w, j + h)) {
+                free = false
                 break
               }
             }
@@ -808,7 +856,7 @@ export default {
           }
         }
       }
-    },
+    }
 
   },
 
@@ -829,7 +877,6 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-
 
 .dpage {
   background-color: #f5f5f5;

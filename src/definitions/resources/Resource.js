@@ -27,11 +27,11 @@ export default {
       getFormatted: function (resource) {
         return (this.get(resource) || []).join(', ')
       }
-    },
+    }
 
   },
 
-  cacheExpired(resource, modifiedAttributes) {
+  cacheExpired (resource, modifiedAttributes) {
     return modifiedAttributes.indexOf('extends') !== -1
   },
 
@@ -42,5 +42,5 @@ export default {
         id: resource.id()
       }
     }
-  },
+  }
 }

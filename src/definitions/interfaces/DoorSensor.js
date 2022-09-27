@@ -8,8 +8,8 @@ export default {
           return {
             label: resource.attr('state') ? 'opened' : 'closed'
           }
-        },
-      },
+        }
+      }
     }
   },
 

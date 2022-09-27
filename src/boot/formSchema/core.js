@@ -2,10 +2,9 @@ import { required } from 'vuelidate/lib/validators'
 import { extend } from 'quasar'
 import FormSchemaLayout from './FormSchemaLayout'
 import Vue from 'vue'
-//import { required } from './validators'
+// import { required } from './validators'
 
-//const customRequired = (v) => v !== undefined && v !== null
-
+// const customRequired = (v) => v !== undefined && v !== null
 
 /*
 options:
@@ -13,7 +12,6 @@ $component: string
 $inline: boolean | 'inherit'
 $idPrefix: string
 */
-
 
 var debug = false
 
@@ -24,47 +22,46 @@ var coreComponents = []
 var _registeredForms = []
 
 var registerForm = function (component, test) {
-
   _registeredForms.push({
     component,
     test: test,
     name: component.name ? formatComponentName(component.name) : ''
   })
-
 }
 
 var unregisterForm = function (component) {
   const index = _registeredForms.findIndex(item => {
     return item.component === component
   })
-  if (index !== -1)
-    _registeredForms.splice(index, 1)
+  if (index !== -1) { _registeredForms.splice(index, 1) }
 }
 
-function clone(obj) {
-    if (obj === null || typeof (obj) !== 'object' || 'isActiveClone' in obj)
-        return obj;
+function clone (obj) {
+  var temp
+  if (obj === null || typeof (obj) !== 'object' || 'isActiveClone' in obj) { return obj }
 
-    if (obj instanceof Date)
-        var temp = new obj.constructor(); //or new Date(obj);
-    else
-        var temp = obj.constructor();
+  if (obj instanceof Date) {
+    temp = new obj.constructor()
+  } // or new Date(obj);
+  else {
+    temp = obj.constructor()
+  }
 
-    for (var key in obj) {
-        if (Object.prototype.hasOwnProperty.call(obj, key)) {
-            obj['isActiveClone'] = null;
-            temp[key] = clone(obj[key]);
-            delete obj['isActiveClone'];
-        }
+  for (var key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      obj['isActiveClone'] = null
+      temp[key] = clone(obj[key])
+      delete obj['isActiveClone']
     }
-    return temp;
+  }
+  return temp
 }
 
-function formatComponentName(name) {
+function formatComponentName (name) {
   return name.replace(/[_\.\-]/g, '').toLowerCase().replace(/^formschema/, '')
 }
 
-function checkRule(component, schema, test) {
+function checkRule (component, schema, test) {
   var rule = null
 
   if (typeof test === 'function') {
@@ -76,7 +73,7 @@ function checkRule(component, schema, test) {
   if (typeof rule === 'function') {
     try {
       return rule(schema)
-    } catch(e) {
+    } catch (e) {
       console.error(e)
     }
   }
@@ -102,7 +99,7 @@ var resolveRef = function (schema) {
     var resolvedSchema = null
     for (var i in _definitionsHandlers) {
       resolvedSchema = _definitionsHandlers[i](ref)
-      if (typeof resolvedSchema === 'object' && resolvedSchema!==null) break
+      if (typeof resolvedSchema === 'object' && resolvedSchema !== null) break
     }
     schema = resolve(extend(true, copySchema, resolvedSchema))
   }
@@ -129,10 +126,10 @@ var resolve = function (schema) {
 var makeForm = function (createElement, props, on) {
   var schema = props.schema = resolve(props.schema)
 
-  if(!schema || Object.keys(schema).length===0) return
+  if (!schema || Object.keys(schema).length === 0) return
 
-  //console.log('SCHEMA', JSON.stringify(schema, null, 2))
-  //console.log('MODEL', JSON.stringify(props.value, null, 2))
+  // console.log('SCHEMA', JSON.stringify(schema, null, 2))
+  // console.log('MODEL', JSON.stringify(props.value, null, 2))
 
   let attributes = {
     props,
@@ -150,7 +147,7 @@ var makeForm = function (createElement, props, on) {
     if (componentName && item.name && item.name === formattedComponentName) {
       return createElement(item.component, attributes)
     }
-    if (rulePass===false && checkRule(item.component, schema, item.test)) {
+    if (rulePass === false && checkRule(item.component, schema, item.test)) {
       rulePass = item.component
       if (!componentName) break
     }
@@ -163,7 +160,7 @@ var makeForm = function (createElement, props, on) {
     if (componentName && formattedComponentName === formatComponentName(componentName_)) {
       return createElement(component, attributes)
     }
-    if (rulePass===false && checkRule(component, schema)) {
+    if (rulePass === false && checkRule(component, schema)) {
       rulePass = component
       if (!componentName) break
     }
@@ -178,7 +175,6 @@ var makeForm = function (createElement, props, on) {
   }
 
   console.error('unable to render the schema', Object.assign({}, schema))
-
 }
 
 var FormComponent = {
@@ -191,7 +187,7 @@ var FormComponent = {
 
   props: {
     inline: {
-      default: "inherit"
+      default: 'inherit'
     },
     value: {},
     schema: {},
@@ -210,22 +206,22 @@ var FormComponent = {
   data () {
     var id = this.schema.id
     if (!id) {
-      id = this.schema.type + '-' + parseInt(Math.random()*10000)
+      id = this.schema.type + '-' + parseInt(Math.random() * 10000)
       if (this.schema['$idPrefix']) {
         id = String(this.schema['$idPrefix']) + '-' + id
       }
     }
     return {
       id,
-    	c_schema: null,
+      c_schema: null,
       formSchemaNode: true,
-      //formSchemaDirty: 0,
+      // formSchemaDirty: 0,
       formSchemaCache: undefined
     }
-	},
+  },
 
-  watch:{
-    schema : {
+  watch: {
+    schema: {
       handler (value, oldValue) { // deep watch ?
         if (debug) this.log('watch schema', clone(value))
         this.c_schema = extend(true, {}, value) // do not alter the parent schema
@@ -233,33 +229,33 @@ var FormComponent = {
       immediate: true,
       deep: true
     },
-    value : {
-      handler(value, oldValue) {
+    value: {
+      handler (value, oldValue) {
         if (debug) this.log('watch value')
         if (typeof this.formSchemaCache !== 'undefined') {
-          //this.formSchemaDirty--;
+          // this.formSchemaDirty--;
           this.formSchemaCache = undefined
           if (debug) this.log('clear cache')
         }
       },
       immediate: true
     },
-    c_value : {
-      handler(value, oldValue) {
+    c_value: {
+      handler (value, oldValue) {
         if (debug) this.log('watch c_value', clone(value), 'prev', clone(oldValue))
-        /*if (typeof value === 'undefined' && typeof this.c_schema.default !== 'undefined') {
+        /* if (typeof value === 'undefined' && typeof this.c_schema.default !== 'undefined') {
           this.$nextTick(() => { // delay or some bugs may arrise
             if (debug) this.log('set default from watch', this.c_schema.default)
             this.c_value = this.c_schema.default
           })
-        } else {*/
-          this.$v.c_value.$touch()
-        //}
+        } else { */
+        this.$v.c_value.$touch()
+        // }
       },
       immediate: true
     },
     c_schema: {
-      handler(value, oldValue) {
+      handler (value, oldValue) {
         if (typeof this.c_value === 'undefined') {
           if (typeof value.default !== 'undefined') {
             this.c_value = value.default
@@ -268,14 +264,14 @@ var FormComponent = {
       },
       immediate: true
     },
-    /*'$v.$error' : {
+    /* '$v.$error' : {
       handler (value, oldValue) {
         if (value !== oldValue)
           this.$emit('error', value)
       },
       immediate: true
-    },*/
-    error : {
+    }, */
+    error: {
       handler (value, oldValue) {
         if (debug) this.log('watch error', clone(value), 'prev', clone(oldValue))
         this.$emit('error', value)
@@ -288,10 +284,9 @@ var FormComponent = {
 
     inlined () {
       var v = this.inline
-      if (v==='') v = true // prop without value : <... inline />
-      if (typeof this.schema['$inline'] !== 'undefined')
-        v = this.schema['$inline']
-      if (v==='inherit') {
+      if (v === '') v = true // prop without value : <... inline />
+      if (typeof this.schema['$inline'] !== 'undefined') { v = this.schema['$inline'] }
+      if (v === 'inherit') {
         var parent = this.parent()
         return parent ? parent.inlined : false
       }
@@ -299,77 +294,77 @@ var FormComponent = {
       return !!v
     },
 
-    /*c_schema () {
+    /* c_schema () {
       return extend(true, {}, this.schema)
-    },*/
+    }, */
 
-  	c_value: {
-    	get(){
-        //if (this.formSchemaDirty>0) {
+    c_value: {
+      get () {
+        // if (this.formSchemaDirty>0) {
         if (typeof this.formSchemaCache !== 'undefined') {
           if (debug) this.log('c_value.get (cache)', clone(this.formSchemaCache))
           return this.formSchemaCache
         }
         if (debug) this.log('c_value.get', clone(this.value))
-        if (typeof this.value !== 'undefined')
-          return this.cast(this.value)
+        if (typeof this.value !== 'undefined') { return this.cast(this.value) }
         return this.value // undefined
       },
-      set(val){
+      set (val) {
         if (debug) this.log('c_value.set', clone(val))
-        //this.formSchemaDirty++;
-        this.formSchemaCache = val;
+        // this.formSchemaDirty++;
+        this.formSchemaCache = val
         this.$emit('input', val)
       },
       cache: true
     },
     error () {
+      var n
       if (debug) this.log('compute error', this.$v.c_value.$error)
       if (!this.$v.c_value.$error) return false
 
-      if (typeof this.$v.c_value.required != 'undefined' && !this.$v.c_value.required) {
+      if (typeof this.$v.c_value.required !== 'undefined' && !this.$v.c_value.required) {
         return 'Field is required'
       }
-      if (typeof this.$v.c_value.minLength != 'undefined' && !this.$v.c_value.minLength) {
-        if (this.$v.c_value.$params.minLength.min == 1) return 'must not be empty'
-        var n = this.c_schema.type === 'array' ? 'items' : 'characters'
+      if (typeof this.$v.c_value.minLength !== 'undefined' && !this.$v.c_value.minLength) {
+        if (this.$v.c_value.$params.minLength.min === 1) return 'must not be empty'
+        n = this.c_schema.type === 'array' ? 'items' : 'characters'
         return 'must have minimum ' + this.$v.c_value.$params.minLength.min + ' ' + n
       }
-      if (typeof this.$v.c_value.maxLength != 'undefined' && !this.$v.c_value.maxLength) {
-        var n = this.c_schema.type === 'array' ? 'items' : 'characters'
+      if (typeof this.$v.c_value.maxLength !== 'undefined' && !this.$v.c_value.maxLength) {
+        n = this.c_schema.type === 'array' ? 'items' : 'characters'
         return 'must have maximum ' + this.$v.c_value.$params.maxLength.max + ' ' + n
       }
-      if (typeof this.$v.c_value.minValue != 'undefined' && !this.$v.c_value.minValue) {
+      if (typeof this.$v.c_value.minValue !== 'undefined' && !this.$v.c_value.minValue) {
         return 'must be greater than or equal to ' + this.$v.c_value.$params.minValue.min
       }
-      if (typeof this.$v.c_value.maxValue != 'undefined' && !this.$v.c_value.maxValue) {
+      if (typeof this.$v.c_value.maxValue !== 'undefined' && !this.$v.c_value.maxValue) {
         return 'must be lower than or equal to ' + this.$v.c_value.$params.maxValue.max
       }
-      if (typeof this.$v.c_value.between != 'undefined' && !this.$v.c_value.between) {
+      if (typeof this.$v.c_value.between !== 'undefined' && !this.$v.c_value.between) {
         return 'must be between ' + this.$v.c_value.$params.between.min + ' and ' + this.$v.c_value.$params.between.max
       }
-      if (typeof this.$v.c_value.alpha != 'undefined' && !this.$v.c_value.alpha) {
+      if (typeof this.$v.c_value.alpha !== 'undefined' && !this.$v.c_value.alpha) {
         return 'Accepts only alphabet characters'
       }
-      if (typeof this.$v.c_value.alphaNum != 'undefined' && !this.$v.c_value.alphaNum) {
+      if (typeof this.$v.c_value.alphaNum !== 'undefined' && !this.$v.c_value.alphaNum) {
         return 'Accepts only alphanumerics'
       }
-      if (typeof this.$v.c_value.numeric != 'undefined' && !this.$v.c_value.numeric) {
+      if (typeof this.$v.c_value.numeric !== 'undefined' && !this.$v.c_value.numeric) {
         return 'Accepts only numerics'
       }
-      if (typeof this.$v.c_value.email != 'undefined' && !this.$v.c_value.email) {
+      if (typeof this.$v.c_value.email !== 'undefined' && !this.$v.c_value.email) {
         return 'Accepts only valid email addresses'
       }
-      if (typeof this.$v.c_value.ipAddress != 'undefined' && !this.$v.c_value.ipAddress) {
+      if (typeof this.$v.c_value.ipAddress !== 'undefined' && !this.$v.c_value.ipAddress) {
         return 'Accepts only valid IPv4 addresses in dotted decimal notation like 127.0.0.1'
       }
-      if (typeof this.$v.c_value.macAddress != 'undefined' && !this.$v.c_value.macAddress) {
+      if (typeof this.$v.c_value.macAddress !== 'undefined' && !this.$v.c_value.macAddress) {
         return 'Accepts only valid MAC addresses like 00:ff:11:22:33:44:55'
       }
-      if (typeof this.$v.c_value.url != 'undefined' && !this.$v.c_value.url) {
+      if (typeof this.$v.c_value.url !== 'undefined' && !this.$v.c_value.url) {
         return 'Accepts only URLs'
       }
-      if (typeof this.$v.c_value.regex != 'undefined' && !this.$v.c_value.regex) {
+      if (typeof this.$v.c_value.regex !== 'undefined' && !this.$v.c_value.regex) {
         return 'Does not match the pattern `' + this.$v.c_value.$params.regex.pattern + '`'
       }
 
@@ -378,13 +373,13 @@ var FormComponent = {
   },
 
   methods: {
-  	cast (val) {
-    	return val
+    cast (val) {
+      return val
     },
     getDefault () {},
     log () {
       var args = Array.prototype.slice.call(arguments)
-      args.unshift('['+this.id+']')
+      args.unshift('[' + this.id + ']')
       console.log.apply(console, args)
     },
     getContext (key) {
@@ -425,7 +420,7 @@ var FormComponent = {
       return p
     },
     root () {
-      var root;
+      var root
       var p = this
       while (p) {
         root = p
@@ -470,7 +465,7 @@ var FormComponent = {
       var children = p.children()
       for (var i in children) {
         var child = children[i]
-        if (child !== node){
+        if (child !== node) {
           var n = this._find_down(child, id)
           if (n) return n
         }
@@ -487,8 +482,7 @@ var FormComponent = {
       var children = node.children()
       for (let i in children) {
         var n = this._find_down(children[i], id)
-        if (n)
-          return n
+        if (n) { return n }
       }
     },
     _is (id) {
@@ -518,7 +512,7 @@ var FormComponent = {
 
     var skipTouch = false
 
-    /*if (typeof this.c_value === 'undefined') {
+    /* if (typeof this.c_value === 'undefined') {
       var def = undefined;
       if (typeof this.c_schema.default !== 'undefined') {
         def = this.c_schema.default
@@ -531,7 +525,7 @@ var FormComponent = {
         this.c_value = def
         // this.$v.c_value.$touch() will be triggered when setting c_value
       }
-    }*/
+    } */
 
     if (!skipTouch) {
       this.$v.c_value.$touch()
@@ -539,7 +533,6 @@ var FormComponent = {
 
     // handle dependencies
     if (this.c_schema['$dependencies']) {
-
       for (let id in this.c_schema['$dependencies']) {
         let callback = this.c_schema['$dependencies'][id]
         let node = this.find(id)
@@ -552,20 +545,17 @@ var FormComponent = {
           }
         }
       }
-
     }
 
-    /*setTimeout(() => {
-    	this.c_schema.description = 'world'
-    }, 2000)*/
-	}
+    /* setTimeout(() => {
+      this.c_schema.description = 'world'
+    }, 2000) */
+  }
 }
-
 
 function addDefinitionsHandler (handler) {
   _definitionsHandlers.push(handler)
 }
-
 
 export {
   makeForm,

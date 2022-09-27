@@ -1,14 +1,13 @@
 // widgets module
 import { extend, colors } from 'quasar'
-import {defaultMerge,mapMerge,functionMerge,vueComponentMerge} from '../utils/merging'
-
+import { defaultMerge, mapMerge, functionMerge, vueComponentMerge } from '../utils/merging'
 
 // global widgets map
 export var widgets = {}
 
 // defaults
 export function widgetDefaults (resource) {
-  var attributes;
+  var attributes
   if (resource) {
     attributes = function (options) {
       return {
@@ -37,7 +36,7 @@ export function widgetDefaults (resource) {
     minHeight: 32,
     schema: {
       type: 'object'
-    },
+    }
   }
 }
 
@@ -45,12 +44,12 @@ export function widgetMerge (p, c, ctx) {
   if (!p) p = widgetDefaults(ctx.args[0])
   if (!c) c = {}
 
-  var keys = Object.keys(p).concat(Object.keys(c)).filter((v, i, a) => a.indexOf(v) === i);
+  var keys = Object.keys(p).concat(Object.keys(c)).filter((v, i, a) => a.indexOf(v) === i)
   var merged = {}
   keys.forEach(k => {
-    if (k==='component') {
+    if (k === 'component') {
       merged[k] = vueComponentMerge(p[k], c[k], ctx)
-    } else if (k==='attributes' || k==='listeners') {
+    } else if (k === 'attributes' || k === 'listeners') {
       merged[k] = functionMerge(p[k], c[k], ctx)
     } else {
       merged[k] = defaultMerge(p[k], c[k], ctx)
@@ -64,7 +63,7 @@ export function dashboardWidgetSchemaDefaults (widget, resource) {
     type: 'object',
     properties: {
       title: {
-        oneOf:[{
+        oneOf: [{
           const: '$default',
           title: 'default'
         }, {
@@ -73,7 +72,7 @@ export function dashboardWidgetSchemaDefaults (widget, resource) {
         }, {
           title: 'custom',
           type: 'string',
-          minLength: 1,
+          minLength: 1
         }],
         type: 'string',
         minLength: 0,
@@ -81,7 +80,7 @@ export function dashboardWidgetSchemaDefaults (widget, resource) {
         '$inline': true
       },
       color: {
-        oneOf:[{
+        oneOf: [{
           const: null,
           title: 'inherit'
         }, {
@@ -96,7 +95,7 @@ export function dashboardWidgetSchemaDefaults (widget, resource) {
         '$group': 'Appearance'
       },
       bgColor: {
-        oneOf:[{
+        oneOf: [{
           const: null,
           title: 'inherit'
         }, {
@@ -113,7 +112,7 @@ export function dashboardWidgetSchemaDefaults (widget, resource) {
         '$group': 'Appearance'
       },
       primaryColor: {
-        oneOf:[{
+        oneOf: [{
           const: null,
           title: 'inherit'
         }, {
@@ -129,7 +128,7 @@ export function dashboardWidgetSchemaDefaults (widget, resource) {
         '$group': 'Appearance'
       },
       secondaryColor: {
-        oneOf:[{
+        oneOf: [{
           const: null,
           title: 'inherit'
         }, {
@@ -143,7 +142,7 @@ export function dashboardWidgetSchemaDefaults (widget, resource) {
         default: null,
         '$inline': true,
         '$group': 'Appearance'
-      },
+      }
     }
   }
 }
@@ -157,7 +156,6 @@ export function findWidget (id) {
 
 // register a global widget
 export function registerWidget (id, widget) {
-
   if (!widget.component) {
     throw new Error('No component attribute set in the widget definition')
   }
@@ -176,12 +174,10 @@ export function registerWidget (id, widget) {
 // leave the export, even if you don't use it
 export default {
   install ({ EThingUI }) {
-
     Object.assign(EThingUI, {
       widgets,
       findWidget,
       registerWidget
     })
-
   }
 }

@@ -1,6 +1,6 @@
 <template>
   <q-item class="item" clickable @click="click" :link="!readonly">
-    <div v-for="n in level" :class="gen(n)"></div>
+    <div v-for="n in level" :key="n" :class="gen(n)"></div>
     <q-item-section avatar>
       <q-avatar :icon="meta.icon" text-color="white" :color="meta.color" />
     </q-item-section>
@@ -9,28 +9,23 @@
         <span class="vertical-middle text-black">{{ resource.basename() }}</span>
         <small v-if="showParent" class="parent text-faded vertical-bottom on-right" :class="readonly ? '' : 'cursor-pointer'" @click="clickCreatedBy">{{ createdBy.basename() }}</small>
         <q-icon v-if="showConnected && !resource.connected()" class="vertical-middle on-right" name="mdi-lan-disconnect" color="warning" />
-        <q-icon v-if="resource.public()" class="vertical-middle on-right" name="share" color="warning" />
+        <q-icon v-if="showError" class="vertical-middle on-right" name="mdi-alert" color="negative" />
       </q-item-label>
       <q-item-label caption v-if="showType" class="text-no-wrap">{{ meta.title }}</q-item-label>
       <template v-if="!dense">
-        <q-item-label caption class="text-no-wrap">{{ $ethingUI.utils.dateToString(date, 'never') }}</q-item-label>
-        <q-item-label caption v-if="showBattery" class="lt-sm">battery: {{ resource.battery() }}%</q-item-label>
-        <q-item-label caption v-if="showLocation" class="lt-sm">location: {{ resource.location() }}</q-item-label>
-        <q-item-label caption v-if="showSize">{{ $ethingUI.utils.sizeToString(resource.size()) }}</q-item-label>
-        <q-item-label caption v-if="showLength">{{ resource.length() }} rows</q-item-label>
+        <q-item-label caption class="text-no-wrap" v-if="date" >{{ $ethingUI.utils.dateToString(date, 'never') }}</q-item-label>
         <q-item-label caption v-if="showError" class="text-negative ellipsis"><q-icon name="mdi-alert" /> {{ resource.attr('error') }}</q-item-label>
       </template>
+      <q-item-label>
+        <div class="row">
+          <dynamic-component
+            :component="badge"
+            v-for="(badge, index) in badges" :key="index"
+          />
+      </div>
+      </q-item-label>
     </q-item-section>
     <q-item-section/>
-    <q-item-section side v-if="!dense">
-      <div class="row justify-end">
-        <dynamic-component
-          :component="badge"
-          class="gt-sm"
-          v-for="(badge, index) in badges" :key="index"
-        />
-      </div>
-    </q-item-section>
     <q-item-section side v-if="!readonly">
       <div>
         <slot name="buttons-prepend"></slot>
@@ -71,7 +66,7 @@ export default {
   },
 
   data () {
-      return {}
+    return {}
   },
 
   computed: {
@@ -102,22 +97,6 @@ export default {
       return this.resource instanceof this.$ething.Device && this.resource.attr('error')
     },
 
-    showBattery () {
-      return this.resource instanceof this.$ething.Device && this.resource.hasBattery()
-    },
-
-    showLocation () {
-      return this.resource instanceof this.$ething.Device && this.resource.location()
-    },
-
-    showSize () {
-      return this.resource instanceof this.$ething.File
-    },
-
-    showLength () {
-      return this.resource instanceof this.$ething.Table
-    },
-
     meta () {
       return this.$ethingUI.get(this.resource)
     },
@@ -125,27 +104,27 @@ export default {
     badges () {
       var badges = Object.values(this.meta.badges)
       // re order by zIndex
-      badges.sort(function(a, b) {
-          return b.zIndex - a.zIndex;
-      });
+      badges.sort(function (a, b) {
+        return b.zIndex - a.zIndex
+      })
       return badges
     },
 
     actions () {
       var actions = Object.values(this.meta.actions())
       // re order by zIndex
-      actions.sort(function(a, b) {
-          return b.zIndex - a.zIndex;
-      });
+      actions.sort(function (a, b) {
+        return b.zIndex - a.zIndex
+      })
       return actions
-    },
+    }
 
   },
 
   methods: {
 
     gen (n) {
-      return ['pad', 'pad-'+n]
+      return ['pad', 'pad-' + n]
     },
 
     openSettings () {
@@ -162,7 +141,7 @@ export default {
       var handlers = {}
 
       this.actions.forEach((action, index) => {
-        var id = 'custom'+index
+        var id = 'custom' + index
         actions.push({
           label: action.label,
           color: action.color || 'secondary',
@@ -206,7 +185,7 @@ export default {
       var name = this.resource.name()
 
       if (confirm('Do you really want to remove definitely "' + this.resource.name() + '" ?')) {
-        this.resource.remove().then( () => {
+        this.resource.remove().then(() => {
           this.$q.notify('"' + name + '" removed !')
         })
       }
@@ -225,16 +204,13 @@ export default {
         evt.stopPropagation()
         this.$ethingUI.open(this.createdBy)
       }
-    },
+    }
   }
-
-
 
 }
 </script>
 
 <style lang="stylus" scoped>
-
 
 .data
   max-width 500px

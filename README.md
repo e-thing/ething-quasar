@@ -17,33 +17,12 @@ npm install
 
 ```
 # run development server (with default theme)
-$ quasar dev
-
-# on specific port
-$ quasar dev -p 9090
-
-# PWA
-$ quasar dev -m pwa
-
-# Mobile App
-$ quasar dev -m cordova -T [android|ios]
-
-# Electron App
-$ quasar dev -m electron
+$ npx quasar dev
 ```
 
 ## Build
 
 ```
 # build for production
-$ quasar build
-
-# PWA
-$ quasar build -m pwa
-
-# Mobile App
-$ quasar build -m cordova -T [android|ios]
-
-# Electron App
-$ quasar build -m electron
+$ npx quasar build
 ```

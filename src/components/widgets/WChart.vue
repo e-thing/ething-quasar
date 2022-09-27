@@ -5,46 +5,45 @@
 <script>
 import Chart from '../Chart'
 import Base from './Base'
-import { colors } from 'quasar'
 
 export default {
-    name: 'WChart',
+  name: 'WChart',
 
-    components: {
-      Chart
-    },
+  components: {
+    Chart
+  },
 
-    mixins: [Base],
+  mixins: [Base],
 
-    props: {
-      history: {
-        default: 86400
-      }
-    },
+  props: {
+    history: {
+      default: 86400
+    }
+  },
 
-    data () {
-      return {
-        chartOptions: {
-          chart:{
-            backgroundColor:'rgba(255, 255, 255, 0.0)'
+  data () {
+    return {
+      chartOptions: {
+        chart: {
+          backgroundColor: 'rgba(255, 255, 255, 0.0)'
+        },
+        plotOptions: {
+          series: {
+            color: this.primaryColor
+          }
+        },
+        title: {
+          style: {
+            color: this.color
           },
-          plotOptions:{
-            series:{
-              color: this.primaryColor
-            }
-          },
-          title:{
-            style:{
-              color: this.color
-            },
-            text: null
-          },
-          subtitle:{
-            text: null
-          },
+          text: null
+        },
+        subtitle: {
+          text: null
         }
       }
     }
+  }
 
 }
 </script>

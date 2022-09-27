@@ -3,10 +3,8 @@ import WLabel from '../../components/widgets/generic/Label'
 import WKnob from '../../components/widgets/generic/Knob'
 import WChart from '../../components/widgets/WChart'
 import WMultiLabel from '../../components/widgets/generic/MultiLabel'
-import EThingUI from '../../core'
 import EThing from 'ething-js'
 import { extend } from 'quasar'
-
 
 export default {
 
@@ -28,7 +26,7 @@ export default {
           component: 'q-chip',
           attributes () {
             var val = resource.attr(propName), hide = false
-            if (typeof val == 'undefined' || val === null) {
+            if (typeof val === 'undefined' || val === null) {
               val = '?'
               hide = true
             }
@@ -43,7 +41,7 @@ export default {
               outline: true,
               square: true,
               dense: true,
-              color: "secondary",
+              color: 'secondary',
               style: hide ? 'display: none;' : ''
             }
           }
@@ -64,14 +62,13 @@ export default {
         if (prop.history) {
           sensorHistoryAttributes.push(propName)
         }
-        if (prop.type == 'number' || prop.type == 'integer') {
+        if (prop.type === 'number' || prop.type === 'integer') {
           sensorNumericAttributes.push(propName)
         }
       }
     }
 
-    if (sensorAttributes.length>0) {
-
+    if (sensorAttributes.length > 0) {
       var base = {
         schema: {
           properties: {},
@@ -79,7 +76,7 @@ export default {
         }
       }
 
-      if (sensorAttributes.length>1) {
+      if (sensorAttributes.length > 1) {
         base.defaultTitle = (attributes) => {
           var sensorName = attributes.sensorName
           return '%name% - ' + props[sensorName].title
@@ -108,12 +105,12 @@ export default {
             unit: sensorProps.unit,
             value: resource.attr(sensorName)
           }
-        },
+        }
       })
 
       widgets['sensor.label'] = labelWidget
 
-      if (sensorAttributes.length>1) {
+      if (sensorAttributes.length > 1) {
         // multiple sensors
         var multiLabelWidget = {
           component: WMultiLabel,
@@ -132,13 +129,13 @@ export default {
                 }
               })
             }
-          },
+          }
         }
 
         widgets['sensor.all'] = multiLabelWidget
       }
 
-      if (sensorNumericAttributes.length>0) {
+      if (sensorNumericAttributes.length > 0) {
         var knobWidget = extend(true, {}, base, {
           component: WKnob,
           title: 'qnob',
@@ -165,7 +162,7 @@ export default {
                 title: 'maximum',
                 type: 'number',
                 default: 100
-              },
+              }
             },
             required: []
           }
@@ -176,20 +173,20 @@ export default {
             'sensor.widget.sensorName': function (sensorName, self, node) {
               var min = props[sensorName].minimum || 0
               self.$set(self.parent().c_schema.properties.min, 'default', min)
-            },
+            }
           }
           knobWidget.schema.properties.max.$dependencies = {
             'sensor.widget.sensorName': function (sensorName, self, node) {
               var max = props[sensorName].maximum
-              if (typeof max != 'number') max = 100
+              if (typeof max !== 'number') max = 100
               self.$set(self.parent().c_schema.properties.max, 'default', max)
-            },
+            }
           }
         } else {
           knobWidget.schema.properties.min.default = props[sensorNumericAttributes[0]].minimum || 0
 
           var max = props[sensorNumericAttributes[0]].maximum
-          if (typeof max == 'number') {
+          if (typeof max === 'number') {
             knobWidget.schema.properties.max.default = max
           }
         }
@@ -204,7 +201,7 @@ export default {
         widgets['sensor.knob'] = knobWidget
       }
 
-      if (sensorHistoryAttributes.length>0) {
+      if (sensorHistoryAttributes.length > 0) {
         var graphWidget = extend(true, {}, base, {
           component: WChart,
           title: 'chart',
@@ -216,7 +213,7 @@ export default {
             // the resource is the table
             var table = null
             if (sensorProps.history) {
-              var tables = EThing.arbo.find(r => r.createdBy() == resource.id() && r.name() == sensorName)
+              var tables = EThing.arbo.find(r => r.createdBy() === resource.id() && r.name() === sensorName)
               if (tables.length > 0) {
                 table = tables[0]
               }
@@ -224,7 +221,7 @@ export default {
 
             return {
               sensorName,
-              resource: table,
+              resource: table
             }
           },
           schema: {
@@ -232,7 +229,7 @@ export default {
               history: {
                 description: 'the past data to plot',
                 type: 'number',
-                enum: [3600, 3600*6, 3600*12, 86400, 86400*2, 86400*7, 'all'],
+                enum: [3600, 3600 * 6, 3600 * 12, 86400, 86400 * 2, 86400 * 7, 'all'],
                 '$labels': ['1 hour', '6 hours', '12 hours', '1 day', '2 days', '1 week', 'all'],
                 default: 86400
               }
@@ -250,10 +247,8 @@ export default {
 
         widgets['sensor.graph'] = graphWidget
       }
-
-
     }
     return widgets
-  },
+  }
 
 }

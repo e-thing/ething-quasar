@@ -4,7 +4,6 @@ import WImage from '../../components/widgets/WImage'
 import EThingUI from 'ething-ui'
 import EThing from 'ething-js'
 
-
 export default {
   icon: 'mdi-file',
 
@@ -20,10 +19,10 @@ export default {
       getFormatted: function (resource) {
         return date.formatDate(this.get(resource).getTime(), 'YYYY-MM-DD HH:mm')
       }
-    },
+    }
   },
 
-  cacheExpired(resource, modifiedAttributes) {
+  cacheExpired (resource, modifiedAttributes) {
     return modifiedAttributes.indexOf('name') !== -1
   },
 
@@ -40,14 +39,14 @@ export default {
             history: {
               description: 'the past data to plot',
               type: 'number',
-              enum: [3600, 3600*6, 3600*12, 86400, 86400*2, 86400*7, 'all'],
+              enum: [3600, 3600 * 6, 3600 * 12, 86400, 86400 * 2, 86400 * 7, 'all'],
               '$labels': ['1 hour', '6 hours', '12 hours', '1 day', '2 days', '1 week', 'all'],
               default: 86400
             }
           }
         },
         minWidth: 250,
-        minHeight: 150,
+        minHeight: 150
       }
     } else if (/^text/.test(resource.mime())) {
       icon = 'mdi-file-document'
@@ -56,7 +55,7 @@ export default {
       widgets.image = {
         component: WImage,
         schema: {
-          title: 'image',
+          title: 'image'
         },
         minWidth: 320,
         minHeight: 280
@@ -80,6 +79,25 @@ export default {
       return '/image/' + resource.id()
     } else {
       return '/text/' + resource.id()
+    }
+  },
+
+  badges (resource) {
+    return {
+      'size': {
+        component: 'q-chip',
+        attributes () {
+          return {
+            label: EThingUI.utils.sizeToString(resource.size()),
+            icon: 'mdi-unfold-more-horizontal',
+            outline: true,
+            square: true,
+            dense: true,
+            color: 'secondary'
+          }
+        },
+        zIndex: 100
+      }
     }
   },
 

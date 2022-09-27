@@ -17,40 +17,40 @@
 import Base from '../Base'
 
 export default {
-    name: 'WLabel',
+  name: 'WLabel',
 
-    mixins: [Base],
+  mixins: [Base],
 
-    props: {
-      label: String,
-      unit: String,
-      icon: String,
-      value: {},
-      horizontal: Boolean
-    },
+  props: {
+    label: String,
+    unit: String,
+    icon: String,
+    value: {},
+    horizontal: Boolean
+  },
 
-    data () {
-      return {
-        fontSize: '16px'
-      }
-    },
-
-    methods: {
-
-      updateLayout (size) {
-        if (!size.height && !size.width) return
-        var height = size.height
-        var lineHeight = 1.5
-        var g = 2 // big = 200 %
-        var coef = g
-        if (!this.horizontal && this.label) coef += 1
-        var fontSizeH = height / (lineHeight * 1. * coef)
-
-        var fontSizeW = size.width / (this.horizontal && this.label ? 20 : 10)
-
-        this.fontSize = Math.floor(Math.min(fontSizeH, fontSizeW))+'px'
-      }
+  data () {
+    return {
+      fontSize: '16px'
     }
+  },
+
+  methods: {
+
+    updateLayout (size) {
+      if (!size.height && !size.width) return
+      var height = size.height
+      var lineHeight = 1.5
+      var g = 2 // big = 200 %
+      var coef = g
+      if (!this.horizontal && this.label) coef += 1
+      var fontSizeH = height / (lineHeight * 1.0 * coef)
+
+      var fontSizeW = size.width / (this.horizontal && this.label ? 20 : 10)
+
+      this.fontSize = Math.floor(Math.min(fontSizeH, fontSizeW)) + 'px'
+    }
+  }
 
 }
 </script>

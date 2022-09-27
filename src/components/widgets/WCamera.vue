@@ -7,42 +7,41 @@ import ImageViewer from '../ImageViewer'
 import Base from './Base'
 
 export default {
-    name: 'WCamera',
+  name: 'WCamera',
 
-    components: {
-      ImageViewer
-    },
+  components: {
+    ImageViewer
+  },
 
-    props: {
-      refreshInterval: {
-        default: 30
-      }
-    },
+  props: {
+    refreshInterval: {
+      default: 30
+    }
+  },
 
-    data () {
-      return {
-        timerId: null
-      }
-    },
+  data () {
+    return {
+      timerId: null
+    }
+  },
 
-    computed: {
-      source () {
-        return this.resource.executeUrl('snapshot')
-      }
-    },
+  computed: {
+    source () {
+      return this.resource.executeUrl('snapshot')
+    }
+  },
 
-    mounted () {
-      this.timerId = setInterval(() => {
-        this.$refs.view.refresh()
-      }, this.refreshInterval * 1000)
-    },
+  mounted () {
+    this.timerId = setInterval(() => {
+      this.$refs.view.refresh()
+    }, this.refreshInterval * 1000)
+  },
 
-    beforeDestroy () {
-      if(this.timerId !== null)
-        clearInterval(this.timerId)
-    },
+  beforeDestroy () {
+    if (this.timerId !== null) { clearInterval(this.timerId) }
+  },
 
-    mixins: [Base],
+  mixins: [Base]
 
 }
 </script>
